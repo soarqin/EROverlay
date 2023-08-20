@@ -10,6 +10,7 @@ namespace er::bosses {
 
 struct BossData {
     std::string displayName;
+    std::string tip;
     std::string region;
     std::string boss;
     std::string place;

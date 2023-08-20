@@ -53,6 +53,9 @@ void Render::render(bool &showFull) {
                     auto &bd = bosses[region.bosses[j]];
                     auto on = alive[bd.index];
                     ImGui::Checkbox(bd.displayName.c_str(), &on);
+                    if (ImGui::IsItemHovered() && !bd.tip.empty()) {
+                        ImGui::SetTooltip(bd.tip.c_str());
+                    }
                 }
                 ImGui::TreePop();
             }

@@ -35,6 +35,12 @@ void BossDataSet::load(const std::wstring &filename) {
             } else {
                 bd.displayName = s;
             }
+            s = n["place_display"];
+            if (!s.empty()) {
+                bd.tip = bd.displayName + ": " + s;
+            } else if (!bd.place.empty()) {
+                bd.tip = bd.displayName + ": " + bd.place;
+            }
             rd.bosses.push_back(index);
             bd.regionIndex = regionIndex;
         }
