@@ -646,7 +646,7 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
         desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
         desc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-        desc.DepthClipEnable = true;
+        desc.DepthClipEnable = TRUE;
         desc.MultisampleEnable = FALSE;
         desc.AntialiasedLineEnable = FALSE;
         desc.ForcedSampleCount = 0;
@@ -656,10 +656,10 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
     // Create depth-stencil State
     {
         D3D12_DEPTH_STENCIL_DESC& desc = psoDesc.DepthStencilState;
-        desc.DepthEnable = false;
+        desc.DepthEnable = FALSE;
         desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
         desc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-        desc.StencilEnable = false;
+        desc.StencilEnable = FALSE;
         desc.FrontFace.StencilFailOp = desc.FrontFace.StencilDepthFailOp = desc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
         desc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
         desc.BackFace = desc.FrontFace;

@@ -1,7 +1,9 @@
 #pragma once
-#include "common.hpp"
 
-namespace ER {
+#include <memory>
+#include <cstdint>
+
+namespace er {
 class Hooking {
 public:
     explicit Hooking();
@@ -15,10 +17,10 @@ public:
     void unhook();
     void findHooks();
 
-    // Hook Pointers
-    void *originalInputHandler_ = nullptr;
-    uint64_t inputHandler_ = 0;
-    static void __fastcall HookInput(uint64_t a1, uint64_t a2);
+    void showMouseCursor(bool show) const;
+
+private:
+    uintptr_t csMenuManImp_ = 0;
 };
 
 inline std::unique_ptr<Hooking> gHooking;

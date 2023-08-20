@@ -1,6 +1,11 @@
 #pragma once
-#include "common.hpp"
-namespace ER {
+
+#include <windows.h>
+#include <memory>
+#include <string>
+#include <cstdio>
+
+namespace er {
 
 class Console {
 public:
@@ -44,5 +49,5 @@ public:
     std::string getTimeString();
     void free();
 };
-inline std::unique_ptr<Console> g_Console;
+inline std::unique_ptr<Console> gConsole;
 }

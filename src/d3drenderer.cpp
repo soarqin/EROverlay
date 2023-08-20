@@ -1,10 +1,22 @@
 #include "d3drenderer.hpp"
 #include "hooking.hpp"
+#include "global.hpp"
+
+#include "imgui.h"
+#include "imgui_impl_dx12.h"
+#include "imgui_impl_win32.h"
+#include "MinHook.h"
+
+#include "bosses/render.hpp"
+
+#include <atomic>
+
+#include "zhocnfont.h"
+#include <algorithm>
 
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-namespace ER {
-bool showMenu = FALSE;
+namespace er {
 
 //-----------------------------------------------------------------------------------
 //									    D3DWindow
@@ -169,7 +181,6 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
     pSwapChain3->GetDesc(&sc_desc);
 
     if (!inited_) {
-        UINT bufferIndex = pSwapChain3->GetCurrentBackBufferIndex();
         ID3D12Device *pDevice;
         if (pSwapChain3->GetDevice(IID_PPV_ARGS(&pDevice)) != S_OK)
             return;
@@ -247,6 +258,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
         }
 
         ImGui::CreateContext();
+        gStyles->InitStyle();
         ImGuiIO &io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
@@ -268,10 +280,11 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    if (showMenu) {
-        ImGui::Begin("ELDEN RING INTERNAL DEBUG", &showMenu, 96);
-        ImGui::Button("OK");
-        ImGui::End();
+    bool oldShowMenu = showMenu;
+    for (auto &window : windows_)
+        window->render(showMenu);
+    if (showMenu != oldShowMenu) {
+        gHooking->showMouseCursor(showMenu);
     }
 
     ImGui::EndFrame();
@@ -305,9 +318,9 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
     pSwapChain3->Release();
 }
 
-HRESULT APIENTRY D3DRenderer::HookResizeTarget(IDXGISwapChain *_this, const DXGI_MODE_DESC *pNewTargetParameters) {
+HRESULT APIENTRY D3DRenderer::HookResizeTarget(IDXGISwapChain *thisObj, const DXGI_MODE_DESC *newTargetParameters) {
     gD3DRenderer->resetRenderState();
-    return gD3DRenderer->oResizeTarget_(_this, pNewTargetParameters);
+    return gD3DRenderer->oResizeTarget_(thisObj, newTargetParameters);
 }
 
 LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -317,23 +330,23 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     return CallWindowProc(reinterpret_cast<WNDPROC>(gD3DRenderer->oldWndProc_), hWnd, msg, wParam, lParam);
 }
 
-HRESULT APIENTRY D3DRenderer::HookPresent(IDXGISwapChain *pSwapChain, UINT SyncInterval, UINT Flags) {
-    if (g_KillSwitch) {
+HRESULT APIENTRY D3DRenderer::HookPresent(IDXGISwapChain *swapChain, UINT syncInterval, UINT flags) {
+    if (gKillSwitch) {
         gHooking->unhook();
-        gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
-        g_Running = FALSE;
+        gD3DRenderer->oPresent_(swapChain, syncInterval, flags);
+        gRunning = false;
         return 0;
     }
-    gD3DRenderer->overlay(pSwapChain);
-    return gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
+    gD3DRenderer->overlay(swapChain);
+    return gD3DRenderer->oPresent_(swapChain, syncInterval, flags);
 }
 
-void D3DRenderer::HookExecuteCommandLists(ID3D12CommandQueue *queue, UINT NumCommandLists,
-                                          ID3D12CommandList *ppCommandLists) {
+void D3DRenderer::HookExecuteCommandLists(ID3D12CommandQueue *queue, UINT numCommandLists,
+                                          ID3D12CommandList *commandLists) {
     if (!gD3DRenderer->commandQueue_)
         gD3DRenderer->commandQueue_ = queue;
 
-    gD3DRenderer->oExecuteCommandLists_(queue, NumCommandLists, ppCommandLists);
+    gD3DRenderer->oExecuteCommandLists_(queue, numCommandLists, commandLists);
 }
 
 bool D3DRenderer::initWindow() {
@@ -388,16 +401,16 @@ bool D3DRenderer::deleteWindow() const {
     return true;
 }
 
-bool D3DRenderer::createHook(UINT16 Index, void **Original, void *Function) {
-    void *target = (void *)MethodsTable[Index];
-    if (MH_CreateHook(target, Function, Original) != MH_OK || MH_EnableHook(target) != MH_OK) {
+bool D3DRenderer::createHook(UINT16 idx, void **original, void *function) {
+    void *target = (void *)MethodsTable[idx];
+    if (MH_CreateHook(target, function, original) != MH_OK || MH_EnableHook(target) != MH_OK) {
         return false;
     }
     return true;
 }
 
-void D3DRenderer::disableHook(UINT16 Index) {
-    MH_DisableHook((void *)MethodsTable[Index]);
+void D3DRenderer::disableHook(UINT16 idx) {
+    MH_DisableHook((void *)MethodsTable[idx]);
 }
 
 void D3DRenderer::disableAll() {
@@ -441,8 +454,6 @@ void Styles::InitStyle() {
     ImGuiStyle &style = ImGui::GetStyle();
     ImVec4 *colors = ImGui::GetStyle().Colors;
 
-    colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.90f);
-
     colors[ImGuiCol_Text] = ImVec4(0.75f, 0.75f, 0.29f, 1.00f);
     colors[ImGuiCol_TextDisabled] = ImVec4(0.86f, 0.93f, 0.89f, 0.28f);
     colors[ImGuiCol_TextSelectedBg] = ImVec4(0.27f, 0.00f, 0.63f, 0.43f);
@@ -471,7 +482,7 @@ void Styles::InitStyle() {
     colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
     colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
     colors[ImGuiCol_HeaderActive] = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
-    //colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.90f);
+    colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.90f);
     colors[ImGuiCol_SeparatorHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
     colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
     colors[ImGuiCol_ResizeGrip] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
@@ -520,5 +531,8 @@ void Styles::InitStyle() {
     style.GrabRounding = 3;
     style.LogSliderDeadzone = 4;
     style.TabRounding = 4;
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromMemoryTTF(zhocn_font, zhocn_font_len, 16.f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 }
 }

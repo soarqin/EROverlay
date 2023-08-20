@@ -1,7 +1,11 @@
 #pragma once
-#include "common.hpp"
 
-namespace ER {
+#include <windows.h>
+#include <type_traits>
+#include <vector>
+#include <cstdint>
+
+namespace er {
 class MemoryHandle {
 public:
     /**
@@ -188,7 +192,7 @@ private:
     }
 };
 
-class signature {
+class Signature {
 public:
     struct Element {
         std::uint8_t m_Data{};
@@ -199,12 +203,12 @@ public:
      * \brief Constructs the signature with an IDA pattern
      * \param pattern The IDA pattern string
      */
-    explicit signature(const char *pattern) {
+    explicit Signature(const char *pattern) {
         auto toUpper = [](char c) -> char {
             return c >= 'a' && c <= 'z' ? static_cast<char>(c + ('A' - 'a')) : static_cast<char>(c);
         };
 
-        auto isHex = [&](char c) -> bool {
+        auto isHex = [&toUpper](char c) -> bool {
             switch (toUpper(c)) {
             case '0':
             case '1':
@@ -233,6 +237,8 @@ public:
                 continue;
             if (*pattern == '?') {
                 elements_.push_back(Element{{}, true});
+                if (*(pattern + 1) == '?')
+                    pattern++;
                 continue;
             }
 
@@ -241,6 +247,7 @@ public:
                 auto data = std::strtol(str, nullptr, 16);
 
                 elements_.push_back(Element{static_cast<std::uint8_t>(data), false});
+                pattern++;
             }
         } while (*(pattern++));
     }

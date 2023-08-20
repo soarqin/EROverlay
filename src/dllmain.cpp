@@ -1,18 +1,23 @@
 #include "initialize.hpp"
 
+#include <shlwapi.h>
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     UNREFERENCED_PARAMETER(lpReserved);
 
-    if (!g_Module)
-        g_Module = hModule;
+    if (!::er::gModule) {
+        ::er::gModule = hModule;
+        GetModuleFileNameW(hModule, ::er::gModulePath, MAX_PATH);
+        PathRemoveFileSpecW(::er::gModulePath);
+    }
 
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
         DisableThreadLibraryCalls(hModule);
-        CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, g_Module, 0, nullptr);
+        CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, gModule, 0, nullptr);
         break;
     case DLL_PROCESS_DETACH:
-        g_KillSwitch = TRUE;
+        gKillSwitch = true;
         break;
     }
 

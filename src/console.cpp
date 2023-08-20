@@ -1,6 +1,10 @@
 ﻿#include "console.hpp"
 
-namespace ER {
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+
+namespace er {
 
 Console::Console(const char *ConsoleName) {
     initializeConsole(ConsoleName);
@@ -56,7 +60,7 @@ void Console::logEvent(std::string TEXT, bool FLAG) {
         color = Colors::red;
     }
     std::string append = TEXT + output;
-    g_Console->printdbg(append.c_str(), static_cast<Colors>(color));
+    gConsole->printdbg(append.c_str(), static_cast<Colors>(color));
 }
 
 std::string Console::getTimeString() {
