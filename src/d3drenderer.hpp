@@ -93,15 +93,11 @@ private:
 };
 
 struct Styles {
+private:
     explicit Styles() = default;
-    Styles(Styles const &) = delete;
-    Styles(Styles &&) = delete;
-    Styles &operator=(Styles const &) = delete;
-    Styles &operator=(Styles &&) = delete;
-
+public:
     static void InitStyle();
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;
-inline std::unique_ptr<Styles> gStyles;
 }

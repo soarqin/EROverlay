@@ -7,14 +7,18 @@ if(NOT MSVC)
     find_package(DirectXMath REQUIRED)
 endif()
 
-add_library(${PROJECT_NAME} SHARED dllmain.cpp
+add_library(${PROJECT_NAME} SHARED
+    # main files
+    dllmain.cpp
     initialize.hpp
-    console.cpp console.hpp
     d3drenderer.cpp d3drenderer.hpp
     hooking.cpp hooking.hpp
     global.cpp global.hpp
     renderbase.hpp
-    bosses/data.cpp bosses/data.hpp bosses/render.cpp bosses/render.hpp
+
+    # Bosses panel
+    bosses/data.cpp bosses/data.hpp
+    bosses/render.cpp bosses/render.hpp
 )
 target_link_libraries(${PROJECT_NAME} minhook imgui_dx12_backend nlohmann_json::nlohmann_json d3dcompiler dwmapi shlwapi)
 if(NOT MSVC)

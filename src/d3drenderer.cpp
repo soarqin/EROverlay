@@ -258,7 +258,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
         }
 
         ImGui::CreateContext();
-        gStyles->InitStyle();
+        Styles::InitStyle();
         ImGuiIO &io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
