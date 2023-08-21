@@ -10,7 +10,6 @@ endif()
 add_library(${PROJECT_NAME} SHARED
     # main files
     dllmain.cpp
-    initialize.hpp
     d3drenderer.cpp d3drenderer.hpp
     hooking.cpp hooking.hpp
     global.cpp global.hpp
