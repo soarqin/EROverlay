@@ -1,0 +1,532 @@
+0	
+110000	Melina
+110200	Enia, Czytająca z palców
+110400	Dwa Palce
+110500	
+110600	Wiedźma Ranni
+110601	
+110602	
+110603	
+110604	
+110605	
+110606	
+110607	
+110608	
+110609	
+110610	Renna, Wiedźma
+111000	Lusat, pierwotny czarodziej
+111100	Azur, pierwotny czarodziej
+111200	Szlachetny Złota Maska
+120000	Rennala, Królowa Pełni Księżyca
+120200	Gurranq, Bestialski Duchowny
+121300	Hewg, mistrz kowalstwa
+121600	Blaidd, Półwilk
+121601	
+121602	
+121603	
+121604	
+121605	
+121606	
+121607	
+121608	
+121609	
+121610	Cień zguby
+121700	Pidia, karyjski sługa
+121800	Asimi, Srebrna Łza
+121801	
+121802	
+121803	
+121804	
+121805	
+121806	
+121807	
+121808	
+121809	
+121810	Asimi, Wieczny Król
+121900	Stary Albus
+122000	Alexander, Wielki słojownik
+122300	Półczłowiek Boc
+122301	
+122302	
+122303	
+122304	
+122305	
+122306	
+122307	
+122308	
+122309	
+122310	Boc, szwacz
+122400	Iji, mistrz kowalstwa
+122401	Iji, wojenny doradca
+122600	Słojątko
+122800	Latenna, albinauryka
+123000	Rycerz Tanith
+123300	Phillia, Wielka Siostrzyczka
+130000	Tanith, właścicielka Wulkanicznego Dworu
+130100	Białolicy Varré
+130200	Strażnik bramy Gostoc
+130400	Vyke, Gnijące Opuszki
+130401	Vyke, Rycerz Okrągłego Stołu
+130700	Mistrz Seluvis
+130900	Łata
+130901	Łata
+131000	Irina z Morne
+131001	
+131002	
+131003	
+131004	
+131005	
+131006	
+131007	
+131008	
+131009	
+131010	Hyetta, poszukiwaczka światła
+131011	Hyetta, służka palców
+131100	Edgar, kasztelan
+131101	Edgar, mściciel
+131200	Jerren, kasztelan
+131201	Jerren, łowca czarownic
+131300	Rya, zwiadowczyni
+131301	
+131302	
+131303	
+131304	
+131305	
+131306	
+131307	
+131308	
+131309	
+131310	Zorayas, zwiadowczyni
+131400	Diallos, rycerz
+131401	Diallos, słojtys
+131600	Czarodziejka Sellen
+131601	Czarodziejka Sellen
+131800	Yura, Łowca krwawych palców
+131801	Shabriri
+131802	Shabriri
+131900	D., Łowca Umarłych
+131901	D., Łowca Umarłych
+131902	
+131903	
+131904	
+131905	
+131906	
+131907	
+131908	
+131909	
+131910	D., Świadek Śmierci
+131911	D., Świadek Śmierci
+132000	Służka o złamanym sercu
+132001	Roderika
+132002	Roderika, stroicielka duchów
+132100	Kenneth Haight, dziedzic Pogrobna
+132200	Fia, Towarzyszka na Łożu Śmierci
+132300	Łajnożerca
+132301	Łajnożerca
+132302	Łajnożerca
+132400	Sir Gideon Ofnir, Wszechwiedzący
+132500	Rogier, czarodziej
+132501	Rogier, czarodziej
+132600	Rycerz Bernahl
+132601	Berhnahl, odszczepieniec
+132602	Berhnahl, odszczepieniec
+132700	Eleonora, fioletowy krwawy palec
+132900	Lionel Lwie Serce
+133000	Miriel, Duszpasterz Przysięgi
+133100	Szubrawiec
+133101	Szubrawiec
+133200	
+133300	Czarodziej Thops
+133400	Nepheli Loux, wojowniczka
+133401	Nepheli Loux, wojowniczka
+133402	Nepheli Loux, wojowniczka
+133500	
+133600	Służka palców Vykego
+133800	Służka palców
+133900	Ensha od Królewskich Szczątków
+134000	Zabójca Kruczej Góry, krwawy palec
+134300	Nerijus, krwawy palec
+134301	
+134302	
+134303	
+134304	
+134305	
+134306	
+134307	
+134308	
+134309	
+134310	Krwawy szlachcic
+134400	Wielki Tragoth Rogaty
+134401	Wielki Tragoth Rogaty
+134500	Pradawny Rycerz Istvan
+134501	Pradawny Rycerz Istvan
+134600	Rileigh Gnuśny
+134700	Juno Hoslow, Rycerz Krwi
+134800	Millicenta
+134900	Mędrzec Gowry
+135000	
+135100	Brat Corhyn
+135101	Corhyn, skryba
+135200	Mistrz Miriam
+135300	Anastasia, Zjadaczka Zmatowieńców
+135500	Okina
+135501	Okina, krwawy palec
+135600	Adan, Złodziej Ognia
+135700	
+135900	Moongrum, karyjski rycerz
+136000	Vargram, Rozszalały Wilk
+136100	Czempion Fii
+136300	Therolina, służka palców
+136400	Dolores, Śpiąca Strzała
+136500	Słojowiec
+136700	Inaba, uczeń Okiny
+136800	Srebrna łza
+136900	Odszczepieniec Henricus
+137000	Czempion Fii
+137100	Czempion Fii
+137200	Maleigh Marais, kasztelan Zamku Cieni
+137300	Rycerz wielkiego naczynia
+137400	Rycerz wielkiego naczynia
+137500	Rycerz wielkiego naczynia
+137600	Garris, nekromanta
+137700	Bezimienny Białolicy
+137900	
+138000	Wilhelm, Błędny Czarodziej
+138200	Arghanthy, główny strażnik
+138300	Strażnik płomienia
+138400	Inkwizytor Ghiza
+138500	Alberich, Oszalały Język
+138600	Esgar, Krwawy Duchowny
+138700	Mary, Najstarsza Siostra
+138800	Maureen, Druga Siostra
+138900	Amy, Trzecia Siostra
+139000	Polyanna, Najmłodsza Siostra
+139001	Polyanna, Adoptowana Córka
+139100	Magnus, Szpon Bestii
+160000	Cienie bliźniaczej służki
+160100	Kościół Smoczej Komunii
+160200	Stół Kowala
+160300	Zwłoki Wędrownego Mauzoleum
+160400	Basen Pokutny
+160500	Katedra Smoczej Komunii
+160600	
+160700	Roztrzaskana Marika
+160800	Zachmurzone Lustro
+160900	Miecz Bernahla
+170000	
+170001	
+170002	
+170003	
+170004	
+170005	
+170006	
+170007	
+170008	
+170009	
+170010	
+170011	
+170012	
+170013	
+170014	
+170015	
+170016	
+170017	
+170018	
+170019	
+170020	
+170021	
+170022	
+170023	
+170024	
+170025	
+170026	
+170027	
+170028	
+170029	
+170030	
+170031	
+170032	
+170033	
+170034	
+170035	
+170036	
+170037	
+175000	Czytająca z palców starucha
+175001	Czytająca z palców starucha
+175002	Czytająca z palców starucha
+175003	Czytająca z palców starucha
+175004	Czytająca z palców starucha
+175005	Czytająca z palców starucha
+175006	Czytająca z palców starucha
+175007	Strażnik Zakazanych Krain
+175008	Mamka Godwyna
+180000	Kupiec Kalé
+180101	Koczowniczy kupiec
+180102	Koczowniczy kupiec
+180103	Koczowniczy kupiec
+180104	Koczowniczy kupiec
+180105	Koczowniczy kupiec
+180106	Odosobniony kupiec
+180107	Odosobniony kupiec
+180108	Koczowniczy kupiec
+180109	Pustelniczy kupiec
+180110	Koczowniczy kupiec
+180111	Koczowniczy kupiec
+180112	Koczowniczy kupiec
+180113	Koczowniczy kupiec
+180114	Koczowniczy kupiec
+180115	Odosobniony kupiec
+180116	Pustelniczy kupiec
+180117	Opuszczony kupiec
+180118	Pustelniczy kupiec
+180119	Uwięziony kupiec
+10104137	
+10204435	
+10304533	
+10403943	
+10503542	
+10711400	
+10803550	
+10903752	
+11003654	
+11103954	
+11204737	
+11305039	
+11405136	
+11505243	
+11605254	
+11705057	
+900000520	Adan, Złodziej Ognia
+900000521	Vyke, Smocza Włócznia
+900000600	
+900000601	Okina
+902030000	Rennala, Królowa Pełni Księżyca
+902030001	Rennala, Królowa Pełni Księżyca
+902100300	Zabójca Czarnych Noży
+902100301	Zabójca Czarnych Noży
+902100302	Zabójca Czarnych Noży
+902100303	
+902100304	
+902100305	
+902100306	
+902100307	
+902100308	
+902100309	
+902100310	Zabójca Czarnych Noży
+902100521	Alecto, Przywódczyni Czarnych Noży
+902100600	Zabójca Czarnych Noży
+902110000	Bestialski Duchowny
+902110001	Maliketh, Czarna Klinga
+902120000	Malenia, Miecz Miquelli
+902120001	Malenia, Bogini Zgnilizny
+902130000	Margit, Upadły Omen
+902130001	
+902130002	Morgott, Król Omenów
+902130003	Morgott, Król Omenów
+902140000	Upadły Bliźniak
+902140001	Upadły Bliźniak
+902190000	Radagon ze Złotego Porządku
+902200000	Eldeńska Bestia
+902500300	Rycerz Tygla Ordovis
+902500301	Rycerz Tygla
+902500500	Rycerz Tygla
+902500520	Rycerz Tygla
+902500600	Rycerz Tygla Siluria
+903050500	Dowódca Niall
+903050600	Dowódca O’Neil
+903100500	Elemer od Głogu
+903100600	Łowca dzwonków kulistych
+903100601	Łowca dzwonków kulistych
+903100602	Łowca dzwonków kulistych
+903100603	Łowca dzwonków kulistych
+903150600	Nocna Kawaleria
+903150601	Nocna Kawaleria
+903150602	Nocna Kawaleria
+903150603	Nocna Kawaleria
+903150604	Nocna Kawaleria
+903150605	Nocna Kawaleria
+903150606	Nocna Kawaleria
+903150607	Nocna Kawaleria
+903150608	Nocna Kawaleria (Glewia)
+903150609	Nocna Kawaleria (Cep)
+903181000	Rudy wilk Radagona
+903181300	Rudy wilk czempiona
+903250600	Smoczy strażnik Drzewa
+903251600	Strażnik Drzewa
+903251601	Strażnik Drzewa
+903251602	Strażnik Drzewa
+903252000	Loretta, rycerz Świętego Drzewa
+903253500	Loretta, królewski rycerz
+903300560	Noxyjski zakonnik
+903300561	Noxyjska szermierczyni
+903320000	Łza naśladowcy
+903320300	Łza naśladowcy
+903350310	Krysztalnik (kostur)
+903350311	Krysztalnik (włócznia)
+903350312	Gnijący Krysztalnik (brzmiące ostrze)
+903350313	Gnijący Krysztalnik (włócznia)
+903350314	Gnijący krysztalnik (kostur)
+903350315	
+903350316	
+903350317	
+903350318	
+903350319	
+903350320	Krysztalnik
+903350321	Krysztalnik (brzmiące ostrze)
+903350322	Krysztalnik (włócznia)
+903400300	Strażnik grobów, pojedynkowicz
+903400301	Strażnik grobów, pojedynkowicz
+903400302	Gnijący strażnik grobów, pojedynkowicz
+903400303	
+903400304	
+903400305	
+903400306	
+903400307	
+903400308	
+903400309	
+903400310	Rozszalały pojedynkowicz
+903451320	Łuskowata aberracja
+903460300	Wojownik wynaturzeniec
+903460301	
+903460302	
+903460303	
+903460304	
+903460305	
+903460306	
+903460307	
+903460308	
+903460309	
+903460310	Orędownik wynaturzeniec
+903460500	Lwi wynaturzeniec
+903460501	Wojownik wynaturzeniec
+903550540	Krwawy szlachcic
+903560000	Apostoł boskiej skóry
+903560310	Apostoł boskiej skóry
+903560600	Apostoł boskiej skóry
+903570000	Szlachcic boskiej skóry
+903570310	Szlachcic boskiej skóry
+903575000	Duet boskiej skóry
+903600320	Onyksowy władca
+903600520	Onyksowy władca
+903664300	Cmentarny cień
+903664301	Cmentarny cień
+903664302	Cmentarny cień
+903700300	Tricia, perfumiarz
+903704520	Hugues, mag bitewny
+903800310	Rycerz czystej zgnilizny
+903800311	Rycerz czystej zgnilizny (włócznia)
+903800312	Rycerz czystej zgnilizny (sierp)
+903810310	Członek klanu zgnilizny
+903810311	Członek klanu zgnilizny
+903970310	Człowiek-bestia z Farum Azuli
+903970311	Człowiek-bestia z Farum Azuli (tasak)
+903970312	Człowiek-bestia z Farum Azuli (nóż do rzucania)
+904020540	Królewski upiór
+904120310	Wódz półludzi
+904120311	Wódz półludzi
+904130310	Margot, królowa półludzi
+904130540	Gilika, królowa półludzi
+904130600	Maggie, królowa półludzi
+904140300	Ślimak-guślarz
+904140301	
+904140302	
+904140303	
+904140304	
+904140305	
+904140306	
+904140307	
+904140308	
+904140309	
+904140310	Ślimak-guślarz
+904260300	Ogar grobowca Złotego Drzewa
+904260301	Ogar grobowca Złotego Drzewa
+904260302	Ogar grobowca Złotego Drzewa
+904260303	Ogar grobowca Złotego Drzewa
+904260304	Ogar grobowca Złotego Drzewa (Miecz)
+904260305	Ogar grobowca Złotego Drzewa (Berło)
+904290310	Wasalny rycerz
+904290520	Darriwil, wasalny rycerz
+904311000	Rycerz Godricka
+904340540	Szalony Dyniogłowy
+904340541	Szalony Dyniogłowy (młot)
+904340542	Szalony Dyniogłowy (korbacz)
+904470000	Dziewica-porywaczka (sierp wahadłowy)
+904470001	Dziewica-porywaczka (koło)
+904480310	Miranda, Splugawiony Kwiat
+904480311	Miranda, Kwiat
+904500600	Latający smok Agheel
+904500601	Latający smok Greyll
+904501600	Rozkładający się Ekzykes
+904502600	Smarag, błyskamienny smok
+904502601	Adula, błyskamienny smok
+904502602	Adula, błyskamienny smok
+904503600	Borealis, Polarna Mgła
+904510000	Drakolicz Fortissax
+904510600	Starożytna smoczyca Lansseax
+904520000	Placidusax, Władca Smoków
+904580600	Robaczywa Gęba
+904580601	Robaczywa Gęba
+904600320	Troll kamienny kopacz
+904600321	Troll kamienny kopacz
+904600520	Bols, karyjski rycerz
+904620001	Astel, Zrodzony z Pustki
+904620320	Astel, Gwiazdy Mroku
+904630310	Runiczny niedźwiedź
+904640000	Duch owrzodzonego drzewa
+904640300	Duch gnijącego drzewa
+904640301	Duch owrzodzonego drzewa
+904640600	Duch owrzodzonego drzewa
+904650000	Żołnierz drakonidów z Nokstelli
+904650600	Żołnierz drakonidów
+904650601	Żołnierz drakonidów
+904660310	Strażnik golemów
+904670000	Duch przodka
+904670001	Duch królewskiego przodka
+904680320	Bestia spadającej gwiazdy
+904680601	Bestia spadającej gwiazdy
+904680602	Bestia spadającej gwiazdy
+904680603	Dorosła bestia spadającej gwiazdy
+904690000	Pozszywany Potomek
+904710000	Wężowy pożeracz bogów
+904710001	Rykard, Pan Bluźnierstwa
+904720000	Godfrey, Pierwszy Eldeński Władca
+904720001	Hoarah Loux, wojownik
+904720002	Godfrey, Pierwszy Eldeński Władca
+904730000	Radahn, Gwiezdna Plaga
+904750000	Godrick, Zszywaniec
+904750520	Godefroy, Zszywaniec
+904760000	Ognisty olbrzym
+904770000	Nieustraszony gargulec
+904770001	Nieustraszony gargulec (podwójne ostrze)
+904770600	Pobratymiec Czarnej Klingi
+904770601	Ród Czarnej Klingi
+904800000	Mohg, Pan Krwi
+904800001	
+904800002	Mohg, Omen
+904810600	Awatar Złotego Drzewa
+904810601	Awatar Złotego Drzewa
+904810602	Awatar Złotego Drzewa
+904811600	Gnijący awatar
+904811601	Gnijący awatar
+904811602	Gnijący awatar
+904820310	Zabójca Omenów
+904820600	Zabójca Omenów
+904910000	Magmowy żmij Makar
+904910320	Magmowy żmij
+904910600	Magmowy żmij
+904911600	Wielki żmij Theodorix
+904950600	Marynarz Kościej
+904950601	Marynarz Kościej
+904950602	Marynarz Kościej
+904950603	Marynarz Kościej
+904980600	Ptak rytuału śmierci
+904980601	Ptak śmierci
+904980602	Ptak śmierci
+904980603	Ptak śmierci
+904980604	Ptak rytuału śmierci
+904980605	Ptak śmierci
+904980606	Ptak rytuału śmierci
+904980607	Ptak rytuału śmierci
+907100300	Pradawny bohater z Zamor
+907100301	Pradawny bohater z Zamor
+907100520	Pradawny bohater z Zamor

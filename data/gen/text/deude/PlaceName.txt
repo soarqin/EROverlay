@@ -1,0 +1,1049 @@
+10000	Schloss Sturmschleier
+10001	
+10002	
+10003	
+10004	
+10005	
+10006	
+10007	
+10008	
+10009	
+10010	Kapelle der Erwartung
+11000	Leyndell, Königliche Hauptstadt
+11050	Leyndell, Aschene Hauptstadt
+11100	Tafelrundfeste
+12010	Hauptarm der Ainsel
+12011	Fäulnissee
+12012	Ainsel
+12013	
+12014	
+12015	
+12016	
+12017	
+12018	
+12019	
+12020	Nokron, die Ewige Stadt
+12021	
+12022	
+12023	
+12024	
+12025	
+12026	
+12027	
+12028	
+12029	
+12030	Tiefen von Tiefwurz
+12050	Mohgwyn-Palast
+12070	Siofra
+13000	Zerfallendes Farum Azula
+14000	Akademie von Raya Lucaria
+15000	Elphael, Stütze des Haligbaums
+15001	Miquellas Haligbaum
+16000	Haus Vulkan
+18000	Friedhof der Gestrandeten
+18001	Grab eines Randvolkshelden
+19000	Steinplattform
+30000	Katakomben des Gräberwalls
+30001	
+30002	
+30003	
+30004	
+30005	
+30006	
+30007	
+30008	
+30009	
+30010	Katakomben des Pfählers
+30011	
+30012	
+30013	
+30014	
+30015	
+30016	
+30017	
+30018	
+30019	
+30020	Sturmfuß-Katakomben
+30021	
+30022	
+30023	
+30024	
+30025	
+30026	
+30027	
+30028	
+30029	
+30030	Katakomben am Wegesende
+30031	
+30032	
+30033	
+30034	
+30035	
+30036	
+30037	
+30038	
+30039	
+30040	Trübflusskatakomben
+30041	
+30042	
+30043	
+30044	
+30045	
+30046	
+30047	
+30048	
+30049	
+30050	Katakomben der Schwarzen Klinge
+30051	
+30052	
+30053	
+30054	
+30055	
+30056	
+30057	
+30058	
+30059	
+30060	Katakomben am Klippenfuß
+30061	
+30062	
+30063	
+30064	
+30065	
+30066	
+30067	
+30068	
+30069	
+30070	Katakomben von Wyndham
+30071	
+30072	
+30073	
+30074	
+30075	
+30076	
+30077	
+30078	
+30079	
+30080	Grab des heiligen Helden
+30081	
+30082	
+30083	
+30084	
+30085	
+30086	
+30087	
+30088	
+30089	
+30090	Grab des Helden von Gelmir
+30091	
+30092	
+30093	
+30094	
+30095	
+30096	
+30097	
+30098	
+30099	
+30100	Grab des Helden von Auriza
+30101	
+30102	
+30103	
+30104	
+30105	
+30106	
+30107	
+30108	
+30109	
+30110	Todberührte Katakomben
+30111	
+30112	
+30113	
+30114	
+30115	
+30116	
+30117	
+30118	
+30119	
+30120	Entstellte Katakomben
+30121	
+30122	
+30123	
+30124	
+30125	
+30126	
+30127	
+30128	
+30129	
+30130	Seitengruft von Auriza
+30131	
+30132	
+30133	
+30134	
+30135	
+30136	
+30137	
+30138	
+30139	
+30140	Niedere Erdenbaumkatakomben
+30141	
+30142	
+30143	
+30144	
+30145	
+30146	
+30147	
+30148	
+30149	
+30150	Katakomben von Caelid
+30151	
+30152	
+30153	
+30154	
+30155	
+30156	
+30157	
+30158	
+30159	
+30160	Katakomben der Kriegsopfer
+30161	
+30162	
+30163	
+30164	
+30165	
+30166	
+30167	
+30168	
+30169	
+30170	Grab des heroischen Riesentöters
+30171	
+30172	
+30173	
+30174	
+30175	
+30176	
+30177	
+30178	
+30179	
+30180	Katakomben des Riesengipfels
+30181	
+30182	
+30183	
+30184	
+30185	
+30186	
+30187	
+30188	
+30189	
+30190	Geweihtes Schneefeld – Katakomben
+30191	
+30192	
+30193	
+30194	
+30195	
+30196	
+30197	
+30198	
+30199	
+30200	Geheimpfad zum Haligbaum
+31000	Trübflusshöhle
+31001	
+31002	
+31003	
+31004	
+31005	
+31006	
+31007	
+31008	
+31009	
+31010	Erdschlundhöhle
+31011	
+31012	
+31013	
+31014	
+31015	
+31016	
+31017	
+31018	
+31019	
+31020	Höhle des Gräberwalls
+31021	
+31022	
+31023	
+31024	
+31025	
+31026	
+31027	
+31028	
+31029	
+31030	Hainhöhle
+31031	
+31032	
+31033	
+31034	
+31035	
+31036	
+31037	
+31038	
+31039	
+31040	Stillwasserhöhle
+31041	
+31042	
+31043	
+31044	
+31045	
+31046	
+31047	
+31048	
+31049	
+31050	Kristallhöhle am See
+31051	
+31052	
+31053	
+31054	
+31055	
+31056	
+31057	
+31058	
+31059	
+31060	Kristallhöhle der Akademie
+31061	
+31062	
+31063	
+31064	
+31065	
+31066	
+31067	
+31068	
+31069	
+31070	Donnerstromhöhle
+31090	Vulkanhöhle
+31091	
+31092	
+31093	
+31094	
+31095	
+31096	
+31097	
+31098	
+31099	
+31100	Drachenhügelhöhle
+31101	
+31102	
+31103	
+31104	
+31105	
+31106	
+31107	
+31108	
+31109	
+31110	Sellias Versteck
+31111	
+31112	
+31113	
+31114	
+31115	
+31116	
+31117	
+31118	
+31119	
+31120	Höhle der Verlorenen
+31150	Küstenhöhle
+31170	Hochstraßen-Höhle
+31171	
+31172	
+31173	
+31174	
+31175	
+31176	
+31177	
+31178	
+31179	
+31180	Parfümeursgrotte
+31181	
+31182	
+31183	
+31184	
+31185	
+31186	
+31187	
+31188	
+31189	
+31190	Höhle des Weisen
+31191	
+31192	
+31193	
+31194	
+31195	
+31196	
+31197	
+31198	
+31199	
+31200	Verlassene Höhle
+31201	
+31202	
+31203	
+31204	
+31205	
+31206	
+31207	
+31208	
+31209	
+31210	Kerkerhöhle
+31211	
+31212	
+31213	
+31214	
+31215	
+31216	
+31217	
+31218	
+31219	
+31220	Höhle des Geisterrufers
+32000	Tunnel von Morne
+32001	
+32002	
+32003	
+32004	
+32005	
+32006	
+32007	
+32008	
+32009	
+32010	Tunnel von Limgrave
+32011	
+32012	
+32013	
+32014	
+32015	
+32016	
+32017	
+32018	
+32019	
+32020	Kristalltunnel von Raya Lucaria
+32040	Alter Altustunnel
+32041	
+32042	
+32043	
+32044	
+32045	
+32046	
+32047	
+32048	
+32049	
+32050	Altustunnel
+32070	Gaeltunnel
+32071	
+32072	
+32073	
+32074	
+32075	
+32076	
+32077	
+32078	
+32079	
+32080	Kristalltunnel von Sellia
+32110	Tunnel von Yelough Anix
+34100	Heiliger Turm von Limgrave
+34101	
+34102	
+34103	
+34104	
+34105	
+34106	
+34107	
+34108	
+34109	
+34110	Carianischer Lehrsaal
+34111	Heiliger Turm von Liurnia
+34112	
+34113	
+34114	
+34115	
+34116	
+34117	
+34118	
+34119	
+34120	Versiegelter Tunnel
+34121	Heiliger Turm von West-Altus
+34122	
+34123	
+34124	
+34125	
+34126	
+34127	
+34128	
+34129	
+34130	Heiliger Turm von Caelid
+34131	
+34132	
+34133	
+34134	
+34135	
+34136	
+34137	
+34138	
+34139	
+34140	Heiliger Turm von Ost-Altus
+34141	
+34142	
+34143	
+34144	
+34145	
+34146	
+34147	
+34148	
+34149	
+34150	Isolierter heiliger Turm
+35000	Unterirdisches Reservat der Scham
+35001	
+35002	Katakomben von Leyndell
+39200	Ruinenübersäter Abgrund
+61000	Limgrave
+61001	Sturmhügel
+61002	Halbinsel der Tränen
+62000	Liurnia das Seenland
+62001	Hochstraße von Bellum
+62002	Mondlichtaltar
+63000	Altus-Plateau
+63001	Gelmir
+63002	Randgebiete der Hauptstadt
+63003	Verbotene Lande
+64000	Caelid
+64001	Greyolls Drachenhügel
+64002	Sumpf von Aeonia
+65000	Berggipfel der Riesen
+65001	Flammengipfel
+65002	Geweihtes Schneefeld
+100000	Godrick, der Verpflanzte
+100001	Margit, das Grausame Mal
+100002	Tunnel zum Schloss
+100003	Kammer auf Torseite
+100004	Sturmschleier-Klippen
+100005	Wallturm
+100006	Kammer auf Aufzugsseite
+100007	Abgelegene Zelle
+100008	Sturmschleier-Haupttor
+110000	Eldenthron
+110001	Refugium des Erdenbaums
+110002	Östlicher Hauptstadtwall
+110003	Untere Hauptstadtkapelle
+110004	Straßenbalkon
+110005	Westlicher Hauptstadtwall
+110006	
+110007	Schlafgemach der Königin
+110008	Befestigtes Anwesen – Erdgeschoss
+110009	Götterbrücke
+110070	Gesuch von Haus Vulkan: Vargram
+110500	Eldenthron
+110501	Refugium des Erdenbaums
+110502	Östlicher Hauptstadtwall
+110503	Leyndell, Aschene Hauptstadt
+110504	Schlafgemach der Königin
+110505	Götterbrücke
+111000	Tafel der Gnade
+120100	Drachenblutsoldat von Nokstella
+120101	Brunnenboden an der Ainsel
+120102	Schleusentor der Ainsel
+120103	Unterlauf der Ainsel
+120104	Hauptarm der Ainsel
+120105	Nokstella, die Ewige Stadt
+120106	Ufer des Fäulnissees
+120107	Fäulnissee
+120108	Großer Kreuzgang
+120109	Wasserfallbecken von Nokstella
+120200	Becken der Großen Fälle
+120201	Imitator-Träne
+120202	
+120203	Ufer des Siofra
+120204	Wald der Jünger
+120205	
+120206	Wald der Ahnen
+120207	Aquäduktklippen
+120208	Heilige Stätte der Nacht
+120209	Unter dem Brunnen
+120300	Thron des Todesprinzen
+120301	Wurzelklippen
+120302	Kamm der Großen Fälle
+120303	Tiefen von Tiefwurz
+120304	Namenlose Ewige Stadt
+120305	Wurzelfurt
+120400	Astel, Ausgeburt des Abgrunds
+120500	Kokon des Himmlischen
+120501	Palastallee
+120502	Dynastiemausoleum – Eingang
+120503	Dynastiemausoleum – Mitte
+120700	Bodenbrunnen am Siofra
+120701	Nokron, die Ewige Stadt
+130000	Maliketh, die Schwarze Klinge
+130001	Drachenfürst Placidusax
+130002	Drachentempel – Altar
+130003	Verfallenes Bestiengrab
+130004	Verfallenes Bestiengrab – Tiefen
+130005	Sturmbalkon
+130006	Drachentempel
+130007	Drachentempel – Transept
+130008	Drachentempel – Aufzug
+130009	Drachentempel – Dach
+130010	An der Großen Brücke
+140000	Große Bibliothek von Raya Lucaria
+140001	Forum der Debatte
+140002	Kirche des Kuckucks
+140003	Schulklassenraum
+150000	Malenia, Göttin der Fäulnis
+150001	Gebetsraum
+150002	Elphael – Innenwall
+150003	Abwasserkanal
+150004	Haligbaum – Wurzeln
+150005	Promenade des Haligbaums
+150006	Haligbaum – Krone
+150007	Haligbaum – Stadt
+150008	Haligbaum – Stadtplatz
+160000	Rykard, Fürst der Blasphemie
+160001	Tempel von Eiglay
+160002	Haus Vulkan
+160003	Kirche der Kerkergemeinde
+160004	Gästehalle
+160005	Audienzpfad
+160006	Entführerjungfern
+160007	Unterirdische Inquisitionskammer
+180000	Höhle des Wissens
+180001	Friedhof der Gestrandeten
+190000	Gespaltene Marika
+300000	Katakomben des Gräberwalls
+300100	Katakomben des Pfählers
+300200	Sturmfuß-Katakomben
+300300	Katakomben am Wegesende
+300400	Trübflusskatakomben
+300500	Katakomben der Schwarzen Klinge
+300600	Katakomben am Klippenfuß
+300700	Katakomben von Wyndham
+300800	Grab des heiligen Helden
+300900	Grab des Helden von Gelmir
+301000	Grab des Helden von Auriza
+301100	Todberührte Katakomben
+301200	Entstellte Katakomben
+301300	Seitengruft von Auriza
+301400	Niedere Erdenbaumkatakomben
+301500	Katakomben von Caelid
+301600	Katakomben der Kriegsopfer
+301700	Grab des heroischen Riesentöters
+301800	Katakomben des Riesengipfels
+301900	Geweihtes Schneefeld – Katakomben
+302000	Geheimpfad zum Haligbaum
+310000	Trübflusshöhle
+310100	Erdschlundhöhle
+310200	Höhle des Gräberwalls
+310300	Hainhöhle
+310400	Stillwasserhöhle
+310500	Kristallhöhle am See
+310600	Kristallhöhle der Akademie
+310700	Donnerstromhöhle
+310900	Vulkanhöhle
+311000	Drachenhügelhöhle
+311100	Sellias Versteck
+311200	Höhle der Verlorenen
+311500	Küstenhöhle
+311700	Hochstraßen-Höhle
+311800	Parfümeursgrotte
+311900	Höhle des Weisen
+312000	Verlassene Höhle
+312100	Kerkerhöhle
+312200	Höhle des Geisterrufers
+320000	Tunnel von Morne
+320100	Tunnel von Limgrave
+320200	Kristalltunnel von Raya Lucaria
+320400	Alter Altustunnel
+320500	Altustunnel
+320700	Gaeltunnel
+320701	Gaeltunnel – Hintereingang
+320800	Kristalltunnel von Sellia
+321100	Tunnel von Yelough Anix
+341000	Turmbrücke von Limgrave
+341001	
+341002	Heiliger Turm von Limgrave
+341100	Eingang zum Lehrsaal
+341101	Turmbrücke von Liurnia
+341102	Heiliger Turm von Liurnia
+341200	Heiliger Turm von West-Altus
+341201	Versiegelter Tunnel
+341202	Heiliger Turm von West-Altus: Tor
+341300	Heiliger Turm von Caelid
+341301	Heiliger Turm von Caelid: Keller
+341302	Heiliger Turm von Caelid: Mitte
+341400	Heiliger Turm von Ost-Altus: Tor
+341401	Heiliger Turm von Ost-Altus
+341470	Die Roldroute
+341500	Isolierter heiliger Turm
+350000	Kathedrale der Verlorenen
+350001	Unterirdische Straße
+350002	Tiefe der Verlorenen
+350003	Katakomben von Leyndell
+350004	Ächtung der Rasenden Flamme
+390000	Magmalindwurm Makar
+390001	Ruinenübersäter Abgrund
+390002	Ruinenübersäter Abgrund – Aussichtspunkt
+392070	Gesuch von Haus Vulkan: Tragoth
+450000	Königliches Kolosseum
+450100	Limgrave Kolosseum
+450200	Caelid Kolosseum
+610000	Kirche von Elleh
+610001	Hütte am Sturmhügel
+610002	Hütte des Künstlers
+610003	Dritte Kirche von Marika
+610004	Westseite der Festung Haight
+610005	Südseite des Agheel-Sees
+610006	
+610007	Nordseite des Agheel-Sees
+610008	Kirche der Drachenkommunion
+610009	Vor dem Tor
+610010	Garten jenseits der Brücke
+610011	Ruinen an der Küste
+610012	Randgebiete von Nebelwald
+610013	Nebelwald
+610014	Trübflussküste
+610015	Heiligenbrücke
+610016	Randgebiete des Totenwasser-Dorfs
+610017	Hütte des Kriegsmeisters
+610018	Ruinen eines Wegpunkts – Keller
+610019	Der erste Schritt
+611000	Vierte Kirche von Marika
+611001	Wall von Schloss Morne
+611002	Gräberwall
+611003	Süden des Aussichtsturms
+611004	Randgebiete des leidenden Dorfs
+611005	Neben dem Hain der Krater
+611006	Hütte des abgeschiedenen Händlers
+611007	Brücke des Opfers
+611008	Aufzug von Schloss Morne
+611009	Hinter dem Schloss
+611010	Neben dem Wallkerker
+611011	Klagengrab von Morne
+611012	Pilgerkirche
+620000	Seeklippen
+620001	Seeufer von Liurnia
+620002	Ruinen von Laskyar
+620003	Malerische Insel
+620004	Torstadt der Akademie
+620005	Haupttor der Akademie
+620006	
+620007	
+620008	
+620009	
+620010	Osttor von Raya Lucaria
+620011	Kirche von Bellum
+620012	Großer Aufzug von Dectus
+620013	
+620014	
+620015	
+620016	
+620017	
+620018	
+620019	
+620020	Fuß der Vier Glockentürme
+620021	Zaubererinsel
+620022	Nördliches Seeufer von Liurnia
+620023	Straße zum Anwesen
+620024	Haupttor des Anwesens von Caria
+620025	
+620026	
+620027	
+620028	
+620029	
+620030	Hütte des schlummernden Wolfs
+620031	Krabbenkocherhütte
+620032	Hütte des Künstlers
+620033	Hütte des Rächers
+620034	Stein-Pavillon am See
+620035	Dorf der Albinaurics
+620036	Nordhochstraße von Liurnia
+620037	Brücke der Torstadt
+620038	Östliches Seeufer von Liurnia
+620039	Kirche der Gelübde
+620040	Ruinen des Labyrinths
+620041	Mausoleumsgelände
+620042	Die Vier Glockentürme
+620043	Rannis Turm
+620044	Verhülltes Klammdorf
+620045	Obere Ebene des Anwesens
+620046	Untere Ebene des Anwesens
+620047	Königliches Observatorium
+620048	Nordseite der Torstadt
+620049	Östliches Tafelland
+620050	Die Klamm
+620051	Herabgestürzte Ruinen des Seenlands
+620052	Konvertierter Turm
+620053	Hinter dem Anwesen von Caria
+620054	Dorf der Rasenden Flamme – Rand
+620055	Kirche der Inhibition
+620056	Tempelviertel
+620057	Brückenrampe des Osttors
+620058	Kristallwälder
+620059	Südhochstraße von Liurnia
+620060	Gefäßburg
+620061	Südtor von Raya Lucaria
+620062	Rannis Kammer
+621000	Mondlichtaltar
+621001	Kathedrale von Manus Celes
+621002	Südaltar
+630000	Aussichtshügel des Erdenbaums
+630001	Windmühlendorf
+630002	Niedere Erdenbaumkirche
+630003	Kreuzung der Altus-Hochstraße
+630004	Wallpfad
+630005	Hütte des Einsiedlerhändlers
+630006	Straße der Sünde – Seitenpfad
+630007	Große Waldbrücke
+630008	Verlassener Sarg
+630009	Altus-Plateau
+630010	Baum der Pracht
+630011	Außenwall – Phantombaum
+630012	Außenwall – Schlachtfeld
+630013	Windmühlenhügel
+630014	Hauptstadtwall
+630050	Halle des Kastellans
+630051	Schattenburg – Wall
+630052	Schattenburg – Inneres Tor
+631000	Brücke der Sünde
+631001	Neuntes Gelmirlager
+631002	Erstes Gelmirlager
+631003	Straße der Sünde
+631004	Donnerstrom
+631005	Mündung des Donnerstroms
+631006	Handwerkerhütte
+631007	Urzauberer Azur
+640000	Schwelende Kirche
+640001	Fäulnisbalkon
+640002	Kathedrale der Drachenkommunion
+640003	Schwelender Wall
+640004	Tiefer Brunnen des Siofra
+640005	Ruinen von Caelem
+640006	Hütte des abgeschiedenen Händlers
+640007	Herz von Aeonia
+640008	Throngruft von Sellia
+640009	Unpassierbare große Brücke
+640010	Schlossplatz Rotmähne
+640011	Kammer außerhalb des Platzes
+640012	
+640013	Nordseite der Festung Gael
+640014	Sternengeißel Radahn
+640015	Sumpfufer von Aeonia
+640016	Südliches Sumpfufer von Aeonia
+640017	Sellias Aufgang
+640018	Kirche der Seuche
+640019	Südhochstraße von Caelid
+640020	Westlicher Drachenhügel
+640021	Festung Faroth
+640022	Gabelung des Drachenhügels
+640023	Lennes Turm
+640024	Große Brücke von Farum
+640025	Refugium der Bestien
+640026	Abseits von Caelids Nordhochstraße
+640027	Sumpf von Aeonia
+640028	Inneres Aeonia
+640029	Gassen von Sellia
+650000	Verbotene Lande
+650001	Ruinen von Zamor
+650002	Ruinen des Urschneetals
+650003	Eisiger See
+650004	Erste Kirche von Marika
+650005	Grabstein der Riesen
+650006	Kirche der Ruhe
+650007	Fuß der Schmiede
+650008	Feuerriese
+650009	Schmiede der Riesen
+650010	Großer Aufzug von Rold
+650050	Weißkammstraße
+650051	Urschneetal – Aussichtspunkt
+650052	Schloss Sol – Haupttor
+650053	Kirche der Finsternis
+650054	Schloss Sol – Dach
+651000	Geweihtes Schneefeld
+651001	Inneres Geweihtes Schneefeld
+651002	Ordina, Stadt der Liturgien
+651003	Verfallende Ruinen der Abtrünnigen
+6100300	Kirche von Elleh
+6100301	Kirche der Drachenkommunion
+6100302	Dritte Kirche von Marika
+6100500	Ruinen im Nebelwald
+6100501	Ruinen eines Wegpunkts
+6100502	Vom Drachen verbrannte Ruinen
+6100503	Ruinen vor dem Tor
+6100504	Totenwasser-Dorf
+6100600	Hütte des Künstlers
+6100601	Hütte des Kriegsmeisters
+6100602	Hütte am Sturmhügel
+6100900	Siegelgefängnis des Bluthundes
+6100901	Siegelgefängnis des Sturmhügels
+6101000	Sturmtor
+6101100	Brücke des Opfers
+6101500	Brunnen am Siofra
+6101800	Festung Haight
+6103000	Niederer Erdenbaum
+6108100	Agheel-See
+6108700	Portal
+6108701	Gesuch von Haus Vulkan: Istvan
+6108702	Krater des gefallenen Sterns
+6110300	Vierte Kirche von Marika
+6110301	Pilgerkirche
+6110302	Täuferkirche von Callu
+6110500	Hexenfluchruinen
+6110501	Ruinen des Gräberwalls
+6110502	Waldruinen der Halbmenschen
+6110600	Hütte des abgeschiedenen Händlers
+6110700	Leidendes Dorf
+6110800	Waldaussichtsturm
+6110801	Turm der Rückkehr
+6110900	Siegelgefängnis der Klagen
+6111700	Oridys' Turm
+6112500	Schloss Morne
+6113000	Niederer Erdenbaum
+6120000	Schloss Sturmschleier
+6200000	Palastruinen von Uld
+6200001	Drei Schwestern
+6200300	Kirche von Irith
+6200301	Kirche der Gelübde
+6200302	Rosenkirche
+6200303	Kirche von Bellum
+6200304	Kirche der Inhibition
+6200500	Geläuterte Ruinen
+6200501	Königliche Ruinen
+6200502	Ruinen von Laskyar
+6200600	Hütte des schlummernden Wolfs
+6200601	Krabbenkocherhütte
+6200602	Hütte des Künstlers
+6200603	Hütte des Rächers
+6200700	Dorf der Albinaurics
+6200701	Dorf der Rasenden Flamme
+6200702	Gefäßburg
+6200800	Aussichtsturm der Hochstraße
+6200801	Turm der Rasenden Flamme
+6200900	Siegelgefängnis der Niedertracht
+6200901	Siegelgefängnis des Kuckucks
+6200902	Siegelgefängnis der Königsgräber
+6201500	Brunnen an der Ainsel
+6201700	Konvertierter Turm
+6201701	Testus Turm
+6201702	Seluvis' Turm
+6201703	Rannis Turm
+6201704	Rennas Turm
+6201705	Konvertierter Randturm
+6202600	Anwesen von Caria
+6203000	Niederer Erdenbaum
+6203001	Niederer Erdenbaum
+6203200	Torstadt der Akademie
+6203201	Tempelviertel
+6205200	Die Vier Glockentürme
+6210300	Kathedrale von Manus Celes
+6210500	Ruinen des Mondvolks
+6210501	Ruinen des Mondanwesens
+6210900	Siegelgefängnis des Oberhaupts
+6211500	Tiefer Brunnen der Ainsel
+6211700	Chelonas Turm
+6220000	Akademie von Raya Lucaria
+6300001	
+6300300	Kirche der Sturmrufer
+6300301	Zweite Kirche von Marika
+6300302	Niedere Erdenbaumkirche
+6300500	Ruinen des Waldvolks
+6300501	Ruinen von Lux
+6300502	Ruinen des Parfümeurs
+6300503	Sturmblutruinen
+6300600	St. Trinas Versteck
+6300601	Hütte des Einsiedlerhändlers
+6300602	
+6300603	
+6300604	
+6300605	
+6300700	Dominula, Windmühlendorf
+6300800	Aussichtsturm der Hochstraße
+6300900	Siegelgefängnis des goldenen Stammbaums
+6301000	Randgebiete der Hauptstadt
+6301300	Ruinen des Waldvolks
+6301700	Trügerischer Turm
+6301900	Westliche Windmühlenweide
+6301901	Östliche Windmühlenweide
+6301902	Dorfwindmühlenweide
+6301903	Kontrollpunkt von Dominula
+6302100	Großer Aufzug von Dectus
+6302700	Die Schattenburg
+6303000	Niederer Erdenbaum
+6303001	Niederer Erdenbaum
+6308700	Gesuch von Haus Vulkan: Rileigh
+6310500	
+6310501	Ruinen von Wyndham
+6310600	Hütte mit Leichengestank
+6310601	Einsiedlerhütte
+6310602	
+6310603	
+6310604	Handwerkerhütte
+6310700	Einsiedlerdorf
+6311000	Leyndell, Königliche Hauptstadt
+6311800	Festung Laiedd
+6313000	Niederer Erdenbaum
+6316000	Haus Vulkan
+6400000	Klagedünen
+6400300	Schwelende Kirche
+6400301	Kathedrale der Drachenkommunion
+6400302	Kirche der Seuche
+6400500	Verlorene Ruinen
+6400501	Ruinen des Wegpunkts von Caelid
+6400502	Ruinen der Straße der Weisen
+6400503	Ruinen von Caelem
+6400600	Hütte der Fäulnis
+6400601	Gowrys Hütte
+6400800	Sumpfaussichtsturm
+6401000	Tor von Sellia
+6401500	Tiefer Brunnen des Siofra
+6401800	Festung Gael
+6401801	
+6402800	Schloss Rotmähne
+6403000	Niederer Erdenbaum
+6403001	Niederer Erdenbaum
+6403300	Sellia, Stadt der Zauberer
+6410600	Hütte des abgeschiedenen Händlers
+6410900	Siegelgefängnis von Sellia
+6411700	Lennes Turm
+6411800	Festung Faroth
+6413000	Niederer Erdenbaum
+6415400	Refugium der Bestien
+6500300	Erste Kirche von Marika
+6500301	Kirche der Ruhe
+6500500	Ruinen von Zamor
+6500501	Ruinen der Sterngucker
+6500600	Hütte des Erhabenen
+6500900	Siegelgefängnis des Fürstenanwärters
+6501700	Ketzerischer Turm
+6501800	Wächtergarnison
+6502100	Großer Aufzug von Rold
+6502900	Schloss Sol
+6503000	Niederer Erdenbaum
+6505700	Schmiede der Riesen
+6508700	Großer Aufzug von Rold
+6508701	Gesuch von Haus Vulkan: Juno Hoslow
+6510300	Verfallende Ruinen der Abtrünnigen
+6510500	Ruinen von Yelough Anix
+6511700	Albinaurischer Turm
+6513000	Niederer Erdenbaum
+6513400	Ordina, Stadt der Liturgien
+6515000	Elphael, Stütze des Haligbaums
+6515500	Miquellas Haligbaum
+6515600	Elphael, Stütze des Haligbaums
+6604700	Uhl-Palastruinen
+6614600	Nokstella, die Ewige Stadt
+6614700	Großer Kreuzgang
+6614701	Uhl-Palastruinen
+6654600	Nokron, die Ewige Stadt
+6654601	Heilige Stätte der Nacht
+6654602	Aquädukt am Siofra
+6654603	
+6654604	Heilighornland
+6664500	Mausoleum der Mohgwyn-Dynastie
+8000000	Limgrave
+8000400	Liurnia das Seenland
+8000800	Altus-Plateau
+8000900	Caelid
+8001200	Berggipfel der Riesen
+8010000	Ainsel
+8010200	Siofra
+8010400	Tiefen von Tiefwurz
+8100001	Limgrave Demesne
+90000000	

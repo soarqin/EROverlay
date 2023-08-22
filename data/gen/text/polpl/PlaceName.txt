@@ -1,0 +1,1049 @@
+10000	Zamek Burzowego Całunu
+10001	
+10002	
+10003	
+10004	
+10005	
+10006	
+10007	
+10008	
+10009	
+10010	Kaplica Oczekiwania
+11000	Leyndell, królewska stolica
+11050	Leyndell, stolica popiołów
+11100	Twierdza Okrągłego Stołu
+12010	Główne koryto rzeki Ainsel
+12011	Jezioro Zgnilizny
+12012	Rzeka Ainsel
+12013	
+12014	
+12015	
+12016	
+12017	
+12018	
+12019	
+12020	Nokron, Wieczne Miasto
+12021	
+12022	
+12023	
+12024	
+12025	
+12026	
+12027	
+12028	
+12029	
+12030	Głębiny
+12050	Pałac Mohgwynów
+12070	Rzeka Siofra
+13000	Przeklęte Farum Azula
+14000	Akademia Rai Lucarii
+15000	Elphael, Podpora Świętego Drzewa
+15001	Święte Drzewo Miquelli
+16000	Wulkaniczny Dwór
+18000	Opuszczone cmentarzysko
+18001	Grobowiec bohatera pogranicza
+19000	Kamienna platforma
+30000	Przycmentarne katakumby
+30001	
+30002	
+30003	
+30004	
+30005	
+30006	
+30007	
+30008	
+30009	
+30010	Katakumby Palownika
+30011	
+30012	
+30013	
+30014	
+30015	
+30016	
+30017	
+30018	
+30019	
+30020	Katakumby Burzowego Podnóża
+30021	
+30022	
+30023	
+30024	
+30025	
+30026	
+30027	
+30028	
+30029	
+30030	Katakumby u kresu drogi
+30031	
+30032	
+30033	
+30034	
+30035	
+30036	
+30037	
+30038	
+30039	
+30040	Katakumby Mętnych Wód
+30041	
+30042	
+30043	
+30044	
+30045	
+30046	
+30047	
+30048	
+30049	
+30050	Katakumby Czarnego Noża
+30051	
+30052	
+30053	
+30054	
+30055	
+30056	
+30057	
+30058	
+30059	
+30060	Katakumby u stóp klifu
+30061	
+30062	
+30063	
+30064	
+30065	
+30066	
+30067	
+30068	
+30069	
+30070	Katakumby Wyndham
+30071	
+30072	
+30073	
+30074	
+30075	
+30076	
+30077	
+30078	
+30079	
+30080	Grobowiec wyświęconego bohatera
+30081	
+30082	
+30083	
+30084	
+30085	
+30086	
+30087	
+30088	
+30089	
+30090	Grobowiec bohatera Gelmir
+30091	
+30092	
+30093	
+30094	
+30095	
+30096	
+30097	
+30098	
+30099	
+30100	Grobowiec bohatera w Aurizie
+30101	
+30102	
+30103	
+30104	
+30105	
+30106	
+30107	
+30108	
+30109	
+30110	Wyklęte katakumby
+30111	
+30112	
+30113	
+30114	
+30115	
+30116	
+30117	
+30118	
+30119	
+30120	Szkaradne katakumby
+30121	
+30122	
+30123	
+30124	
+30125	
+30126	
+30127	
+30128	
+30129	
+30130	Boczny grobowiec w Aurizie
+30131	
+30132	
+30133	
+30134	
+30135	
+30136	
+30137	
+30138	
+30139	
+30140	Katakumby pomniejszego Złotego drzewa
+30141	
+30142	
+30143	
+30144	
+30145	
+30146	
+30147	
+30148	
+30149	
+30150	Katakumby Caelid
+30151	
+30152	
+30153	
+30154	
+30155	
+30156	
+30157	
+30158	
+30159	
+30160	Katakumby poległych
+30161	
+30162	
+30163	
+30164	
+30165	
+30166	
+30167	
+30168	
+30169	
+30170	Grobowiec heroicznego pogromcy olbrzymów
+30171	
+30172	
+30173	
+30174	
+30175	
+30176	
+30177	
+30178	
+30179	
+30180	Katakumby Szczytów Olbrzymów
+30181	
+30182	
+30183	
+30184	
+30185	
+30186	
+30187	
+30188	
+30189	
+30190	Katakumby w uświęconej śnieżnej dolinie
+30191	
+30192	
+30193	
+30194	
+30195	
+30196	
+30197	
+30198	
+30199	
+30200	Ukryta ścieżka do Świętego Drzewa
+31000	Pieczara Mętnych Wód
+31001	
+31002	
+31003	
+31004	
+31005	
+31006	
+31007	
+31008	
+31009	
+31010	Wydrążona pieczara
+31011	
+31012	
+31013	
+31014	
+31015	
+31016	
+31017	
+31018	
+31019	
+31020	Przycmentarna jaskinia
+31021	
+31022	
+31023	
+31024	
+31025	
+31026	
+31027	
+31028	
+31029	
+31030	Jaskinia w zagajniku
+31031	
+31032	
+31033	
+31034	
+31035	
+31036	
+31037	
+31038	
+31039	
+31040	Jaskinia Zatęchłych Wód
+31041	
+31042	
+31043	
+31044	
+31045	
+31046	
+31047	
+31048	
+31049	
+31050	Kryształowa jaskinia przy jeziorze
+31051	
+31052	
+31053	
+31054	
+31055	
+31056	
+31057	
+31058	
+31059	
+31060	Kryształowa jaskinia Akademii
+31061	
+31062	
+31063	
+31064	
+31065	
+31066	
+31067	
+31068	
+31069	
+31070	Pieczara Kipiących Wód
+31090	Jaskinia wulkaniczna
+31091	
+31092	
+31093	
+31094	
+31095	
+31096	
+31097	
+31098	
+31099	
+31100	Pieczara w Smoczych Kurhanach
+31101	
+31102	
+31103	
+31104	
+31105	
+31106	
+31107	
+31108	
+31109	
+31110	Selliańska kryjówka
+31111	
+31112	
+31113	
+31114	
+31115	
+31116	
+31117	
+31118	
+31119	
+31120	Jaskinia porzuconych
+31150	Przybrzeżna jaskinia
+31170	Pieczara przy gościńcu
+31171	
+31172	
+31173	
+31174	
+31175	
+31176	
+31177	
+31178	
+31179	
+31180	Grota Perfumiarza
+31181	
+31182	
+31183	
+31184	
+31185	
+31186	
+31187	
+31188	
+31189	
+31190	Pieczara Mędrca
+31191	
+31192	
+31193	
+31194	
+31195	
+31196	
+31197	
+31198	
+31199	
+31200	Opuszczona jaskinia
+31201	
+31202	
+31203	
+31204	
+31205	
+31206	
+31207	
+31208	
+31209	
+31210	Podziemny loch
+31211	
+31212	
+31213	
+31214	
+31215	
+31216	
+31217	
+31218	
+31219	
+31220	Jaskinia guseł
+32000	Tunel Morne
+32001	
+32002	
+32003	
+32004	
+32005	
+32006	
+32007	
+32008	
+32009	
+32010	Tunele Pogrobna
+32011	
+32012	
+32013	
+32014	
+32015	
+32016	
+32017	
+32018	
+32019	
+32020	Kryształowe tunele Rai Lucarii
+32040	Stary tunel Altus
+32041	
+32042	
+32043	
+32044	
+32045	
+32046	
+32047	
+32048	
+32049	
+32050	Tunel Altus
+32070	Tunel Gael
+32071	
+32072	
+32073	
+32074	
+32075	
+32076	
+32077	
+32078	
+32079	
+32080	Kryształowe tunele Sellii
+32110	Tunele Yelough Anix
+34100	Boska Wieża Pogrobna
+34101	
+34102	
+34103	
+34104	
+34105	
+34106	
+34107	
+34108	
+34109	
+34110	Karyjska biblioteka 
+34111	Boska Wieża Liurnii
+34112	
+34113	
+34114	
+34115	
+34116	
+34117	
+34118	
+34119	
+34120	Zapieczętowany tunel
+34121	Boska Wieża zachodniego Altus
+34122	
+34123	
+34124	
+34125	
+34126	
+34127	
+34128	
+34129	
+34130	Boska Wieża Caelid
+34131	
+34132	
+34133	
+34134	
+34135	
+34136	
+34137	
+34138	
+34139	
+34140	Boska Wieża wschodniego Altus
+34141	
+34142	
+34143	
+34144	
+34145	
+34146	
+34147	
+34148	
+34149	
+34150	Odosobniona Boska Wieża
+35000	Podziemia porzuconych
+35001	
+35002	Katakumby Leyndell
+39200	Urwisko usiane ruinami
+61000	Pogrobno
+61001	Burzowe Wzgórze
+61002	Płaczący Półwysep
+62000	Jeziorna Liurnia
+62001	Trakt Bellum
+62002	Ołtarz Blasku Księżyca
+63000	Płaskowyż Altus
+63001	Góra Gelmir
+63002	Obrzeża stolicy
+63003	Zakazane Krainy
+64000	Caelid
+64001	Smocze Kurhany Greyoll
+64002	Bagno Aeonii
+65000	Szczyty Olbrzymów
+65001	Szczyt Płomienia
+65002	Uświęcona śnieżna dolina
+100000	Godrick, Zszywaniec
+100001	Margit, Upadły Omen
+100002	Tunel do zamku
+100003	Komnata przy bramie
+100004	Urwisko Burzowego Całunu
+100005	Baszta
+100006	Komnata przy windzie
+100007	Odosobniona komnata
+100008	Brama główna Burzowego Całunu
+110000	Eldeński Tron
+110001	Sanktuarium Złotego Drzewa
+110002	Wschodnie mury obronne stolicy
+110003	Pomniejszy kościół stolicy
+110004	Taras nad aleją
+110005	Zachodnie mury obronne stolicy
+110006	
+110007	Komnata sypialna królowej
+110008	Ufortyfikowana posiadłość, parter
+110009	Boski most
+110070	Prośba z Wulkanicznego Dworu: Vargram
+110500	Eldeński Tron
+110501	Sanktuarium Złotego Drzewa
+110502	Wschodnie mury obronne stolicy
+110503	Leyndell, stolica popiołów
+110504	Komnata sypialna królowej
+110505	Boski most
+111000	Stół Utraconej Łaski
+120100	Żołnierz drakonidów z Nokstelli
+120101	Czeluście studni rzeki Ainsel
+120102	Śluza na rzece Ainsel
+120103	Dolny bieg rzeki Ainsel
+120104	Główne koryto rzeki Ainsel
+120105	Nokstella, Wieczne Miasto
+120106	Brzeg Jeziora Zgnilizny
+120107	Jezioro Zgnilizny
+120108	Wielki Klasztor
+120109	Basen wodospadu Nokstelli
+120200	Basen wielkiego wodospadu
+120201	Łza naśladowcy
+120202	
+120203	Brzeg rzeki Siofra
+120204	Las Wyznawców
+120205	
+120206	Las Przodków
+120207	Klify z widokiem na akwedukt
+120208	Święta Ziemia Nocy
+120209	Pod studnią
+120300	Tron Księcia Śmierci
+120301	Klify z widokiem na korzenie
+120302	Szczyt wielkiego wodospadu
+120303	Głębiny
+120304	Bezimienne Wieczne Miasto
+120305	Poprzez korzenie
+120400	Astel, Zrodzony z Pustki
+120500	Kokon Niebianina
+120501	Kręta droga do pałacu
+120502	Podnóże mauzoleum dynastii
+120503	Wejście do mauzoleum dynastii
+120700	Czeluście studni rzeki Siofra
+120701	Nokron, Wieczne Miasto
+130000	Maliketh, Czarna Klinga
+130001	Placidusax, Władca Smoków
+130002	Ołtarz Smoczej Świątyni
+130003	Rozpadający się grób bestii
+130004	Czeluści rozpadającego się grobu bestii
+130005	Taras z widokiem na burzę
+130006	Smocza Świątynia
+130007	Transept Smoczej Świątyni
+130008	Winda Smoczej Świątyni
+130009	Dach Smoczej Świątyni
+130010	Przy wielkim moście
+140000	Wielka Biblioteka Rai Lucarii
+140001	Sala debat
+140002	Kościół Kukułki
+140003	Sala szkolna
+150000	Malenia, Bogini Zgnilizny
+150001	Kaplica
+150002	Wewnętrzny mur Elphael
+150003	Kanał spustowy
+150004	Korzenie Świętego Drzewa
+150005	Promenada Świętego Drzewa
+150006	Korona Świętego Drzewa
+150007	Miasto Świętego Drzewa
+150008	Plac miejski Świętego Drzewa
+160000	Rykard, Pan Bluźnierstwa
+160001	Świątynia Eiglay
+160002	Wulkaniczny Dwór
+160003	Kościół miasta więziennego
+160004	Sala gościnna
+160005	Na audiencję
+160006	Dziewica-porywaczka
+160007	Podziemna sala tortur
+180000	Jaskinia Wiedzy
+180001	Opuszczone cmentarzysko
+190000	Roztrzaskana Marika
+300000	Przycmentarne katakumby
+300100	Katakumby Palownika
+300200	Katakumby Burzowego Podnóża
+300300	Katakumby u kresu drogi
+300400	Katakumby Mętnych Wód
+300500	Katakumby Czarnego Noża
+300600	Katakumby u stóp klifu
+300700	Katakumby Wyndham
+300800	Grobowiec wyświęconego bohatera
+300900	Grobowiec bohatera Gelmir
+301000	Grobowiec bohatera w Aurizie
+301100	Wyklęte katakumby
+301200	Szkaradne katakumby
+301300	Boczny grobowiec w Aurizie
+301400	Katakumby pomniejszego Złotego drzewa
+301500	Katakumby Caelid
+301600	Katakumby poległych
+301700	Grobowiec heroicznego pogromcy olbrzymów
+301800	Katakumby Szczytów Olbrzymów
+301900	Katakumby w uświęconej śnieżnej dolinie
+302000	Ukryta ścieżka do Świętego Drzewa
+310000	Pieczara Mętnych Wód
+310100	Wydrążona pieczara
+310200	Przycmentarna jaskinia
+310300	Jaskinia w zagajniku
+310400	Jaskinia Zatęchłych Wód
+310500	Kryształowa jaskinia przy jeziorze
+310600	Kryształowaj jaskinia Akademii
+310700	Pieczara Kipiących Wód
+310900	Jaskinia wulkaniczna
+311000	Pieczara w Smoczych Kurhanach
+311100	Selliańska kryjówka
+311200	Jaskinia porzuconych
+311500	Przybrzeżna jaskinia
+311700	Pieczara przy gościńcu
+311800	Grota Perfumiarza
+311900	Pieczara Mędrca
+312000	Opuszczona jaskinia
+312100	Podziemny loch
+312200	Jaskinia guseł
+320000	Tunel Morne
+320100	Tunele Pogrobna
+320200	Kryształowe tunele Rai Lucarii
+320400	Stary tunel Altus
+320500	Tunel Altus
+320700	Tunel Gael
+320701	Tylne wejście do tunelu Gael
+320800	Kryształowe tunele Sellii
+321100	Tunele Yelough Anix
+341000	Most do Boskiej Wieży Pogrobna
+341001	
+341002	Boska Wieża Pogrobna
+341100	Wejście do biblioteki
+341101	Most do wieży w Liurnii
+341102	Boska Wieża Liurnii
+341200	Boska Wieża zachodniego Altus
+341201	Zapieczętowany tunel
+341202	Boska Wieża zachodniego Altus: brama
+341300	Boska Wieża Caelid
+341301	Boska Wieża Caelid: podziemie
+341302	Boska Wieża Caelid: środek
+341400	Boska Wieża wschodniego Altus: brama
+341401	Boska Wieża wschodniego Altus
+341470	Szlak Rold
+341500	Odosobniona Boska Wieża
+350000	Katedra Zapomnianych
+350001	Boczna komnata
+350002	Zapomniane czeluści
+350003	Katakumby Leyndell
+350004	Proskrypcja Oszalałego Płomienia
+390000	Magmowy żmij Makar
+390001	Urwisko usiane ruinami
+390002	Widok z urwiska usianego ruinami
+392070	Prośba z Wulkanicznego Dworu: Tragoth
+450000	Koloseum Królewskie
+450100	Koloseum Pogrobna
+450200	Koloseum Caelid
+610000	Kościół Elleha
+610001	Szopa na Burzowym Wzgórzu
+610002	Szopa artysty
+610003	Trzeci kościół Mariki
+610004	Na zachód od Fortu Haighta
+610005	Jezioro Agheela (południe)
+610006	
+610007	Jezioro Agheela (północ)
+610008	Kościół Smoczej Komunii
+610009	Burzowa Brama
+610010	Ogród za mostem
+610011	Nadmorskie ruiny
+610012	Obrzeża Lasu Mgieł
+610013	Las Mgieł
+610014	Urwisko Mętnych Wód
+610015	Most Świętych
+610016	Obrzeża wioski w Wodach Przyzwania
+610017	Szopa Wojennego Mistrza
+610018	Piwniczka w ruinach stanicy
+610019	Pierwszy krok
+611000	Czwarty kościół Mariki
+611001	Mury obronne Zamku Morne
+611002	Okolica Przycmentarna
+611003	Na południe od strażnicy
+611004	Obrzeża udręczonej wioski
+611005	Obok polany usianej kraterami
+611006	Szopa odosobnionego kupca
+611007	Most Ofiarny
+611008	Winda Zamku Morne
+611009	Tyły zamku
+611010	Tylny dziedziniec przy celi
+611011	Zawodzący mogilnik Morne
+611012	Kościół Pielgrzymki
+620000	Klify z widokiem na jezioro
+620001	Brzeg jeziora Liurnii
+620002	Ruiny Laskyar
+620003	Malownicza wyspa
+620004	Podgrodzie Akademii
+620005	Główna brama Akademii
+620006	
+620007	
+620008	
+620009	
+620010	Wschodnia brama Rai Lucarii
+620011	Kościół Bellum
+620012	Wielka Winda Dectus
+620013	
+620014	
+620015	
+620016	
+620017	
+620018	
+620019	
+620020	Podnóże Czterech Dzwonnic
+620021	Wyspa Czarodzieja
+620022	Północny brzeg jeziora Liurnii
+620023	Droga do posiadłości
+620024	Główna brama Karyjskiej Posiadłości
+620025	
+620026	
+620027	
+620028	
+620029	
+620030	Szopa śpiącego wilka
+620031	Szopa gotowanej krewetki
+620032	Szopa artysty
+620033	Szopa mściciela
+620034	Altana pośrodku jeziora
+620035	Wioska albinauryków
+620036	Północ traktu Liurnii
+620037	Most do podgrodzia
+620038	Wschodni brzeg jeziora Liurnii
+620039	Kościół Przyrzeczeń
+620040	Zrujnowany labirynt
+620041	Teren mauzoleum
+620042	Cztery Dzwonnice
+620043	Wieża Ranni
+620044	Wioska w wąwozie
+620045	Piętro posiadłości
+620046	Parter posiadłości
+620047	Królewskie Obserwatorium
+620048	Północne podgrodzie
+620049	Wschodni płaskowyż
+620050	Wąwóz
+620051	Ruiny w jeziorze
+620052	Przebudowana wieża
+620053	Tyły Karyjskiej Posiadłości
+620054	Obrzeża Wioski Oszalałego Płomienia
+620055	Kościół Inhibicji
+620056	Dzielnica świątynna
+620057	Estakada wschodniej bramy
+620058	Krystaliczny Las
+620059	Południe traktu Liurnii
+620060	Słojogród
+620061	Południowa brama Rai Lucarii
+620062	Komnata Ranni
+621000	Ołtarz Blasku Księżyca
+621001	Katedra Manus Celes
+621002	Południowy Ołtarz
+630000	Wzgórze przy Złotym Drzewie
+630001	Wioska młynarzy
+630002	Kościół pomniejszego Złotego drzewa
+630003	Skrzyżowanie na trakcie Altus
+630004	Ścieżka przy murach
+630005	Szopa pustelniczego kupca
+630006	Ścieżka przy Drodze Nieprawości
+630007	Wielki most nad lasem
+630008	Porzucone sarkofagi
+630009	Płaskowyż Altus
+630010	Gaj obfitości
+630011	Iluzoryczne drzewo na obrzeżach stolicy
+630012	Pole bitwy na obrzeżach stolicy
+630013	Wzgórza młynarzy
+630014	Mury obronne stolicy
+630050	Sala kasztelana
+630051	Blanki Zamku Cieni
+630052	Wewnętrzna brama Zamku Cieni
+631000	Most Nieprawości
+631001	Dziewiąte obozowisko na górze Gelmir
+631002	Pierwsze obozowisko na górze Gelmir
+631003	Droga Nieprawości
+631004	Rzeka Kipiących Wód
+631005	Kraniec Kipiących Wód
+631006	Szopa rzemieślnika
+631007	Azur, pierwotny czarodziej
+640000	Niegasnący kościół
+640001	Krajobraz zgnilizny
+640002	Katedra Smoczej Komunii
+640003	Niegasnący mur
+640004	Głęboka studnia Siofry
+640005	Ruiny Caelem
+640006	Szopa odosobnionego kupca
+640007	Serce Aeonii
+640008	Selliański tron
+640009	Nieprzekraczalny wielki most
+640010	Plac Zamku Lwiej Grzywy
+640011	Komnata poza bramą
+640012	
+640013	Na północ od Fortu Gael
+640014	Radahn, Gwiezdna Plaga
+640015	Brzeg Aeonii
+640016	Południowy brzeg Aeonii
+640017	Schody do Sellii
+640018	Kościół Choroby
+640019	Południowy trakt Caelid
+640020	Zachodnie Smocze Kurhany
+640021	Fort Faroth
+640022	Rozstaje Smoczych Kurhanów
+640023	Wieża Lenne
+640024	Wielki most Farum
+640025	Sanktuarium Bestii
+640026	Ubocze północnego traktu Caelid
+640027	Bagno Aeonii
+640028	Środek Aeonii
+640029	Selliańskie zaułki
+650000	Zakazane Krainy
+650001	Ruiny Zamor
+650002	Pradawne ruiny w śnieżnej dolinie
+650003	Zamarznięte jezioro
+650004	Pierwszy kościół Mariki
+650005	Cmentarzysko olbrzymów
+650006	Kościół Wytchnienia
+650007	Podnóże Kuźni
+650008	Ognisty olbrzym
+650009	Kuźnia olbrzymów
+650010	Wielka Winda Rold
+650050	Biała grań
+650051	Widok na ruiny w śnieżnej dolinie
+650052	Brama główna Zamku Sol
+650053	Kościół Zaćmienia
+650054	Dach Zamku Sol
+651000	Uświęcona śnieżna dolina
+651001	Dno uświęconej śnieżnej doliny
+651002	Ordina, Liturgiczne Miasto
+651003	Apostackie ruiny
+6100300	Kościół Elleha
+6100301	Kościół Smoczej Komunii
+6100302	Trzeci kościół Mariki
+6100500	Ruiny w Lesie Mgieł
+6100501	Ruiny stanicy
+6100502	Ruiny smoczego pogorzeliska
+6100503	Ruiny przed bramą
+6100504	Wioska w Wodach Przyzwania
+6100600	Szopa artysty
+6100601	Szopa Wojennego Mistrza
+6100602	Szopa na Burzowym Wzgórzu
+6100900	Wieczne więzienie rycerza bez pana
+6100901	Wieczne więzienie Burzowego Wzgórza
+6101000	Burzowa Brama
+6101100	Most Ofiarny
+6101500	Studnia rzeki Siofra
+6101800	Fort Haighta
+6103000	Pomniejsze Złote drzewo
+6108100	Jezioro Agheela
+6108700	Brama teleportacyjna
+6108701	Prośba z Wulkanicznego Dworu: Istvan
+6108702	Krater upadłej gwiazdy 
+6110300	Czwarty kościół Mariki
+6110301	Kościół Pielgrzymki
+6110302	Baptysterium w Callu
+6110500	Ruiny Zguby
+6110501	Przycmentarne ruiny
+6110502	Leśne ruiny półludzi
+6110600	Szopa odosobnionego kupca
+6110700	Udręczona wioska
+6110800	Strażnica w lesie
+6110801	Wieża Powrotu
+6110900	Wieczne więzienie lamentu
+6111700	Wieża Oridysa
+6112500	Zamek Morne
+6113000	Pomniejsze Złote drzewo
+6120000	Zamek Burzowego Całunu
+6200000	Ruiny pałacu Uld
+6200001	Trzy siostry
+6200300	Kościół Irith
+6200301	Kościół Przyrzeczeń
+6200302	Różany Kościół
+6200303	Kościół Bellum
+6200304	Kościół Inhibicji
+6200500	Oczyszczone ruiny
+6200501	Królewskie ruiny
+6200502	Ruiny Laskyar
+6200600	Szopa śpiącego wilka
+6200601	Szopa gotowanej krewetki
+6200602	Szopa artysty
+6200603	Szopa mściciela
+6200700	Wioska albinauryków
+6200701	Wioska Oszalałego Płomienia
+6200702	Słojogród
+6200800	Przydrożna strażnica
+6200801	Wieża Oszalałego Płomienia
+6200900	Wieczne więzienie złoczyńcy
+6200901	Kukułcze wieczne więzienie
+6200902	Wieczne więzienie królewskiego grobu
+6201500	Studnia rzeki Ainsel
+6201700	Przebudowana wieża
+6201701	Wieża Testu
+6201702	Wieża Seluvisa
+6201703	Wieża Ranni
+6201704	Wieża Renny
+6201705	Przebudowana wieża na pograniczu
+6202600	Karyjska Posiadłość
+6203000	Pomniejsze Złote drzewo
+6203001	Pomniejsze Złote drzewo
+6203200	Podgrodzie Akademii
+6203201	Dzielnica świątynna
+6205200	Cztery Dzwonnice
+6210300	Katedra Manus Celes
+6210500	Ruiny Księżycowego Ludu
+6210501	Ruiny Księżycowej Posiadłości
+6210900	Wieczne więzienie przywódcy
+6211500	Głęboka studnia Ainsel
+6211700	Wieża Chelony
+6220000	Akademia Rai Lucarii
+6300001	
+6300300	Kościół Władcy Burz
+6300301	Drugi kościół Mariki
+6300302	Kościół pomniejszego Złotego drzewa
+6300500	Ruiny warowni Leśnego Ludu
+6300501	Ruiny Lux
+6300502	Ruiny Perfumiarza
+6300503	Krwawe ruiny
+6300600	Kryjówka św. Triny
+6300601	Szopa pustelniczego kupca
+6300602	
+6300603	
+6300604	
+6300605	
+6300700	Dominula, wioska młynarzy
+6300800	Przydrożna strażnica
+6300900	Wieczne więzienie złotego rodu
+6301000	Obrzeża stolicy
+6301300	Ruiny warowni Leśnego Ludu
+6301700	Wieża mirażu
+6301900	Zachodnie pastwisko Dominuli
+6301901	Wschodnie pastwisko Dominuli
+6301902	Pastwisko przy Dominuli
+6301903	Punkt kontrolny w Dominuli
+6302100	Wielka Winda Dectus
+6302700	Zamek Cieni
+6303000	Pomniejsze Złote drzewo
+6303001	Pomniejsze Złote drzewo
+6308700	Prośba z Wulkanicznego Dworu: Rileigh
+6310500	
+6310501	Ruiny Wyndham
+6310600	Szopa trupiego odoru
+6310601	Szopa pustelnika
+6310602	
+6310603	
+6310604	Szopa rzemieślnika
+6310700	Odosobniona wioska
+6311000	Leyndell, królewska stolica
+6311800	Fort Laiedd
+6313000	Pomniejsze Złote drzewo
+6316000	Wulkaniczny Dwór
+6400000	Zawodzące Wydmy
+6400300	Niegasnący kościół
+6400301	Katedra Smoczej Komunii
+6400302	Kościół Choroby
+6400500	Zapomniane ruiny
+6400501	Ruiny stanicy w Caelid
+6400502	Ruiny ulicy Mędrców
+6400503	Ruiny Caelem
+6400600	Szopa skażonych zgnilizną
+6400601	Szopa Gowry’ego
+6400800	Strażnica na bagnach
+6401000	Brama do Sellii
+6401500	Głęboka studnia Siofry
+6401800	Fort Gael
+6401801	
+6402800	Zamek Lwiej Grzywy
+6403000	Pomniejsze Złote drzewo
+6403001	Pomniejsze Złote drzewo
+6403300	Sellia, Miasto Magii
+6410600	Szopa odosobnionego kupca
+6410900	Selliańskie wieczne więzienie
+6411700	Wieża Lenne
+6411800	Fort Faroth
+6413000	Pomniejsze Złote drzewo
+6415400	Sanktuarium Bestii
+6500300	Pierwszy kościół Mariki
+6500301	Kościół Wytchnienia
+6500500	Ruiny Zamor
+6500501	Ruiny astrologów
+6500600	Szopa olbrzymów
+6500900	Wieczne więzienie pretendenta
+6501700	Wieża herezji
+6501800	Warownia strażników
+6502100	Wielka Winda Rold
+6502900	Zamek Sol
+6503000	Pomniejsze Złote drzewo
+6505700	Kuźnia olbrzymów
+6508700	Wielka Winda Rold
+6508701	Prośba z Wulkanicznego Dworu: Juno Hoslow
+6510300	Apostackie ruiny
+6510500	Ruiny Yelough Anix
+6511700	Wieża albinauryków
+6513000	Pomniejsze Złote drzewo
+6513400	Ordina, Liturgiczne Miasto
+6515000	Elphael, Podpora Świętego Drzewa
+6515500	Święte Drzewo Miquelli
+6515600	Elphael, Podpora Świętego Drzewa
+6604700	Ruiny pałacu Uhl
+6614600	Nokstella, Wieczne Miasto
+6614700	Wielki Klasztor
+6614701	Ruiny pałacu Uhl
+6654600	Nokron, Wieczne Miasto
+6654601	Święta Ziemia Nocy
+6654602	Akwedukt Siofra
+6654603	
+6654604	Świątynia Poroża
+6664500	Mauzoleum dynastii Mohgwynów
+8000000	Pogrobno
+8000400	Jeziorna Liurnia
+8000800	Płaskowyż Altus
+8000900	Caelid
+8001200	Szczyty Olbrzymów
+8010000	Rzeka Ainsel
+8010200	Rzeka Siofra
+8010400	Głębiny
+8100001	Region Pogrobna
+90000000	

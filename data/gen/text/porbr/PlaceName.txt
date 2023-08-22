@@ -1,0 +1,1049 @@
+10000	Castelo Tempesvéu
+10001	
+10002	
+10003	
+10004	
+10005	
+10006	
+10007	
+10008	
+10009	
+10010	Capela da Antecipação
+11000	Leyndell, Capital Real
+11050	Leyndell, Capital Cinzenta
+11100	Mesa-Redonda
+12010	Rio Ainsel, Principal
+12011	Lago da Podridão
+12012	Rio Ainsel
+12013	
+12014	
+12015	
+12016	
+12017	
+12018	
+12019	
+12020	Nokron, Cidade Eterna
+12021	
+12022	
+12023	
+12024	
+12025	
+12026	
+12027	
+12028	
+12029	
+12030	Abismos da Raiz Profunda
+12050	Palácio de Mohgwyn
+12070	Rio Siofra
+13000	Ruína de Farum Azula
+14000	Academia de Raya Lucaria
+15000	Elphael, Suporte da Árvore Sacra
+15001	Árvore Sacra de Miquella
+16000	Mansão Vulcânica
+18000	Cemitério à Deriva
+18001	Tumba do Herói da Periferia
+19000	Plataforma de Pedra
+30000	Catacumbas da Ala do Mausoléu
+30001	
+30002	
+30003	
+30004	
+30005	
+30006	
+30007	
+30008	
+30009	
+30010	Catacumbas do Empalador
+30011	
+30012	
+30013	
+30014	
+30015	
+30016	
+30017	
+30018	
+30019	
+30020	Catacumbas Intempéries
+30021	
+30022	
+30023	
+30024	
+30025	
+30026	
+30027	
+30028	
+30029	
+30030	Catacumbas do Fim da Estrada
+30031	
+30032	
+30033	
+30034	
+30035	
+30036	
+30037	
+30038	
+30039	
+30040	Catacumbas Turváguas
+30041	
+30042	
+30043	
+30044	
+30045	
+30046	
+30047	
+30048	
+30049	
+30050	Catacumbas das Facas Negras
+30051	
+30052	
+30053	
+30054	
+30055	
+30056	
+30057	
+30058	
+30059	
+30060	Catacumbas do Fundo do Penhasco
+30061	
+30062	
+30063	
+30064	
+30065	
+30066	
+30067	
+30068	
+30069	
+30070	Catacumbas de Wyndham
+30071	
+30072	
+30073	
+30074	
+30075	
+30076	
+30077	
+30078	
+30079	
+30080	Túmulo do Herói Consagrado
+30081	
+30082	
+30083	
+30084	
+30085	
+30086	
+30087	
+30088	
+30089	
+30090	Túmulo do Herói de Gelmir
+30091	
+30092	
+30093	
+30094	
+30095	
+30096	
+30097	
+30098	
+30099	
+30100	Túmulo do Herói de Auriza
+30101	
+30102	
+30103	
+30104	
+30105	
+30106	
+30107	
+30108	
+30109	
+30110	Catacumbas Toque da Morte
+30111	
+30112	
+30113	
+30114	
+30115	
+30116	
+30117	
+30118	
+30119	
+30120	Catacumbas Repulsivas
+30121	
+30122	
+30123	
+30124	
+30125	
+30126	
+30127	
+30128	
+30129	
+30130	Túmulo Auxiliar de Auriza
+30131	
+30132	
+30133	
+30134	
+30135	
+30136	
+30137	
+30138	
+30139	
+30140	Catacumbas da Térvore Menor
+30141	
+30142	
+30143	
+30144	
+30145	
+30146	
+30147	
+30148	
+30149	
+30150	Catacumbas de Caelid
+30151	
+30152	
+30153	
+30154	
+30155	
+30156	
+30157	
+30158	
+30159	
+30160	Catacumbas dos Mortos de Guerra
+30161	
+30162	
+30163	
+30164	
+30165	
+30166	
+30167	
+30168	
+30169	
+30170	Túmulo do Herói Conquistador de Gigantes
+30171	
+30172	
+30173	
+30174	
+30175	
+30176	
+30177	
+30178	
+30179	
+30180	Catacumbas da Montanha dos Gigantes
+30181	
+30182	
+30183	
+30184	
+30185	
+30186	
+30187	
+30188	
+30189	
+30190	Catacumbas do Campo de Neve Consagrado
+30191	
+30192	
+30193	
+30194	
+30195	
+30196	
+30197	
+30198	
+30199	
+30200	Caminho Oculto para a Árvore Sacra
+31000	Cavernas Turváguas
+31001	
+31002	
+31003	
+31004	
+31005	
+31006	
+31007	
+31008	
+31009	
+31010	Cavernas do Túnel de Terra
+31011	
+31012	
+31013	
+31014	
+31015	
+31016	
+31017	
+31018	
+31019	
+31020	Cavernas da Ala do Mausoléu
+31021	
+31022	
+31023	
+31024	
+31025	
+31026	
+31027	
+31028	
+31029	
+31030	Caverna do Arvoredo
+31031	
+31032	
+31033	
+31034	
+31035	
+31036	
+31037	
+31038	
+31039	
+31040	Caverna da Água Parada
+31041	
+31042	
+31043	
+31044	
+31045	
+31046	
+31047	
+31048	
+31049	
+31050	Caverna de Cristal do Lago
+31051	
+31052	
+31053	
+31054	
+31055	
+31056	
+31057	
+31058	
+31059	
+31060	Caverna de Cristal da Academia
+31061	
+31062	
+31063	
+31064	
+31065	
+31066	
+31067	
+31068	
+31069	
+31070	Cavernas das Águas Ferventes
+31090	Cavernas dos Semi-Humanos
+31091	
+31092	
+31093	
+31094	
+31095	
+31096	
+31097	
+31098	
+31099	
+31100	Cavernas da Fenda do Dragão
+31101	
+31102	
+31103	
+31104	
+31105	
+31106	
+31107	
+31108	
+31109	
+31110	Esconderijo de Sellia
+31111	
+31112	
+31113	
+31114	
+31115	
+31116	
+31117	
+31118	
+31119	
+31120	Caverna dos Desamparados
+31150	Caverna do Passe do Dragão
+31170	Cavernas da Estrada Principal
+31171	
+31172	
+31173	
+31174	
+31175	
+31176	
+31177	
+31178	
+31179	
+31180	Gruta do Perfumista
+31181	
+31182	
+31183	
+31184	
+31185	
+31186	
+31187	
+31188	
+31189	
+31190	Cavernas do Sábio
+31191	
+31192	
+31193	
+31194	
+31195	
+31196	
+31197	
+31198	
+31199	
+31200	Caverna Abandonada
+31201	
+31202	
+31203	
+31204	
+31205	
+31206	
+31207	
+31208	
+31209	
+31210	Cavernas do Cárcere
+31211	
+31212	
+31213	
+31214	
+31215	
+31216	
+31217	
+31218	
+31219	
+31220	Caverna do Invocador de Espíritos
+32000	Túnel Morne
+32001	
+32002	
+32003	
+32004	
+32005	
+32006	
+32007	
+32008	
+32009	
+32010	Túneis de Limgrave
+32011	
+32012	
+32013	
+32014	
+32015	
+32016	
+32017	
+32018	
+32019	
+32020	Túnel de Pedrilhante de Raya Lucaria
+32040	Antigo Túnel Altus
+32041	
+32042	
+32043	
+32044	
+32045	
+32046	
+32047	
+32048	
+32049	
+32050	Túnel Altus
+32070	Túnel Gael
+32071	
+32072	
+32073	
+32074	
+32075	
+32076	
+32077	
+32078	
+32079	
+32080	Túnel de Pedrilhante de Sellia
+32110	Túnel de Yelough Anix
+34100	Torre Divina de Limgrave
+34101	
+34102	
+34103	
+34104	
+34105	
+34106	
+34107	
+34108	
+34109	
+34110	Salão de Estudos Cariano
+34111	Torre Divina de Liurnia
+34112	
+34113	
+34114	
+34115	
+34116	
+34117	
+34118	
+34119	
+34120	Túnel Lacrado
+34121	Torre Divina de Altus Oeste
+34122	
+34123	
+34124	
+34125	
+34126	
+34127	
+34128	
+34129	
+34130	Torre Divina de Caelid
+34131	
+34132	
+34133	
+34134	
+34135	
+34136	
+34137	
+34138	
+34139	
+34140	Torre Divina de Altus Leste
+34141	
+34142	
+34143	
+34144	
+34145	
+34146	
+34147	
+34148	
+34149	
+34150	Torre Divina Isolada
+35000	Campos Subterrâneos de Reclusão
+35001	
+35002	Catacumbas de Leyndell
+39200	Precipício Pontilhado de Ruínas
+61000	Limgrave
+61001	Colina da Tormenta
+61002	Península das Lágrimas
+62000	Liurnia dos Lagos
+62001	Estrada Bellum
+62002	Altar do Luar
+63000	Platô Altus
+63001	Monte Gelmir
+63002	Arredores da Capital
+63003	Terras Proibidas
+64000	Caelid
+64001	Fenda da Dragoa Greyoll
+64002	Pântano de Aeonia
+65000	Montanha dos Gigantes
+65001	Pico da Chama
+65002	Campo de Neve Consagrado
+100000	Godrick, o Enxertado
+100001	Margit, o Agouro Caído
+100002	Túnel ao Castelo
+100003	Câmara Lateral do Portão
+100004	Penhasco de Tempesvéu
+100005	Torre do Forte
+100006	Câmara da Lateral do Elevador
+100007	Cela Isolada
+100008	Portão Principal de Tempesvéu
+110000	Trono Prístino
+110001	Santuário da Térvore
+110002	Forte Leste da Capital
+110003	Igreja da Baixa Capital
+110004	Varanda da Avenida
+110005	Forte Oeste da Capital
+110006	
+110007	Quarto da Rainha
+110008	Mansão Fortificada, Primeiro Andar
+110009	Ponte Divina
+110070	Pedido da Mansão Vulcânica: Vargram
+110500	Trono Prístino
+110501	Santuário da Térvore
+110502	Forte Leste da Capital
+110503	Leyndell, Capital das Cinzas
+110504	Quarto da Rainha
+110505	Ponte Divina
+111000	Mesa da Graça Perdida
+120100	Soldado Draconiano de Nokstella
+120101	Profundezas do Poço do Rio Ainsel
+120102	Comporta do Rio Ainsel
+120103	Parte Baixa do Rio Ainsel
+120104	Rio Ainsel, Principal
+120105	Nokstella, Cidade Eterna
+120106	Margem do Lago da Podridão
+120107	Lago da Podridão
+120108	Grande Claustro
+120109	Nokstella Ponta Sul
+120200	Lago da Grande Cachoeira
+120201	Lágrima Imitadora
+120202	
+120203	Margem do Rio Siofra
+120204	Floresta dos Idólatras
+120205	
+120206	Floresta Ancestral
+120207	Penhascos da Vista do Aqueduto
+120208	Campo Noturno Sagrado
+120209	Abaixo do Poço
+120300	Trono do Príncipe da Morte
+120301	Penhascos da Vista da Raiz
+120302	Topo da Grande Cachoeira
+120303	Abismos da Raiz Profunda
+120304	A Cidade Eterna Sem Nome
+120305	Passagem das Raízes
+120400	Astel, Filho Natural da Escuridão
+120500	Casulo do Empíreo
+120501	Estrada do Penhasco para Chegar ao Palácio
+120502	Entrada do Mausoléu da Dinastia
+120503	Ponto Central do Mausoléu da Dinastia
+120700	Profundezas do Poço do Rio Siofra
+120701	Nokron, Cidade Eterna
+130000	Maliketh, a Lâmina Negra
+130001	Placidusax, o Lorde Dragão
+130002	Altar do Templo do Dragão
+130003	Túmulo da Fera Decadente
+130004	Profundezas do Túmulo da Fera Decadente
+130005	Varanda em Frente à Tempestade
+130006	Templo do Dragão
+130007	Transepto do Templo do Dragão
+130008	Elevador do Templo do Dragão
+130009	Terraço do Templo do Dragão
+130010	Lateral da Grande Ponte
+140000	Grande Biblioteca de Raya Lucaria
+140001	Salão de Debates
+140002	Igreja do Cuco
+140003	Sala de Aula da Escola
+150000	Malenia, Deusa da Podridão
+150001	Sala de Orações
+150002	Interior da Muralha de Elphael
+150003	Canal de Drenagem
+150004	Raízes da Árvore Sacra
+150005	Esplanada da Sentinela Arbórea
+150006	Copa da Árvore Sacra
+150007	Cidade da Árvore Sacra
+150008	Praça da Cidade da Árvore Sacra
+160000	Rykard, Lorde Blasfemo
+160001	Templo de Eiglay
+160002	Mansão Vulcânica
+160003	Igreja do Distrito Carcerário
+160004	Saguão de Convidados
+160005	Caminho da Audiência
+160006	Donzela Sequestradora
+160007	Câmara de Inquisição Subterrânea
+180000	Gruta da Sabedoria
+180001	Cemitério à Deriva
+190000	Marika Quebrada
+300000	Catacumbas da Ala do Mausoléu
+300100	Catacumbas do Empalador
+300200	Catacumbas Intempéries
+300300	Catacumbas do Fim da Estrada
+300400	Catacumbas Turváguas
+300500	Catacumbas das Facas Negras
+300600	Catacumbas do Fundo do Penhasco
+300700	Catacumbas de Wyndham
+300800	Túmulo do Herói Consagrado
+300900	Túmulo do Herói de Gelmir
+301000	Túmulo do Herói de Auriza
+301100	Catacumbas Toque da Morte
+301200	Catacumbas Repulsivas
+301300	Túmulo Auxiliar de Auriza
+301400	Catacumbas da Térvore Menor
+301500	Catacumbas de Caelid
+301600	Catacumbas dos Mortos de Guerra
+301700	Túmulo do Herói Conquistador de Gigantes
+301800	Catacumbas da Montanha
+301900	Catacumbas do Campo de Neve Consagrado
+302000	Caminho Oculto para a Árvore Sacra
+310000	Cavernas da Ala do Mausoléu
+310100	Cavernas do Túnel de Terra
+310200	Cavernas da Ala do Mausoléu
+310300	Caverna do Arvoredo
+310400	Caverna da Água Parada
+310500	Caverna de Cristal do Lago
+310600	Caverna de Cristal da Academia
+310700	Cavernas das Águas Ferventes
+310900	Cavernas dos Semi-Humanos
+311000	Cavernas da Fenda do Dragão
+311100	Esconderijo de Sellia
+311200	Caverna dos Desamparados
+311500	Gruta da Passagem do Dragão
+311700	Cavernas da Estrada Principal
+311800	Gruta do Perfumista
+311900	Cavernas do Sábio
+312000	Caverna Abandonada
+312100	Cavernas do Cárcere
+312200	Caverna do Invocador de Espíritos
+320000	Túnel Morne
+320100	Túneis de Limgrave
+320200	Túnel de Pedrilhante de Raya Lucaria
+320400	Antigo Túnel Altus
+320500	Túnel Altus
+320700	Túnel Gael
+320701	Entrada dos Fundos do Túnel Gael
+320800	Túnel de Pedrilhante de Sellia
+321100	Túnel de Yelough Anix
+341000	Ponte da Torre de Limgrave
+341001	
+341002	Torre Divina de Limgrave
+341100	Saguão de Entrada do Escritório
+341101	Ponte da Torre de Liurnia
+341102	Torre Divina de Liurnia
+341200	Torre Divina de Altus Oeste
+341201	Túnel Lacrado
+341202	Torre Divina de Altus Oeste: Portão
+341300	Torre Divina de Caelid
+341301	Torre Divina de Caelid: Porão
+341302	Torre Divina de Caelid: Centro
+341400	Selo da Torre Divina
+341401	Torre Divina de Altus Leste
+341470	A Rota dos Rolds
+341500	Torre Divina Isolada
+350000	Catedral dos Abandonados
+350001	Beira da Estrada Subterrânea
+350002	Profundezas Abandonadas
+350003	Catacumbas de Leyndell
+350004	Interdição da Chama Frenética
+390000	Wyrm de Magma de Makar
+390001	Ruína do Penhasco
+390002	Vista das Ruínas do Penhasco
+392070	Pedido da Mansão Vulcânica: Tragoth
+450000	Coliseu Real
+450100	Coliseu de Limgrave
+450200	Coliseu de Caelid
+610000	Igreja de Elleh
+610001	Cabana da Colina da Tormenta
+610002	Cabana do Artista
+610003	Terceira Igreja de Marika
+610004	Forte Haight - Oeste
+610005	Lago Agheel - Sul
+610006	
+610007	Lago Agheel - Norte
+610008	Igreja da Comunhão do Dragão
+610009	Frente do Portão
+610010	Jardim Além da Ponte
+610011	Ruínas à Beira-Mar
+610012	Arredores da Floresta Nebulosa
+610013	Floresta Nebulosa
+610014	Costa de Turváguas
+610015	Ponte dos Santos
+610016	Arredores do Vilarejo das Águas Despertas
+610017	Cabana do Mestre da Guerra
+610018	Porão Arruinado
+610019	O Primeiro Passo
+611000	Quarta Igreja de Marika
+611001	Forte do Castelo Morne
+611002	Ala do Mausoléu
+611003	Sul da Torre de Vigia
+611004	Arredores do Vilarejo Isolado
+611005	Campo Perfurado
+611006	Cabana do Mercador Ascético
+611007	Ponte do Sacrifício
+611008	Elevador do Castelo Morne
+611009	Fundos do Castelo
+611010	Cárcere do Forte
+611011	Túmulo dos Lamentos de Morne
+611012	Igreja da Peregrinação
+620000	Penhascos da Vista do Lago
+620001	Margem do Lago de Liurnia
+620002	Ruínas de Laskyar
+620003	Ilha da Boa Vista
+620004	Cidade do Portão da Academia
+620005	Portão Principal da Academia
+620006	
+620007	
+620008	
+620009	
+620010	Portão Leste de Raya Lucaria
+620011	Igreja Bellum
+620012	Grande Elevador de Dectus
+620013	
+620014	
+620015	
+620016	
+620017	
+620018	
+620019	
+620020	Pés dos Quatro Campanários
+620021	Ilha do Feiticeiro
+620022	Margem Norte do Lago de Liurnia
+620023	Estrada para a Mansão
+620024	Portão Principal da Mansão de Caria
+620025	
+620026	
+620027	
+620028	
+620029	
+620030	Cabana do Sono do Lobo
+620031	Cabana do Camarão Cozido
+620032	Cabana do Artista
+620033	Cabana do Vingador
+620034	Gazebo no Lago
+620035	Vilarejo dos Albináuricos
+620036	Estrada de Liurnia - Norte
+620037	Ponte da Cidade do Portão
+620038	Margem Leste do Lago de Liurnia
+620039	Igreja dos Votos
+620040	Labirinto Arruinado
+620041	Complexo de Mausoléus
+620042	Os Quatro Campanários
+620043	Torre Pedrilhante de Ranni
+620044	Vilarejo Oculto da Ravina
+620045	Nível Superior da Mansão
+620046	Nível Inferior da Mansão
+620047	Observatório Real
+620048	Norte da Cidade do Portão
+620049	Planalto Leste
+620050	A Ravina
+620051	Ruínas do Lago Caído
+620052	Torre do Prosélito
+620053	Fundos da Mansão de Caria
+620054	Arredores do Vilarejo da Chama Frenética
+620055	Igreja da Inibição
+620056	Quadra do Templo
+620057	Suportes da Ponte do Portão Leste
+620058	Floresta Cristalina
+620059	Estrada de Liurnia - Sul
+620060	Jarrosburgo
+620061	Portão Sul de Raya Lucaria
+620062	Câmara de Ranni
+621000	Altar do Luar
+621001	Catedral de Manus Celes
+621002	Altar Sul
+630000	Colina com Vista para a Térvore
+630001	Vilarejo do Moinho de Vento
+630002	Igreja da Térvore Menor
+630003	Entroncamento da Estrada de Altus
+630004	Caminho da Lateral do Forte
+630005	Cabana do Mercador Eremita
+630006	Caminho Lateral da Estrada da Iniquidade
+630007	Grande Ponte que Atravessa a Floresta
+630008	Caixão Abandonado
+630009	Platô Altus
+630010	Floresta da Abundância
+630011	Bosque Espectral da Muralha Externa
+630012	Campo de Batalha da Muralha Externa
+630013	Altos do Moinho de Vento
+630014	Forte da Capital
+630050	Saguão do Castelão
+630051	Forte do Castelo Sombreado
+630052	Portão Interno do Castelo Sombreado
+631000	Ponte da Iniquidade
+631001	Nono Acampamento do Monte Gelmir
+631002	Primeiro Acampamento do Monte Gelmir
+631003	Estrada da Iniquidade
+631004	Rio das Águas Ferventes
+631005	Foz das Águas Ferventes
+631006	Cabana do Artesão
+631007	Feiticeiro Primevo Azur
+640000	Igreja Fumegante
+640001	Varanda da Vista Pútrida
+640002	Catedral da Comunhão do Dragão
+640003	Muralha Fumegante
+640004	Poço do Fundo do Siofra
+640005	Ruínas de Caelem
+640006	Cabana do Mercador Ascético
+640007	Coração de Aeonia
+640008	Cripta-Trono de Sellia
+640009	Grande Ponte Intransponível
+640010	Praça do Castelo da Juba Vermelha
+640011	Cela Isolada
+640012	
+640013	Norte do Forte Gael
+640014	Flagelo Estelar Radahn
+640015	Margem do Pântano de Aeonia
+640016	Margem Sul do Pântano de Aeonia
+640017	Abaixo das Escadas de Sellia
+640018	Igreja da Praga
+640019	Estrada de Caelid - Sul
+640020	Oeste da Fenda do Dragão
+640021	Forte Faroth
+640022	Bifurcação da Fenda do Dragão
+640023	Torre Pedrilhante de Lenne
+640024	Grande Ponte de Farum
+640025	Santuário Bestial
+640026	Estrada de Caelid - Norte, Desvio do Caminho
+640027	Pântano de Aeonia
+640028	Interior de Aeonia
+640029	Ruelas de Sellia
+650000	Terras Proibidas
+650001	Ruínas de Zamor
+650002	Antigo Vale da Neve
+650003	Lago Congelante
+650004	Primeira Igreja de Marika
+650005	Lápide do Gigante
+650006	Igreja do Repouso
+650007	Base da Forja
+650008	Gigante de Fogo
+650009	Forja dos Gigantes
+650010	Grande Elevador dos Rolds
+650050	Estrada do Cerro Branco
+650051	Penhasco do Vale das Ruínas
+650052	Portão Principal do Castelo Sol
+650053	Igreja do Eclipse
+650054	Terraço do Castelo Sol
+651000	Campo de Neve Consagrado
+651001	Campo de Neve Consagrado Interno
+651002	Ordina, Cidade Sacramental
+651003	Casa Abandonada do Apóstata
+6100300	Igreja de Elleh
+6100301	Igreja da Comunhão do Dragão
+6100302	Terceira Igreja de Marika
+6100500	Ruínas da Floresta Nebulosa
+6100501	Ruínas do Ponto de Paragem
+6100502	Ruínas Queimadas por Dragão
+6100503	Ruínas em Frente ao Portão
+6100504	Vilarejo das Águas Despertas
+6100600	Cabana do Artista
+6100601	Cabana do Mestre da Guerra
+6100602	Cabana da Colina da Tormenta
+6100900	Cárcere Perpétuo do Cão Abandonado
+6100901	Cárcere Perpétuo da Colina da Tormenta
+6101000	Portão da Tempestade
+6101100	Ponte do Sacrifício
+6101500	Poço do Rio Siofra
+6101800	Forte Haight
+6103000	Térvore Menor
+6108100	Lago Agheel
+6108700	Portão de Envio
+6108701	Pedido da Mansão Vulcânica: Istvan
+6108702	Cratera da Estrela Cadente
+6110300	Quarta Igreja de Marika
+6110301	Igreja da Peregrinação
+6110302	Igreja de Batismo de Callu
+6110500	Ruínas da Perdição da Bruxa
+6110501	Ruínas da Ala do Mausoléu
+6110502	Ruínas da Floresta dos Semi-Humanos
+6110600	Cabana do Mercador Ascético
+6110700	Vilarejo Isolado de Callu
+6110800	Torre de Vigia da Floresta
+6110801	Torre do Retorno
+6110900	Cárcere Perpétuo dos Lamentos
+6111700	Torre Pedrilhante de Oridys
+6112500	Castelo Morne
+6113000	Térvore Menor
+6120000	Castelo Tempesvéu
+6200000	Ruínas do Palácio Uld
+6200001	Três Irmãs
+6200300	Igreja de Irith
+6200301	Igreja dos Votos
+6200302	Igreja da Rosa
+6200303	Igreja Bellum
+6200304	Igreja da Inibição
+6200500	Ruínas Purificadas
+6200501	Ruínas do Território Real
+6200502	Ruínas de Laskyar
+6200600	Cabana do Sono do Lobo
+6200601	Cabana do Camarão Cozido
+6200602	Cabana do Artista
+6200603	Cabana do Vingador
+6200700	Vilarejo dos Albináuricos
+6200701	Vilarejo da Chama Frenética
+6200702	Jarrosburgo
+6200800	Torre de Vigia da Estrada
+6200801	Torre da Chama Frenética
+6200900	Cárcere Perpétuo dos Malfeitores
+6200901	Cárcere Perpétuo do Cuco
+6200902	Cárcere Perpétuo do Túmulo Real
+6201500	Poço do Rio Ainsel
+6201700	Torre do Prosélito
+6201701	Torre Pedrilhante de Testu
+6201702	Torre Pedrilhante de Seluvis
+6201703	Torre Pedrilhante de Ranni
+6201704	Torre Pedrilhante de Renna
+6201705	Pináculo do Prosélito
+6202600	Mansão de Caria
+6203000	Térvore Menor
+6203001	Térvore Menor
+6203200	Cidade do Portão da Academia
+6203201	Quadra do Templo
+6205200	Os Quatro Campanários
+6210300	Catedral de Manus Celes
+6210500	Ruínas do Povo Lunar
+6210501	Ruínas da Regência Lunar
+6210900	Cárcere Perpétuo da Lâmina Longa
+6211500	Poço Fundo do Ainsel
+6211700	Torre Pedrilhante de Chelona
+6220000	Academia de Raya Lucaria
+6300001	
+6300300	Igreja do Invocador da Tempestade
+6300301	Segunda Igreja de Marika
+6300302	Igreja da Térvore Menor
+6300500	Ruínas do Povo do Bosque
+6300501	Ruínas de Lux
+6300502	Ruínas do Perfumista
+6300503	Ruínas do Sangue Exaltado
+6300600	Esconderijo de Sta. Trina
+6300601	Cabana do Mercador Eremita
+6300602	
+6300603	
+6300604	
+6300605	
+6300700	Dominula, Vilarejo do Moinho de Vento
+6300800	Torre de Vigia da Estrada
+6300900	Cárcere Perpétuo da Linhagem Dourada
+6301000	Arredores da Capital
+6301300	Ruínas do Povo do Bosque
+6301700	Torre Pedrilhante da Miragem
+6301900	Pasto a Oeste do Moinho de Vento
+6301901	Pasto a Leste do Moinho de Vento
+6301902	Pasto do Vilarejo do Moinho de Vento
+6301903	Ponto de Controle de Dominula
+6302100	Grande Elevador de Dectus
+6302700	O Castelo Sombreado
+6303000	Térvore Menor
+6303001	Térvore Menor
+6308700	Pedido da Mansão Vulcânica: Rileigh
+6310500	
+6310501	Ruínas de Wyndham
+6310600	Cabana do Rendido
+6310601	Cabana do Eremita
+6310602	
+6310603	
+6310604	Cabana do Artesão
+6310700	Vilarejo do Eremita
+6311000	Leyndell, Capital Real
+6311800	Forte Laiedd
+6313000	Térvore Menor
+6316000	Mansão Vulcânica
+6400000	Dunas dos Lamentos
+6400300	Igreja Fumegante
+6400301	Catedral da Comunhão do Dragão
+6400302	Igreja da Praga
+6400500	Ruínas Abandonadas
+6400501	Ruínas do Ponto de Paragem de Caelid
+6400502	Ruínas da Rua dos Sábios
+6400503	Ruínas de Caelem
+6400600	Cabana Tomada Pela Praga
+6400601	Cabana de Gowry
+6400800	Torre de Vigia do Pântano
+6401000	Entrada de Sellia
+6401500	Poço do Fundo do Siofra
+6401800	Forte Gael
+6401801	
+6402800	Castelo da Juba Vermelha
+6403000	Térvore Menor
+6403001	Térvore Menor
+6403300	Sellia, Cidade da Feitiçaria
+6410600	Cabana do Mercador Ascético
+6410900	Cárcere Perpétuo de Sellia
+6411700	Torre Pedrilhante de Lenne
+6411800	Forte Faroth
+6413000	Térvore Menor
+6415400	Santuário Bestial
+6500300	Primeira Igreja de Marika
+6500301	Igreja do Repouso
+6500500	Ruínas de Zamor
+6500501	Ruínas do Observador de Estrelas
+6500600	Cabana do Herói Enlouquecido Pela Guerra
+6500900	Cárcere Perpétuo do Lorde Competidor
+6501700	Torre Pedrilhante Herética
+6501800	Guarnição dos Guardiões
+6502100	Grande Elevador dos Rolds
+6502900	Castelo Sol
+6503000	Térvore Menor
+6505700	Forja dos Gigantes
+6508700	Grande Elevador dos Rolds
+6508701	Pedido da Mansão Vulcânica: Juno Hoslow
+6510300	Casa Abandonada do Apóstata
+6510500	Ruínas de Yelough Anix
+6511700	Torre Pedrilhante Albináurica
+6513000	Térvore Menor
+6513400	Ordina, Cidade Sacramental
+6515000	Elphael, Suporte da Árvore Sacra
+6515500	Árvore Sacra de Miquella
+6515600	Elphael, Suporte da Árvore Sacra
+6604700	Restos da Dinastia Uhl
+6614600	Nokstella, Cidade Eterna
+6614700	Grande Claustro
+6614701	Restos da Dinastia Uhl
+6654600	Nokron, Cidade Eterna
+6654601	Campo Noturno Sagrado
+6654602	Aqueduto de Siofra
+6654603	
+6654604	Campo Sagrado do Chifre
+6664500	Mausoléu da Dinastia Mohgwyn
+8000000	Limgrave
+8000400	Liurnia dos Lagos
+8000800	Platô Altus
+8000900	Caelid
+8001200	Montanha dos Gigantes
+8010000	Rio Ainsel
+8010200	Rio Siofra
+8010400	Abismos da Raiz Profunda
+8100001	Terras de Tenebrae
+90000000	

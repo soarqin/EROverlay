@@ -1,0 +1,532 @@
+0	
+110000	Melina
+110200	Leggidita Enia
+110400	Due Dita
+110500	
+110600	Ranni la strega
+110601	
+110602	
+110603	
+110604	
+110605	
+110606	
+110607	
+110608	
+110609	
+110610	Renna la strega
+111000	Stregone originario Lusat
+111100	Stregone originario Azur
+111200	Venerabile Maschera d'oro
+120000	Rennala, Regina del plenilunio
+120200	Gurranq la Belva ecclesiastica
+121300	Maestro fabbro Hewg
+121600	Blaidd il Mezzolupo
+121601	
+121602	
+121603	
+121604	
+121605	
+121606	
+121607	
+121608	
+121609	
+121610	Ombra funesta
+121700	Pidia, servo di Caria
+121800	Asimi, lacrima d'argento
+121801	
+121802	
+121803	
+121804	
+121805	
+121806	
+121807	
+121808	
+121809	
+121810	Asimi, re eterno
+121900	Vecchio Albus
+122000	Alexander, vaso guerriero
+122300	Semiumano Boc
+122301	
+122302	
+122303	
+122304	
+122305	
+122306	
+122307	
+122308	
+122309	
+122310	Boc il sarto
+122400	Iji, maestro fabbro
+122401	Iji, consigliere di guerra
+122600	Vaso bambino
+122800	Latenna l'albinaura
+123000	Cavaliere di Tanith
+123300	Phillia, sorellina imponente
+130000	Tanith, proprietaria di Villa Vulcano
+130100	Viso bianco Varré
+130200	Custode Gostoc
+130400	Vyke, impronta purulenta
+130401	Vyke, cavaliere della Tavola rotonda
+130700	Precettore Seluvis
+130900	Patches
+130901	Patches
+131000	Irina di Morne
+131001	
+131002	
+131003	
+131004	
+131005	
+131006	
+131007	
+131008	
+131009	
+131010	Hyetta la cercaluce
+131011	Vergine delle Dita Hyetta
+131100	Castellano Edgar
+131101	Vendicatore Edgar
+131200	Castellano Jerren
+131201	Cacciatore di streghe Jerren
+131300	Rya l'esploratrice
+131301	
+131302	
+131303	
+131304	
+131305	
+131306	
+131307	
+131308	
+131309	
+131310	Zorayas l'esploratrice
+131400	Cavaliere Diallos
+131401	Ceramista Diallos
+131600	Strega Sellen
+131601	Strega Sellen
+131800	Yura, cacciatore di Dita sanguinanti
+131801	Shabriri
+131802	Shabriri
+131900	D, cacciatore di morti
+131901	D, cacciatore di morti
+131902	
+131903	
+131904	
+131905	
+131906	
+131907	
+131908	
+131909	
+131910	D, testimone della morte
+131911	D, testimone della morte
+132000	Fanciulla dal cuore spezzato
+132001	Roderika
+132002	Roderika, esperta di sintonia spiritica
+132100	Kenneth Haight, erede di Sepolcride
+132200	Fia la Compagna di morte
+132300	Mangiasterco
+132301	Mangiasterco
+132302	Mangiasterco
+132400	Ser Gideon Ofnir l'Onnisciente
+132500	Stregone Rogier
+132501	Stregone Rogier
+132600	Cavaliere Bernahl
+132601	Dissidente Bernahl
+132602	Dissidente Bernahl
+132700	Eleonora, il Dito sanguinante viola
+132900	Lionel cuor di leone
+133000	Miriel, custode di voti
+133100	Brigante
+133101	Brigante
+133200	
+133300	Stregone Thops
+133400	Nepheli Loux, Guerriera
+133401	Nepheli Loux, Guerriera
+133402	Nepheli Loux, Guerriera
+133500	
+133600	Vergine delle Dita di Vyke
+133800	Vergine delle Dita
+133900	Ensha dei reali resti
+134000	Dito sanguinante, l'assassino di Montecorvo
+134300	Dito sanguinante Nerijus
+134301	
+134302	
+134303	
+134304	
+134305	
+134306	
+134307	
+134308	
+134309	
+134310	Sanguigno nobiliare
+134400	Tragoth dalle grandi corna
+134401	Tragoth dalle grandi corna
+134500	Antico cavaliere Istvan
+134501	Antico cavaliere Istvan
+134600	Rileigh l'indolente
+134700	Juno Hoslow, cavaliere del sangue
+134800	Millicent
+134900	Saggio Gowry
+135000	
+135100	Fratello Corhyn
+135101	Scriba Corhyn
+135200	Precettrice Miriam
+135300	Anastasia, divoratrice di Senzaluce
+135500	Okina
+135501	Dito sanguinante Okina
+135600	Adan, ladro del fuoco
+135700	
+135900	Cavaliere cariano Moongrum
+136000	Vargram il Lupo sanguinario
+136100	Campione di Fia
+136300	Vergine delle Dita Therolina
+136400	Dolores la freccia dormiente
+136500	Vaso vivente
+136700	Inaba, discepolo di Okina
+136800	Lacrima d'argento
+136900	Dissidente Henricus
+137000	Campione di Fia
+137100	Campione di Fia
+137200	Maleigh Marais, signore di Castellombroso
+137300	Cavaliere del grande vaso
+137400	Cavaliere del grande vaso
+137500	Cavaliere del grande vaso
+137600	Necromante Garris
+137700	Viso bianco senza nome
+137900	
+138000	Stregone errante Wilhelm
+138200	Custode capo Arghanthy
+138300	Custode della fiamma
+138400	Inquisitore Ghiza
+138500	Alberich dalla lingua folle
+138600	Esgar, sacerdote del sangue
+138700	Mary, sorella maggiore
+138800	Maureen, seconda sorella
+138900	Amy, terza sorella
+139000	Polyanna, sorella minore
+139001	Polyanna, figlia adottiva
+139100	Magnus l'Artiglio ferino
+160000	Resti delle vergini gemelle
+160100	Chiesa della comunione draconica
+160200	Banco da lavoro
+160300	Cadavere del mausoleo errante
+160400	Bacino dell'Espiazione
+160500	Cattedrale della comunione draconica
+160600	
+160700	Marika distrutta
+160800	Specchiera offuscata
+160900	Spada di Bernahl
+170000	
+170001	
+170002	
+170003	
+170004	
+170005	
+170006	
+170007	
+170008	
+170009	
+170010	
+170011	
+170012	
+170013	
+170014	
+170015	
+170016	
+170017	
+170018	
+170019	
+170020	
+170021	
+170022	
+170023	
+170024	
+170025	
+170026	
+170027	
+170028	
+170029	
+170030	
+170031	
+170032	
+170033	
+170034	
+170035	
+170036	
+170037	
+175000	Leggidita anziana
+175001	Leggidita anziana
+175002	Leggidita anziana
+175003	Leggidita anziana
+175004	Leggidita anziana
+175005	Leggidita anziana
+175006	Leggidita anziana
+175007	Custode delle terre proibite
+175008	Balia di Godwyn
+180000	Mercante Kalé
+180101	Mercante nomade
+180102	Mercante nomade
+180103	Mercante nomade
+180104	Mercante nomade
+180105	Mercante nomade
+180106	Mercante solitario
+180107	Mercante solitario
+180108	Mercante nomade
+180109	Mercante eremita
+180110	Mercante nomade
+180111	Mercante nomade
+180112	Mercante nomade
+180113	Mercante nomade
+180114	Mercante nomade
+180115	Mercante solitario
+180116	Mercante eremita
+180117	Mercante abbandonato
+180118	Mercante eremita
+180119	Mercante prigioniero
+10104137	
+10204435	
+10304533	
+10403943	
+10503542	
+10711400	
+10803550	
+10903752	
+11003654	
+11103954	
+11204737	
+11305039	
+11405136	
+11505243	
+11605254	
+11705057	
+900000520	Adan, ladro del fuoco
+900000521	Vyke la lancia draconica
+900000600	
+900000601	Okina
+902030000	Rennala, Regina del plenilunio
+902030001	Rennala, Regina del plenilunio
+902100300	Assassina dei Neri Coltelli
+902100301	Assassina dei Neri Coltelli
+902100302	Assassina dei Neri Coltelli
+902100303	
+902100304	
+902100305	
+902100306	
+902100307	
+902100308	
+902100309	
+902100310	Assassina dei Neri Coltelli
+902100521	Alecto, capo dei Neri Coltelli
+902100600	Assassina dei Neri Coltelli
+902110000	Belva ecclesiastica
+902110001	Maliketh la Lama nera
+902120000	Malenia, spada di Miquella
+902120001	Malenia, Dea della marcescenza
+902130000	Margit il Presagio implacabile
+902130001	
+902130002	Morgott il Re Presagio
+902130003	Morgott il Re Presagio
+902140000	Gemello implacabile
+902140001	Gemello implacabile
+902190000	Radagon dell'Ordine aureo
+902200000	Belva ancestrale
+902500300	Cavaliere del Crogiolo Ordovis
+902500301	Cavaliere del Crogiolo
+902500500	Cavaliere del Crogiolo
+902500520	Cavaliere del Crogiolo
+902500600	Cavaliere del Crogiolo Siluria
+903050500	Comandante Niall
+903050600	Comandante O'Neil
+903100500	Elemer del rovo
+903100600	Cacciatore di globi cinerei
+903100601	Cacciatore di globi cinerei
+903100602	Cacciatore di globi cinerei
+903100603	Cacciatore di globi cinerei
+903150600	Cavaliere notturno
+903150601	Cavaliere notturno
+903150602	Cavaliere notturno
+903150603	Cavaliere notturno
+903150604	Cavaliere notturno
+903150605	Cavaliere notturno
+903150606	Cavaliere notturno
+903150607	Cavaliere notturno
+903150608	Cavaliere notturno (falcione)
+903150609	Cavaliere notturno (flagello)
+903181000	Lupo rosso di Radagon
+903181300	Lupo rosso del campione
+903250600	Sentinella draconica dell'albero
+903251600	Sentinella dell'albero
+903251601	Sentinella dell'albero
+903251602	Sentinella dell'albero
+903252000	Loretta, cavaliere del Sacro Albero
+903253500	Guardia reale Loretta
+903300560	Monaco Nox
+903300561	Spadaccina Nox
+903320000	Lacrima riflessa
+903320300	Lacrima riflessa smarrita
+903350310	Cristalliano (bastone)
+903350311	Cristalliano (lancia)
+903350312	Cristalliano putrescente (lama circolare)
+903350313	Cristalliano putrescente (lancia)
+903350314	Cristalliano putrescente (bastone)
+903350315	
+903350316	
+903350317	
+903350318	
+903350319	
+903350320	Cristalliano
+903350321	Cristalliano (lama circolare)
+903350322	Cristalliano (lancia)
+903400300	Guardia sepolcrale duellante
+903400301	Guardia sepolcrale duellante
+903400302	Guardia sepolcrale duellante putrescente
+903400303	
+903400304	
+903400305	
+903400306	
+903400307	
+903400308	
+903400309	
+903400310	Duellante frenetico
+903451320	Progenie squamata
+903460300	Guerriero aberrante
+903460301	
+903460302	
+903460303	
+903460304	
+903460305	
+903460306	
+903460307	
+903460308	
+903460309	
+903460310	Crociato della progenie
+903460500	Progenie leonina
+903460501	Guerriero aberrante
+903550540	Sanguigno nobiliare
+903560000	Apostolo Sacriderma
+903560310	Apostolo Sacriderma
+903560600	Apostolo Sacriderma
+903570000	Nobile Sacriderma
+903570310	Nobile Sacriderma
+903575000	Duo Sacriderma
+903600320	Campione di onice
+903600520	Campione di onice
+903664300	Ombra cimiteriale
+903664301	Ombra cimiteriale
+903664302	Ombra cimiteriale
+903700300	Profumiera Tricia
+903704520	Mago guerriero Hugues
+903800310	Cavaliere marcescente
+903800311	Cavaliere marcescente (lancia)
+903800312	Cavaliere marcescente (falcetto)
+903810310	Seguace della marcescenza
+903810311	Seguace della marcescenza
+903970310	Bestia umana di Farum Azula
+903970311	Bestia umana di Farum Azula (mannaia)
+903970312	Bestia umana di Farum Azula (coltello da lancio)
+904020540	Spirito inquieto reale
+904120310	Capo semiumano
+904120311	Capo semiumano
+904130310	Regina semiumana Margot
+904130540	Regina semiumana Gilika
+904130600	Regina semiumana Maggie
+904140300	Lumaca evoca-spiriti
+904140301	
+904140302	
+904140303	
+904140304	
+904140305	
+904140306	
+904140307	
+904140308	
+904140309	
+904140310	Lumaca evoca-spiriti
+904260300	Guardiano sepolcrale dell'Albero Madre
+904260301	Guardiano sepolcrale dell'Albero Madre
+904260302	Guardiano sepolcrale dell'Albero Madre
+904260303	Guardiano sepolcrale dell'Albero Madre
+904260304	Guardiano sepolcrale dell'Albero Madre (spada)
+904260305	Guardiano sepolcrale dell'Albero Madre (scettro)
+904290310	Cavalier limiere
+904290520	Cavalier limiere Darriwil
+904311000	Soldato di Godrick
+904340540	Testa di zucca folle
+904340541	Testa di zucca (martello)
+904340542	Testa di zucca (flagello)
+904470000	Vergine rapitrice (falcetto oscillante)
+904470001	Vergine rapitrice (ruota)
+904480310	Miranda il bocciolo avvizzito
+904480311	Miranda bocciolo
+904500600	Drago volante Agheel
+904500601	Drago volante Greyll
+904501600	Ekzykes decadente
+904502600	Drago di scintipietra Smarag
+904502601	Drago di scintipietra Adula
+904502602	Drago di scintipietra Adula
+904503600	Borealis la nebbia gelida
+904510000	Necrodrago Fortissax
+904510600	Lansseax, drago antico
+904520000	Lord draconico Placidusax
+904580600	Facciadiverme
+904580601	Facciadiverme
+904600320	Troll scavapietra
+904600321	Troll scavapietra
+904600520	Cavaliere cariano Bols
+904620001	Astel, progenie del vuoto
+904620320	Astel, stelle di tenebra
+904630310	Orso runico
+904640000	Spirito arboreo ulcerato
+904640300	Spirito arboreo putrescente
+904640301	Spirito arboreo ulcerato
+904640600	Spirito arboreo ulcerato
+904650000	Soldato draconide di Nokstella
+904650600	Soldato draconide
+904650601	Soldato draconide
+904660310	Golem guardiano
+904670000	Spirito ancestrale
+904670001	Spirito ancestrale regale
+904680320	Belva meteoritica
+904680601	Belva meteoritica
+904680602	Belva meteoritica
+904680603	Belva meteoritica adulta
+904690000	Erede innestato
+904710000	Serpente divoratore di dei
+904710001	Rykard, signore della blasfemia
+904720000	Godfrey, primo Lord ancestrale
+904720001	Hoarah Loux, Guerriero
+904720002	Godfrey, primo Lord ancestrale
+904730000	Radahn il Flagello celeste
+904750000	Godrick l'Innestato
+904750520	Godefroy l'Innestato
+904760000	Gigante di fuoco
+904770000	Audace gargoyle
+904770001	Audace gargoyle (lama gemella)
+904770600	Seguace della Lama nera
+904770601	Seguace della Lama nera
+904800000	Mohg, Signore del sangue
+904800001	
+904800002	Mohg il Presagio
+904810600	Avatar dell'Albero Madre
+904810601	Avatar dell'Albero Madre
+904810602	Avatar dell'Albero Madre
+904811600	Avatar putrescente
+904811601	Avatar putrescente
+904811602	Avatar putrescente
+904820310	Ammazzapresagi
+904820600	Ammazzapresagi
+904910000	Drago di magma Makar
+904910320	Drago di magma
+904910600	Drago di magma
+904911600	Drago gigante Theodorix
+904950600	Marinaio tibiale
+904950601	Marinaio tibiale
+904950602	Marinaio tibiale
+904950603	Marinaio tibiale
+904980600	Uccello del rito di morte
+904980601	Uccello della morte
+904980602	Uccello della morte
+904980603	Uccello della morte
+904980604	Uccello del rito di morte
+904980605	Uccello della morte
+904980606	Uccello del rito di morte
+904980607	Uccello del rito di morte
+907100300	Antico eroe di Zamor
+907100301	Antico eroe di Zamor
+907100520	Antico eroe di Zamor

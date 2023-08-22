@@ -1,0 +1,532 @@
+0	
+110000	Melina
+110200	Finger Reader Enia
+110400	The Two Fingers
+110500	
+110600	Ranni the Witch
+110601	
+110602	
+110603	
+110604	
+110605	
+110606	
+110607	
+110608	
+110609	
+110610	Renna the Witch
+111000	Primeval Sorcerer Lusat
+111100	Primeval Sorcerer Azur
+111200	The Noble Goldmask
+120000	Rennala, Queen of the Full Moon
+120200	Gurranq, Beast Clergyman
+121300	Smithing Master Hewg
+121600	Blaidd the Half-Wolf
+121601	
+121602	
+121603	
+121604	
+121605	
+121606	
+121607	
+121608	
+121609	
+121610	Baleful Shadow
+121700	Pidia, Carian Servant
+121800	Asimi, Silver Tear
+121801	
+121802	
+121803	
+121804	
+121805	
+121806	
+121807	
+121808	
+121809	
+121810	Asimi, Eternal King
+121900	Old Albus
+122000	Alexander, Warrior Jar
+122300	Demi-Human Boc
+122301	
+122302	
+122303	
+122304	
+122305	
+122306	
+122307	
+122308	
+122309	
+122310	Boc the Seamster
+122400	Smithing Master Iji
+122401	War Counselor Iji
+122600	Jar-Bairn
+122800	Latenna the Albinauric
+123000	Tanith's Knight
+123300	Phillia, Towering Little Sister
+130000	Tanith, Volcano Manor Proprietress
+130100	White Mask Varré
+130200	Gatekeeper Gostoc
+130400	Festering Fingerprint Vyke
+130401	Roundtable Knight Vyke
+130700	Preceptor Seluvis
+130900	Patches
+130901	Patches
+131000	Irina of Morne
+131001	
+131002	
+131003	
+131004	
+131005	
+131006	
+131007	
+131008	
+131009	
+131010	Lightseeker Hyetta
+131011	Finger Maiden Hyetta
+131100	Castellan Edgar
+131101	Edgar the Revenger
+131200	Castellan Jerren
+131201	Witch-Hunter Jerren
+131300	Rya the Scout
+131301	
+131302	
+131303	
+131304	
+131305	
+131306	
+131307	
+131308	
+131309	
+131310	Zorayas the Scout
+131400	Knight Diallos
+131401	Potentate Diallos
+131600	Sorceress Sellen
+131601	Sorceress Sellen
+131800	Yura, Hunter of Bloody Fingers
+131801	Shabriri
+131802	Shabriri
+131900	D, Hunter of the Dead
+131901	D, Hunter of the Dead
+131902	
+131903	
+131904	
+131905	
+131906	
+131907	
+131908	
+131909	
+131910	D, Beholder of Death
+131911	D, Beholder of Death
+132000	Heartbroken Maiden
+132001	Roderika
+132002	Roderika, Spirit Tuner
+132100	Kenneth Haight, Limgrave Heir
+132200	Fia, Deathbed Companion
+132300	Dung Eater
+132301	Dung Eater
+132302	Dung Eater
+132400	Sir Gideon Ofnir, the All-Knowing
+132500	Sorcerer Rogier
+132501	Sorcerer Rogier
+132600	Knight Bernahl
+132601	Recusant Bernahl
+132602	Recusant Bernahl
+132700	Eleonora, Violet Bloody Finger
+132900	Lionel the Lionhearted
+133000	Miriel, Pastor of Vows
+133100	Blackguard
+133101	Blackguard
+133200	
+133300	Sorcerer Thops
+133400	Nepheli Loux, Warrior
+133401	Nepheli Loux, Warrior
+133402	Nepheli Loux, Warrior
+133500	Reeling Rico
+133600	Vyke's Finger Maiden
+133800	Finger Maiden
+133900	Ensha of the Royal Remains
+134000	Bloody Finger Ravenmount Assassin
+134300	Bloody Finger Nerijus
+134301	
+134302	
+134303	
+134304	
+134305	
+134306	
+134307	
+134308	
+134309	
+134310	Sanguine Noble
+134400	Great Horned Tragoth
+134401	Great Horned Tragoth
+134500	Old Knight Istvan
+134501	Old Knight Istvan
+134600	Rileigh the Idle
+134700	Juno Hoslow, Knight of Blood
+134800	Millicent
+134900	Sage Gowry
+135000	
+135100	Brother Corhyn
+135101	Scribe Corhyn
+135200	Preceptor Miriam
+135300	Anastasia, Tarnished-Eater
+135500	Okina
+135501	Bloody Finger Okina
+135600	Adan, Thief of Fire
+135700	
+135900	Moongrum, Carian Knight
+136000	Vargram the Raging Wolf
+136100	Fia's Champion
+136300	Finger Maiden Therolina
+136400	Dolores the Sleeping Arrow
+136500	Jarwight
+136700	Inaba, Disciple of Okina
+136800	Silver Tear
+136900	Recusant Henricus
+137000	Fia's Champion
+137100	Fia's Champion
+137200	Maleigh Marais, Shaded Castle Castellan
+137300	Knight of the Great Jar
+137400	Knight of the Great Jar
+137500	Knight of the Great Jar
+137600	Necromancer Garris
+137700	Nameless White Mask
+137900	
+138000	Errant Sorcerer Wilhelm
+138200	Chief Guardian Arghanthy
+138300	Flame Guardian
+138400	Inquisitor Ghiza
+138500	Mad Tongue Alberich
+138600	Esgar, Priest of Blood
+138700	Mary, Eldest Sister
+138800	Maureen, Second Sister
+138900	Amy, Third Sister
+139000	Polyanna, Youngest Sister
+139001	Polyanna, Adopted Daughter
+139100	Magnus the Beast Claw
+160000	Twin Maiden Husks
+160100	Church of Dragon Communion
+160200	Smithing Table
+160300	Wandering Mausoleum Corpse
+160400	Basin of Atonement
+160500	Cathedral of Dragon Communion
+160600	
+160700	Fractured Marika
+160800	Clouded Mirror Stand
+160900	Sword of Bernahl
+170000	
+170001	
+170002	
+170003	
+170004	
+170005	
+170006	
+170007	
+170008	
+170009	
+170010	
+170011	
+170012	
+170013	
+170014	
+170015	
+170016	
+170017	
+170018	
+170019	
+170020	
+170021	
+170022	
+170023	
+170024	
+170025	
+170026	
+170027	
+170028	
+170029	
+170030	
+170031	
+170032	
+170033	
+170034	
+170035	
+170036	
+170037	
+175000	Finger Reader Crone
+175001	Finger Reader Crone
+175002	Finger Reader Crone
+175003	Finger Reader Crone
+175004	Finger Reader Crone
+175005	Finger Reader Crone
+175006	Finger Reader Crone
+175007	Keeper of Forbidden Lands
+175008	Godwyn's Wet Nurse
+180000	Merchant Kalé
+180101	Nomadic Merchant
+180102	Nomadic Merchant
+180103	Nomadic Merchant
+180104	Nomadic Merchant
+180105	Nomadic Merchant
+180106	Isolated Merchant
+180107	Isolated Merchant
+180108	Nomadic Merchant
+180109	Hermit Merchant
+180110	Nomadic Merchant
+180111	Nomadic Merchant
+180112	Nomadic Merchant
+180113	Nomadic Merchant
+180114	Nomadic Merchant
+180115	Isolated Merchant
+180116	Hermit Merchant
+180117	Abandoned Merchant
+180118	Hermit Merchant
+180119	Imprisoned Merchant
+10104137	Someone Yet Unseen
+10204435	Someone Yet Unseen
+10304533	Someone Yet Unseen
+10403943	Someone Yet Unseen
+10503542	Someone Yet Unseen
+10711400	Someone Yet Unseen
+10803550	Someone Yet Unseen
+10903752	Someone Yet Unseen
+11003654	Someone Yet Unseen
+11103954	Someone Yet Unseen
+11204737	Someone Yet Unseen
+11305039	Someone Yet Unseen
+11405136	Someone Yet Unseen
+11505243	Someone Yet Unseen
+11605254	Someone Yet Unseen
+11705057	Someone Yet Unseen
+900000520	Adan, Thief of Fire
+900000521	Vyke the Dragonspear
+900000600	
+900000601	Okina
+902030000	Rennala, Queen of the Full Moon
+902030001	Rennala, Queen of the Full Moon
+902100300	Black Knife Assassin
+902100301	Black Knife Assassin
+902100302	Black Knife Assassin
+902100303	
+902100304	
+902100305	
+902100306	
+902100307	
+902100308	
+902100309	
+902100310	Black Knife Assassin
+902100521	Alecto, Black Knife Ringleader
+902100600	Black Knife Assassin
+902110000	Beast Clergyman
+902110001	Maliketh, the Black Blade
+902120000	Malenia, Blade of Miquella
+902120001	Malenia, Goddess of Rot
+902130000	Margit, the Fell Omen
+902130001	
+902130002	Morgott, the Omen King
+902130003	Morgott, the Omen King
+902140000	Fell Twin
+902140001	Fell Twin
+902190000	Radagon of the Golden Order
+902200000	Elden Beast
+902500300	Crucible Knight Ordovis
+902500301	Crucible Knight
+902500500	Crucible Knight
+902500520	Crucible Knight
+902500600	Crucible Knight Siluria
+903050500	Commander Niall
+903050600	Commander O'Neil
+903100500	Elemer of the Briar
+903100600	Bell Bearing Hunter
+903100601	Bell Bearing Hunter
+903100602	Bell Bearing Hunter
+903100603	Bell Bearing Hunter
+903150600	Night's Cavalry
+903150601	Night's Cavalry
+903150602	Night's Cavalry
+903150603	Night's Cavalry
+903150604	Night's Cavalry
+903150605	Night's Cavalry
+903150606	Night's Cavalry
+903150607	Night's Cavalry
+903150608	Night's Cavalry (Glaive)
+903150609	Night's Cavalry (Flail)
+903181000	Red Wolf of Radagon
+903181300	Red Wolf of the Champion
+903250600	Draconic Tree Sentinel
+903251600	Tree Sentinel
+903251601	Tree Sentinel
+903251602	Tree Sentinel
+903252000	Loretta, Knight of the Haligtree
+903253500	Royal Knight Loretta
+903300560	Nox Monk
+903300561	Nox Swordstress
+903320000	Mimic Tear
+903320300	Stray Mimic Tear
+903350310	Crystalian (Staff)
+903350311	Crystalian (Spear)
+903350312	Putrid Crystalian (Ringblade)
+903350313	Putrid Crystalian (Spear)
+903350314	Putrid Crystalian (Staff)
+903350315	
+903350316	
+903350317	
+903350318	
+903350319	
+903350320	Crystalian
+903350321	Crystalian (Ringblade)
+903350322	Crystalian (Spear)
+903400300	Grave Warden Duelist
+903400301	Grave Warden Duelist
+903400302	Putrid Grave Warden Duelist
+903400303	
+903400304	
+903400305	
+903400306	
+903400307	
+903400308	
+903400309	
+903400310	Frenzied Duelist
+903451320	Scaly Misbegotten
+903460300	Misbegotten Warrior
+903460301	
+903460302	
+903460303	
+903460304	
+903460305	
+903460306	
+903460307	
+903460308	
+903460309	
+903460310	Misbegotten Crusader
+903460500	Leonine Misbegotten
+903460501	Misbegotten Warrior
+903550540	Sanguine Noble
+903560000	Godskin Apostle
+903560310	Godskin Apostle
+903560600	Godskin Apostle
+903570000	Godskin Noble
+903570310	Godskin Noble
+903575000	Godskin Duo
+903600320	Onyx Lord
+903600520	Onyx Lord
+903664300	Cemetery Shade
+903664301	Cemetery Shade
+903664302	Cemetery Shade
+903700300	Perfumer Tricia
+903704520	Battlemage Hugues
+903800310	Cleanrot Knight
+903800311	Cleanrot Knight (Spear)
+903800312	Cleanrot Knight (Sickle)
+903810310	Kindred of Rot
+903810311	Kindred of Rot
+903970310	Beastman of Farum Azula
+903970311	Beastman of Farum Azula (Cleaver)
+903970312	Beastman of Farum Azula (Throwing Knife)
+904020540	Royal Revenant
+904120310	Demi-Human Chief
+904120311	Demi-Human Chief
+904130310	Demi-Human Queen Margot
+904130540	Demi-Human Queen Gilika
+904130600	Demi-Human Queen Maggie
+904140300	Spiritcaller Snail
+904140301	
+904140302	
+904140303	
+904140304	
+904140305	
+904140306	
+904140307	
+904140308	
+904140309	
+904140310	Spiritcaller Snail
+904260300	Erdtree Burial Watchdog
+904260301	Erdtree Burial Watchdog
+904260302	Erdtree Burial Watchdog
+904260303	Erdtree Burial Watchdog
+904260304	Erdtree Burial Watchdog (Sword)
+904260305	Erdtree Burial Watchdog (Scepter)
+904290310	Bloodhound Knight
+904290520	Bloodhound Knight Darriwil
+904311000	Soldier of Godrick
+904340540	Mad Pumpkin Head
+904340541	Mad Pumpkin Head (Hammer)
+904340542	Mad Pumpkin Head (Flail)
+904470000	Abductor Virgin (Swinging Sickle)
+904470001	Abductor Virgin (Wheel)
+904480310	Miranda the Blighted Bloom
+904480311	Miranda Blossom
+904500600	Flying Dragon Agheel
+904500601	Flying Dragon Greyll
+904501600	Decaying Ekzykes
+904502600	Glintstone Dragon Smarag
+904502601	Glintstone Dragon Adula
+904502602	Glintstone Dragon Adula
+904503600	Borealis the Freezing Fog
+904510000	Lichdragon Fortissax
+904510600	Ancient Dragon Lansseax
+904520000	Dragonlord Placidusax
+904580600	Wormface
+904580601	Wormface
+904600320	Stonedigger Troll
+904600321	Stonedigger Troll
+904600520	Bols, Carian Knight
+904620001	Astel, Naturalborn of the Void
+904620320	Astel, Stars of Darkness
+904630310	Runebear
+904640000	Ulcerated Tree Spirit
+904640300	Putrid Tree Spirit
+904640301	Ulcerated Tree Spirit
+904640600	Ulcerated Tree Spirit
+904650000	Dragonkin Soldier of Nokstella
+904650600	Dragonkin Soldier
+904650601	Dragonkin Soldier
+904660310	Guardian Golem
+904670000	Ancestor Spirit
+904670001	Regal Ancestor Spirit
+904680320	Fallingstar Beast
+904680601	Fallingstar Beast
+904680602	Fallingstar Beast
+904680603	Full-Grown Fallingstar Beast
+904690000	Grafted Scion
+904710000	God-Devouring Serpent
+904710001	Rykard, Lord of Blasphemy
+904720000	Godfrey, First Elden Lord
+904720001	Hoarah Loux, Warrior
+904720002	Godfrey, First Elden Lord
+904730000	Starscourge Radahn
+904750000	Godrick the Grafted
+904750520	Godefroy the Grafted
+904760000	Fire Giant
+904770000	Valiant Gargoyle
+904770001	Valiant Gargoyle (Twinblade)
+904770600	Black Blade Kindred
+904770601	Black Blade Kindred
+904800000	Mohg, Lord of Blood
+904800001	
+904800002	Mohg, the Omen
+904810600	Erdtree Avatar
+904810601	Erdtree Avatar
+904810602	Erdtree Avatar
+904811600	Putrid Avatar
+904811601	Putrid Avatar
+904811602	Putrid Avatar
+904820310	Omenkiller
+904820600	Omenkiller
+904910000	Magma Wyrm Makar
+904910320	Magma Wyrm
+904910600	Magma Wyrm
+904911600	Great Wyrm Theodorix
+904950600	Tibia Mariner
+904950601	Tibia Mariner
+904950602	Tibia Mariner
+904950603	Tibia Mariner
+904980600	Death Rite Bird
+904980601	Deathbird
+904980602	Deathbird
+904980603	Deathbird
+904980604	Death Rite Bird
+904980605	Deathbird
+904980606	Death Rite Bird
+904980607	Death Rite Bird
+907100300	Ancient Hero of Zamor
+907100301	Ancient Hero of Zamor
+907100520	Ancient Hero of Zamor

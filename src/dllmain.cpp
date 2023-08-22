@@ -1,5 +1,3 @@
-#include "initialize.hpp"
-
 #include <shlwapi.h>
 #include <thread>
 #include <chrono>

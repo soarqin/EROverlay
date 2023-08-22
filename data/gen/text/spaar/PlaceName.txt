@@ -1,0 +1,1049 @@
+10000	Castillo Velobrumo
+10001	
+10002	
+10003	
+10004	
+10005	
+10006	
+10007	
+10008	
+10009	
+10010	Capilla de la Premonición
+11000	Leyndell, capital real
+11050	Leyndell, capital cenicienta
+11100	Mesa Redonda
+12010	Río Ainsel principal
+12011	Lago de la Podredumbre
+12012	Río Ainsel
+12013	
+12014	
+12015	
+12016	
+12017	
+12018	
+12019	
+12020	Nokron, Ciudad Eterna
+12021	
+12022	
+12023	
+12024	
+12025	
+12026	
+12027	
+12028	
+12029	
+12030	Profundidades de Profundraíz
+12050	Palacio Mohgwyn
+12070	Río Siofra
+13000	Farum Azula desmoronada
+14000	Academia de Raya Lucaria
+15000	Elfael, sostén del Santoárbol
+15001	Santoárbol de Miquella
+16000	Mansión Volcánica
+18000	Cementerio Varado
+18001	Tumba del Héroe de los Marginados
+19000	Plataforma de piedra
+30000	Catacumbas de la tumba subterránea
+30001	
+30002	
+30003	
+30004	
+30005	
+30006	
+30007	
+30008	
+30009	
+30010	Catacumbas del empalador
+30011	
+30012	
+30013	
+30014	
+30015	
+30016	
+30017	
+30018	
+30019	
+30020	Catacumbas de Piebrumo
+30021	
+30022	
+30023	
+30024	
+30025	
+30026	
+30027	
+30028	
+30029	
+30030	catacumbas al final del camino
+30031	
+30032	
+30033	
+30034	
+30035	
+30036	
+30037	
+30038	
+30039	
+30040	Catacumbas Fangal
+30041	
+30042	
+30043	
+30044	
+30045	
+30046	
+30047	
+30048	
+30049	
+30050	Catacumbas de los Cuchillos Negros
+30051	
+30052	
+30053	
+30054	
+30055	
+30056	
+30057	
+30058	
+30059	
+30060	Catacumbas del fondo del acantilado
+30061	
+30062	
+30063	
+30064	
+30065	
+30066	
+30067	
+30068	
+30069	
+30070	Catacumbas de Wyndham
+30071	
+30072	
+30073	
+30074	
+30075	
+30076	
+30077	
+30078	
+30079	
+30080	Tumba de héroe canonizado
+30081	
+30082	
+30083	
+30084	
+30085	
+30086	
+30087	
+30088	
+30089	
+30090	Tumba de héroe de Gelmir
+30091	
+30092	
+30093	
+30094	
+30095	
+30096	
+30097	
+30098	
+30099	
+30100	Tumba de héroe de Auriza
+30101	
+30102	
+30103	
+30104	
+30105	
+30106	
+30107	
+30108	
+30109	
+30110	Catacumbas Tocadas por la Muerte
+30111	
+30112	
+30113	
+30114	
+30115	
+30116	
+30117	
+30118	
+30119	
+30120	Catacumbas desagradables
+30121	
+30122	
+30123	
+30124	
+30125	
+30126	
+30127	
+30128	
+30129	
+30130	Tumba lateral de Auriza
+30131	
+30132	
+30133	
+30134	
+30135	
+30136	
+30137	
+30138	
+30139	
+30140	Catacumbas de Terrárbol menor
+30141	
+30142	
+30143	
+30144	
+30145	
+30146	
+30147	
+30148	
+30149	
+30150	Catacumbas de Caelid
+30151	
+30152	
+30153	
+30154	
+30155	
+30156	
+30157	
+30158	
+30159	
+30160	Catacumbas de los caídos
+30161	
+30162	
+30163	
+30164	
+30165	
+30166	
+30167	
+30168	
+30169	
+30170	Tumba del héroe conquistador de gigantes
+30171	
+30172	
+30173	
+30174	
+30175	
+30176	
+30177	
+30178	
+30179	
+30180	Catacumbas de la Cumbre de los Gigantes
+30181	
+30182	
+30183	
+30184	
+30185	
+30186	
+30187	
+30188	
+30189	
+30190	Catacumbas del campo de nieve consagrado
+30191	
+30192	
+30193	
+30194	
+30195	
+30196	
+30197	
+30198	
+30199	
+30200	Camino oculto hacia el Santoárbol
+31000	Cueva Fangal
+31001	
+31002	
+31003	
+31004	
+31005	
+31006	
+31007	
+31008	
+31009	
+31010	Cueva excavada
+31011	
+31012	
+31013	
+31014	
+31015	
+31016	
+31017	
+31018	
+31019	
+31020	Cueva de la tumba subterránea
+31021	
+31022	
+31023	
+31024	
+31025	
+31026	
+31027	
+31028	
+31029	
+31030	Cueva de la Arboleda
+31031	
+31032	
+31033	
+31034	
+31035	
+31036	
+31037	
+31038	
+31039	
+31040	Cueva de agua estancada
+31041	
+31042	
+31043	
+31044	
+31045	
+31046	
+31047	
+31048	
+31049	
+31050	Cueva de cristal junto al lago
+31051	
+31052	
+31053	
+31054	
+31055	
+31056	
+31057	
+31058	
+31059	
+31060	Cueva de cristal de la Academia
+31061	
+31062	
+31063	
+31064	
+31065	
+31066	
+31067	
+31068	
+31069	
+31070	Cueva de aguas peligrosas
+31090	Cueva volcánica
+31091	
+31092	
+31093	
+31094	
+31095	
+31096	
+31097	
+31098	
+31099	
+31100	Cueva del Túmulo del Dragón
+31101	
+31102	
+31103	
+31104	
+31105	
+31106	
+31107	
+31108	
+31109	
+31110	Escondite de Sellia
+31111	
+31112	
+31113	
+31114	
+31115	
+31116	
+31117	
+31118	
+31119	
+31120	Cueva de los olvidados
+31150	Cueva costera
+31170	Cueva del camino mayor
+31171	
+31172	
+31173	
+31174	
+31175	
+31176	
+31177	
+31178	
+31179	
+31180	Gruta del perfumista
+31181	
+31182	
+31183	
+31184	
+31185	
+31186	
+31187	
+31188	
+31189	
+31190	Cueva del sabio
+31191	
+31192	
+31193	
+31194	
+31195	
+31196	
+31197	
+31198	
+31199	
+31200	Cueva abandonada
+31201	
+31202	
+31203	
+31204	
+31205	
+31206	
+31207	
+31208	
+31209	
+31210	Cueva de la prisión
+31211	
+31212	
+31213	
+31214	
+31215	
+31216	
+31217	
+31218	
+31219	
+31220	Cueva de invocación de espíritus
+32000	Túnel de Morne
+32001	
+32002	
+32003	
+32004	
+32005	
+32006	
+32007	
+32008	
+32009	
+32010	Túneles de Limgrave
+32011	
+32012	
+32013	
+32014	
+32015	
+32016	
+32017	
+32018	
+32019	
+32020	Túnel de cristal de Raya Lucaria
+32040	Túnel del viejo Altus
+32041	
+32042	
+32043	
+32044	
+32045	
+32046	
+32047	
+32048	
+32049	
+32050	Túnel de Altus
+32070	Túnel gaélico
+32071	
+32072	
+32073	
+32074	
+32075	
+32076	
+32077	
+32078	
+32079	
+32080	Túnel de cristal de Sellia
+32110	Túnel de Yelough Anix
+34100	Torre divina de Limgrave
+34101	
+34102	
+34103	
+34104	
+34105	
+34106	
+34107	
+34108	
+34109	
+34110	Sala de estudio de Caria
+34111	Torre divina de Liurnia
+34112	
+34113	
+34114	
+34115	
+34116	
+34117	
+34118	
+34119	
+34120	Túnel sellado
+34121	Torre divina del oeste de Altus
+34122	
+34123	
+34124	
+34125	
+34126	
+34127	
+34128	
+34129	
+34130	Torre divina de Caelid
+34131	
+34132	
+34133	
+34134	
+34135	
+34136	
+34137	
+34138	
+34139	
+34140	Torre divina del este de Altus
+34141	
+34142	
+34143	
+34144	
+34145	
+34146	
+34147	
+34148	
+34149	
+34150	Torre divina aislada
+35000	Terrenos de evasión subterráneos
+35001	
+35002	Catacumbas de Leyndell
+39200	Precipicio sembrado de ruinas
+61000	Limgrave
+61001	Montebrumo
+61002	Península Llorona
+62000	Liurnia de los Lagos
+62001	Camino de Bellum
+62002	Altar de luz de luna
+63000	Meseta Altus
+63001	Monte Gelmir
+63002	Afueras de la capital
+63003	Tierras Prohibidas
+64000	Caelid
+64001	Túmulo de Greyoll
+64002	Pantano de Aeonia
+65000	Montañas de los Gigantes
+65001	Cima Abrasadora
+65002	Campo de nieve consagrado
+100000	Godric el Injertado
+100001	Margit el Aojo Cruel
+100002	Túnel hacia el castillo
+100003	Cámara junto a la puerta
+100004	Acantilado de Velobrumo
+100005	Torre de defensa
+100006	Cámara junto al elevador
+100007	Celda de aislamiento
+100008	Entrada principal de Velobrumo
+110000	Trono de Elden
+110001	Santuario del Terrárbol
+110002	Muralla de la capital oriental
+110003	Iglesia de la capital inferior
+110004	Balcón de la avenida
+110005	Muralla de la capital occidental
+110006	
+110007	Alcoba de la reina
+110008	Mansión fortificada, primer piso
+110009	Puente divino
+110070	Solicitud de la Mansión Volcánica: Vargram
+110500	Trono de Elden
+110501	Santuario del Terrárbol
+110502	Muralla de la capital oriental
+110503	Leyndell, capital de las cenizas
+110504	Alcoba de la reina
+110505	Puente divino
+111000	Mesa de la gracia perdida
+120100	Soldado Dragonante de Nokstella
+120101	Profundidades del pozo del río Ainsel
+120102	Compuerta del río Ainsel
+120103	Corriente del río Ainsel
+120104	Río Ainsel principal
+120105	Nokstella, Ciudad Eterna
+120106	Costa del Lago de la Podredumbre
+120107	Lago de la Podredumbre
+120108	Gran claustro
+120109	Cuenca de la cascada de Nokstella
+120200	Cuenca de la Gran Cascada
+120201	Lágrima mimética
+120202	
+120203	Ribera del río Siofra
+120204	Bosque de los adoradores
+120205	
+120206	Bosque ancestral
+120207	Acantilados frente al acueducto
+120208	Tierra Sagrada de la Noche
+120209	Debajo del pozo
+120300	Trono del Príncipe de la Muerte
+120301	Acantilados frente a las raíces
+120302	Cresta de la Gran Cascada
+120303	Profundidades de Profundraíz
+120304	La Ciudad Eterna sin Nombre
+120305	Al otro lado de las raíces
+120400	Astel, Nacido del Vacío
+120500	Capullo del Empíreo
+120501	Carretera de cornisa cercana al palacio
+120502	Entrada del Mausoleo de la Dinastía
+120503	Centro del Mausoleo de la Dinastía
+120700	Profundidades del pozo del río Siofra
+120701	Nokron, Ciudad Eterna
+130000	Maliketh, la Espada Negra
+130001	Señordragón Placidusax
+130002	Altar del Templo del Dragón
+130003	Tumba de la bestia desmoronada
+130004	Tumba interior de la bestia desmoronada
+130005	Balcón frente a la tempestad
+130006	Templo del Dragón
+130007	Transepto del Templo del Dragón
+130008	Elevador del Templo del Dragón
+130009	Azotea del Templo del Dragón
+130010	Junto al Gran Puente
+140000	Gran Biblioteca de Raya Lucaria
+140001	Salón de debate
+140002	Iglesia del Cuco
+140003	Salón de clases
+150000	Malenia, Diosa de la Podredumbre
+150001	Sala de oración
+150002	Muro interior de Elfael
+150003	Canal del desagüe
+150004	Raíces del Santoárbol
+150005	Rambla de centinela arborescente
+150006	Copa del Santoárbol
+150007	Ciudad del Santoárbol
+150008	Plaza de la ciudad del Santoárbol
+160000	Rykard, Señor de la Blasfemia
+160001	Templo de Eiglay
+160002	Mansión Volcánica
+160003	Iglesia de la ciudad prisión
+160004	Salón de invitados
+160005	Sendero de la audiencia
+160006	Virgen secuestradora
+160007	Cámara de inquisición subterránea
+180000	Cueva del Conocimiento
+180001	Cementerio Varado
+190000	Márida fracturada
+300000	Catacumbas de la tumba subterránea
+300100	Catacumbas del empalador
+300200	Catacumbas de Piebrumo
+300300	Catacumbas al final del camino
+300400	Catacumbas Fangal
+300500	Catacumbas de los Cuchillos Negros
+300600	Catacumbas del fondo del acantilado
+300700	Catacumbas de Wyndham
+300800	Tumba de héroe canonizado
+300900	Tumba de héroe de Gelmir
+301000	Tumba de héroe de Auriza
+301100	Catacumbas tocadas por la muerte
+301200	Catacumbas desagradables
+301300	Tumba lateral de Auriza
+301400	Catacumbas de Terrárbol menor
+301500	Catacumbas de Caelid
+301600	Catacumbas de los caídos
+301700	Tumba del héroe conquistador de gigantes
+301800	Catacumbas de la cumbre
+301900	Catacumbas del campo de nieve consagrado
+302000	Camino oculto hacia el Santoárbol
+310000	Cueva Fangal
+310100	Cueva excavada
+310200	Cueva de la tumba subterránea
+310300	Cueva de la Arboleda
+310400	Cueva de agua estancada
+310500	Cueva de cristal junto al lago
+310600	Cueva de cristal de la Academia
+310700	Cueva de aguas peligrosas
+310900	Cueva volcánica
+311000	Cueva del Túmulo del Dragón
+311100	Escondite de Sellia
+311200	Cueva de los olvidados
+311500	Cueva costera
+311700	Cueva del camino mayor
+311800	Gruta del perfumista
+311900	Cueva del sabio
+312000	Cueva abandonada
+312100	Cueva de la prisión
+312200	Cueva de invocación de espíritus
+320000	Túnel de Morne
+320100	Túneles de Limgrave
+320200	Túnel de cristal de Raya Lucaria
+320400	Túnel del viejo Altus
+320500	Túnel de Altus
+320700	Túnel gaélico
+320701	Entrada trasera del túnel gaélico
+320800	Túnel de cristal de Sellia
+321100	Túnel de Yelough Anix
+341000	Puente de la torre de Limgrave
+341001	
+341002	Torre divina de Limgrave
+341100	Entrada a la sala de estudios
+341101	Puente de la torre de Liurnia
+341102	Torre divina de Liurnia
+341200	Torre divina del oeste de Altus
+341201	Túnel sellado
+341202	Torre divina del oeste de Altus: puerta
+341300	Torre divina de Caelid
+341301	Torre divina de Caelid: sótano
+341302	Torre divina de Caelid: centro
+341400	Torre divina del este de Altus: Puerta
+341401	Torre divina del este de Altus
+341470	La Ruta de Rold
+341500	Torre divina aislada
+350000	Catedral de los Olvidados
+350001	Borde de la carretera subterránea
+350002	Profundidades olvidadas
+350003	Catacumbas de Leyndell
+350004	Prohibición de la llama frenética
+390000	Dragón de magma Makar
+390001	Precipicio sembrado de ruinas
+390002	Mirador del precipicio sembrado de ruinas
+392070	Solicitud de la Mansión Volcánica: Tragoth
+450000	Coliseo Real
+450100	Coliseo de Limgrave
+450200	Coliseo de Caelid
+610000	Iglesia de Elleh
+610001	Choza de Montebrumo
+610002	Choza de artista
+610003	Tercera Iglesia de Márida
+610004	Oeste del fuerte Haight
+610005	Sur del lago Aguil
+610006	
+610007	Norte del lago Aguil
+610008	Iglesia de la Comunión del Dragón
+610009	Frente a la puerta
+610010	Jardín tras el puente
+610011	Ruinas costeras
+610012	Afueras de Bosqueniebla
+610013	Bosqueniebla
+610014	Costa Fangal
+610015	Puentesanto
+610016	Afueras de la Aldea de las Aguas Invocadoras
+610017	Choza del maestro de guerra
+610018	Sótano en ruinas
+610019	El Primer Paso
+611000	Cuarta Iglesia de Márida
+611001	Muralla del Castillo Morne
+611002	Tumba subterránea
+611003	Sur de la torre del vigía
+611004	Afueras de la aldea enferma
+611005	Junto al claro de cráteres
+611006	Choza de mercader aislado
+611007	Puente del Sacrificio
+611008	Elevador del Castillo Morne
+611009	Detrás del Castillo
+611010	Junto a la prisión de la muralla
+611011	Tumba del Dolor de Morne
+611012	Iglesia de la Peregrinación
+620000	Acantilados frente al lago
+620001	Orilla del lago de Liurnia
+620002	Ruinas de Laskyar
+620003	Isla pintoresca
+620004	Ciudad de las Puertas de la Academia
+620005	Entrada principal de la Academia
+620006	
+620007	
+620008	
+620009	
+620010	Entrada este de Raya Lucaria
+620011	Iglesia de Bellum
+620012	Gran Elevador de Dectus
+620013	
+620014	
+620015	
+620016	
+620017	
+620018	
+620019	
+620020	Pie de los Cuatro Campanarios
+620021	Isla del hechicero
+620022	Orilla del norte del lago de Liurnia
+620023	Camino hacia la mansión
+620024	Entrada principal de la mansión de Caria
+620025	
+620026	
+620027	
+620028	
+620029	
+620030	Choza de Lobo Durmiente
+620031	Choza de camarones hervidos
+620032	Choza de artista
+620033	Choza de vengador
+620034	Insensatez del Lago
+620035	Aldea de los albináuricos
+620036	Carretera norte de Liurnia
+620037	Puente de la Ciudad de las Puertas
+620038	Orilla del este del lago de Liurnia
+620039	Iglesia de los Votos
+620040	Laberinto en ruinas
+620041	Recinto del mausoleo
+620042	Los Cuatro Campanarios
+620043	El Ascenso de Ranni
+620044	Aldea del barranco oculto
+620045	Nivel superior de la mansión
+620046	Nivel inferior de la mansión
+620047	Tierras reales de observación de la Luna
+620048	Norte de la Ciudad de las Puertas
+620049	Altiplano oriental
+620050	El barranco
+620051	Ruinas caídas del lago
+620052	Torre convertida
+620053	Detrás de la Mansión de Caria
+620054	Afueras de la aldea de la Llama Frenética
+620055	Iglesia de la Inhibición
+620056	Distrito del Templo
+620057	Caballete del puente de la entrada este
+620058	Bosque Cristalino
+620059	Carretera sur de Liurnia
+620060	Jarroburgo
+620061	Entrada sur de Raya Lucaria
+620062	Aposento de Ranni
+621000	Altar de luz de luna
+621001	Catedral de Manus Celes
+621002	Sur del altar
+630000	Colina con vista al Terrárbol
+630001	Aldea del Molino de Viento
+630002	Iglesia del Terrárbol menor
+630003	Cruce de carreteras de Altus
+630004	Sendero junto a la muralla
+630005	Choza de mercader ermitaño
+630006	Sendero lateral del Camino de la Iniquidad
+630007	Gran puente del bosque
+630008	Ataúd abandonado
+630009	Meseta Altus
+630010	Pérgola de la Abundancia
+630011	Árbol fantasma de la pared exterior
+630012	Muro exterior del campo de batalla
+630013	Cumbre del Molino de Viento
+630014	Muralla de la capital
+630050	Salón del Castellano
+630051	Murallas del Castillo Sombrío
+630052	Entrada interior del Castillo Sombrío
+631000	Puente de la Iniquidad
+631001	Noveno campamento del Monte Gelmir
+631002	Primer campamento del Monte Gelmir
+631003	Camino de la Iniquidad
+631004	Río de aguas peligrosas
+631005	Final de las aguas peligrosas
+631006	Choza de artesano
+631007	Azur, el Hechicero Primigenio
+640000	Iglesia humeante
+640001	Balcón con vista a la podredumbre
+640002	Catedral de la Comunión del Dragón
+640003	Muro humeante
+640004	Pozo profundo de Siofra
+640005	Ruinas de Caelem
+640006	Choza de mercader aislado
+640007	Corazón de Aeonia
+640008	Silla-cripta de Sellia
+640009	Gran puente infranqueable
+640010	Plaza del Castillo Melenarroja
+640011	Cámara fuera de la plaza
+640012	
+640013	Fuerte gaélico norte
+640014	Radahn Azotestelar
+640015	Orilla del pantano de Aeonia
+640016	Banco del pantano sur de Aeonia
+640017	Bajo la escalera de Sellia
+640018	Iglesia de la Plaga
+640019	Carretera sur de Caelid
+640020	Túmulo de dragón oeste
+640021	Fuerte Faroth
+640022	Desvío del túmulo de dragón
+640023	El Ascenso de Lenne
+640024	Gran puente de Farum
+640025	Santuario bestial
+640026	Desvío de la carretera norte de Caelid
+640027	Pantano de Aeonia
+640028	Interior de Aeonia
+640029	Rutas paralelas de Sellia
+650000	Tierras Prohibidas
+650001	Ruinas de Zamor
+650002	Ruinas del valle nevado antiguo
+650003	Lago de congelación
+650004	Primera Iglesia de Márida
+650005	Poste de la tumba de los gigantes
+650006	Iglesia del Descanso
+650007	Pie de la Forja
+650008	Gigante de fuego
+650009	Forja de los Gigantes
+650010	Gran elevador de Rold
+650050	Carretera de la Cresta Blanca
+650051	Mirador de las ruinas del valle nevado
+650052	Entrada principal del Castillo Sol
+650053	Iglesia del Eclipse
+650054	Azotea del Castillo Sol
+651000	Campo de nieve consagrado
+651001	Interior del campo de nieve consagrado
+651002	Ordina, ciudad litúrgica
+651003	Casa Abandonada de la Apostasía
+6100300	Iglesia de Elleh
+6100301	Iglesia de la Comunión del Dragón
+6100302	Tercera Iglesia de Márida
+6100500	Ruinas de Bosqueniebla
+6100501	Ruinas de parada de carretera
+6100502	Ruinas incineradas por dragones
+6100503	Ruinas frente a la puerta
+6100504	Aldea de las Aguas Invocadoras
+6100600	Choza de artista
+6100601	Choza del maestro de guerra
+6100602	Choza de Montebrumo
+6100900	Prisión eterna del sabueso solitario
+6100901	Prisión eterna de Montebrumo
+6101000	Puertabruma
+6101100	Puente del Sacrificio
+6101500	Pozo del río Siofra
+6101800	Fuerte Haight
+6103000	Terrárbol menor
+6108100	Lago Aguil
+6108700	Puerta de traslado
+6108701	Solicitud de la Mansión Volcánica: Istvan
+6108702	Cráter estelar
+6110300	Cuarta Iglesia de Márida
+6110301	Iglesia de la Peregrinación
+6110302	Iglesia bautismal de Callu
+6110500	Ruinas del Calvario de las Brujas
+6110501	Ruinas de la tumba subterránea
+6110502	Ruinas del bosque de los semihumanos
+6110600	Choza de mercader aislado
+6110700	Aldea enferma
+6110800	Torre del vigía del bosque
+6110801	Torre de retorno
+6110900	Prisión Eterna de los Llantos
+6111700	El Ascenso de Oridys
+6112500	Castillo Morne
+6113000	Terrárbol menor
+6120000	Castillo Velobrumo
+6200000	Ruinas del Palacio de Uld
+6200001	Tres Hermanas
+6200300	Iglesia de Irith
+6200301	Iglesia de los Votos
+6200302	Iglesia de la Rosa
+6200303	Iglesia de Bellum
+6200304	Iglesia de la Inhibición
+6200500	Ruinas purificadas
+6200501	Ruinas del Reino de los Soberanos
+6200502	Ruinas de Laskyar
+6200600	Choza de Lobo Durmiente
+6200601	Choza de camarones hervidos
+6200602	Choza de artista
+6200603	Choza de vengador
+6200700	Aldea de los albináuricos
+6200701	Aldea de la Llama Frenética
+6200702	Jarroburgo
+6200800	Torre del vigía de la carretera
+6200801	Torre de la Llama Frenética
+6200900	Prisión eterna del Malechor
+6200901	Prisión eterna del Cuco
+6200902	Prisión eterna de la tumba real
+6201500	Pozo del río Ainsel
+6201700	Torre convertida
+6201701	El Ascenso de Testu
+6201702	El Ascenso de Seluvis
+6201703	El Ascenso de Ranni
+6201704	El Ascenso de Renna
+6201705	Torre marginal convertida
+6202600	Mansión de Caria
+6203000	Terrárbol menor
+6203001	Terrárbol menor
+6203200	Ciudad de las Puertas de la Academia
+6203201	Distrito del Templo
+6205200	Los Cuatro Campanarios
+6210300	Catedral de Manus Celes
+6210500	Ruinas del pueblo de la luna
+6210501	Ruinas del estado lunar
+6210900	Prisión Eterna del Cabecilla
+6211500	Pozo profundo de Ainsel
+6211700	El Ascenso de Chelona
+6220000	Academia de Raya Lucaria
+6300001	
+6300300	Iglesia del Invocatormentas
+6300301	Segunda Iglesia de Márida
+6300302	Iglesia del Terrárbol menor
+6300500	Ruinas del pueblo del bosque
+6300501	Ruinas de Lux
+6300502	Ruinas del perfumista
+6300503	Ruinas de la Sangre Agonizante
+6300600	Escondite de Santa Trina
+6300601	Choza de mercader ermitaño
+6300602	
+6300603	
+6300604	
+6300605	
+6300700	Dominula, aldea del Molino de Viento
+6300800	Torre del vigía de la carretera
+6300900	Prisión Eterna del Linaje Dorado
+6301000	Afueras de la capital
+6301300	Ruinas del pueblo del bosque
+6301700	El Ascenso del Espejismo
+6301900	Pastizales del oeste del Molino de Viento
+6301901	Pastizales del este del Molino de Viento
+6301902	Pastizales del molino de viento de la aldea
+6301903	Puesto de control de Dominula
+6302100	Gran Elevador de Dectus
+6302700	El Castillo Sombrío
+6303000	Terrárbol menor
+6303001	Terrárbol menor
+6308700	Solicitud de la Mansión Volcánica: Rileigh
+6310500	
+6310501	Ruinas de Wyndham
+6310600	Choza con olor a cadáver
+6310601	Choza de ermitaño
+6310602	
+6310603	
+6310604	Choza de artesano
+6310700	Aldea del ermitaño
+6311000	Leyndell, capital real
+6311800	Fuerte Laiedd
+6313000	Terrárbol menor
+6316000	Mansión Volcánica
+6400000	Dunas de los Lamentos
+6400300	Iglesia humeante
+6400301	Catedral de la Comunión del Dragón
+6400302	Iglesia de la Plaga
+6400500	Ruinas de los Olvidados
+6400501	Ruinas de parada de carretera de Caelid
+6400502	Ruinas de la Calle de los Sabios
+6400503	Ruinas de Caelem
+6400600	Cabaña de lo putrefacto
+6400601	Choza de Gowry
+6400800	Torre del vigía del pantano
+6401000	Entrada de Sellia
+6401500	Pozo profundo de Siofra
+6401800	Fuerte gaélico
+6401801	
+6402800	Castillo Melenarroja
+6403000	Terrárbol menor
+6403001	Terrárbol menor
+6403300	Sellia, ciudad de hechicerías
+6410600	Choza de mercader aislado
+6410900	Prisión eterna de Sellia
+6411700	El Ascenso de Lenne
+6411800	Fuerte Faroth
+6413000	Terrárbol menor
+6415400	Santuario bestial
+6500300	Primera Iglesia de Márida
+6500301	Iglesia del Descanso
+6500500	Ruinas de Zamor
+6500501	Ruinas de los Astrónomos
+6500600	Cabaña de la Elevación
+6500900	Prisión eterna del Señor Aspirante
+6501700	Ascenso Profano
+6501800	Guarnición de los guardianes
+6502100	Gran elevador de Rold
+6502900	Castillo Sol
+6503000	Terrárbol menor
+6505700	Forja de los Gigantes
+6508700	Gran elevador de Rold
+6508701	Solicitud de la Mansión Volcánica: Juno Hondal
+6510300	Casa Abandonada de la Apostasía
+6510500	Ruinas de Yelough Anix
+6511700	Ascenso Albináurico
+6513000	Terrárbol menor
+6513400	Ordina, ciudad litúrgica
+6515000	Elfael, sostén del Santoárbol
+6515500	Santoárbol de Miquella
+6515600	Elfael, sostén del Santoárbol
+6604700	Ruinas del palacio de Uhl
+6614600	Nokstella, Ciudad Eterna
+6614700	Gran claustro
+6614701	Ruinas del palacio de Uhl
+6654600	Nokron, Ciudad Eterna
+6654601	Tierra Sagrada de la Noche
+6654602	Acueducto de Siofra
+6654603	
+6654604	Tierras del cuerno santo
+6664500	Mausoleo de la dinastía Mohgwyn
+8000000	Limgrave
+8000400	Liurnia de los Lagos
+8000800	Meseta Altus
+8000900	Caelid
+8001200	Montañas de los Gigantes
+8010000	Río Ainsel
+8010200	Río Siofra
+8010400	Profundidades de Profundraíz
+8100001	Dominios de Tenebria
+90000000	

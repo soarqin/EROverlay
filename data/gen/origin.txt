@@ -1,0 +1,208 @@
+Limgrave|1800,3002,3004,3011,3100,3103,3115,3117,3201,3410,6100,6101:
++ Soldier of Godrick|Stranded Graveyard:28,15B608,5,1
++ Tree Sentinel|Church of Elleh:28,A0749,7,1
++ Demi-Human Chief|(x2)|Coastal Cave:28,174184,7,1
++ Erdtree Burial Watchdog|Stormfoot Catacombs:28,16848D,7,1
++ Beastman of Farum Azula|Groveside Cave:28,170CC8,7,1
++ Stonedigger Troll|Limgrave Tunnels:28,1787D4,7,1
++ Mad Pumpkin Head|Waypoint Ruins:28,B18B9,7,1
++ Bloodhound Knight Darriwil|Forlorn Hound Evergaol:28,B154E,7,1
++ Patches|Murkwater Cave:28,16FF99,7,1
++ Grave Warden Duelist|Murkwater Catacombs:28,168D57,7,1
++ Guardian Golem|Highroad Cave:28,1745E9,7,1
++ Black Knife Assassin|Deathtouched Catacombs:28,16AC1A,7,1
++ Ulcerated Tree Spirit|Fringefolk Hero's Grave:28,15B602,7,1
++ Flying Dragon Agheel|Agheel Lake:28,A9001,7,1
++ Tibia Mariner|Summonwater Village:28,BABB2,7,1
++ Crucible Knight|Stormhill Evergaol:28,A0AB4,7,1
++ Night's Cavalry:28,A936C,7,1
++ Deathbird:28,A0E1F,7,1
++ Bell Bearing Hunter|Warmaster's Shack:28,A0E25,5,1
+
+Weeping Peninsula|3000,3001,3101,3102,3200,6102:
++ Runebear|Earthbore Cave:28,1703FE,7,1
++ Scaly Misbegotten|Morne Tunnel:28,17836F,7,1
++ Erdtree Burial Watchdog|Impaler's Catacombs:28,168028,7,1
++ Cemetery Shade|Tombsward Catacombs:28,167BC3,7,1
++ Miranda the Blighted Bloom|Tombsward Cave:28,170863,7,1
++ Erdtree Avatar|Minor Erdtree:28,A85C0,7,1
++ Ancient Hero of Zamor|Weeping Evergaol:28,9FD08,7,1
++ Night's Cavalry|Castle Morne Rampart:28,B0B13,5,1
++ Deathbird:28,B0B0D,7,1
++ Leonine Misbegotten|Morne Moangrave:28,A7B7F,7,1
+
+Stormveil Castle|1000:
++ Margit, the Fell Omen|Stormveil Castle:28,151C39,5,1
++ Godrick the Grafted|Stormveil Castle:28,151C33,7,1
+
+Liurnia of the Lakes|3003,3005,3006,3104,3105,3106,3202,3411,3900,3920,6200,6201:
++ Cleanrot Knight|Stillwater Cave:28,17112D,7,1
++ Bloodhound Knight|Lakeside Crystal Cave:28,171592,7,1
++ Erdtree Burial Watchdog|Cliffbottom Catacombs:28,169621,7,1
++ Crystalian (Staff)|Crystalian (Spear)|Academy Crystal Cave:28,1719F7,7,1
++ Crystalian (Ringblade)|Raya Lucaria Crystal Tunnel:28,178C39,7,1
++ Cemetery Shade|Black Knife Catacombs:28,1691BC,7,1
++ Black Knife Assassin|Black Knife Catacombs:28,1691C2,5,1
++ Spiritcaller Snail|Road's End Catacombs:28,1688F2,7,1
++ Grafted Scion|Chapel of Anticipation:28,152098,7,1
++ Glintstone Dragon Smarag|Temple Quarter:28,5E04C,7,1
++ Omenkiller|Village of the Albinaurics:28,65EC3,7,1
++ Royal Revenant|Kingsrealm Ruins:28,5EA8D,7,1
++ Tibia Mariner:28,88879,7,1
++ Erdtree Avatar|Converted Tower:28,550BE,7,1
++ Erdtree Avatar|Mausoleum Compound:28,80D6D,7,1
++ Adan, Thief of Fire|Malefactor's Evergaol:28,7F580,7,1
++ Bols, Carian Knight|Cuckoo's Evergaol:28,55794,7,1
++ Onyx Lord|Royal Grave Evergaol:28,702D3,7,1
++ Night's Cavalry|Gate Town Bridge:28,8850E,7,1
++ Night's Cavalry|Bellum Church:28,6FBFD,7,1
++ Deathbird|Scenic Isle:28,77033,7,1
++ Death Rite Bird|Gate Town North:28,6F1BC,7,1
++ Bell Bearing Hunter|Church of Vows:28,77DDF,7,1
++ Royal Knight Loretta|Caria Manor:28,67A1B,7,1
++ Magma Wyrm Makar|Ruin-Strewn Precipice:28,15DD8F,7,1
++ Glintstone Dragon Adula|Moonlight Altar:28,5D60B,7,1
++ Alecto, Black Knife Ringleader|Ringleader's Evergaol:28,54D53,7,1
+
+Academy of Raya Lucaria|1400:
++ Red Wolf of Radagon|Raya Lucaria:28,15814C,5,1
++ Rennala, Queen of the Full Moon|Raya Lucaria:28,158146,7,1
+
+Caelid|3014,3015,3121,3207,3208,6400:
++ Magma Wyrm|Gael Tunnel:28,179DCD,7,1
++ Erdtree Burial Watchdog (Sword)|Erdtree Burial Watchdog (Scepter)|Minor Erdtree Catacombs:28,16B949,7,1
++ Frenzied Duelist|Gaol Cave:28,17577D,7,1
++ Cemetery Shade|Caelid Catacombs:28,16BDAE,7,1
++ Fallingstar Beast|Sellia Crystal Tunnel:28,17A232,7,1
++ Mad Pumpkin Head (Hammer)|Mad Pumpkin Head (Flail)|Caelem Ruins:28,D4945,7,1
++ Decaying Ekzykes|Church of the Plague:28,D3F04,7,1
++ Nox Monk|Nox Swordstress|Sellia, Town of Sorcery:28,DCE92,7,1
++ Commander O'Neil|Swamp of Aeonia:28,DCB27,7,1
++ Putrid Avatar|Minor Erdtree:28,CC08D,7,1
++ Night's Cavalry|Caelid Highway South:28,DC7BC,7,1
++ Death Rite Bird|Southern Aeonia Swamp Bank:28,DC7C2,5,1
++ Crucible Knight|Misbegott1en Warrior|Redmane Castle:28,ED5C1,7,1
++ Starscourge Radahn|Wailing Dunes:28,1A1B02,7,1
+
+Greyoll's Dragonbarrow|3016,3110,3111,3120,3413,6402:
++ Cleanrot Knight (Spear)|Cleanrot Knight (Sickle)|Abandoned Cave:28,175318,7,1
++ Putrid Crystalian (Ringblade)|Putrid Crystalian (Spear)|Putrid Crystalian (Staff)|Sellia Hideaway:28,172FF0,7,1
++ Beastman of Farum Azula (Cleaver)|Beastman of Farum Azula (Throwing Knife)|Dragonbarrow Cave:28,172B8B,7,1
++ Putrid Tree Spirit|War-Dead Catacombs:28,16C213,7,1
++ Godskin Apostle|Divine Tower of Caelid:28,16310E,7,1
++ Black Blade Kindred|Bestial Sanctum:28,EEDAE,7,1
++ Flying Dragon Greyll|Greyoll's Dragonbarrow:28,F6F90,7,1
++ Putrid Avatar|Minor Erdtree:28,EE36D,7,1
++ Battlemage Hugues|Sellia Evergaol:28,DCE98,5,1
++ Night's Cavalry|Lenne's Rise:28,F6F96,5,1
++ Bell Bearing Hunter|Isolated Merchant's Shack:28,D4CB0,7,1
+
+Altus Plateau|3007,3008,3012,3118,3119,3204,3205,6300:
++ Necromancer Garris|Sage's Cave:28,174EB9,5,1
++ Black Knife Assassin|Sage's Cave:28,174EB3,7,1
++ Stonedigger Troll|Old Altus Tunnel:28,17909E,7,1
++ Crystalian (Spear)|Crystalian (Ringblade)|Altus Tunnel:28,179968,7,1
++ Black Knife Assassin|Sainted Hero's Grave:28,92C89,7,1
++ Ancient Hero of Zamor|Sainted Hero's Grave:28,169EEB,7,1
++ Omenkiller|Miranda the Blighted Bloom|Perfumer's Grotto:28,174A4E,7,1
++ Perfumer Tricia|Misbegotten Warrior|Unsightly Catacombs:28,16B07F,7,1
++ Erdtree Burial Watchdog|Wyndham Catacombs:28,169A86,7,1
++ Ancient Dragon Lansseax|Rampartside Path:28,9B541,7,1
++ Demi-Human Queen Gilika|Lux Ruins:28,817AE,7,1
++ Sanguine Noble|Writheblood Ruins:28,92FF4,7,1
++ Godskin Apostle|Dominula, Windmill Village:28,A483A,7,1
++ Fallingstar Beast|Starfall Crater:28,9AE6B,7,1
++ Tree Sentinel|(x2):28,9B1D6,7,1
++ Tibia Mariner|Wyndham Ruins:28,81B19,7,1
++ Wormface|Minor Erdtree:28,9B8AC,7,1
++ Godefroy the Grafted|Golden Lineage Evergaol:28,89CFB,7,1
++ Night's Cavalry|Altus Highway Junction:28,8A066,7,1
++ Elemer of the Briar|The Shaded Castle:28,8AAA7,7,1
+
+Capital Outskirts|3010,3013,3412,6301:
++ Onyx Lord|Sealed Tunnel:28,162CA9,7,1
++ Grave Warden Duelist|Auriza Side Tomb:28,16B4E4,7,1
++ Crucible Knight|Crucible Knight Ordovis|Auriza Hero's Grave:28,16A7B5,7,1
++ Draconic Tree Sentinel|Capital Rampart:28,BD821,7,1
++ Deathbird|Warmaster's Shack:28,B52D4,7,1
++ Bell Bearing Hunter|Hermit Merchant's Shack:28,ACA1C,7,1
+
+Mt. Gelmir|3009,3107,3109,6302:
++ Demi-Human Queen Margot|Volcano Cave:28,172726,7,1
++ Kindred of Rot|(x2)|Seethewater Cave:28,171E5C,7,1
++ Red Wolf of the Champion|Gelmir Hero's Grave:28,16A350,7,1
++ Magma Wyrm|Fort Laiedd:28,6845C,7,1
++ Full-Grown Fallingstar Beast|Ninth Mt. Gelmir Campsite:28,7107F,7,1
++ Demi-Human Queen Maggie|Hermit Village:28,795CC,7,1
++ Ulcerated Tree Spirit|Minor Erdtree:28,79938,5,1
+
+Volcano Manor|1600:
++ Abductor Virgin (Swinging Sickle)|Abductor Virgin (Wheel)|Subterranean Inquisition Chamber:28,159BAB,3,1
++ Godskin Noble|Temple of Eiglay:28,159BAA,5,1
++ God-Devouring Serpent|Rykard, Lord of Blasphemy|Volcano Manor:28,159BA4,7,1
+
+Leyndell, Royal Capital|1100,3414,3415,3500:
++ Esgar, Priest of Blood|Leyndell Catacombs:28,15D066,5,1
++ Fell Twin|(x2)|Divine Tower of East Altus:28,163579,5,1
++ Mohg, the Omen|Cathedral of the Forsaken:28,15D060,7,1
++ Godfrey, First Elden Lord (Golden Shade)|Erdtree Sanctuary:28,152DCD,5,1
++ Morgott, the Omen King|Elden Throne:28,152DC7,7,1
+
+Forbidden Lands|6500:
++ Night's Cavalry:28,D6EDE,7,1
++ Black Blade Kindred:28,DFB01,7,1
+
+Mountaintops of the Giants|3017,3018,3122,6501,6502:
++ Ancient Hero of Zamor|Giant-Conquering Hero's Grave:28,16C678,7,1
++ Ulcerated Tree Spirit|Giants' Mountaintop Catacombs:28,16CADD,7,1
++ Godskin Apostle|Godskin Noble|Spiritcaller Snail|Spiritcaller Cave:28,175BE2,7,1
++ Borealis the Freezing Fog|Freezing Lake:28,1AA7A2,7,1
++ Erdtree Avatar|Minor Erdtree:28,FA2D5,7,1
++ Roundtable Knight Vyke|Lord Contender's Evergaol:28,102B8D,7,1
++ Death Rite Bird:28,E94D0,7,1
++ Commander Niall|Castle Sol:28,F1D88,7,1
++ Fire Giant|Flame Peak:28,1AAC07,7,1
+
+Crumbling Farum Azula|1300:
++ Godskin Duo|Dragon Temple Altar:28,15741D,5,1
++ Dragonlord Placidusax|Beside the Great Bridge:28,15741A,1,1
++ Maliketh, the Black Blade:28,157417,7,1
+
+Consecrated Snowfield|3019,3020,3112,3211,6503:
++ Stray Mimic Tear|Hidden Path to the Haligtree:28,16D3A7,7,1
++ Putrid Grave Warden Duelist|Consecrated Snowfield Catacombs:28,16CF42,7,1
++ Astel, Stars of Darkness|Yelough Anix Tunnel:28,17A697,7,1
++ Misbegotten Crusader|Cave of the Forlorn:28,173455,7,1
++ Great Wyrm Theodorix:28,E9165,7,1
++ Putrid Avatar|Minor Erdtree:28,E94D6,5,1
++ Night's Cavalry (Glaive)|Night's Cavalry (Flail)|Inner Consecrated Snowfield:28,1ABD9B,7,1
++ Death Rite Bird:28,D8360,7,1
+
+Miquella's Haligtree|1500:
++ Loretta, Knight of the Haligtree:28,158E7B,5,1
++ Malenia, Blade of Miquella|Malenia, Goddess of Rot:28,158E75,7,1
+
+Siofra River|1202,1207:
++ Dragonkin Soldier|Siofra River Bank:28,1550F2,1,1
++ Ancestor Spirit|Siofra River Bank:28,156B4D,7,1
++ Mimic Tear:28,1550F5,5,1
++ Regal Ancestor Spirit|Hallowhorn Grounds:28,156FB2,7,1
++ Valiant Gargoyle|Valiant Gargoyle (Twinblade)|Siofra Aqueduct:28,1550EF,7,1
+
+Mohgwyn Dynasty Mausoleum|1205:
++ Mohg, Lord of Blood:28,155E1E,7,1
+
+Ainsel River|1201,1204:
++ Dragonkin Soldier of Nokstella:28,154C8A,7,1
++ Dragonkin Soldier:28,154C90,5,1
++ Astel, Naturalborn of the Void|Grand Cloister:28,1559B9,7,1
+
+Deeproot Depths|1203:
++ Crucible Knight Siluria:28,155520,1,1
++ Fia's Champion|Sorcerer Rogier|Lionel the Lionhearted:28,155554,7,1
++ Lichdragon Fortissax:28,15555A,5,1
+
+Leyndell, Ashen Capital|1105,1900:
++ Sir Gideon Ofnir, the All-Knowing|Erdtree Sanctuary:28,153232,5,1
++ Godfrey, First Elden Lord|Elden Throne:28,15322C,7,1
++ Radagon of the Golden Order|Elden Beast|Fractured Marika:28,15C331,7,1
