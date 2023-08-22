@@ -31,6 +31,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     case DLL_PROCESS_DETACH:
         er::gKillSwitch = true;
         break;
+    default:
+        break;
     }
 
     return TRUE;
@@ -74,7 +76,7 @@ void mainThread() {
             }
         }
 
-        std::this_thread::sleep_for(3ms);
+        std::this_thread::sleep_for(10ms);
         std::this_thread::yield();
     }
 }
