@@ -44,12 +44,12 @@ void Render::render(bool &showFull) {
         int sz = (int)regions.size();
         for (int i = 0; i < sz; i++) {
             const auto &region = regions[i];
-            auto bossCount = region.bosses.size();
+            auto bossCount = (int)region.bosses.size();
             if (regionIndex >= 0) {
                 ImGui::SetNextItemOpen(i == regionIndex);
             }
-            if (ImGui::TreeNode(&region, "%d/%d %s", region.count, (int)bossCount, region.name.c_str())) {
-                for (size_t j = 0; j < bossCount; j++) {
+            if (ImGui::TreeNode(&region, "%d/%d %s", region.count, bossCount, region.name.c_str())) {
+                for (int j = 0; j < bossCount; j++) {
                     auto &bd = bosses[region.bosses[j]];
                     auto on = alive[bd.index];
                     ImGui::Checkbox(bd.displayName.c_str(), &on);
