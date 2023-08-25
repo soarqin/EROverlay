@@ -19,7 +19,7 @@ void Render::render(bool &showFull) {
             showFull = true;
         }
     } else {
-        ImGui::SetNextWindowSize(ImVec2(vp->Size.x / 8.0f, vp->Size.y - 20.f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(vp->Size.x / 9.0f, vp->Size.y * .9f), ImGuiCond_Always);
         ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
         std::unique_lock lock(gBossDataSet.mutex());
         auto regionIndex = gBossDataSet.regionIndex();
@@ -29,7 +29,8 @@ void Render::render(bool &showFull) {
             regionIndex = -1;
         }
         ImGui::Text("%d/%d", gBossDataSet.count(), gBossDataSet.total());
-        ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - 16.f);
+        auto &style = ImGui::GetStyle();
+        ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Up)) {
             showFull = false;
         }
@@ -48,7 +49,9 @@ void Render::render(bool &showFull) {
                 for (int j = 0; j < bossCount; j++) {
                     auto &bd = bosses[region.bosses[j]];
                     auto on = alive[bd.index];
+                    ImGui::BeginDisabled();
                     ImGui::Checkbox(bd.displayName.c_str(), &on);
+                    ImGui::EndDisabled();
                     if (ImGui::IsItemHovered() && !bd.tip.empty()) {
                         ImGui::SetTooltip(bd.tip.c_str());
                     }

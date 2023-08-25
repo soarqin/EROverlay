@@ -52,7 +52,7 @@ void init() {
     er::gHooking = std::make_unique<er::Hooking>();
     //  WAIT FOR USER INPUT
     while (!er::gHooking->menuLoaded()) {
-        Sleep(500);
+        Sleep(1000);
     }
     Sleep(5000);
     er::bosses::gBossDataSet.update();
@@ -70,7 +70,7 @@ void init() {
 }
 
 void mainThread() {
-    er::showMenu = true;
+    er::showMenu = false;
     int counter = 0x3F;
     while (er::gRunning) {
         if (er::gD3DRenderer->isForeground()) {
