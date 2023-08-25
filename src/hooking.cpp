@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "hooking.hpp"
 #include "d3drenderer.hpp"
 #include "memory.hpp"
@@ -11,6 +12,7 @@ void Hooking::findHooks() {
 }
 
 Hooking::Hooking() {
+    findHooks();
 }
 
 Hooking::~Hooking() noexcept {
@@ -19,8 +21,6 @@ Hooking::~Hooking() noexcept {
 
 void Hooking::hook() {
     gD3DRenderer->hook();
-
-    findHooks();
 }
 
 void Hooking::unhook() {
@@ -35,6 +35,12 @@ void Hooking::showMouseCursor(bool show) const {
         *ptr |= 1u;
     else
         *ptr &= ~1u;
+}
+
+bool Hooking::menuLoaded() const {
+    auto addr = *(uintptr_t *)csMenuManImp_;
+    if (addr == 0) return false;
+    return *(uint8_t *)(addr + 0x21) == 1;
 }
 
 }

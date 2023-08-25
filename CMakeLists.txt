@@ -10,3 +10,4 @@ add_static_runtime_option()
 
 add_subdirectory(deps)
 add_subdirectory(src)
+add_subdirectory(injector)

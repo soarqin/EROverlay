@@ -18,6 +18,7 @@ public:
     void findHooks();
 
     void showMouseCursor(bool show) const;
+    [[nodiscard]] bool menuLoaded() const;
 
 private:
     uintptr_t csMenuManImp_ = 0;

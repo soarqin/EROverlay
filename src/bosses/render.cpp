@@ -6,10 +6,6 @@
 namespace er::bosses {
 
 void Render::render(bool &showFull) {
-    counter_ = (counter_ + 1) & 0x1F;
-    if (counter_ == 0) {
-        gBossDataSet.update();
-    }
     auto *vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(vp->Size.x - 10, 10), ImGuiCond_Always, ImVec2(1.f, 0.f));
     if (!showFull) {

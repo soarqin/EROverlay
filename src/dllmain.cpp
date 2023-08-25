@@ -39,18 +39,27 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 void init() {
+#ifndef NDEBUG
+    AllocConsole();
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+#endif
+
     er::bosses::gBossDataSet.load(std::wstring(er::gModulePath) + L"\\data\\bosses.json");
     er::bosses::gBossDataSet.initMemoryAddresses();
 
+    er::gHooking = std::make_unique<er::Hooking>();
     //  WAIT FOR USER INPUT
-    while (!(GetAsyncKeyState(VK_OEM_PLUS) & 1))
-        Sleep(60);
+    while (!er::gHooking->menuLoaded()) {
+        Sleep(500);
+    }
+    Sleep(5000);
     er::bosses::gBossDataSet.update();
 
     er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
     er::gD3DRenderer->registerWindow<er::bosses::Render>();
 
-    er::gHooking = std::make_unique<er::Hooking>();
     er::gHooking->hook();
 
     mainThread();
@@ -62,6 +71,7 @@ void init() {
 
 void mainThread() {
     er::showMenu = true;
+    int counter = 0x3F;
     while (er::gRunning) {
         if (er::gD3DRenderer->isForeground()) {
             if (GetAsyncKeyState(VK_OEM_PLUS) & 1) {
@@ -76,6 +86,10 @@ void mainThread() {
             }
         }
 
+        counter = (counter + 1) & 0x3F;
+        if (counter == 0) {
+            er::bosses::gBossDataSet.update();
+        }
         std::this_thread::sleep_for(10ms);
         std::this_thread::yield();
     }

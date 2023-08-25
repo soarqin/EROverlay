@@ -11,7 +11,6 @@ public:
     void render(bool &showFull) override;
 
 private:
-    int counter_ = 0x1F;
     int lastRegionIndex_ = -1;
 };
 
