@@ -1,6 +1,7 @@
 #include "d3drenderer.hpp"
 #include "hooking.hpp"
 #include "global.hpp"
+#include "config.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_dx12.h"
@@ -9,10 +10,8 @@
 
 #include "bosses/render.hpp"
 
-#include <atomic>
-
-#include "zhocnfont.h"
 #include <algorithm>
+#include <fstream>
 
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -27,7 +26,9 @@ bool D3DRenderer::hook() {
     if (!initHook()) {
         return false;
     }
-    createHook(54, reinterpret_cast<void **>(&oExecuteCommandLists_), reinterpret_cast<void *>(HookExecuteCommandLists));
+    createHook(54,
+               reinterpret_cast<void **>(&oExecuteCommandLists_),
+               reinterpret_cast<void *>(HookExecuteCommandLists));
     createHook(140, reinterpret_cast<void **>(&oPresent_), reinterpret_cast<void *>(HookPresent));
     createHook(146, reinterpret_cast<void **>(&oResizeTarget_), reinterpret_cast<void *>(HookResizeTarget));
     return true;
@@ -255,7 +256,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
         }
 
         ImGui::CreateContext();
-        Styles::InitStyle();
+        initStyle();
         ImGuiIO &io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
@@ -278,7 +279,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
     ImGui::NewFrame();
 
     bool oldShowMenu = showMenu;
-    for (auto &window : windows_)
+    for (auto &window: windows_)
         window->render(showMenu);
     if (showMenu != oldShowMenu) {
         gHooking->showMouseCursor(showMenu);
@@ -447,7 +448,7 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, float matrix[16], 
 //									    STYLES
 //-----------------------------------------------------------------------------------
 
-void Styles::InitStyle() {
+void D3DRenderer::initStyle() {
     ImGuiStyle &style = ImGui::GetStyle();
     ImVec4 *colors = ImGui::GetStyle().Colors;
 
@@ -530,7 +531,37 @@ void Styles::InitStyle() {
     style.LogSliderDeadzone = 4;
     style.TabRounding = 4;
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromMemoryTTF(zhocn_font, zhocn_font_len, 16.f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+    ImGuiIO &io = ImGui::GetIO();
+    const auto &fontFile = gConfig.getw("common.font", L"");
+    if (fontFile.empty()) {
+        io.Fonts->AddFontDefault();
+        return;
+    }
+    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str());
+    if (!ifs) {
+        fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
+        io.Fonts->AddFontDefault();
+        return;
+    }
+    ifs.seekg(0, std::ios::end);
+    const auto size = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+    fontData_.resize(size);
+    ifs.read((char *)fontData_.data(), size);
+    ifs.close();
+    auto charset = gConfig["common.charset"].substr(0, 2);
+    const ImWchar *range;
+    if (charset == "ja") {
+        range = io.Fonts->GetGlyphRangesJapanese();
+    } else if (charset == "ko") {
+        range = io.Fonts->GetGlyphRangesKorean();
+    } else if (charset == "th") {
+        range = io.Fonts->GetGlyphRangesThai();
+    } else if (charset == "zh") {
+        range = io.Fonts->GetGlyphRangesChineseFull();
+    } else {
+        range = io.Fonts->GetGlyphRangesDefault();
+    }
+    io.Fonts->AddFontFromMemoryTTF(fontData_.data(), (int)size, 16.f, nullptr, range);
 }
 }

@@ -2,6 +2,7 @@
 #include "data.hpp"
 #include "nlohmann/json.hpp"
 #include <fstream>
+#include <cstdio>
 
 namespace er::bosses {
 
@@ -12,6 +13,10 @@ static std::vector<int> aliveByRegionSwap_;
 void BossDataSet::load(const std::wstring &filename) {
     nlohmann::ordered_json j;
     std::ifstream ifs(filename.c_str());
+    if (!ifs) {
+        fwprintf(stderr, L"Unable to open %ls\n", filename.c_str());
+        return;
+    }
     j = nlohmann::ordered_json::parse(ifs);
     for (auto &p: j.items()) {
         auto regionIndex = regions_.size();

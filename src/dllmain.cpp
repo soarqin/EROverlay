@@ -5,6 +5,7 @@
 #include "d3drenderer.hpp"
 #include "hooking.hpp"
 #include "global.hpp"
+#include "config.hpp"
 
 #include "bosses/data.hpp"
 #include "bosses/render.hpp"
@@ -17,14 +18,11 @@ void mainThread();
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     UNREFERENCED_PARAMETER(lpReserved);
 
-    if (!::er::gModule) {
-        ::er::gModule = hModule;
-        GetModuleFileNameW(hModule, ::er::gModulePath, MAX_PATH);
-        PathRemoveFileSpecW(::er::gModulePath);
-    }
-
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
+        if (!::er::gModule) {
+            ::er::gModule = hModule;
+        }
         DisableThreadLibraryCalls(hModule);
         CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, er::gModule, 0, nullptr);
         break;
@@ -39,14 +37,20 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 void init() {
-#ifndef NDEBUG
-    AllocConsole();
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-#endif
+    GetModuleFileNameW(::er::gModule, ::er::gModulePath, MAX_PATH);
+    PathRemoveFileSpecW(::er::gModulePath);
+    er::gConfig.load(std::wstring(::er::gModulePath) + L"\\EROverlay.ini");
+    bool enableConsole = false;
+    if (er::gConfig.enabled("common.console")) {
+        enableConsole = true;
+        AllocConsole();
+        freopen("CONIN$", "r", stdin);
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
 
-    er::bosses::gBossDataSet.load(std::wstring(er::gModulePath) + L"\\data\\bosses.json");
+    er::bosses::gBossDataSet
+        .load(std::wstring(er::gModulePath) + L"\\data\\" + er::gConfig.getw("boss.data", L"engus.json"));
     er::bosses::gBossDataSet.initMemoryAddresses();
 
     er::gHooking = std::make_unique<er::Hooking>();
@@ -66,6 +70,9 @@ void init() {
 
     er::gHooking->unhook();
     std::this_thread::sleep_for(500ms);
+    if (enableConsole) {
+        FreeConsole();
+    }
     FreeLibraryAndExitThread(er::gModule, 0);
 }
 

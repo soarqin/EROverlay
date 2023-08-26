@@ -69,6 +69,7 @@ public:
     std::enable_if_t<std::is_base_of<RenderBase, T>::value, void> registerWindow() {
         windows_.emplace_back(std::unique_ptr<RenderBase>(new T()));
     }
+    void initStyle();
 
 private:
     WNDCLASSEX windowClass_ {};
@@ -90,13 +91,7 @@ private:
     uint64_t buffersCounts_ = -1;
     FrameContext *frameContext_ = nullptr;
     std::vector<std::unique_ptr<RenderBase>> windows_;
-};
-
-struct Styles {
-private:
-    explicit Styles() = default;
-public:
-    static void InitStyle();
+    std::vector<uint8_t> fontData_;
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;
