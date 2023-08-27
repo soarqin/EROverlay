@@ -537,19 +537,19 @@ void D3DRenderer::initStyle() {
         io.Fonts->AddFontDefault();
         return;
     }
-    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str());
+    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
     if (!ifs) {
         fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
         io.Fonts->AddFontDefault();
         return;
     }
     ifs.seekg(0, std::ios::end);
-    const auto size = ifs.tellg();
+    const size_t size = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
     fontData_.resize(size);
     ifs.read((char *)fontData_.data(), size);
     ifs.close();
-    auto charset = gConfig["common.charset"].substr(0, 2);
+    const auto charset = gConfig["common.charset"].substr(0, 2);
     const ImWchar *range;
     if (charset == "ja") {
         ImFontGlyphRangesBuilder builder;

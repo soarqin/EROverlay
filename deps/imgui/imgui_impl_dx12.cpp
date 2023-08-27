@@ -296,7 +296,7 @@ static void ImGui_ImplDX12_CreateFontsTexture()
     // Upload texture to graphics system
     {
         D3D12_HEAP_PROPERTIES props;
-        memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+        ZeroMemory(&props, sizeof(D3D12_HEAP_PROPERTIES));
         props.Type = D3D12_HEAP_TYPE_DEFAULT;
         props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
         props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -321,6 +321,7 @@ static void ImGui_ImplDX12_CreateFontsTexture()
 
         UINT uploadPitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
         UINT uploadSize = height * uploadPitch;
+        ZeroMemory(&desc, sizeof(desc));
         desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         desc.Alignment = 0;
         desc.Width = uploadSize;
@@ -333,6 +334,7 @@ static void ImGui_ImplDX12_CreateFontsTexture()
         desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
+        ZeroMemory(&props, sizeof(D3D12_HEAP_PROPERTIES));
         props.Type = D3D12_HEAP_TYPE_UPLOAD;
         props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
         props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;

@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME} SHARED
     bosses/data.cpp bosses/data.hpp
     bosses/render.cpp bosses/render.hpp
 )
+target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 target_link_libraries(${PROJECT_NAME} inih minhook imgui_dx12_backend nlohmann_json::nlohmann_json d3dcompiler dwmapi shlwapi)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} Microsoft::DirectXMath)
