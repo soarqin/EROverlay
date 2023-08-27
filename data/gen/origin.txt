@@ -81,7 +81,7 @@ Caelid|3014,3015,3121,3207,3208,6400:
 + Putrid Avatar|Minor Erdtree:28,CC08D,7,1
 + Night's Cavalry|Caelid Highway South:28,DC7BC,7,1
 + Death Rite Bird|Southern Aeonia Swamp Bank:28,DC7C2,5,1
-+ Crucible Knight|Misbegott1en Warrior|Redmane Castle:28,ED5C1,7,1
++ Crucible Knight|Misbegotten Warrior|Redmane Castle:28,ED5C1,7,1
 + Starscourge Radahn|Wailing Dunes:28,1A1B02,7,1
 
 Greyoll's Dragonbarrow|3016,3110,3111,3120,3413,6402:
@@ -145,7 +145,7 @@ Leyndell, Royal Capital|1100,3414,3415,3500:
 + Esgar, Priest of Blood|Leyndell Catacombs:28,15D066,5,1
 + Fell Twin|(x2)|Divine Tower of East Altus:28,163579,5,1
 + Mohg, the Omen|Cathedral of the Forsaken:28,15D060,7,1
-+ Godfrey, First Elden Lord (Golden Shade)|Erdtree Sanctuary:28,152DCD,5,1
++ Godfrey, First Elden Lord|Erdtree Sanctuary:28,152DCD,5,1
 + Morgott, the Omen King|Elden Throne:28,152DC7,7,1
 
 Forbidden Lands|6500:
