@@ -70,8 +70,10 @@ public:
 */
 
     template<typename T>
-    std::enable_if_t<std::is_base_of<RenderBase, T>::value, void> registerWindow() {
-        windows_.emplace_back(std::unique_ptr<RenderBase>(new T()));
+    std::enable_if_t<std::is_base_of_v<RenderBase, T>, void> registerWindow() {
+        auto* val = new T();
+        val->init();
+        windows_.emplace_back(std::unique_ptr<RenderBase>(val));
     }
     void initStyle();
 
