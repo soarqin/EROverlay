@@ -12,11 +12,13 @@
 namespace er {
 
 class D3DRenderer {
+/*
     struct FrameContext {
         ID3D12CommandAllocator *commandAllocator;
         ID3D12Resource *resource;
         D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
     };
+*/
 
     typedef HRESULT (APIENTRY *Present12)(IDXGISwapChain *pSwapChain, UINT SyncInterval, UINT Flags);
     Present12 oPresent_ = nullptr;
@@ -63,7 +65,9 @@ public:
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-    static bool WorldToScreen(Vector3 pos, Vector2 &screen, float matrix[16], int windowWidth, int windowHeight);
+/*
+    static bool WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight);
+*/
 
     template<typename T>
     std::enable_if_t<std::is_base_of<RenderBase, T>::value, void> registerWindow() {
@@ -77,8 +81,10 @@ private:
 
     uint64_t oldWndProc_ = 0;
 
+/*
     IDXGISwapChain3 *swapchain_ = nullptr;
     ID3D12Device *device_ = nullptr;
+*/
 
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
@@ -89,7 +95,9 @@ private:
     std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargets_;
 
     uint64_t buffersCounts_ = -1;
+/*
     FrameContext *frameContext_ = nullptr;
+*/
     std::vector<std::unique_ptr<RenderBase>> windows_;
     std::vector<uint8_t> fontData_;
 };

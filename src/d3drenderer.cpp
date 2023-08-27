@@ -40,7 +40,7 @@ void D3DRenderer::unhook() const {
 }
 
 bool D3DRenderer::initHook() {
-    if (initWindow() == false) {
+    if (!initWindow()) {
         return false;
     }
 
@@ -362,7 +362,7 @@ bool D3DRenderer::initWindow() {
     windowClass_.hIconSm = nullptr;
     RegisterClassEx(&windowClass_);
     windowHwnd_ = CreateWindow(windowClass_.lpszClassName, "DirectX Window", WS_OVERLAPPEDWINDOW, 0, 0, 100, 100,
-                               NULL, NULL, windowClass_.hInstance, NULL);
+                               nullptr, nullptr, windowClass_.hInstance, nullptr);
     if (windowHwnd_ == nullptr) {
         return false;
     }
@@ -422,13 +422,15 @@ D3DRenderer::~D3DRenderer() noexcept {
 }
 
 //	GUIDED HACKING TEMPLATE
-bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, float matrix[16], int windowWidth, int windowHeight) {
+/*
+bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight) {
     //Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
-    Vector4 clipCoords;
-    clipCoords.x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3];
-    clipCoords.y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7];
-    clipCoords.z = pos.x * matrix[8] + pos.y * matrix[9] + pos.z * matrix[10] + matrix[11];
-    clipCoords.w = pos.x * matrix[12] + pos.y * matrix[13] + pos.z * matrix[14] + matrix[15];
+    Vector4 clipCoords = {
+        .x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3],
+        .y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7],
+        .z = pos.x * matrix[8] + pos.y * matrix[9] + pos.z * matrix[10] + matrix[11],
+        .w = pos.x * matrix[12] + pos.y * matrix[13] + pos.z * matrix[14] + matrix[15],
+    };
 
     if (clipCoords.w < 0.1f)
         return false;
@@ -439,10 +441,11 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, float matrix[16], 
     NDC.y = clipCoords.y / clipCoords.w;
     NDC.z = clipCoords.z / clipCoords.w;
 
-    screen.x = (windowWidth / 2 * NDC.x) + (NDC.x + windowWidth / 2);
-    screen.y = -(windowHeight / 2 * NDC.y) + (NDC.y + windowHeight / 2);
+    screen.x = ((float)windowWidth * .5f * NDC.x) + (NDC.x + (float)windowWidth * .5f);
+    screen.y = -((float)windowHeight * .5f * NDC.y) + (NDC.y + (float)windowHeight * .5f);
     return true;
 }
+*/
 
 //-----------------------------------------------------------------------------------
 //									    STYLES
@@ -544,7 +547,7 @@ void D3DRenderer::initStyle() {
         return;
     }
     ifs.seekg(0, std::ios::end);
-    const size_t size = ifs.tellg();
+    const std::streamsize size = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
     fontData_.resize(size);
     ifs.read((char *)fontData_.data(), size);
@@ -584,6 +587,8 @@ void D3DRenderer::initStyle() {
     } else {
         range = io.Fonts->GetGlyphRangesDefault();
     }
-    io.Fonts->AddFontFromMemoryTTF(fontData_.data(), (int)size, 16.f, nullptr, range);
+    auto fontSize = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
+    if (fontSize == 0.0f) fontSize = 16.0f;
+    io.Fonts->AddFontFromMemoryTTF(fontData_.data(), (int)size, fontSize, nullptr, range);
 }
 }
