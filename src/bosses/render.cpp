@@ -61,13 +61,13 @@ void Render::render(bool &showFull) {
             if (ImGui::TreeNode(&region, "%d/%d %s", region.count, bossCount, region.name.c_str())) {
                 for (int j = 0; j < bossCount; j++) {
                     auto &bd = bosses[region.bosses[j]];
-                    auto on = dead[bd.index];
+                    bool on = dead[bd.index];
                     if (ImGui::Checkbox(bd.displayName.c_str(), &on) && dead[bd.index] && allowRevive_) {
                         popupBossIndex_ = (int)bd.index;
                         popup = true;
                     }
                     if (ImGui::IsItemHovered() && !bd.tip.empty()) {
-                        ImGui::SetTooltip(bd.tip.c_str());
+                        ImGui::SetTooltip("%s", bd.tip.c_str());
                     }
                 }
                 ImGui::TreePop();
