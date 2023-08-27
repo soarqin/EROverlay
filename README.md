@@ -1,9 +1,11 @@
 # ELDEN RING Overlay Hook
 
 ## USAGE
-* Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) or [ModEngine2](https://github.com/soulsmods/ModEngine2)).
-* Press `=` to load in-game menu.
-* After loaded, press `=` to toggle mini/full mode, press `-` to unload the mod.
+* Modify `EROverlay.ini` to your liking.
+* Inject the mod to Elden Ring, you can either:
+  + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) or [ModEngine2](https://github.com/soulsmods/ModEngine2)).
+  + Inject `EROverlay.dll` into running Elden Ring process by run `injector.exe`.
+* Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode, press `-` to unload the mod.
 
 ## [LICENSE](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

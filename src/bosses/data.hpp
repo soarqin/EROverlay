@@ -37,10 +37,11 @@ public:
     [[nodiscard]] inline int regionIndex() const { return regionIndex_; }
     [[nodiscard]] inline int total() const { return (int)bosses_.size(); }
     [[nodiscard]] inline std::mutex& mutex() { return mutex_; }
-    [[nodiscard]] inline const std::vector<bool>& alive() const { return alive_; }
+    [[nodiscard]] inline const std::vector<bool>& dead() const { return dead_; }
 
     void initMemoryAddresses();
     void update();
+    void revive(int index);
 
 private:
     std::vector<BossData> bosses_;
@@ -52,7 +53,7 @@ private:
     uintptr_t eventFlagMan_ = 0;
     uintptr_t flagAddress_ = 0;
     uintptr_t fieldArea_ = 0;
-    std::vector<bool> alive_;
+    std::vector<bool> dead_;
     std::mutex mutex_;
 };
 

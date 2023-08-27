@@ -552,11 +552,33 @@ void D3DRenderer::initStyle() {
     auto charset = gConfig["common.charset"].substr(0, 2);
     const ImWchar *range;
     if (charset == "ja") {
-        range = io.Fonts->GetGlyphRangesJapanese();
+        ImFontGlyphRangesBuilder builder;
+        builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+        builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+        static ImVector<ImWchar> jpRanges;
+        builder.BuildRanges(&jpRanges);
+        range = jpRanges.Data;
     } else if (charset == "ko") {
         range = io.Fonts->GetGlyphRangesKorean();
+    } else if (charset == "pl") {
+        ImFontGlyphRangesBuilder builder;
+        static const ImWchar plRanges[] =
+        {
+            0x0020, 0x017F, // Basic Latin + Latin Supplement + Polish characters
+            0,
+        };
+        range = plRanges;
+    } else if (charset == "ru") {
+        range = io.Fonts->GetGlyphRangesCyrillic();
     } else if (charset == "th") {
-        range = io.Fonts->GetGlyphRangesThai();
+        static const ImWchar thaiRanges[] =
+        {
+            0x0020, 0x00FF, // Basic Latin
+            0x2000, 0x205E, // Punctuations
+            0x0E00, 0x0E7F, // Thai
+            0,
+        };
+        range = thaiRanges;
     } else if (charset == "zh") {
         range = io.Fonts->GetGlyphRangesChineseFull();
     } else {

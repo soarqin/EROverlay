@@ -185,7 +185,7 @@ Ongoing Dear ImGui development is and has been financially supported by users an
 <BR>Please see the **[detailed list of current and past Dear ImGui supporters](https://github.com/ocornut/imgui/wiki/Sponsors)** for details.
 <BR>From November 2014 to December 2019, ongoing development has also been financially supported by its users on Patreon and through individual donations.
 
-**THANK YOU to all past and present supporters for helping to keep this project alive and thriving!**
+**THANK YOU to all past and present supporters for helping to keep this project dead and thriving!**
 
 Dear ImGui is using software and services provided free of charge for open source projects:
 - [PVS-Studio](https://www.viva64.com/en/b/0570/) for static analysis.

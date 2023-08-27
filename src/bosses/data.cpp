@@ -7,8 +7,8 @@
 namespace er::bosses {
 
 BossDataSet gBossDataSet;
-static std::vector<bool> aliveSwap_;
-static std::vector<int> aliveByRegionSwap_;
+static std::vector<bool> deadSwapTmp;
+static std::vector<int> deadByRegionSwapTmp;
 
 void BossDataSet::load(const std::wstring &filename) {
     nlohmann::ordered_json j;
@@ -50,9 +50,9 @@ void BossDataSet::load(const std::wstring &filename) {
             bd.regionIndex = regionIndex;
         }
     }
-    alive_.resize(bosses_.size());
-    aliveSwap_.resize(bosses_.size());
-    aliveByRegionSwap_.resize(regions_.size());
+    dead_.resize(bosses_.size());
+    deadSwapTmp.resize(bosses_.size());
+    deadByRegionSwapTmp.resize(regions_.size());
 }
 
 void BossDataSet::initMemoryAddresses() {
@@ -87,23 +87,23 @@ void BossDataSet::update() {
         flagAddress_ = addr2;
     }
     int cnt = 0;
-    std::fill(aliveByRegionSwap_.begin(), aliveByRegionSwap_.end(), 0);
+    std::fill(deadByRegionSwapTmp.begin(), deadByRegionSwapTmp.end(), 0);
     size_t sz = bosses_.size();
     for (size_t i = 0; i < sz; i++) {
         auto &b = bosses_[i];
         bool al = (*(uint8_t*)(flagAddress_ + b.offset) & b.bits) != 0;
-        aliveSwap_[i] = al;
+        deadSwapTmp[i] = al;
         if (al) {
             cnt++;
-            aliveByRegionSwap_[b.regionIndex]++;
+            deadByRegionSwapTmp[b.regionIndex]++;
         }
     }
     std::unique_lock lock(mutex_);
     sz = regions_.size();
     for (size_t i = 0; i < sz; i++) {
-        regions_[i].count = aliveByRegionSwap_[i];
+        regions_[i].count = deadByRegionSwapTmp[i];
     }
-    alive_.swap(aliveSwap_);
+    dead_.swap(deadSwapTmp);
     count_ = cnt;
     auto addr1 = *(uintptr_t*)fieldArea_;
     if (addr1 == 0) {
@@ -115,6 +115,14 @@ void BossDataSet::update() {
     auto ite = regionMap_.find(mapId / 1000);
     if (ite == regionMap_.end()) return;
     regionIndex_ = ite->second;
+}
+
+void BossDataSet::revive(int index) {
+    if (flagAddress_ == 0) {
+        return;
+    }
+    auto &b = bosses_[index];
+    *(uint8_t*)(flagAddress_ + b.offset) &= ~b.bits;
 }
 
 }
