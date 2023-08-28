@@ -61,6 +61,8 @@ Liurnia of the Lakes|3003,3005,3006,3104,3105,3106,3202,3411,3900,3920,6200,6201
 + Bell Bearing Hunter|Church of Vows:28,77DDF,7,1
 + Royal Knight Loretta|Caria Manor:28,67A1B,7,1
 + Magma Wyrm Makar|Ruin-Strewn Precipice:28,15DD8F,7,1
+
+Moonlight Altar|6202:
 + Glintstone Dragon Adula|Moonlight Altar:28,5D60B,7,1
 + Alecto, Black Knife Ringleader|Ringleader's Evergaol:28,54D53,7,1
 
