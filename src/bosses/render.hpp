@@ -15,6 +15,10 @@ private:
     bool allowRevive_ = false;
     int lastRegionIndex_ = -1;
     int popupBossIndex_ = -1;
+    float posX_ = -10.f;
+    float posY_ = 10.f;
+    float width_ = 0.12f;
+    float height_ = 0.9f;
 };
 
 }

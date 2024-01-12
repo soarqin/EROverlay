@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-01-13: v1.0.1
+  + 在 `EROverlay.ini` 中添加 `boss.panel_pos` 以调整boss面板的位置
+  + 修复boss数据中的一些bug
 * 2023-08-27: v1.0.0
   + 第一个发布版本
 

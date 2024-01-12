@@ -5,15 +5,59 @@
 
 #include "imgui.h"
 
+#include <sstream>
+#include <algorithm>
+
 namespace er::bosses {
+
+inline static std::vector<float> split(const std::string &s) {
+    std::vector<float> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, ',')) {
+        if (item.empty()) {
+            elems.push_back(0);
+            continue;
+        }
+        if (item.back() == '%') {
+            item.pop_back();
+            auto val = std::stof(item);
+            elems.push_back(std::clamp(val / 100.f, -0.999999f, 0.999999f));
+            continue;
+        }
+        elems.push_back(std::stof(item));
+    }
+    return elems;
+}
 
 void Render::init() {
     allowRevive_ = gConfig.enabled("boss.allow_revive");
+    const auto &pos = gConfig["boss.panel_pos"];
+    auto posVec = split(pos);
+    if (posVec.size() >= 4) {
+        posX_ = posVec[0];
+        posY_ = posVec[1];
+        width_ = posVec[2];
+        height_ = posVec[3];
+    }
+}
+
+inline static float calculatePos(float w, float n) {
+    if (n >= 1.f) {
+        return n;
+    }
+    if (n >= 0.f) {
+        return w * n;
+    }
+    if (n <= -1.f) {
+        return w + n;
+    }
+    return w + w * n;
 }
 
 void Render::render(bool &showFull) {
     auto *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(vp->Size.x - 10, 10), ImGuiCond_Always, ImVec2(1.f, 0.f));
+    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)), ImGuiCond_Always, ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
     if (!showFull) {
         ImGui::Begin("##bosses_window",
                      nullptr,
@@ -28,7 +72,7 @@ void Render::render(bool &showFull) {
             showFull = true;
         }
     } else {
-        ImGui::SetNextWindowSize(ImVec2(vp->Size.x * 0.12f, vp->Size.y * .9f), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))), ImGuiCond_Always);
         ImGui::Begin("##bosses_window",
                      nullptr,
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
