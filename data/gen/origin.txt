@@ -70,12 +70,13 @@ Academy of Raya Lucaria|1400:
 + Red Wolf of Radagon|Raya Lucaria:28,15814C,5,1
 + Rennala, Queen of the Full Moon|Raya Lucaria:28,158146,7,1
 
-Caelid|3014,3015,3121,3207,3208,6400:
+Caelid|3014,3015,3111,3121,3207,3208,6400:
 + Magma Wyrm|Gael Tunnel:28,179DCD,7,1
 + Erdtree Burial Watchdog (Sword)|Erdtree Burial Watchdog (Scepter)|Minor Erdtree Catacombs:28,16B949,7,1
 + Frenzied Duelist|Gaol Cave:28,17577D,7,1
 + Cemetery Shade|Caelid Catacombs:28,16BDAE,7,1
 + Fallingstar Beast|Sellia Crystal Tunnel:28,17A232,7,1
++ Putrid Crystalian (Ringblade)|Putrid Crystalian (Spear)|Putrid Crystalian (Staff)|Sellia Hideaway:28,172FF0,7,1
 + Mad Pumpkin Head (Hammer)|Mad Pumpkin Head (Flail)|Caelem Ruins:28,D4945,7,1
 + Decaying Ekzykes|Church of the Plague:28,D3F04,7,1
 + Nox Monk|Nox Swordstress|Sellia, Town of Sorcery:28,DCE92,7,1
@@ -86,9 +87,8 @@ Caelid|3014,3015,3121,3207,3208,6400:
 + Crucible Knight|Misbegotten Warrior|Redmane Castle:28,ED5C1,7,1
 + Starscourge Radahn|Wailing Dunes:28,1A1B02,7,1
 
-Greyoll's Dragonbarrow|3016,3110,3111,3120,3413,6402:
+Greyoll's Dragonbarrow|3016,3110,3120,3413,6402:
 + Cleanrot Knight (Spear)|Cleanrot Knight (Sickle)|Abandoned Cave:28,175318,7,1
-+ Putrid Crystalian (Ringblade)|Putrid Crystalian (Spear)|Putrid Crystalian (Staff)|Sellia Hideaway:28,172FF0,7,1
 + Beastman of Farum Azula (Cleaver)|Beastman of Farum Azula (Throwing Knife)|Dragonbarrow Cave:28,172B8B,7,1
 + Putrid Tree Spirit|War-Dead Catacombs:28,16C213,7,1
 + Godskin Apostle|Divine Tower of Caelid:28,16310E,7,1
@@ -126,7 +126,7 @@ Capital Outskirts|3010,3013,3412,6301:
 + Grave Warden Duelist|Auriza Side Tomb:28,16B4E4,7,1
 + Crucible Knight|Crucible Knight Ordovis|Auriza Hero's Grave:28,16A7B5,7,1
 + Draconic Tree Sentinel|Capital Rampart:28,BD821,7,1
-+ Deathbird|Warmaster's Shack:28,B52D4,7,1
++ Deathbird:28,B52D4,7,1
 + Bell Bearing Hunter|Hermit Merchant's Shack:28,ACA1C,7,1
 
 Mt. Gelmir|3009,3107,3109,6302:
@@ -208,3 +208,62 @@ Leyndell, Ashen Capital|1105,1900:
 + Sir Gideon Ofnir, the All-Knowing|Erdtree Sanctuary:28,153232,5,1
 + Godfrey, First Elden Lord|Elden Throne:28,15322C,7,1
 + Radagon of the Golden Order|Elden Beast|Fractured Marika:28,15C331,7,1
+
+Gravesite Plain|4100,4102,4300,6800,6801,6804,6805,6806,6810,6815,6820:
++ Ghostflame Dragon:28,11F80,7,1
++ Blackgaol Knight|Western Nameless Mausoleum:28,163DC,7,1
++ Chief Bloodfiend|Rivermouth Cave:28,184930,7,1
++ Lamenter|Lamenter's Gaol:28,182608,7,1
++ Demi-Human Swordmaster Onze|Belurat Gaol:28,181D3E,7,1
++ Divine Beast Dancing Lion|Belurat, Tower Settlement:28,17AF61,7,1
++ Rellana, Twin Moon Knight|Castle Ensis:28,20B57,7,1
+
+Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906:
++ Ghostflame Dragon:28,2531E,7,1
++ Ralva the Great Red Bear:28,259F4,7,1
++ Rugalea the Great Red Bear:28,DB24,7,1
++ Dryleaf Dane:28,25689,7,1
++ Black Knight Edredd|Fort of Reprimand:28,25324,5,1
++ Black Knight Garrew|Fog Rift Fort:28,1C025,7,1
++ Red Bear|Northern Nameless Mausoleum:28,17188,7,1
++ Rakshasa|Eastern Nameless Mausoleum:28,2ECED,7,1
++ Metyr, Mother of Fingers|Cathedral of Manus Metyr:28,17DB53,7,1
++ Count Ymir, Mother of Fingers|Cathedral of Manus Metyr:28,2F058,7,1
++ Death Knight|Fog Rift Catacombs:28,164FD1,7,1
++ Death Knight|Scorpion River Catacombs:28,180BAA,7,1
++ Curseblade Labirith|Bonny Gaol:28,1821A3,7,1
++ Golden Hippopotamus|Shadow Keep:28,17C0FB,5,1
++ Messmer the Impaler|Base Serpent Messmer|Shadow Keep:28,17C55A,7,1
+
+Ancient Ruins of Rauh|6940:
++ Romina, Saint of the Bud|Church of the Bud:28,D44E,7,1
+
+Cerulean Coast|2200,6830,6835:
++ Ghostflame Dragon:28,1F6DB,5,1
++ Dancer of Ranah|Southern Nameless Mausoleum:28,1599B,7,1
++ Putrescent Knight|Stone Coffin Fissure:28,17D289,7,1
+
+Charo's Hidden Grave|6840:
++ Death Rite Bird:28,1ABA3,7,1
++ Demi-Human Queen Marigga:28,16071,7,1
+
+Jagged Peak|4301,6850:
++ Jagged Peak Drake:28,24C48,7,1
++ Jagged Peak Drake:28,32A66,3,1
++ Ancient Dragon-Man|Dragon's Pit:28,184D95,7,1
++ Ancient Dragon Senessax|Jagged Peak Mountainside:28,C0496,5,1
++ Bayle the Dread|Jagged Peak Summit:28,C0490,7,1
+
+Scaduview|6920,6930,6960:
++ Tree Sentinel:28,2ABFC,7,1
++ Tree Sentinel:28,2AF6E,3,1
++ Fallingstar Beast:28,345CB,7,1
++ Commander Gaius:28,26435,7,1
++ Scadutree Avatar|Scadutree Base:28,2AF67,7,1
+
+Abyssal Woods|2800,4002,6860:
++ Jori, Elder Inquisitor|Darklight Catacombs:28,334B4,7,1
++ Midra, Lord of Frenzied Flame|Midra's Manse:28,17F5B1,7,1
+
+Enir-Ilim|2001:
++ Promised Consort Radahn|Radahn, Consort of Miquella:28,17B3C6,7,1

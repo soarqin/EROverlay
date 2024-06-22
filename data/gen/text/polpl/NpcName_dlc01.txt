@@ -1,0 +1,104 @@
+140200	Starowina, rogata przybyszka
+140300	Igon
+140301	Igon, smoczy wojownik
+140500	Święta Trina
+140600	Kapłanka smoczej komunii
+140601	Florissax, starożytna smoczyca
+140700	Starożytny smokowiec
+140900	Jolán, szermierka nocy
+140901	Jolán, szermierka nocy
+140902	Jolán, szermierka nocy
+140903	Jolán, szermierka nocy
+140904	Anna, szermierka nocy
+140905	Jolán, szermierka nocy
+140906	Jolán i Anna
+141300	Rycerz ognia Queelign
+141301	Rycerz ognia Queelign
+141302	Rycerz ognia Queelign
+141400	Rogaty przybysz
+141401	Rogaty przybysz
+141402	Rogaty przybysz
+141403	Rogaty przybysz
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Ród poszukiwaczy
+141504	Ród poszukiwaczy
+141600	Pan Ansbach
+141601	Pan Ansbach
+141602	Pan Ansbach
+141603	Ansbach, rycerz czystej krwi
+141700	Freyja, Lwia Grzywa
+141701	Freyja, Lwia Grzywa
+141702	Freyja, Lwia Grzywa
+141800	Leda, rycerz igły
+141801	Leda, rycerz igły
+141802	Leda, rycerz igły
+141803	Leda, rycerz igły
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Hrabia Ymir, najwyższy kapłan
+142001	Hrabia Ymir, Matka Palców
+142100	Niedźwiedź rudy
+142200	Tancerka Ranaha
+142300	Rakshasa
+142400	Rycerz Samotnego więzienia
+142500	Dane, Suchy Liść
+142501	Dane, Suchy Liść
+142502	Dane, Suchy Liść
+142600	Nataan, krwawy szlachcic
+142700	Płaczka
+142800	Nadsłojtys
+142900	Ręka szaleństwa
+143100	Logur, Szpon Bestii
+143200	Moonrithyll, karyjski rycerz
+163000	Wielki Ołtarz Smoczej Komunii
+900000410	Płaczka
+900000430	Starożytny smokowiec
+900000560	Niedźwiedź rudy
+900000561	Tancerka Ranaha
+900000562	Rakshasa
+900000563	Rycerz Samotnego więzienia
+900000605	Jolán, szermierka nocy
+900000606	Hrabia Ymir, Matka Palców
+905000000	Dowódca Gajusz
+905010000	Złoty hipopotam
+905020000	Gnijący rycerz
+905030000	Romina, święta patronka pąków
+905040400	Labirith, przeklęte ostrze
+905051000	Midra, Władca Oszalałego Płomienia
+905070400	Rycerz śmierci
+905070401	Rycerz śmierci
+905081430	Wódz demonów krwi
+905120000	Bayle Groza
+905130000	Messmer Palownik
+905130001	Messmer, złośliwy wąż
+905200000	Metyr, Matka Palców
+905210000	Boska bestia, Tańczący Lew
+905210600	Boska bestia, Tańczący Lew
+905220000	Radahn, obiecany małżonek
+905220001	Radahn, małżonek Miquelli
+905230000	Awatar Ostrodrzewa
+905230001	Awatar Ostrodrzewa
+905230002	Awatar Ostrodrzewa
+905300000	Rellana, rycerz Bliźniaczych Księżyców
+905320000	Jori, starszy inkwizytor
+905370600	Senessax, starożytna smoczyca
+905580600	Smokowiec Wyszczerbionego Szczytu
+905580601	Smokowiec Wyszczerbionego Szczytu
+905730600	Marigga, królowa półludzi
+905810410	Onze, szermierz-półczłowiek
+905820600	Rugalea, wielki niedźwiedź rudy
+905820601	Ralva, wielki niedźwiedź rudy
+905840500	Edredd, czarny rycerz
+905840501	Garrew, czarny rycerz
+905860600	Smok ognia duchów
+905860601	Smok ognia duchów
+905860602	
+905860603	Smok ognia duchów
+906251600	Strażnik Drzewa
+906251601	Strażnik Drzewa
+906260600	Ptak rytuału śmierci
+906310600	Bestia spadającej gwiazdy

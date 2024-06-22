@@ -1,0 +1,104 @@
+140200	Hornsent Grandam
+140300	Igon
+140301	Drake Warrior Igon
+140500	St. Trina
+140600	Dragon Communion Priestess
+140601	Ancient Dragon Florissax
+140700	Ancient Dragon-Man
+140900	Swordhand of Night Jolán
+140901	Swordhand of Night Jolán
+140902	Swordhand of Night Jolán
+140903	Swordhand of Night Jolán
+140904	Swordhand of Night Anna
+140905	Swordhand of Night Jolán
+140906	Jolán and Anna
+141300	Fire Knight Queelign
+141301	Fire Knight Queelign
+141302	Fire Knight Queelign
+141400	Hornsent
+141401	Hornsent
+141402	Hornsent
+141403	Hornsent
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Forager Brood
+141504	Forager Brood
+141600	Sir Ansbach
+141601	Sir Ansbach
+141602	Sir Ansbach
+141603	Pureblood Knight Ansbach
+141700	Redmane Freyja
+141701	Redmane Freyja
+141702	Redmane Freyja
+141800	Needle Knight Leda
+141801	Needle Knight Leda
+141802	Needle Knight Leda
+141803	Needle Knight Leda
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Count Ymir, High Priest
+142001	Count Ymir, Mother of Fingers
+142100	Red Bear
+142200	Dancer of Ranah
+142300	Rakshasa
+142400	Knight of the Solitary Gaol
+142500	Dryleaf Dane
+142501	Dryleaf Dane
+142502	Dryleaf Dane
+142600	Sanguine Noble Nataan
+142700	Lamenter
+142800	Greater Potentate
+142900	Madding Hand
+143100	Logur, the Beast Claw
+143200	Moonrithyll, Carian Knight
+163000	Grand Altar of Dragon Communion
+900000410	Lamenter
+900000430	Ancient Dragon-Man
+900000560	Red Bear
+900000561	Dancer of Ranah
+900000562	Rakshasa
+900000563	Blackgaol Knight
+900000605	Swordhand of Night Jolán
+900000606	Count Ymir, Mother of Fingers
+905000000	Commander Gaius
+905010000	Golden Hippopotamus
+905020000	Putrescent Knight
+905030000	Romina, Saint of the Bud
+905040400	Curseblade Labirith
+905051000	Midra, Lord of Frenzied Flame
+905070400	Death Knight
+905070401	Death Knight
+905081430	Chief Bloodfiend
+905120000	Bayle the Dread
+905130000	Messmer the Impaler
+905130001	Base Serpent Messmer
+905200000	Metyr, Mother of Fingers
+905210000	Divine Beast Dancing Lion
+905210600	Divine Beast Dancing Lion
+905220000	Promised Consort Radahn
+905220001	Radahn, Consort of Miquella
+905230000	Scadutree Avatar
+905230001	Scadutree Avatar
+905230002	Scadutree Avatar
+905300000	Rellana, Twin Moon Knight
+905320000	Jori, Elder Inquisitor
+905370600	Ancient Dragon Senessax
+905580600	Jagged Peak Drake
+905580601	Jagged Peak Drake
+905730600	Demi-Human Queen Marigga
+905810410	Demi-Human Swordmaster Onze
+905820600	Rugalea the Great Red Bear
+905820601	Ralva the Great Red Bear
+905840500	Black Knight Edredd
+905840501	Black Knight Garrew
+905860600	Ghostflame Dragon
+905860601	Ghostflame Dragon
+905860602	
+905860603	Ghostflame Dragon
+906251600	Tree Sentinel
+906251601	Tree Sentinel
+906260600	Death Rite Bird
+906310600	Fallingstar Beast

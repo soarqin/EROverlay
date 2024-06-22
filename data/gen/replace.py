@@ -22,7 +22,24 @@ def load_text():
             continue
         idmap['PL' + l[:index]] = l[index+1:]
         namemap[l[index+1:]] = 'PL' + l[:index]
+    for l in codecs.open('text\\engus\\PlaceName_dlc01.txt', 'r', 'utf-8').readlines():
+        l = l.strip()
+        index = l.find('\t')
+        if index < 0:
+            continue
+        idmap['PL' + l[:index]] = l[index+1:]
+        namemap[l[index+1:]] = 'PL' + l[:index]
     for l in codecs.open('text\\engus\\NpcName.txt', 'r', 'utf-8').readlines():
+        l = l.strip()
+        index = l.find('\t')
+        if index < 0:
+            continue
+        # Skip 'Fractured Marika', this is duplicate with certain place
+        if l[:index] == '160700':
+            continue
+        idmap['NPC' + l[:index]] = l[index+1:]
+        namemap[l[index+1:]] = 'NPC' + l[:index]
+    for l in codecs.open('text\\engus\\NpcName_dlc01.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:

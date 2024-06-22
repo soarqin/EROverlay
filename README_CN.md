@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-06-22: v1.1.0
+  + 添加对带有41个新boss的DLC“Erdtree之影”的Elden Ring v1.12的支持(这是所有我所知的boss，可能遗漏其他可选boss)
+  + 对原版boss数据进行了一些修复
 * 2024-01-13: v1.0.1
   + 在 `EROverlay.ini` 中添加 `boss.panel_pos` 以调整boss面板的位置
   + 修复boss数据中的一些bug

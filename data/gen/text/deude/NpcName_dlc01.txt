@@ -1,0 +1,104 @@
+140200	Hornhold-Greisin
+140300	Igon
+140301	Drachlinkrieger Igon
+140500	St. Trina
+140600	Priesterin der Drachenkommunion
+140601	Uralter Drache Florissax
+140700	Uralter Drachenmensch
+140900	Jolán, Schwerthand der Nacht
+140901	Jolán, Schwerthand der Nacht
+140902	Jolán, Schwerthand der Nacht
+140903	Jolán, Schwerthand der Nacht
+140904	Anna, Schwerthand der Nacht
+140905	Jolán, Schwerthand der Nacht
+140906	Jolán und Anna
+141300	Feuerritter Queelign
+141301	Feuerritter Queelign
+141302	Feuerritter Queelign
+141400	Hornherold
+141401	Hornherold
+141402	Hornherold
+141403	Hornherold
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Sammlerbrut
+141504	Sammlerbrut
+141600	Sir Ansbach
+141601	Sir Ansbach
+141602	Sir Ansbach
+141603	Reinblutritter Ansbach
+141700	Rotmähne Freyja
+141701	Rotmähne Freyja
+141702	Rotmähne Freyja
+141800	Nadelritterin Leda
+141801	Nadelritterin Leda
+141802	Nadelritterin Leda
+141803	Nadelritterin Leda
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Fürst Ymir, Hohepriester
+142001	Fürst Ymir, Mutter der Finger
+142100	Roter Bär
+142200	Tänzerin von Ranah
+142300	Rakshasa
+142400	Ritter des Einsamen Kerker
+142500	Trockenblatt Dane
+142501	Trockenblatt Dane
+142502	Trockenblatt Dane
+142600	Blutadliger Nataan
+142700	Kläger
+142800	Großer Herrscher
+142900	Wahnwitzige Hand
+143100	Logur die Bestienklaue
+143200	Carianische Ritterin Moonrithyll
+163000	Großer Altar der Drachenkommunion
+900000410	Kläger
+900000430	Uralter Drachenmensch
+900000560	Roter Bär
+900000561	Tänzerin von Ranah
+900000562	Rakshasa
+900000563	Ritter des Einsamen Kerker
+900000605	Jolán, Schwerthand der Nacht
+900000606	Fürst Ymir, Mutter der Finger
+905000000	Kommandant Gaius
+905010000	Goldenes Nilpferd
+905020000	Fäulnisritter
+905030000	Romina, Heilige der Knospe
+905040400	Fluchklingen Labirith
+905051000	Midra, Herr der Rasenden Flamme
+905070400	Todesritter
+905070401	Todesritter
+905081430	Blutunhold-Anführer
+905120000	Bayle der Schreckliche
+905130000	Messmer der Pfähler
+905130001	Böse Schlange Messmer
+905200000	Metyr, Mutter der Finger
+905210000	Göttliche Bestie - Tanzender Löwe
+905210600	Göttliche Bestie - Tanzender Löwe
+905220000	Radahn, versprochener Gemahl
+905220001	Radahn, Miquellas Gemahl
+905230000	Avatar des Scadubaums
+905230001	Avatar des Scadubaums
+905230002	Avatar des Scadubaums
+905300000	Rellana, Zwillings-Mondritterin
+905320000	Jori, Ältester Inquisitor
+905370600	Uralter Drache Senessax
+905580600	Klingengipfel-Drachling
+905580601	Klingengipfel-Drachling
+905730600	Halbmenschen-Königin Marigga
+905810410	Halbmenschen-Schwertmeister Onze
+905820600	Rugalea, der große rote Bär
+905820601	Ralva, der große rote Bär
+905840500	Schwarzer Ritter Edredd
+905840501	Schwarzer Ritter Garrew
+905860600	Geisterflammendrache
+905860601	Geisterflammendrache
+905860602	
+905860603	Geisterflammendrache
+906251600	Baumwächter
+906251601	Baumwächter
+906260600	Todesritenvogel
+906310600	Sternenfallbestie

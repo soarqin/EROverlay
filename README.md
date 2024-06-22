@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-06-22: v1.1.0
+  + Add support for Elden Ring v1.12 with DLC "Shadow of the Erdtree" with 41 new bosses (all my known bosses, but may be missing some optional bosses). 
+  + Minor fixes to original boss data.
 * 2024-01-13: v1.0.1
   + Add `boss.panel_pos` to `EROverlay.ini` to adjust the position of boss panel.
   + Fix some bugs in boss data.

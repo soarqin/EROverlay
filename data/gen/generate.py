@@ -20,7 +20,19 @@ def load_text(lang):
         if index < 0:
             continue
         idmap['NPC' + l[:index]] = l[index+1:]
+    for l in codecs.open('text\\' + lang + '\\NpcName_dlc01.txt', 'r', 'utf-8').readlines():
+        l = l.strip()
+        index = l.find('\t')
+        if index < 0:
+            continue
+        idmap['NPC' + l[:index]] = l[index+1:]
     for l in codecs.open('text\\' + lang + '\\PlaceName.txt', 'r', 'utf-8').readlines():
+        l = l.strip()
+        index = l.find('\t')
+        if index < 0:
+            continue
+        idmap['PL' + l[:index]] = l[index+1:]
+    for l in codecs.open('text\\' + lang + '\\PlaceName_dlc01.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:

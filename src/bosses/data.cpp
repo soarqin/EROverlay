@@ -112,7 +112,7 @@ void BossDataSet::update() {
     auto mapId = *(uint32_t*)(addr1 + 0xE4);
     if (mapId == 0 || mapId == mapId_) return;
     mapId_ = mapId;
-    auto ite = regionMap_.find(mapId / 1000);
+    auto ite = regionMap_.find(mapId < 100000 ? mapId / 10 : (mapId < 1000000 ? mapId / 100 : mapId / 1000));
     if (ite == regionMap_.end()) return;
     regionIndex_ = ite->second;
 }

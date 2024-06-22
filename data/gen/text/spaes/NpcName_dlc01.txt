@@ -1,0 +1,104 @@
+140200	Anciana cornamentada
+140300	Igon
+140301	Guerrero dracónico Igon
+140500	Santa Trina
+140600	Sacerdotisa de la Comunión Dragontina
+140601	Dragona antigua Florissax
+140700	Hombre dragón antiguo
+140900	Espadachina de la Noche Jolán
+140901	Espadachina de la Noche Jolán
+140902	Espadachina de la Noche Jolán
+140903	Espadachina de la Noche Jolán
+140904	Espadachina de la Noche Anna
+140905	Espadachina de la Noche Jolán
+140906	Jolán y Anna
+141300	Caballero de Fuego Queelign
+141301	Caballero de Fuego Queelign
+141302	Caballero de Fuego Queelign
+141400	Cornamentado
+141401	Cornamentado
+141402	Cornamentado
+141403	Cornamentado
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Progenie recolectora
+141504	Progenie recolectora
+141600	Sir Ansbach
+141601	Sir Ansbach
+141602	Sir Ansbach
+141603	Caballero de sangre pura Ansbach
+141700	Melena Roja Freyja
+141701	Melena Roja Freyja
+141702	Melena Roja Freyja
+141800	Caballera de la aguja Leda
+141801	Caballera de la aguja Leda
+141802	Caballera de la aguja Leda
+141803	Caballera de la aguja Leda
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Conde Ymir, sumo sacerdote
+142001	Conde Ymir, madre de Dedos
+142100	Oso Rojo
+142200	Bailarina de Ranah
+142300	Rakshasa
+142400	Caballero de la soledad
+142500	Hojaseca Dane
+142501	Hojaseca Dane
+142502	Hojaseca Dane
+142600	Noble sanguino Nataan
+142700	Doliente
+142800	Gran Tarroteniente
+142900	Mano enloquecida
+143100	Logur, la Garra de la Bestia
+143200	Moonrithyll, caballera cariana
+163000	Gran altar de la Comunión Dragontina
+900000410	Doliente
+900000430	Hombre dragón antiguo
+900000560	Oso Rojo
+900000561	Bailarina de Ranah
+900000562	Rakshasa
+900000563	Caballero de la soledad
+900000605	Espadachina de la Noche Jolán
+900000606	Conde Ymir, madre de Dedos
+905000000	Comandante Gaius
+905010000	Hipopótamo dorado
+905020000	Caballero putrefacto
+905030000	Romina, la santa del brote
+905040400	Hojamaldita Labirith
+905051000	Midra, Señor de la Llama Frenética
+905070400	Caballero de la Muerte
+905070401	Caballero de la Muerte
+905081430	Sanguinemigo jefe
+905120000	Bayle el Temible
+905130000	Messmer el Empalador
+905130001	Messmer serpiente primitiva
+905200000	Metyr, madre de Dedos
+905210000	Bestia divina León Danzante
+905210600	Bestia divina León Danzante
+905220000	Radahn, consorte prometido
+905220001	Radahn, consorte de Miquella
+905230000	Avatar del Árbol Umbrío
+905230001	Avatar del Árbol Umbrío
+905230002	Avatar del Árbol Umbrío
+905300000	Rellana, Caballera de Luna Gemela
+905320000	Jori, inquisidor anciano
+905370600	Dragón antiguo Senessax
+905580600	Dragón de pico escarpado
+905580601	Dragón de pico escarpado
+905730600	Marigga, la reina semihumana
+905810410	Onze, maestro espadachín semihumano
+905820600	Rugalea, el Gran Oso Rojo
+905820601	Ralva, el Gran Oso Rojo
+905840500	Caballero Negro Edredd
+905840501	Caballero Negro Garrew
+905860600	Dragón de llama espectral
+905860601	Dragón de llama espectral
+905860602	
+905860603	Dragón de llama espectral
+906251600	Centinela agreste
+906251601	Centinela agreste
+906260600	Ave del ritual fúnebre
+906310600	Bestia de la Estrella fugaz

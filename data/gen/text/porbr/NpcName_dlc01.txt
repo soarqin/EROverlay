@@ -1,0 +1,104 @@
+140200	Anciã Enviada do Chifre
+140300	Igon
+140301	Guerreiro Draco Igon
+140500	Sta. Trina
+140600	Sacerdotisa da Comunhão do Dragão
+140601	Dragão Ancião Florissax
+140700	Homem-Dragão Ancião
+140900	Espadachim da Noite Jolán
+140901	Espadachim da Noite Jolán
+140902	Espadachim da Noite Jolán
+140903	Espadachim da Noite Jolán
+140904	Espadachim da Noite Anna
+140905	Espadachim da Noite Jolán
+140906	Jolán e Anna
+141300	Cavaleiro de Fogo Queelign
+141301	Cavaleiro de Fogo Queelign
+141302	Cavaleiro de Fogo Queelign
+141400	Enviado do Chifre
+141401	Enviado do Chifre
+141402	Enviado do Chifre
+141403	Enviado do Chifre
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Cria dos Forrageadores
+141504	Cria dos Forrageadores
+141600	Sir Ansbach
+141601	Sir Ansbach
+141602	Sir Ansbach
+141603	Cavaleiro Sangue Puro Ansbach
+141700	Juba Vermelha Freyja
+141701	Juba Vermelha Freyja
+141702	Juba Vermelha Freyja
+141800	Cavaleira da Agulha Leda
+141801	Cavaleira da Agulha Leda
+141802	Cavaleira da Agulha Leda
+141803	Cavaleira da Agulha Leda
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Conde Ymir, Sumo Sacerdote
+142001	Conde Ymir, Mãe dos Dedos
+142100	Urso Vermelho
+142200	Dançarina de Ranah
+142300	Rakshasa
+142400	Cavaleiro do Cárcere Solitário
+142500	Dane Folhaseca
+142501	Dane Folhaseca
+142502	Dane Folhaseca
+142600	Nobre Sanguíneo Nataan
+142700	Enlutado
+142800	Jarrista Superior
+142900	Mão Enlouquecida
+143100	Logur, a Garra de Fera
+143200	Moonrithyll, Cavaleira Cariana
+163000	Grande Altar da Comunhão do Dragão
+900000410	Enlutado
+900000430	Homem-Dragão Ancião
+900000560	Urso Vermelho
+900000561	Dançarina de Ranah
+900000562	Rakshasa
+900000563	Cavaleiro do Cárcere Solitário
+900000605	Espadachim da Noite Jolán
+900000606	Conde Ymir, Mãe dos Dedos
+905000000	Comandante Gaius
+905010000	Hipopótamo Dourado
+905020000	Cavaleiro Pútrido
+905030000	Romina, Santa do Broto
+905040400	Lâmina Maldita Labirith
+905051000	Midra, Lorde da Chama Frenética
+905070400	Cavaleiro da Morte
+905070401	Cavaleiro da Morte
+905081430	Chefe Demônio do Sangue
+905120000	Bayle, o Horror
+905130000	Messmer, o Empalador
+905130001	Messmer, Serpente Vil
+905200000	Metyr, Mãe dos Dedos
+905210000	Fera Divina, o Leão Dançante
+905210600	Fera Divina, o Leão Dançante
+905220000	Radahn, o Consorte Prometido
+905220001	Radahn, Consorte de Miquella
+905230000	Avatar da Umbrárvore
+905230001	Avatar da Umbrárvore
+905230002	Avatar da Umbrárvore
+905300000	Rellana, Cavaleira das Luas Gêmeas
+905320000	Jori, Inquisidor Ancião
+905370600	Dragão Ancião Senessax
+905580600	Draco do Pico Irregular
+905580601	Draco do Pico Irregular
+905730600	Rainha Semi-Humana Marigga
+905810410	Mestre Espadachim Semi-Humano Onze
+905820600	Rugalea, o Grande Urso Vermelho
+905820601	Ralva, o Grande Urso Vermelho
+905840500	Edredd, Cavaleiro Negro
+905840501	Garrew, Cavaleiro Negro
+905860600	Dragão da Chama Espectral
+905860601	Dragão da Chama Espectral
+905860602	
+905860603	Dragão da Chama Espectral
+906251600	Sentinela da Árvore
+906251601	Sentinela da Árvore
+906260600	Pássaro do Rito Fúnebre
+906310600	Fera da Estrela Cadente

@@ -1,0 +1,698 @@
+20000	Belurat, insediamento della torre
+20001	
+20002	
+20003	
+20004	
+20005	
+20006	
+20007	
+20008	
+20009	
+20010	Enir-Ilim
+21000	Rocca delle ombre
+21001	Rocca delle ombre, quartiere della chiesa
+21002	
+21003	
+21004	
+21005	
+21006	
+21007	
+21008	
+21009	
+21010	Magazzino di esemplari
+22000	Faglia dei sarcofagi di pietra
+28000	Canonica di Midra
+40000	Catacombe del varco nebbioso
+40001	
+40002	
+40003	
+40004	
+40005	
+40006	
+40007	
+40008	
+40009	
+40010	Catacombe del fiume degli scorpioni
+40011	
+40012	
+40013	
+40014	
+40015	
+40016	
+40017	
+40018	
+40019	
+40020	Catacombe di Tetraluce
+41000	Prigione di Belurat
+41001	
+41002	
+41003	
+41004	
+41005	
+41006	
+41007	
+41008	
+41009	
+41010	Prigione di Bonny
+41011	
+41012	
+41013	
+41014	
+41015	
+41016	
+41017	
+41018	
+41019	
+41020	Prigione del dolente
+42000	Afflusso lava delle rovine della forgia
+42020	Rovine della forgia dell'antico meteorite
+42021	
+42022	
+42023	
+42024	
+42025	
+42026	
+42027	
+42028	
+42029	
+42030	Rovine della forgia di Taylew
+43000	Caverna sulla foce del fiume
+43001	
+43002	
+43003	
+43004	
+43005	
+43006	
+43007	
+43008	
+43009	
+43010	Fossa del drago
+68000	Piana dei sepolcri
+68200	Castello di Ensis
+68300	Costa cerulea
+68400	Tomba nascosta di Charo
+68500	Picco frastagliato
+68501	Base del picco frastagliato
+68600	Boschi abissali
+69000	Altus Ombra
+69001	Base di Rauh
+69200	Ombravista
+69400	Antiche rovine di Rauh
+200000	Teatro della belva divina
+200001	Belurat, insediamento della torre
+200002	Piccolo altare privato
+200003	Facciata del teatro
+200100	Varco della divinità
+200101	
+200102	Enir-Ilim, mura esterne
+200103	Prima guglia
+200104	Guglia a spirale
+200105	Atrio della camera di catarsi
+200106	Scale anteriori del cancello divino
+210001	Piazza del cancello principale
+210002	Porta principale della rocca delle ombre
+210003	
+210004	
+210005	
+210006	Ingresso al quartiere della chiesa
+210007	Cappella sommersa
+210008	Passaggio del culto arboreo
+210009	Santuario del culto arboreo
+210100	Camera oscura di Messmer
+210101	Magazzino, piano terra
+210102	Magazzino, terzo piano
+210103	Magazzino, sesto piano
+210104	Ingresso della camera oscura
+210105	
+210106	Magazzino, sezione posteriore
+210107	Magazzino, soffitta
+210201	Baluardo occidentale
+220000	Giardino purpureo velato
+220001	Faglia dei sarcofagi di pietra
+220002	Croce della faglia
+220003	Punto di sosta della faglia
+220004	Profondità della faglia
+250000	Vivaio di dita
+280000	Camera di consiglio
+280001	Sala della canonica
+280002	Biblioteca di Midra
+280003	Camera al primo piano
+400000	Catacombe del varco nebbioso
+400100	Catacombe del fiume degli scorpioni
+400200	Catacombe di Tetraluce
+410000	Prigione di Belurat
+410100	Prigione di Bonny
+410200	Prigione del dolente
+420000	Afflusso lava delle rovine della forgia
+420200	Rovine della forgia dell'antico meteorite
+420300	Rovine della forgia di Taylew
+430000	Caverna sulla foce del fiume
+430100	Fossa del drago
+430101	Fondo della Fossa del drago
+680000	Piana dei sepolcri
+680001	Rovine arse
+680002	Croce del sentiero triforcato
+680003	Croce del cancello principale
+680004	Fine della strada sulla rupe
+680005	Nord del granponte
+681000	Caverna sul fiume Ellac
+681001	Croce del sentiero delle colonne
+681002	Punto di sosta del sentiero delle colonne
+681003	Fronte del castello
+682000	Presidio del castello di Ensis
+682001	Camera del signore del castello
+682002	Osservatorio di Ensis
+683000	Basso corso del fiume Ellac
+683001	Costa cerulea
+683002	Costa cerulea ovest
+683003	Faglia
+683004	Rovine delle Dita di Rhia
+683005	Croce della costa cerulea
+684000	Grande altare della comunione draconica
+684001	Tomba nascosta di Charo
+685000	Base del picco frastagliato
+685001	Versante del picco frastagliato
+685002	Vetta del picco frastagliato
+685003	Covo del terribile drago
+686000	Boschi abissali
+686001	Cascate frammentate
+686002	Cimitero desolato
+686003	Sentiero del bosco
+686004	Rovine della chiesa
+690000	Croce della strada maestra
+690001	
+690002	Rovine di Moorth
+690003	Villaggio di Bonny
+690004	Ponte per il villaggio
+690005	Strada maestra del quartiere della chiesa
+690006	Cattedrale di Manus Metyr
+690007	Altus Ombra, ovest
+690008	Solco a sud di Moorth
+690009	Forte delle reprimende
+690010	Retro del forte delle reprimende
+690011	Croce di Ombravista
+690012	Base delle antiche rovine
+690013	Rovine della città del tempio
+690014	Gola nord
+690015	
+690016	Bacino d'acqua del castello
+690017	Alto corso del fiume dei reclusi
+690018	Basso corso del fiume dei reclusi
+692000	Ombravista
+692001	Rocca delle ombre, cancello sul retro
+693000	Entroterra
+693001	Collina del dito di pietra
+693002	Ponte dell'entroterra
+694000	Torre minore del viadotto
+694001	Antiche rovine di Rauh, est
+694002	Antiche rovine di Rauh, ovest
+694003	Sagrato della chiesa del bocciolo
+694004	Antiche rovine, grande scalinata
+694005	Chiesa del bocciolo
+696000	Base dell'Albero Ombra
+6800800	Croce di Miquella
+6800801	Croce di Miquella
+6801000	Belurat, insediamento della torre
+6804400	Villaggio sofferente abbandonato
+6804700	Chiesa della consolazione
+6804701	Chiesa della benedizione
+6805000	Rovine arse
+6805100	Città panoramica
+6805600	Mausoleo ignoto occidentale
+6805900	Rifugio del viandante fatiscente
+6805901	Capanna dell'artista
+6806000	Granponte sull'Ellac
+6810800	Croce di Miquella
+6815700	Colonna dell'oblio
+6815901	Tugurio dell'anziano
+6820800	Croce di Miquella
+6824100	Castello di Ensis
+6830000	Rovine delle Dita di Rhia
+6830800	Croce di Miquella
+6831700	Faglia dei sarcofagi di pietra
+6835500	Rovine delle Dita di Rhia
+6835600	Mausoleo ignoto meridionale
+6835900	Tugurio del tessitore di dita
+6844900	Grande altare della comunione draconica
+6861800	Canonica di Midra
+6864700	Chiesa abbandonata
+6870800	Croce di Miquella
+6880800	Croce di Miquella
+6890800	Croce di Miquella
+6900000	Rovine delle Dita di Miyr
+6900800	Croce di Miquella
+6900801	Croce di Miquella
+6900802	Croce di Miquella
+6901300	Rocca delle ombre
+6904200	Forte del varco nebbioso
+6904300	Forte delle reprimende
+6904700	Chiesa della crociata
+6904800	Cattedrale di Manus Metyr
+6905200	Rovine della città del tempio
+6905300	Rovine di Unte
+6905400	Rovine di Moorth
+6905500	Rovine delle Dita di Miyr
+6905600	Mausoleo ignoto settentrionale
+6905601	Mausoleo ignoto orientale
+6905800	Guglia di Rabbath
+6905900	Capanne delle fruste
+6906100	Villaggio delle mosche
+6906800	Villaggio di Bonny
+6920000	Ombravista
+6920001	Base dell'Albero Ombra
+6924000	Calice dell'Albero Ombra
+6925900	Capanna dell'albinauro
+6930000	Rovine delle Dita di Dheo
+6934600	Villaggio sciamanico
+6935500	Rovine delle Dita di Dheo
+6940800	Croce di Miquella
+6941100	Enir-Ilim
+6990800	Croce di Miquella
+8020000	Regno dell'ombra
+10670100	Rovine di Lammia
+10670101	Primo passo
+10670102	Lago di Agheel
+10670103	Rovine incenerite dal drago
+10670104	Albero Madre minore della penisola
+10670105	Castello di Morne
+10670106	Punto di sosta in rovina
+10670130	Galleria per il castello
+10670131	Cella isolata
+10670132	Camera del montacarichi
+10670133	Torre baluardo
+10670134	Dirupo di Grantempesta
+10670135	Porta principale di Grantempesta
+10670160	Catacombe di Guardiasepolcro
+10670161	Catacombe dell'impalatore
+10670162	Catacombe di Passo Tempesta
+10670163	Catacombe mortifere
+10670164	Catacombe di Acquafosca
+10670165	
+10670166	
+10670167	
+10670168	
+10670169	
+10670170	Caverna di Guardiasepolcro
+10670171	Caverna di Profundis
+10670172	Caverna di Acquafosca
+10670173	Caverna di Latibosco
+10670174	Caverna costiera
+10670175	Caverna della strada maestra
+10670176	
+10670177	
+10670178	
+10670179	
+10670180	Galleria di Morne
+10670181	Gallerie di Sepolcride
+10670200	Albero Madre minore del lago
+10670201	Quartiere del tempio
+10670202	Villaggio degli albinauri
+10670203	Rovine del re
+10670204	Maniero cariano
+10670205	Albero Madre minore di Uld
+10670230	Cancello principale dell'Accademia
+10670231	Aula scolastica
+10670232	Chiesa del Cuculo
+10670233	Aula da dibattito
+10670234	
+10670235	
+10670236	
+10670237	
+10670238	
+10670239	
+10670240	Precipizio sulle rovine
+10670241	Vista sul precipizio delle rovine
+10670260	Catacombe dei Neri Coltelli
+10670261	Catacombe della strada morta
+10670262	Catacombe ai piedi della rupe
+10670263	
+10670264	
+10670265	
+10670266	
+10670267	
+10670268	
+10670269	
+10670270	Caverna di Acquacheta
+10670271	Caverna cristallina del lago
+10670272	Caverna cristallina dell'Accademia
+10670273	
+10670274	
+10670275	
+10670276	
+10670277	
+10670278	
+10670279	
+10670280	Galleria di cristallo di Raya Lucaria
+10670300	Forte Laiedd sud
+10670301	Strada sulla rupe del villaggio secluso
+10670302	
+10670303	Via dell'iniquità
+10670304	Capanna dell'artigiano
+10670305	Rovine di Wyndham
+10670306	Castellombroso
+10670307	Rovine di Risangue
+10670308	Dominula, villaggio dei mulini
+10670309	Albero Madre minore delle mura esterne
+10670310	Mura esterne est
+10670330	Baluardo orientale della capitale
+10670331	Terrazza sul viale
+10670332	Chiesa inferiore della capitale
+10670333	Baluardo occidentale della capitale
+10670334	Camera da letto della regina
+10670335	
+10670336	
+10670337	
+10670338	
+10670339	
+10670340	Percorso sotterraneo
+10670341	Abissi dimenticati
+10670342	Catacombe di Leyndell
+10670343	
+10670344	
+10670345	
+10670346	
+10670347	
+10670348	
+10670349	
+10670350	
+10670351	Chiesa della città carceraria
+10670352	Sala degli ospiti
+10670353	Tempio di Eiglay
+10670354	Corridoio delle udienze
+10670355	
+10670356	
+10670357	
+10670358	
+10670359	
+10670360	Tomba dell'eroe beato
+10670361	Tomba dell'eroe di Gelmir
+10670362	Tomba dell'eroe di Auriza
+10670363	Catacombe ripugnanti
+10670364	Catacombe di Wyndham
+10670365	
+10670366	
+10670367	
+10670368	
+10670369	
+10670370	Caverna di Thermae
+10670371	Caverna del vulcano
+10670372	Grotta del profumiere
+10670373	Caverna del savio
+10670374	
+10670375	
+10670376	
+10670377	
+10670378	
+10670379	
+10670380	Vecchia galleria di Altus
+10670381	Galleria di Altus
+10670382	
+10670383	
+10670384	
+10670385	
+10670386	
+10670387	
+10670388	
+10670389	
+10670390	Galleria sigillata
+10670391	
+10670392	
+10670393	
+10670394	
+10670395	
+10670396	
+10670397	
+10670398	
+10670399	
+10670400	Albero Madre minore di Caelid
+10670401	Rovine di Caelem
+10670402	Strada maestra di Caelid meridionale
+10670403	Palude di Aeonia
+10670404	Sellia, città della stregoneria
+10670405	Dracotumulo di Greyoll
+10670406	Castello di Mantorosso
+10670407	Dune sibilanti sud
+10670408	Albero Madre minore di Dracotumulo
+10670409	Granponte di Farum
+10670460	Catacombe dell'Albero Madre minore
+10670461	Catacombe di Caelid
+10670462	Catacombe dei caduti in guerra
+10670463	
+10670464	
+10670465	
+10670466	
+10670467	
+10670468	
+10670469	
+10670470	Caverna carceraria
+10670471	Caverna di Dracotumulo
+10670472	Caverna abbandonata
+10670473	Ritiro di Sellia
+10670474	
+10670475	
+10670476	
+10670477	
+10670478	
+10670479	
+10670480	Galleria di Gael
+10670481	Galleria di cristallo di Sellia
+10670482	
+10670483	
+10670484	
+10670485	
+10670486	
+10670487	
+10670488	
+10670489	
+10670490	Torre divina di Caelid
+10670491	
+10670492	
+10670493	
+10670494	
+10670495	
+10670496	
+10670497	
+10670498	
+10670499	
+10670500	Terre proibite
+10670501	Lago ghiacciato
+10670502	Base della forgia
+10670503	Albero Madre minore sulla vetta
+10670504	Rovine dell'antica valle
+10670505	Castel Sol
+10670506	Fiume congelante
+10670507	Albero Madre minore dei campi di neve
+10670530	Chioma del Sacro Albero
+10670531	Città del Sacro Albero
+10670532	Piazza cittadina del Sacro Albero
+10670533	
+10670534	Cammino dell'Albero Sacro
+10670535	Stanza delle preghiere
+10670536	Mura interne di Elphael
+10670537	Canale di scarico
+10670538	
+10670539	Radici del Sacro Albero
+10670560	Tomba del conquistatore di giganti
+10670561	Catacombe della vetta dei giganti
+10670562	Catacombe dei campi di neve consacrati
+10670563	Sentiero segreto del Sacro Albero
+10670564	
+10670565	
+10670566	
+10670567	
+10670568	
+10670569	
+10670570	Caverna dei desolati
+10670571	Caverna dell'evoca-spiriti
+10670572	
+10670573	
+10670574	
+10670575	
+10670576	
+10670577	
+10670578	
+10670579	
+10670580	Galleria di Yelough Anix
+10670610	Pozzo del fiume Ainsel
+10670611	Chiusa del fiume Ainsel
+10670612	Basso corso del fiume Ainsel
+10670613	Corso del fiume Ainsel
+10670614	Nokstella, Città Eterna
+10670615	Riva del lago putrescente
+10670616	Grande chiostro
+10670617	
+10670618	
+10670619	
+10670620	Sponda del fiume Siofra
+10670621	Boschi dei fedeli
+10670622	Lacrima riflessa
+10670623	Boschi ancestrali
+10670624	Dirupo sull'acquedotto
+10670625	Suolo consacrato alla notte
+10670626	Sotto il pozzo
+10670627	
+10670628	
+10670629	
+10670630	Dirupo sulle Radici
+10670631	Sommità della grande cascata
+10670632	Abisso tra le Radici
+10670633	Oltre le Radici
+10670634	La città eterna senza nome
+10670650	Strada tortuosa verso il palazzo
+10670651	Promontorio del mausoleo di famiglia
+10670652	Ingresso al mausoleo di famiglia
+10670670	Pozzo del fiume Siofra
+10670671	Nokron, città eterna
+10670730	Camera da letto della regina
+10670731	Santuario dell'Albero Madre
+10670732	
+10670733	
+10670734	
+10670735	
+10670736	
+10670737	
+10670738	
+10670739	
+10670740	Tomba della bestia in rovina
+10670741	Abissi della tomba della bestia
+10670742	Terrazza affacciata sulla tempesta
+10670743	Tempio del drago
+10670744	Altare del tempio del drago
+10670745	Montacarichi del tempio del drago
+10670746	Prossimità del granponte
+10670747	Tetto del tempio del drago
+10670748	
+10670749	
+10670750	Trono ancestrale
+10670800	Mausoleo ignoto occidentale
+10670801	Lago a nord del granponte
+10670802	Fronte del castello
+10670803	Camera del signore del castello
+10670804	Costa cerulea
+10670805	Valle dei semiumani
+10670806	Mausoleo ignoto meridionale
+10670807	Cimitero dei draghi
+10670808	Tomba nascosta sud
+10670809	Tomba nascosta nord
+10670810	Base del picco frastagliato
+10670811	Caverna del picco frastagliato
+10670812	Vetta del picco frastagliato
+10670813	Catacombe di Tetraluce, livello inferiore
+10670814	Sala della canonica
+10670815	Camera al primo piano
+10670830	Faglia dei sarcofagi di pietra
+10670831	Profondità della faglia
+10670832	
+10670833	
+10670834	
+10670835	
+10670836	
+10670837	
+10670838	
+10670839	
+10670840	Santuario della via oscura
+10670841	Belurat, insediamento della torre
+10670842	Piccolo altare privato
+10670843	Facciata del teatro
+10670844	
+10670845	
+10670846	
+10670847	
+10670848	
+10670849	
+10670850	Enir-Ilim, mura esterne
+10670851	Prima guglia
+10670852	Guglia a spirale
+10670853	Atrio della camera di catarsi
+10670854	Scale anteriori del cancello divino
+10670855	
+10670856	
+10670857	
+10670858	
+10670859	
+10670860	Catacombe del varco nebbioso
+10670861	
+10670862	
+10670863	
+10670864	
+10670865	
+10670866	
+10670867	
+10670868	
+10670869	
+10670870	Prigione di Belurat
+10670871	Prigione del dolente
+10670872	
+10670873	
+10670874	
+10670875	
+10670876	
+10670877	
+10670878	
+10670879	
+10670880	Fossa del drago
+10670900	Solco di Moorth
+10670901	Bosco degli orsi
+10670902	Mausoleo ignoto settentrionale
+10670903	Mausoleo ignoto orientale
+10670904	Rocca delle ombre, cancello sul retro
+10670905	
+10670906	Antiche rovine di Rauh
+10670907	Antiche rovine, sottoscala
+10670908	Chiesa del bocciolo
+10670909	Santuario del culto arboreo
+10670910	Entroterra
+10670911	Altus, bosco degli orsi
+10670912	Forte del varco nebbioso
+10670913	Solco a sud di Moorth
+10670930	Campana appesa di Miyr
+10670931	
+10670932	
+10670933	
+10670934	
+10670935	
+10670936	
+10670937	
+10670938	
+10670939	
+10670940	Porta principale della rocca delle ombre
+10670941	Ingresso al quartiere della chiesa
+10670942	Cappella sommersa
+10670943	Passaggio del culto arboreo
+10670944	
+10670945	Baluardo occidentale
+10670946	
+10670947	
+10670948	
+10670949	
+10670950	Magazzino, piano terra
+10670951	Magazzino, terzo piano
+10670952	Magazzino, sesto piano
+10670953	Ingresso della camera oscura
+10670954	
+10670955	Magazzino, sezione posteriore
+10670956	Magazzino, soffitta
+10670957	
+10670958	
+10670959	
+10670960	Catacombe del fiume degli scorpioni
+10670961	Catacombe di Tetraluce
+10670962	
+10670963	
+10670964	
+10670965	
+10670966	
+10670967	
+10670968	
+10670969	
+10670970	Prigione di Bonny
+10670971	
+10670972	
+10670973	
+10670974	
+10670975	
+10670976	
+10670977	
+10670978	
+10670979	
+10670980	Caverna sulla foce del fiume

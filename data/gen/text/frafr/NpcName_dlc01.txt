@@ -1,0 +1,104 @@
+140200	Doyenne kérastienne
+140300	Igon
+140301	Guerrier draconique Igon
+140500	Sainte Trina
+140600	Prêtresse de la communion draconique
+140601	Florissax le Dragon ancien
+140700	Homme-dragon ancien
+140900	Épéiste nocturne Jolán
+140901	Épéiste nocturne Jolán
+140902	Épéiste nocturne Jolán
+140903	Épéiste nocturne Jolán
+140904	Épéiste nocturne Anna
+140905	Épéiste nocturne Jolán
+140906	Jolán et Anna
+141300	Chevalier de Feu Queelign
+141301	Chevalier de Feu Queelign
+141302	Chevalier de Feu Queelign
+141400	Kérastien
+141401	Kérastien
+141402	Kérastien
+141403	Kérastien
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Nuée glaneuse
+141504	Nuée glaneuse
+141600	Sire Ansbach
+141601	Sire Ansbach
+141602	Sire Ansbach
+141603	Chevalier de sang pur Ansbach
+141700	Freyja, chevaleresse du Lion rouge
+141701	Freyja, chevaleresse du Lion rouge
+141702	Freyja, chevaleresse du Lion rouge
+141800	Leda, chevaleresse de l'Aiguille
+141801	Leda, chevaleresse de l'Aiguille
+141802	Leda, chevaleresse de l'Aiguille
+141803	Leda, chevaleresse de l'Aiguille
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Comte Ymir, le grand prêtre
+142001	Comte Ymir, mère des Doigts
+142100	Ours écarlate
+142200	Danseuse de Ranah
+142300	Rakshasa
+142400	Chevalier de la Geôle Solitaire
+142500	Dane Mortefeuille
+142501	Dane Mortefeuille
+142502	Dane Mortefeuille
+142600	Noble sanglant Nataan
+142700	Larmoyeur
+142800	Grand potentat
+142900	Main frénétique
+143100	Logur le Sauvage
+143200	Lunerithyll, chevaleresse de Caria
+163000	Grand autel de la communion draconique
+900000410	Larmoyeur
+900000430	Homme-dragon ancien
+900000560	Ours écarlate
+900000561	Danseuse de Ranah
+900000562	Rakshasa
+900000563	Chevalier de la Geôle Solitaire
+900000605	Épéiste nocturne Jolán
+900000606	Comte Ymir, mère des Doigts
+905000000	Commandant Gaïus
+905010000	Hippopotame doré
+905020000	Chevalier putride
+905030000	Romina, sainte du bourgeon
+905040400	Labirith l'Exécrable
+905051000	Midra, seigneur de la Flamme exaltée
+905070400	Chevalier de la Mort
+905070401	Chevalier de la Mort
+905081430	Chef des démons sanglants
+905120000	Bayle l'Effroyable
+905130000	Messmer l'Empaleur
+905130001	Messmer, serpent maléfique
+905200000	Metyr, mère des Doigts
+905210000	Lion dansant de la bête divine
+905210600	Lion dansant de la bête divine
+905220000	Radahn, futur consort
+905220001	Radahn, consort de Miquella
+905230000	Avatar de l'Arbre-Occulte
+905230001	Avatar de l'Arbre-Occulte
+905230002	Avatar de l'Arbre-Occulte
+905300000	Rellana, chevaleresse des Lunes jumelles
+905320000	Jori, inquisiteur en chef
+905370600	Senessax, Dragon ancien
+905580600	Dragon du Pic déchiqueté
+905580601	Dragon du Pic déchiqueté
+905730600	Marigga, reine semi-humaine
+905810410	Onze, épéiste semi-humain
+905820600	Rugalea, grand ours écarlate
+905820601	Ralva, grand ours écarlate
+905840500	Edredd, chevalier Noir
+905840501	Garrew, chevalier Noir
+905860600	Dragon de flammes spectrales
+905860601	Dragon de flammes spectrales
+905860602	
+905860603	Dragon de flammes spectrales
+906251600	Sentinelle de l'Arbre
+906251601	Sentinelle de l'Arbre
+906260600	Volatile funèbre
+906310600	Créature stellaire

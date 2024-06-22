@@ -1,0 +1,104 @@
+140200	Megera araldo del corno
+140300	Igon
+140301	Guerriero draconico Igon
+140500	Santa Trina
+140600	Sacerdotessa della comunione draconica
+140601	Drago antico Florissax
+140700	Uomo-drago antico
+140900	Spada della notte Jolán
+140901	Spada della notte Jolán
+140902	Spada della notte Jolán
+140903	Spada della notte Jolán
+140904	Spada della notte Anna
+140905	Spada della notte Jolán
+140906	Jolán e Anna
+141300	Cavaliere del fuoco Queelign
+141301	Cavaliere del fuoco Queelign
+141302	Cavaliere del fuoco Queelign
+141400	Araldo del corno
+141401	Araldo del corno
+141402	Araldo del corno
+141403	Araldo del corno
+141500	Moore
+141501	Moore
+141502	Moore
+141503	Nidiata dei cercatori
+141504	Nidiata dei cercatori
+141600	Ser Ansbach
+141601	Ser Ansbach
+141602	Ser Ansbach
+141603	Cavaliere di sangue puro Ansbach
+141700	Mantorosso Freyja
+141701	Mantorosso Freyja
+141702	Mantorosso Freyja
+141800	Cavaliera dell'Ago Leda
+141801	Cavaliera dell'Ago Leda
+141802	Cavaliera dell'Ago Leda
+141803	Cavaliera dell'Ago Leda
+141900	Thiollier
+141901	Thiollier
+141902	Thiollier
+141903	Thiollier
+142000	Conte Ymir, prelato
+142001	Conte Ymir, Madre di Dita
+142100	Orso rosso
+142200	Danzatrice di Ranah
+142300	Rakshasa
+142400	Cavaliere della galera solitaria
+142500	Dane Fogliamorta
+142501	Dane Fogliamorta
+142502	Dane Fogliamorta
+142600	Sanguigno nobiliare Nataan
+142700	Dolente
+142800	Potentato superiore
+142900	Mano scellerata
+143100	Logur l'Artiglio ferino
+143200	Cavaliera cariana Moonrithyll
+163000	Grande altare della comunione draconica
+900000410	Dolente
+900000430	Uomo-drago antico
+900000560	Orso rosso
+900000561	Danzatrice di Ranah
+900000562	Rakshasa
+900000563	Cavaliere della galera solitaria
+900000605	Spada della notte Jolán
+900000606	Conte Ymir, Madre di Dita
+905000000	Comandante Gaius
+905010000	Ippopotamo d'oro
+905020000	Cavaliere putrescente
+905030000	Romina, santa del bocciolo
+905040400	Lama di sventura Labirith
+905051000	Midra, signore della Fiamma della frenesia
+905070400	Cavaliere della morte
+905070401	Cavaliere della morte
+905081430	Capo sanguidemone
+905120000	Bayle il Terribile
+905130000	Messmer l'Impalatore
+905130001	Spregevole serpe Messmer
+905200000	Metyr, Madre di Dita
+905210000	Leone danzante belva divina
+905210600	Leone danzante belva divina
+905220000	Promesso consorte Radahn
+905220001	Radahn, consorte di Miquella
+905230000	Avatar dell'Albero Ombra
+905230001	Avatar dell'Albero Ombra
+905230002	Avatar dell'Albero Ombra
+905300000	Rellana, cavaliera della Luna gemella
+905320000	Jori, luminare dell'inquisizione
+905370600	Drago antico Senessax
+905580600	Drago del picco frastagliato
+905580601	Drago del picco frastagliato
+905730600	Regina semiumana Marigga
+905810410	Maestro d'armi semiumano Onze
+905820600	Rugalea, il grande orso rosso
+905820601	Ralva, il grande orso rosso
+905840500	Edredd dei Cavalieri neri
+905840501	Garrew dei Cavalieri neri
+905860600	Drago della fiamma spettrale
+905860601	Drago della fiamma spettrale
+905860602	
+905860603	Drago della fiamma spettrale
+906251600	Sentinella dell'albero
+906251601	Sentinella dell'albero
+906260600	Uccello del rito di morte
+906310600	Belva meteoritica
