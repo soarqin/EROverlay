@@ -56,10 +56,13 @@ void init() {
     er::gHooking = std::make_unique<er::Hooking>();
     //  WAIT FOR USER INPUT
     while (!er::gHooking->menuLoaded()) {
-        Sleep(1000);
+        std::this_thread::sleep_for(1000ms);
     }
-    Sleep(5000);
-    er::bosses::gBossDataSet.update();
+    std::this_thread::sleep_for(2000ms);
+    /* do not hook on game loading, high risk of crash */
+    while (er::gHooking->screenState() == 1) {
+        std::this_thread::sleep_for(100ms);
+    }
 
     er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
     er::gD3DRenderer->registerWindow<er::bosses::Render>();
@@ -79,7 +82,11 @@ void init() {
 void mainThread() {
     er::showMenu = false;
     int counter = 0x3F;
+    er::bosses::gBossDataSet.update();
     while (er::gRunning) {
+        while (er::gHooking->screenState() != 0) {
+            std::this_thread::sleep_for(50ms);
+        }
         if (er::gD3DRenderer->isForeground()) {
             if (GetAsyncKeyState(VK_OEM_PLUS) & 1) {
                 er::showMenu = !er::showMenu;
@@ -97,7 +104,7 @@ void mainThread() {
         if (counter == 0) {
             er::bosses::gBossDataSet.update();
         }
-        std::this_thread::sleep_for(10ms);
         std::this_thread::yield();
+        std::this_thread::sleep_for(50ms);
     }
 }

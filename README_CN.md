@@ -1,6 +1,10 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-06-23: v1.1.1
+  + 更改了确认应用钩子补丁时机的代码，以避免崩溃风险
+  + 现在在加载画面或返回主菜单时不再检查boss数据
+  + 在README中添加了一个关于不要与某些覆盖层一起使用的说明
 * 2024-06-22: v1.1.0
   + 添加对带有41个新boss的DLC“Erdtree之影”的Elden Ring v1.12的支持(这是所有我所知的boss，可能遗漏其他可选boss)
   + 对原版boss数据进行了一些修复
@@ -9,6 +13,9 @@
   + 修复boss数据中的一些bug
 * 2023-08-27: v1.0.0
   + 第一个发布版本
+
+## 注意
+* 请不要与一些覆盖层(如`Nvidia GeForce Experience`中的`FPS Counter`、`MSI Afterburner`、`RivaTuner Statistics Server`等)一起使用此Mod，它们可能导致游戏崩溃。
 
 ## 用法
 * 按自己需求修改 `EROverlay.ini`

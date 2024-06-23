@@ -11,9 +11,7 @@ void Hooking::findHooks() {
     csMenuManImp_ = addr.add(addr.add(3).as<uint32_t&>() + 7).as<uintptr_t>();
 }
 
-Hooking::Hooking() {
-    findHooks();
-}
+Hooking::Hooking() = default;
 
 Hooking::~Hooking() noexcept {
     unhook();
@@ -27,7 +25,11 @@ void Hooking::unhook() {
     gD3DRenderer->unhook();
 }
 
-void Hooking::showMouseCursor(bool show) const {
+void Hooking::showMouseCursor(bool show) {
+    if (csMenuManImp_ == 0) {
+        findHooks();
+        if (csMenuManImp_ == 0) return;
+    }
     auto addr = *(uintptr_t *)csMenuManImp_;
     if (addr == 0) return;
     auto *ptr = (uint8_t *)(addr + 0xAC);
@@ -37,10 +39,24 @@ void Hooking::showMouseCursor(bool show) const {
         *ptr &= ~1u;
 }
 
-bool Hooking::menuLoaded() const {
+bool Hooking::menuLoaded() {
+    if (csMenuManImp_ == 0) {
+        findHooks();
+        if (csMenuManImp_ == 0) return false;
+    }
     auto addr = *(uintptr_t *)csMenuManImp_;
     if (addr == 0) return false;
     return *(uint8_t *)(addr + 0x21) == 1;
+}
+
+int Hooking::screenState() {
+    if (csMenuManImp_ == 0) {
+        findHooks();
+        if (csMenuManImp_ == 0) return 1;
+    }
+    auto addr = *(uintptr_t *)csMenuManImp_;
+    if (addr == 0) return false;
+    return *(int *)(addr + 0x730);
 }
 
 }

@@ -13,12 +13,13 @@ public:
     Hooking &operator=(Hooking const &) = delete;
     Hooking &operator=(Hooking &&) = delete;
 
-    void hook();
-    void unhook();
+    static void hook() ;
+    static void unhook() ;
     void findHooks();
 
-    void showMouseCursor(bool show) const;
-    [[nodiscard]] bool menuLoaded() const;
+    void showMouseCursor(bool show);
+    [[nodiscard]] bool menuLoaded();
+    [[nodiscard]] int screenState();
 
 private:
     uintptr_t csMenuManImp_ = 0;

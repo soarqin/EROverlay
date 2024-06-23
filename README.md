@@ -1,6 +1,10 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-06-23: v1.1.1
+  + Changed codes for checking time to apply hooks, to avoid risk of crash.
+  + Do not check boss data while on loading screen or returned to main menu now.
+  + Add a note in README about not using with some overlays.
 * 2024-06-22: v1.1.0
   + Add support for Elden Ring v1.12 with DLC "Shadow of the Erdtree" with 41 new bosses (all my known bosses, but may be missing some optional bosses). 
   + Minor fixes to original boss data.
@@ -9,6 +13,9 @@
   + Fix some bugs in boss data.
 * 2023-08-27: v1.0.0
   + Initial release.
+
+## NOTE
+* Please do not use this mod with some overlays like `FPS Counter` in `Nvidia GeForce Experience`, `MSI Afterburner`, `RivaTuner Statistics Server`, etc. They may cause the game to crash.
 
 ## USAGE
 * Modify `EROverlay.ini` to your liking.
