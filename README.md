@@ -1,9 +1,11 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-06-23: v1.1.2
+  + Add a missing boss: `Divine Beast Dancing Lion` in `Ancient Ruins of Rauh`.
 * 2024-06-23: v1.1.1
-  + Changed codes for checking time to apply hooks, to avoid risk of crash.
-  + Do not check boss data while on loading screen or returned to main menu now.
+  + Change codes for checking time to apply hooks, to avoid risk of crash.
+  + Do not check boss data while on loadin~~g~~ screen or returned to main menu now.
   + Add a note in README about not using with some overlays.
 * 2024-06-22: v1.1.0
   + Add support for Elden Ring v1.12 with DLC "Shadow of the Erdtree" with 41 new bosses (all my known bosses, but may be missing some optional bosses). 

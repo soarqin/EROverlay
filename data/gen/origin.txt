@@ -236,6 +236,7 @@ Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906:
 + Messmer the Impaler|Base Serpent Messmer|Shadow Keep:28,17C55A,7,1
 
 Ancient Ruins of Rauh|6940:
++ Divine Beast Dancing Lion:28,174F3,7,1
 + Romina, Saint of the Bud|Church of the Bud:28,D44E,7,1
 
 Cerulean Coast|2200,6830,6835:
