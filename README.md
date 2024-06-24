@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-06-24: v1.1.3
+  + Fix a crash caused by wrong memory deallocation.
+  + Use [Pattern16](https://github.com/Dasaav-dsv/Pattern16) to improve signature scanning speed.
 * 2024-06-23: v1.1.2
   + Add a missing boss: `Divine Beast Dancing Lion` in `Ancient Ruins of Rauh`.
 * 2024-06-23: v1.1.1
@@ -35,3 +38,4 @@
 * [stb](https://github.com/nothings/stb)
 * [JSON for Modern C++](https://github.com/nlohmann/json)
 * [inih](https://github.com/benhoyt/inih)
+* [Pattern16](https://github.com/Dasaav-dsv/Pattern16)

@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-06-24: v1.1.3
+  + 修复了由错误的内存释放引起的崩溃
+  + 使用 [Pattern16](https://github.com/Dasaav-dsv/Pattern16) 以提高特征代码扫描速度
 * 2024-06-23: v1.1.2
   + 添加了缺失的boss：`劳弗古遗迹`中的`神兽舞狮`
 * 2024-06-23: v1.1.1
@@ -35,3 +38,4 @@
 * [stb](https://github.com/nothings/stb)
 * [JSON for Modern C++]( https://github.com/nlohmann/json)
 * [inih](https://github.com/benhoyt/inih)
+* [Pattern16](https://github.com/Dasaav-dsv/Pattern16)

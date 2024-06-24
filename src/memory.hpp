@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pattern16.h"
+
 #include <windows.h>
 #include <type_traits>
 #include <vector>
@@ -194,62 +196,11 @@ private:
 
 class Signature {
 public:
-    struct Element {
-        std::uint8_t m_Data{};
-        bool m_Wildcard{};
-    };
-
     /**
      * \brief Constructs the signature with an IDA pattern
      * \param pattern The IDA pattern string
      */
-    explicit Signature(const char *pattern) {
-        auto toUpper = [](char c) -> char {
-            return c >= 'a' && c <= 'z' ? static_cast<char>(c + ('A' - 'a')) : static_cast<char>(c);
-        };
-
-        auto isHex = [&toUpper](char c) -> bool {
-            switch (toUpper(c)) {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-                return true;
-            default:
-                return false;
-            }
-        };
-
-        do {
-            if (*pattern == ' ')
-                continue;
-            if (*pattern == '?') {
-                elements_.push_back(Element{{}, true});
-                if (*(pattern + 1) == '?')
-                    pattern++;
-                continue;
-            }
-
-            if (*(pattern + 1) && isHex(*pattern) && isHex(*(pattern + 1))) {
-                char str[3] = {*pattern, *(pattern + 1), '\0'};
-                auto data = std::strtol(str, nullptr, 16);
-
-                elements_.push_back(Element{static_cast<std::uint8_t>(data), false});
-                pattern++;
-            }
-        } while (*(pattern++));
+    explicit Signature(const char *pattern): pattern_(pattern) {
     }
 
     /**
@@ -258,26 +209,9 @@ public:
      * \return MemoryHandle
      */
     MemoryHandle scan(MemoryRegion region = Module(nullptr)) {
-        auto compareMemory = [](std::uint8_t *data, Element *elem, std::size_t num) -> bool {
-            for (std::size_t i = 0; i < num; ++i) {
-                if (!elem[i].m_Wildcard)
-                    if (data[i] != elem[i].m_Data)
-                        return false;
-            }
-
-            return true;
-        };
-
-        for (std::uintptr_t i = region.base().as<std::uintptr_t>(), end = region.end().as<std::uintptr_t>(); i != end;
-             ++i) {
-            if (compareMemory(reinterpret_cast<std::uint8_t *>(i), elements_.data(), elements_.size())) {
-                return MemoryHandle(i);
-            }
-        }
-
-        return {};
+        return Pattern16::scan(region.base().as<void*>(), region.size(), pattern_);
     }
 private:
-    std::vector<Element> elements_;
+    const char *pattern_;
 };
 }
