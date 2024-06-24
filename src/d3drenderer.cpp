@@ -3,7 +3,6 @@
 #include "global.hpp"
 #include "config.hpp"
 
-#include "imgui.h"
 #include "imgui_impl_dx12.h"
 #include "imgui_impl_win32.h"
 #include "MinHook.h"
@@ -26,9 +25,7 @@ bool D3DRenderer::hook() {
     if (!initHook()) {
         return false;
     }
-    createHook(54,
-               reinterpret_cast<void **>(&oExecuteCommandLists_),
-               reinterpret_cast<void *>(HookExecuteCommandLists));
+    createHook(54, reinterpret_cast<void **>(&oExecuteCommandLists_), reinterpret_cast<void *>(HookExecuteCommandLists));
     createHook(140, reinterpret_cast<void **>(&oPresent_), reinterpret_cast<void *>(HookPresent));
     createHook(146, reinterpret_cast<void **>(&oResizeTarget_), reinterpret_cast<void *>(HookResizeTarget));
     return true;
@@ -147,9 +144,9 @@ bool D3DRenderer::initHook() {
     memcpy(MethodsTable + 44 + 19, *(uint64_t **)CommandAllocator, 9 * sizeof(uint64_t));
     memcpy(MethodsTable + 44 + 19 + 9, *(uint64_t **)CommandList, 60 * sizeof(uint64_t));
     memcpy(MethodsTable + 44 + 19 + 9 + 60, *(uint64_t **)SwapChain, 18 * sizeof(uint64_t));
-    Sleep(1000);
 
     MH_Initialize();
+
     Device->Release();
     Device = nullptr;
     CommandQueue->Release();
@@ -256,6 +253,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
         }
 
         ImGui::CreateContext();
+        loadFont();
         initStyle();
         ImGuiIO &io = ImGui::GetIO();
         io.IniFilename = nullptr;
@@ -266,7 +264,7 @@ void D3DRenderer::overlay(IDXGISwapChain *pSwapChain) {
                             descriptorHeap_->GetCPUDescriptorHandleForHeapStart(),
                             descriptorHeap_->GetGPUDescriptorHandleForHeapStart());
         ImGui_ImplDX12_CreateDeviceObjects();
-        ImGui::GetIO().ImeWindowHandle = gameWindow_;
+        ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
         oldWndProc_ = SetWindowLongPtr(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
 
         inited_ = true;
@@ -385,7 +383,6 @@ void D3DRenderer::resetRenderState() {
         SetWindowLongPtr(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
-
         inited_ = false;
     }
 }
@@ -450,6 +447,69 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix
 //-----------------------------------------------------------------------------------
 //									    STYLES
 //-----------------------------------------------------------------------------------
+
+void D3DRenderer::loadFont() {
+    fontData_.clear();
+    fontSize_ = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
+    if (fontSize_ == 0.0f) fontSize_ = 18.0f;
+    const auto& fontFile = gConfig.getw("common.font", L"");
+    if (fontFile.empty()) {
+        return;
+    }
+    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
+    if (!ifs) {
+        fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
+        return;
+    }
+    ifs.seekg(0, std::ios::end);
+    const std::streamsize size = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+    fontData_.resize(size);
+    ifs.read((char*)fontData_.data(), size);
+    ifs.close();
+
+    const ImGuiIO& io = ImGui::GetIO();
+    const auto charset = gConfig["common.charset"].substr(0, 2);
+    if (charset == "ja") {
+        ImFontGlyphRangesBuilder builder;
+        builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+        builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+        static ImVector<ImWchar> jpRanges;
+        builder.BuildRanges(&jpRanges);
+        charsetRange_ = jpRanges.Data;
+    }
+    else if (charset == "ko") {
+        charsetRange_ = io.Fonts->GetGlyphRangesKorean();
+    }
+    else if (charset == "pl") {
+        ImFontGlyphRangesBuilder builder;
+        static const ImWchar plRanges[] =
+        {
+            0x0020, 0x017F, // Basic Latin + Latin Supplement + Polish characters
+            0,
+        };
+        charsetRange_ = plRanges;
+    }
+    else if (charset == "ru") {
+        charsetRange_ = io.Fonts->GetGlyphRangesCyrillic();
+    }
+    else if (charset == "th") {
+        static const ImWchar thaiRanges[] =
+        {
+            0x0020, 0x00FF, // Basic Latin
+            0x2000, 0x205E, // Punctuations
+            0x0E00, 0x0E7F, // Thai
+            0,
+        };
+        charsetRange_ = thaiRanges;
+    }
+    else if (charset == "zh") {
+        charsetRange_ = io.Fonts->GetGlyphRangesChineseFull();
+    }
+    else {
+        charsetRange_ = io.Fonts->GetGlyphRangesDefault();
+    }
+}
 
 void D3DRenderer::initStyle() {
     ImGuiStyle &style = ImGui::GetStyle();
@@ -534,61 +594,14 @@ void D3DRenderer::initStyle() {
     style.LogSliderDeadzone = 4;
     style.TabRounding = 4;
 
-    ImGuiIO &io = ImGui::GetIO();
-    const auto &fontFile = gConfig.getw("common.font", L"");
-    if (fontFile.empty()) {
+    const ImGuiIO &io = ImGui::GetIO();
+    if (fontData_.empty()) {
         io.Fonts->AddFontDefault();
-        return;
-    }
-    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
-    if (!ifs) {
-        fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
-        io.Fonts->AddFontDefault();
-        return;
-    }
-    ifs.seekg(0, std::ios::end);
-    const std::streamsize size = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-    fontData_.resize(size);
-    ifs.read((char *)fontData_.data(), size);
-    ifs.close();
-    const auto charset = gConfig["common.charset"].substr(0, 2);
-    const ImWchar *range;
-    if (charset == "ja") {
-        ImFontGlyphRangesBuilder builder;
-        builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
-        builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
-        static ImVector<ImWchar> jpRanges;
-        builder.BuildRanges(&jpRanges);
-        range = jpRanges.Data;
-    } else if (charset == "ko") {
-        range = io.Fonts->GetGlyphRangesKorean();
-    } else if (charset == "pl") {
-        ImFontGlyphRangesBuilder builder;
-        static const ImWchar plRanges[] =
-        {
-            0x0020, 0x017F, // Basic Latin + Latin Supplement + Polish characters
-            0,
-        };
-        range = plRanges;
-    } else if (charset == "ru") {
-        range = io.Fonts->GetGlyphRangesCyrillic();
-    } else if (charset == "th") {
-        static const ImWchar thaiRanges[] =
-        {
-            0x0020, 0x00FF, // Basic Latin
-            0x2000, 0x205E, // Punctuations
-            0x0E00, 0x0E7F, // Thai
-            0,
-        };
-        range = thaiRanges;
-    } else if (charset == "zh") {
-        range = io.Fonts->GetGlyphRangesChineseFull();
     } else {
-        range = io.Fonts->GetGlyphRangesDefault();
+        void *data = IM_ALLOC(fontData_.size());
+        const auto size = fontData_.size();
+        memcpy(data, fontData_.data(), size);
+        io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(size), fontSize_, nullptr, charsetRange_);
     }
-    auto fontSize = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
-    if (fontSize == 0.0f) fontSize = 16.0f;
-    io.Fonts->AddFontFromMemoryTTF(fontData_.data(), (int)size, fontSize, nullptr, range);
 }
 }

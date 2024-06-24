@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "imgui.h"
 #include "renderbase.hpp"
 #include "util/vector.hpp"
 
@@ -75,6 +76,7 @@ public:
         val->init();
         windows_.emplace_back(std::unique_ptr<RenderBase>(val));
     }
+    void loadFont();
     void initStyle();
 
 private:
@@ -96,12 +98,14 @@ private:
     ID3D12Resource **backBuffer_ = nullptr;
     std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargets_;
 
-    uint64_t buffersCounts_ = -1;
+    uint64_t buffersCounts_ = 0;
 /*
     FrameContext *frameContext_ = nullptr;
 */
     std::vector<std::unique_ptr<RenderBase>> windows_;
     std::vector<uint8_t> fontData_;
+    float fontSize_ = 0.0f;
+    const ImWchar* charsetRange_;
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;

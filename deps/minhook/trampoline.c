@@ -42,7 +42,9 @@
     typedef hde64s HDE;
     #define HDE_DISASM(code, hs) hde64_disasm(code, hs)
 #else
-    #error "This subset of minhook only supports x64 targets"
+    #include "hde32.h"
+    typedef hde32s HDE;
+    #define HDE_DISASM(code, hs) hde32_disasm(code, hs)
 #endif
 
 #include "trampoline.h"
@@ -283,8 +285,7 @@ BOOL CreateTrampolineFunction(PTRAMPOLINE ct)
 #endif
         newPos += copySize;
         oldPos += hs.len;
-    }
-    while (!finished);
+    } while (!finished);
 
     // Is there enough place for a long jump?
     if (oldPos < sizeof(JMP_REL)
