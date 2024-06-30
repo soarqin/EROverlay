@@ -28,7 +28,7 @@ struct RegionData {
 
 class BossDataSet {
 public:
-    void load(const std::wstring &filename);
+    void load(bool hasDLC);
 
     [[nodiscard]] inline const std::vector<BossData> &bosses() const { return bosses_; }
     [[nodiscard]] inline const std::vector<RegionData> &regions() const { return regions_; }

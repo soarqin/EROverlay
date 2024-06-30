@@ -16,6 +16,12 @@ add_library(${PROJECT_NAME} SHARED
     global.cpp global.hpp
     renderbase.hpp
 
+    # SteamAPI usage
+    steamapi.cpp steamapi.hpp
+
+    # util
+    util/vector.hpp
+
     # Bosses panel
     bosses/data.cpp bosses/data.hpp
     bosses/render.cpp bosses/render.hpp

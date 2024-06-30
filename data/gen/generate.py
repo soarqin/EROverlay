@@ -80,6 +80,8 @@ def generate(j, lang):
             o3['bit'] = m['bit']
             o2.append(o3)
         o[name] = {'regions': v['regions'], 'bosses': o2}
+        if 'dlc' in v:
+            o[name]['dlc'] = 1
     codecs.open('../' + lang + '.json', 'w', 'utf-8').write(json.dumps(o, ensure_ascii=False))
 
 

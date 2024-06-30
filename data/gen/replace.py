@@ -65,6 +65,8 @@ if __name__ == '__main__':
             regions = []
             for v in spl[1].split(','):
                 regions.append(int(v))
+            if len(spl) > 2 and int(spl[2]) > 0:
+                curr['dlc'] = 1
             curr['regions'] = regions
             curr_section = []
             curr['bosses'] = curr_section

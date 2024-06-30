@@ -1,4 +1,7 @@
 #include "../memory.hpp"
+#include "../global.hpp"
+#include "../config.hpp"
+#include "../steamapi.hpp"
 #include "data.hpp"
 #include "nlohmann/json.hpp"
 #include <fstream>
@@ -10,8 +13,13 @@ BossDataSet gBossDataSet;
 static std::vector<bool> deadSwapTmp;
 static std::vector<int> deadByRegionSwapTmp;
 
-void BossDataSet::load(const std::wstring &filename) {
+void BossDataSet::load(bool hasDLC) {
     nlohmann::ordered_json j;
+    std::wstring name = er::gConfig.getw("boss.data", L"");
+    if (name.empty()) {
+        name = getGameLanguage() + L".json";
+    }
+    const std::wstring filename = std::wstring(er::gModulePath) + L"\\data\\" + name;
     std::ifstream ifs(filename.c_str());
     if (!ifs) {
         fwprintf(stderr, L"Unable to open %ls\n", filename.c_str());
@@ -19,6 +27,9 @@ void BossDataSet::load(const std::wstring &filename) {
     }
     j = nlohmann::ordered_json::parse(ifs);
     for (auto &p: j.items()) {
+        if (!hasDLC && p.value()["dlc"] == 1) {
+            continue;
+        }
         auto regionIndex = regions_.size();
         auto &rd = regions_.emplace_back();
         rd.name = p.key();

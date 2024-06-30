@@ -47,7 +47,8 @@ std::wstring Config::getw(const std::string &key, const std::wstring &defaultVal
     std::wstring ws;
     ws.resize(MultiByteToWideChar(CP_UTF8, 0, it->second.c_str(), -1, nullptr, 0));
     MultiByteToWideChar(CP_UTF8, 0, it->second.c_str(), -1, ws.data(), (int)ws.size());
-    return std::move(ws);
+    while (!ws.empty() && ws.back() == 0) ws.pop_back();
+    return ws;
 }
 
 bool Config::enabled(const std::string &key) const {

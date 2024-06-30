@@ -209,7 +209,7 @@ Leyndell, Ashen Capital|1105,1900:
 + Godfrey, First Elden Lord|Elden Throne:28,15322C,7,1
 + Radagon of the Golden Order|Elden Beast|Fractured Marika:28,15C331,7,1
 
-Gravesite Plain|4100,4102,4300,6800,6801,6804,6805,6806,6810,6815,6820:
+Gravesite Plain|4100,4102,4300,6800,6801,6804,6805,6806,6810,6815,6820|1:
 + Ghostflame Dragon:28,11F80,7,1
 + Blackgaol Knight|Western Nameless Mausoleum:28,163DC,7,1
 + Chief Bloodfiend|Rivermouth Cave:28,184930,7,1
@@ -218,7 +218,7 @@ Gravesite Plain|4100,4102,4300,6800,6801,6804,6805,6806,6810,6815,6820:
 + Divine Beast Dancing Lion|Belurat, Tower Settlement:28,17AF61,7,1
 + Rellana, Twin Moon Knight|Castle Ensis:28,20B57,7,1
 
-Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906:
+Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906|1:
 + Ghostflame Dragon:28,2531E,7,1
 + Ralva the Great Red Bear:28,259F4,7,1
 + Rugalea the Great Red Bear:28,DB24,7,1
@@ -235,36 +235,36 @@ Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906:
 + Golden Hippopotamus|Shadow Keep:28,17C0FB,5,1
 + Messmer the Impaler|Base Serpent Messmer|Shadow Keep:28,17C55A,7,1
 
-Ancient Ruins of Rauh|6940:
+Ancient Ruins of Rauh|6940|1:
 + Divine Beast Dancing Lion:28,174F3,7,1
 + Romina, Saint of the Bud|Church of the Bud:28,D44E,7,1
 
-Cerulean Coast|2200,6830,6835:
+Cerulean Coast|2200,6830,6835|1:
 + Ghostflame Dragon:28,1F6DB,5,1
 + Dancer of Ranah|Southern Nameless Mausoleum:28,1599B,7,1
 + Putrescent Knight|Stone Coffin Fissure:28,17D289,7,1
 
-Charo's Hidden Grave|6840:
+Charo's Hidden Grave|6840|1:
 + Death Rite Bird:28,1ABA3,7,1
 + Demi-Human Queen Marigga:28,16071,7,1
 
-Jagged Peak|4301,6850:
+Jagged Peak|4301,6850|1:
 + Jagged Peak Drake:28,24C48,7,1
 + Jagged Peak Drake:28,32A66,3,1
 + Ancient Dragon-Man|Dragon's Pit:28,184D95,7,1
 + Ancient Dragon Senessax|Jagged Peak Mountainside:28,C0496,5,1
 + Bayle the Dread|Jagged Peak Summit:28,C0490,7,1
 
-Scaduview|6920,6930,6960:
+Scaduview|6920,6930,6960|1:
 + Tree Sentinel:28,2ABFC,7,1
 + Tree Sentinel:28,2AF6E,3,1
 + Fallingstar Beast:28,345CB,7,1
 + Commander Gaius:28,26435,7,1
 + Scadutree Avatar|Scadutree Base:28,2AF67,7,1
 
-Abyssal Woods|2800,4002,6860:
+Abyssal Woods|2800,4002,6860|1:
 + Jori, Elder Inquisitor|Darklight Catacombs:28,334B4,7,1
 + Midra, Lord of Frenzied Flame|Midra's Manse:28,17F5B1,7,1
 
-Enir-Ilim|2001:
+Enir-Ilim|2001|1:
 + Promised Consort Radahn|Radahn, Consort of Miquella:28,17B3C6,7,1

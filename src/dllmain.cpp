@@ -6,6 +6,7 @@
 #include "hooking.hpp"
 #include "global.hpp"
 #include "config.hpp"
+#include "steamapi.hpp"
 
 #include "bosses/data.hpp"
 #include "bosses/render.hpp"
@@ -56,8 +57,11 @@ void init() {
         freopen("CONOUT$", "w", stderr);
     }
 
-    er::bosses::gBossDataSet
-        .load(std::wstring(er::gModulePath) + L"\\data\\" + er::gConfig.getw("boss.data", L"engus.json"));
+    std::this_thread::sleep_for(2000ms);
+    er::initSteamAPI();
+    bool dlcInstalled = er::isDLCInstalled(2778580) || er::isDLCInstalled(2778590);
+    fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", dlcInstalled ? L"installed" : L"not installed");
+    er::bosses::gBossDataSet.load(dlcInstalled);
     er::bosses::gBossDataSet.initMemoryAddresses();
 
     er::gHooking = std::make_unique<er::Hooking>();
