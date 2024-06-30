@@ -2,6 +2,7 @@
 #include "hooking.hpp"
 #include "global.hpp"
 #include "config.hpp"
+#include "steamapi.hpp"
 
 #include "imgui_impl_dx12.h"
 #include "imgui_impl_win32.h"
@@ -474,7 +475,19 @@ void D3DRenderer::loadFont() {
     ifs.close();
 
     const ImGuiIO& io = ImGui::GetIO();
-    const auto charset = gConfig["common.charset"].substr(0, 2);
+    auto charset = gConfig["common.charset"];
+    if (charset.empty()) {
+        const auto &lang = er::getGameLanguage();
+        if (lang == L"jpnJP") charset = "ja";
+        else if (lang == L"korKR") charset = "ko";
+        else if (lang == L"polPL") charset = "pl";
+        else if (lang == L"rusRU") charset = "ru";
+        else if (lang == L"thaTH") charset = "th";
+        else if (lang == L"zhoCN") charset = "zh";
+        else charset = "en";
+    } else {
+        charset = charset.substr(0, 2);
+    }
     if (charset == "ja") {
         ImFontGlyphRangesBuilder builder;
         builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
