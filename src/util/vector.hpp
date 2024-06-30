@@ -20,7 +20,7 @@ public:
         : x(0), y(0), z(0) {
     }
 
-    inline Vector3(float x, float y, float z): x(x), y(y), z(z) {}
+    inline Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
     __forceinline Vector3 operator-(const Vector3 &V) {
         return Vector3(x - V.x, y - V.y, z - V.z);

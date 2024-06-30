@@ -91,7 +91,7 @@ void BossDataSet::update() {
     size_t sz = bosses_.size();
     for (size_t i = 0; i < sz; i++) {
         auto &b = bosses_[i];
-        bool al = (*(uint8_t*)(flagAddress_ + b.offset) & b.bits) != 0;
+        bool al = (*(uint8_t *)(flagAddress_ + b.offset) & b.bits) != 0;
         deadSwapTmp[i] = al;
         if (al) {
             cnt++;
@@ -105,11 +105,11 @@ void BossDataSet::update() {
     }
     dead_.swap(deadSwapTmp);
     count_ = cnt;
-    auto addr1 = *(uintptr_t*)fieldArea_;
+    auto addr1 = *(uintptr_t *)fieldArea_;
     if (addr1 == 0) {
         return;
     }
-    auto mapId = *(uint32_t*)(addr1 + 0xE4);
+    auto mapId = *(uint32_t *)(addr1 + 0xE4);
     if (mapId == 0 || mapId == mapId_) return;
     mapId_ = mapId;
     auto ite = regionMap_.find(mapId < 100000 ? mapId / 10 : (mapId < 1000000 ? mapId / 100 : mapId / 1000));
@@ -122,7 +122,7 @@ void BossDataSet::revive(int index) {
         return;
     }
     auto &b = bosses_[index];
-    *(uint8_t*)(flagAddress_ + b.offset) &= ~b.bits;
+    *(uint8_t *)(flagAddress_ + b.offset) &= ~b.bits;
 }
 
 }

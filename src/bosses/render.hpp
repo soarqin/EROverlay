@@ -6,7 +6,7 @@
 
 namespace er::bosses {
 
-class Render: public RenderBase {
+class Render : public RenderBase {
 public:
     void init() override;
     void render(bool &showFull) override;

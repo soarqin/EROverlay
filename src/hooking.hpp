@@ -13,8 +13,8 @@ public:
     Hooking &operator=(Hooking const &) = delete;
     Hooking &operator=(Hooking &&) = delete;
 
-    static void hook() ;
-    static void unhook() ;
+    static void hook();
+    static void unhook();
     void findHooks();
 
     void showMouseCursor(bool show);

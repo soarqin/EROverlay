@@ -14,14 +14,14 @@ public:
      * \brief Constructs the object with a pointer
      * \param p The pointer to initialize the object with, optional
      */
-    constexpr MemoryHandle(void *p = nullptr):
+    constexpr MemoryHandle(void *p = nullptr) :
         ptr_(p) {}
 
     /**
      * \brief Constructs the object with an integral pointer
      * \param p The integral pointer to initialize the object with
      */
-    explicit MemoryHandle(std::uintptr_t p):
+    explicit MemoryHandle(std::uintptr_t p) :
         ptr_(reinterpret_cast<void *>(p)) {}
 
     /**
@@ -99,7 +99,7 @@ public:
      * \param base The base of the region
      * \param size The size of the region
      */
-    constexpr explicit MemoryRegion(MemoryHandle base, std::size_t size):
+    constexpr explicit MemoryRegion(MemoryHandle base, std::size_t size) :
         base_(base),
         size_(size) {}
 
@@ -145,26 +145,26 @@ protected:
     std::size_t size_;
 };
 
-class Module: public MemoryRegion {
+class Module : public MemoryRegion {
 public:
     /**
      * \brief Constructs the class with the main module
      */
-    explicit Module(std::nullptr_t):
+    explicit Module(std::nullptr_t) :
         Module(static_cast<char *>(nullptr)) {}
 
     /**
      * \brief Constructs the class with a module name
      * \param name The name of the module
      */
-    explicit Module(const char *name):
+    explicit Module(const char *name) :
         Module(GetModuleHandleA(name)) {
     }
 
     /**
      * \brief Constructs the class with a module base
      */
-    Module(HMODULE hmod):
+    Module(HMODULE hmod) :
         MemoryRegion(hmod, 0) {
         auto dosHeader = base_.as<IMAGE_DOS_HEADER *>();
         auto ntHeader = base_.add(dosHeader->e_lfanew).as<IMAGE_NT_HEADERS64 *>();
@@ -200,7 +200,7 @@ public:
      * \brief Constructs the signature with an IDA pattern
      * \param pattern The IDA pattern string
      */
-    explicit Signature(const char *pattern): pattern_(pattern) {
+    explicit Signature(const char *pattern) : pattern_(pattern) {
     }
 
     /**
@@ -209,7 +209,7 @@ public:
      * \return MemoryHandle
      */
     MemoryHandle scan(MemoryRegion region = Module(nullptr)) {
-        return Pattern16::scan(region.base().as<void*>(), region.size(), pattern_);
+        return Pattern16::scan(region.base().as<void *>(), region.size(), pattern_);
     }
 private:
     const char *pattern_;

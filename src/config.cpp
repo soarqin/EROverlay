@@ -22,7 +22,7 @@ void Config::load(const std::wstring &filename) {
     fclose(f);
 }
 
-const std::string &Config::operator[](const std::string& key) const {
+const std::string &Config::operator[](const std::string &key) const {
     const auto it = entries_.find(key);
     if (it == entries_.end()) {
         static const std::string empty;

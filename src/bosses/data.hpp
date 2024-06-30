@@ -30,14 +30,14 @@ class BossDataSet {
 public:
     void load(const std::wstring &filename);
 
-    [[nodiscard]] inline const std::vector<BossData>& bosses() const { return bosses_; }
-    [[nodiscard]] inline const std::vector<RegionData>& regions() const { return regions_; }
+    [[nodiscard]] inline const std::vector<BossData> &bosses() const { return bosses_; }
+    [[nodiscard]] inline const std::vector<RegionData> &regions() const { return regions_; }
     [[nodiscard]] inline int count() const { return count_; }
     [[nodiscard]] inline uint32_t mapId() const { return mapId_; }
     [[nodiscard]] inline int regionIndex() const { return regionIndex_; }
     [[nodiscard]] inline int total() const { return (int)bosses_.size(); }
-    [[nodiscard]] inline std::mutex& mutex() { return mutex_; }
-    [[nodiscard]] inline const std::vector<bool>& dead() const { return dead_; }
+    [[nodiscard]] inline std::mutex &mutex() { return mutex_; }
+    [[nodiscard]] inline const std::vector<bool> &dead() const { return dead_; }
 
     void initMemoryAddresses();
     void update();

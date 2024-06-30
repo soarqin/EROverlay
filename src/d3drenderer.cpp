@@ -34,6 +34,7 @@ bool D3DRenderer::hook() {
     static MH_STATUS present1Status = MH_CreateHook(reinterpret_cast<void*>(fnPresent1_), reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_));
 
     static MH_STATUS resizeStatus = MH_CreateHook(reinterpret_cast<void*>(fnResizeBuffers_), reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_));
+    static MH_STATUS setSourceSizeStatus = MH_CreateHook(reinterpret_cast<void*>(fnSetSourceSize_), reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_));
     static MH_STATUS resize1Status = MH_CreateHook(reinterpret_cast<void*>(fnResizeBuffers1_), reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_));
 
     static MH_STATUS eclStatus = MH_CreateHook(reinterpret_cast<void*>(fnExecuteCommandLists_), reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_));
@@ -47,6 +48,7 @@ bool D3DRenderer::hook() {
     MH_EnableHook(fnPresent1_);
 
     MH_EnableHook(fnResizeBuffers_);
+    MH_EnableHook(fnSetSourceSize_);
     MH_EnableHook(fnResizeBuffers1_);
 
     MH_EnableHook(fnExecuteCommandLists_);
@@ -204,6 +206,7 @@ bool D3DRenderer::createDevice() {
         fnPresent1_ = swapChainVTable[22];
 
         fnResizeBuffers_ = swapChainVTable[13];
+        fnSetSourceSize_ = swapChainVTable[29];
         fnResizeBuffers1_ = swapChainVTable[39];
 
         fnExecuteCommandLists_ = commandQueueVTable[10];
@@ -639,6 +642,11 @@ HRESULT WINAPI D3DRenderer::hkResizeBuffers(IDXGISwapChain *pSwapChain,
                                             UINT SwapChainFlags) {
     gD3DRenderer->CleanupRenderTarget();
     return gD3DRenderer->oResizeBuffers_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
+}
+
+HRESULT WINAPI D3DRenderer::hkSetSourceSize(IDXGISwapChain1 *pSwapChain, UINT Width, UINT Height) {
+    gD3DRenderer->CleanupRenderTarget();
+    return gD3DRenderer->oSetSourceSize_(pSwapChain, Width, Height);
 }
 
 HRESULT WINAPI D3DRenderer::hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,

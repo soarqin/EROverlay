@@ -9,7 +9,7 @@ namespace er {
 void Hooking::findHooks() {
     Signature sig("48 8B 0D ?? ?? ?? ?? 48 8B 49 08 E8 ?? ?? ?? ?? 48 8B D0 48 8B CE E8 ?? ?? ?? ??");
     MemoryHandle addr = sig.scan();
-    csMenuManImp_ = addr.add(addr.add(3).as<uint32_t&>() + 7).as<uintptr_t>();
+    csMenuManImp_ = addr.add(addr.add(3).as<uint32_t &>() + 7).as<uintptr_t>();
 }
 
 Hooking::Hooking() = default;

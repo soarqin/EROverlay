@@ -22,22 +22,22 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
     static ATOM processAtom = 0;
 
-	switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH:
-        if (FindAtomW(OVERLAY_ATOM_NAME))
-            return FALSE;
-        processAtom = AddAtomW(OVERLAY_ATOM_NAME);
-        if (!::er::gModule) {
-            ::er::gModule = hModule;
-        }
-        DisableThreadLibraryCalls(hModule);
-        CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, er::gModule, 0, nullptr);
-        break;
-    case DLL_PROCESS_DETACH:
-        DeleteAtom(processAtom);
-        break;
-    default:
-        break;
+    switch (ul_reason_for_call) {
+        case DLL_PROCESS_ATTACH:
+            if (FindAtomW(OVERLAY_ATOM_NAME))
+                return FALSE;
+            processAtom = AddAtomW(OVERLAY_ATOM_NAME);
+            if (!::er::gModule) {
+                ::er::gModule = hModule;
+            }
+            DisableThreadLibraryCalls(hModule);
+            CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, er::gModule, 0, nullptr);
+            break;
+        case DLL_PROCESS_DETACH:
+            DeleteAtom(processAtom);
+            break;
+        default:
+            break;
     }
 
     return TRUE;

@@ -57,7 +57,9 @@ inline static float calculatePos(float w, float n) {
 
 void Render::render(bool &showFull) {
     auto *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)), ImGuiCond_Always, ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
+    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
+                            ImGuiCond_Always,
+                            ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
     if (!showFull) {
         ImGui::Begin("##bosses_window",
                      nullptr,
