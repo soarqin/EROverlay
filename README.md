@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-06-30: v1.2.0
+  + Rewrite DX12 hooking codes to fix some crashes and support for fullscreen mode (still get some rendering bugs, but at least you can do alt-tab now).
+  + Prevent the mod from being loaded multiple times.
 * 2024-06-24: v1.1.3
   + Fix a crash caused by wrong memory deallocation.
   + Use [Pattern16](https://github.com/Dasaav-dsv/Pattern16) to improve signature scanning speed.

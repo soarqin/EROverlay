@@ -15,11 +15,18 @@ using namespace std::chrono_literals;
 void init();
 void mainThread();
 
+#define OVERLAY_ATOM_NAME L"EROVERLAY_BY_SOARQIN"
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     UNREFERENCED_PARAMETER(lpReserved);
 
-    switch (ul_reason_for_call) {
+    static ATOM processAtom = 0;
+
+	switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
+        if (FindAtomW(OVERLAY_ATOM_NAME))
+            return FALSE;
+        processAtom = AddAtomW(OVERLAY_ATOM_NAME);
         if (!::er::gModule) {
             ::er::gModule = hModule;
         }
@@ -27,7 +34,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)init, er::gModule, 0, nullptr);
         break;
     case DLL_PROCESS_DETACH:
-        er::gKillSwitch = true;
+        DeleteAtom(processAtom);
         break;
     default:
         break;
@@ -94,6 +101,7 @@ void mainThread() {
                 er::showMenu = false;
                 //gHooking->showMouseCursor(false);
                 er::gRunning = false;
+                break;
             }
         }
 

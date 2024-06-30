@@ -20,19 +20,6 @@ class D3DRenderer {
         D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
     };
 */
-
-    typedef HRESULT (APIENTRY *Present12)(IDXGISwapChain *pSwapChain, UINT SyncInterval, UINT Flags);
-    Present12 oPresent_ = nullptr;
-
-    typedef void (APIENTRY *ExecuteCommandLists)(ID3D12CommandQueue *queue, UINT NumCommandLists,
-                                                 ID3D12CommandList *ppCommandLists);
-    ExecuteCommandLists oExecuteCommandLists_ = nullptr;
-
-    typedef HRESULT (APIENTRY *ResizeTarget)(IDXGISwapChain *thisObj, const DXGI_MODE_DESC *newTargetParameters);
-    ResizeTarget oResizeTarget_ = nullptr;
-    HWND gameWindow_ = nullptr;
-    bool inited_ = false;
-
 public:
     explicit D3DRenderer() = default;
     ~D3DRenderer() noexcept;
@@ -45,24 +32,16 @@ public:
         return GetForegroundWindow() == gameWindow_;
     }
 
-    static HRESULT APIENTRY HookPresent(IDXGISwapChain *swapChain, UINT syncInterval, UINT flags);
-    static void HookExecuteCommandLists(ID3D12CommandQueue *queue, UINT numCommandLists,
-                                        ID3D12CommandList *commandLists);
-    static HRESULT APIENTRY HookResizeTarget(IDXGISwapChain *thisObj, const DXGI_MODE_DESC *newTargetParameters);
     void resetRenderState();
 
-    bool initHook();
+    bool createDevice();
     bool hook();
-    void unhook() const;
+    void unhook();
 
-    bool initWindow();
-    bool deleteWindow() const;
+    void disableAll();
 
-    static bool createHook(UINT16 idx, void **original, void *function);
-    static void disableHook(UINT16 idx);
-    static void disableAll();
-
-    void overlay(IDXGISwapChain *pSwapChain);
+    void initOverlay();
+    void overlay(IDXGISwapChain3 *pSwapChain);
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -80,15 +59,81 @@ public:
     void initStyle();
 
 private:
-    WNDCLASSEX windowClass_ {};
-    HWND windowHwnd_ = nullptr;
+    void CleanupRenderTarget();
+
+    static HRESULT WINAPI hkPresent(IDXGISwapChain3* pSwapChain,
+        UINT SyncInterval,
+        UINT Flags);
+    static HRESULT WINAPI hkPresent1(IDXGISwapChain3* pSwapChain,
+        UINT SyncInterval,
+        UINT PresentFlags,
+        const DXGI_PRESENT_PARAMETERS* pPresentParameters);
+    static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain,
+        UINT BufferCount,
+        UINT Width,
+        UINT Height,
+        DXGI_FORMAT NewFormat,
+        UINT SwapChainFlags);
+    static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3* pSwapChain,
+        UINT BufferCount,
+        UINT Width,
+        UINT Height,
+        DXGI_FORMAT NewFormat,
+        UINT SwapChainFlags,
+        const UINT* pCreationNodeMask,
+        IUnknown* const* ppPresentQueue);
+    static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue* pCommandQueue,
+        UINT NumCommandLists,
+        ID3D12CommandList* ppCommandLists);
+    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory* pFactory,
+        IUnknown* pDevice,
+        DXGI_SWAP_CHAIN_DESC* pDesc,
+        IDXGISwapChain** ppSwapChain);
+    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory* pFactory,
+        IUnknown* pDevice,
+        HWND hWnd,
+        const DXGI_SWAP_CHAIN_DESC1* pDesc,
+        const DXGI_SWAP_CHAIN_FULLSCREEN_DESC* pFullscreenDesc,
+        IDXGIOutput* pRestrictToOutput,
+        IDXGISwapChain1** ppSwapChain);
+    static HRESULT WINAPI hkCreateSwapChainForCoreWindow(IDXGIFactory* pFactory,
+        IUnknown* pDevice,
+        IUnknown* pWindow,
+        const DXGI_SWAP_CHAIN_DESC1* pDesc,
+        IDXGIOutput* pRestrictToOutput,
+        IDXGISwapChain1** ppSwapChain);
+    static HRESULT WINAPI hkCreateSwapChainForComposition(IDXGIFactory* pFactory,
+        IUnknown* pDevice,
+        const DXGI_SWAP_CHAIN_DESC1* pDesc,
+        IDXGIOutput* pRestrictToOutput,
+        IDXGISwapChain1** ppSwapChain);
+
+    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3*, UINT, UINT)> oPresent_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3*, UINT, UINT, const DXGI_PRESENT_PARAMETERS*)> oPresent1_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3*, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT*, IUnknown* const*)> oResizeBuffers1_;
+    std::add_pointer_t<void WINAPI(ID3D12CommandQueue*, UINT, ID3D12CommandList*)> oExecuteCommandLists_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory*, IUnknown*, DXGI_SWAP_CHAIN_DESC*, IDXGISwapChain**)> oCreateSwapChain_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory*, IUnknown*, HWND, const DXGI_SWAP_CHAIN_DESC1*, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC*, IDXGIOutput*, IDXGISwapChain1**)> oCreateSwapChainForHwnd_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory*, IUnknown*, IUnknown*, const DXGI_SWAP_CHAIN_DESC1*, IDXGIOutput*, IDXGISwapChain1**)> oCreateSwapChainForCoreWindow_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory*, IUnknown*, const DXGI_SWAP_CHAIN_DESC1*, IDXGIOutput*, IDXGISwapChain1**)> oCreateSwapChainForComposition_;
 
     uint64_t oldWndProc_ = 0;
 
-/*
-    IDXGISwapChain3 *swapchain_ = nullptr;
-    ID3D12Device *device_ = nullptr;
-*/
+	void* fnCreateSwapChain_ = nullptr;
+    void* fnCreateSwapChainForHwndChain_ = nullptr;
+    void* fnCreateSwapChainForCWindowChain_ = nullptr;
+    void* fnCreateSwapChainForCompChain_ = nullptr;
+
+    void* fnPresent_ = nullptr;
+    void* fnPresent1_ = nullptr;
+
+    void* fnResizeBuffers_ = nullptr;
+    void* fnResizeBuffers1_ = nullptr;
+
+    void* fnExecuteCommandLists_ = nullptr;
+
+    HWND gameWindow_ = nullptr;
 
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
@@ -99,6 +144,7 @@ private:
     std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargets_;
 
     uint64_t buffersCounts_ = 0;
+
 /*
     FrameContext *frameContext_ = nullptr;
 */

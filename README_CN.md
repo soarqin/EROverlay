@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-06-30: v1.2.0
+  + 重写DX12钩子代码以修复一些崩溃并支持全屏模式(仍然存在一些渲染错误，但至少现在可以使用alt+tab了)
+  + 防止Mod被多次加载
 * 2024-06-24: v1.1.3
   + 修复了由错误的内存释放引起的崩溃
   + 使用 [Pattern16](https://github.com/Dasaav-dsv/Pattern16) 以提高特征代码扫描速度
