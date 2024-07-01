@@ -9,6 +9,7 @@
 #include "steamapi.hpp"
 
 #include "bosses/data.hpp"
+#include "config.hpp"
 #include "bosses/render.hpp"
 
 using namespace std::chrono_literals;
@@ -91,23 +92,34 @@ void init() {
 }
 
 void mainThread() {
+    auto unloadKey = er::gConfig.getVirtualKey("input.unload", {VK_OEM_MINUS});
+    auto toggleFullKey = er::gConfig.getVirtualKey("input.toggle_full_mode", {VK_OEM_PLUS});
+
     er::showMenu = false;
     int counter = 0x1F;
     er::bosses::gBossDataSet.update();
     while (er::gRunning) {
         if (er::gD3DRenderer->isForeground()) {
-            if (GetAsyncKeyState(VK_OEM_PLUS) & 1) {
+            if (!toggleFullKey.empty()) {
+                for (auto &vk: toggleFullKey) {
+                    if (!(GetAsyncKeyState(vk & 0x7FFF) & ((vk & 0x8000) != 0 ? 0x8000 : 1))) {
+                        goto noToggleFull;
+                    }
+                }
                 er::showMenu = !er::showMenu;
-                //gHooking->showMouseCursor(showMenu);
             }
-
-            if (GetAsyncKeyState(VK_OEM_MINUS) & 1) {
+            noToggleFull:
+            if (!unloadKey.empty()) {
+                for (auto &vk: unloadKey) {
+                    if (!(GetAsyncKeyState(vk & 0x7FFF) & ((vk & 0x8000) != 0 ? 0x8000 : 1))) {
+                        goto noUnload;
+                    }
+                }
                 er::showMenu = false;
-                //gHooking->showMouseCursor(false);
                 er::gRunning = false;
-                break;
             }
         }
+        noUnload:
 
         std::this_thread::yield();
         std::this_thread::sleep_for(20ms);

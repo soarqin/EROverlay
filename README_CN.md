@@ -2,10 +2,13 @@
 
 ## 更新记录
 * 2024-06-30: v1.2.0
-  + 重写DX12钩子代码以修复一些崩溃并支持全屏模式(仍然存在一些渲染错误，但至少现在可以使用alt+tab了)
+  + 优化了DX12钩子代码以修复一些崩溃并支持全屏模式(仍然存在一些渲染错误，但至少现在可以使用alt+tab了)
   + 如果没有安装DLC则不会在列表中包含DLC boss
-  + 如果在`[boss]`中将`data`设置为空，会根据游戏语言来加载数据，请注意手动设置`[Common]`中的`font`和`charset`以显示非拉丁字符
-  + `[Common]`中的`charset`现在默认为空，这会使用与游戏语言相关的字符集
+  + 如果在`[boss]`中将`data`设置为空，会根据游戏语言来加载数据，请注意手动设置`[common]`中的`font`和`charset`以显示非拉丁字符
+  + `[common]`中的`charset`现在默认为空，这会使用与游戏语言相关的字符集
+  + 在配置文件里添加了一个新的`[style]`来自定义面板的样式
+  + 在配置文件里添加了一个新的`[input]`来自定义快捷键
+  + 使用`Open Sans`作为默认字体，并将默认字体大小设置为20以提高可读性
   + 防止Mod被多次加载
 * 2024-06-24: v1.1.3
   + 修复了由错误的内存释放引起的崩溃
@@ -45,3 +48,4 @@
 * [JSON for Modern C++]( https://github.com/nlohmann/json)
 * [inih](https://github.com/benhoyt/inih)
 * [Pattern16](https://github.com/Dasaav-dsv/Pattern16)
+* [Open Sans](https://fonts.google.com/specimen/Open+Sans)

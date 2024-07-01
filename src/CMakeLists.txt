@@ -19,7 +19,11 @@ add_library(${PROJECT_NAME} SHARED
     # SteamAPI usage
     steamapi.cpp steamapi.hpp
 
+    # Embedded font
+    embeddedfont.cpp
+
     # util
+    util/string.cpp util/string.hpp
     util/vector.hpp
 
     # Bosses panel

@@ -8,12 +8,18 @@
 #include "imgui_impl_win32.h"
 #include "MinHook.h"
 
+#include "util/string.hpp"
 #include "bosses/render.hpp"
 
 #include <algorithm>
 #include <fstream>
 
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+extern "C" {
+extern int embedded_font_len;
+extern unsigned char embedded_font[];
+}
 
 namespace er {
 
@@ -96,6 +102,7 @@ void D3DRenderer::disableAll() {
     MH_DisableHook(fnPresent1_);
 
     MH_DisableHook(fnResizeBuffers_);
+    MH_DisableHook(fnSetSourceSize_);
     MH_DisableHook(fnResizeBuffers1_);
 
     MH_DisableHook(fnExecuteCommandLists_);
@@ -459,20 +466,19 @@ void D3DRenderer::loadFont() {
     fontSize_ = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
     if (fontSize_ == 0.0f) fontSize_ = 18.0f;
     const auto& fontFile = gConfig.getw("common.font", L"");
-    if (fontFile.empty()) {
-        return;
+    if (!fontFile.empty()) {
+        std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
+        if (!ifs) {
+            fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
+        } else {
+            ifs.seekg(0, std::ios::end);
+            const std::streamsize size = ifs.tellg();
+            ifs.seekg(0, std::ios::beg);
+            fontData_.resize(size);
+            ifs.read((char *)fontData_.data(), size);
+            ifs.close();
+        }
     }
-    std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
-    if (!ifs) {
-        fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
-        return;
-    }
-    ifs.seekg(0, std::ios::end);
-    const std::streamsize size = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-    fontData_.resize(size);
-    ifs.read((char*)fontData_.data(), size);
-    ifs.close();
 
     const ImGuiIO& io = ImGui::GetIO();
     auto charset = gConfig["common.charset"];
@@ -529,26 +535,58 @@ void D3DRenderer::loadFont() {
     }
 
     if (fontData_.empty()) {
-        io.Fonts->AddFontDefault();
-    } else {
-        void *data = IM_ALLOC(fontData_.size());
-        const auto fontSize = fontData_.size();
-        memcpy(data, fontData_.data(), fontSize);
-        io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, nullptr, charsetRange_);
+        fontData_.assign(embedded_font, embedded_font + embedded_font_len);
     }
+    void *data = IM_ALLOC(fontData_.size());
+    const auto fontSize = fontData_.size();
+    memcpy(data, fontData_.data(), fontSize);
+    io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, nullptr, charsetRange_);
+}
+
+static inline ImVec4 extractColor(const std::string &s, const ImVec4 &defVal) {
+    auto parts = util::splitString(s, ',');
+    if (parts.size() == 4) {
+        return ImVec4 {
+            std::clamp(float(std::stoi(parts[0])) / 255.0f, 0.0f, 1.0f),
+            std::clamp(float(std::stoi(parts[1])) / 255.0f, 0.0f, 1.0f),
+            std::clamp(float(std::stoi(parts[2])) / 255.0f, 0.0f, 1.0f),
+            std::clamp(float(std::stoi(parts[3])) / 255.0f, 0.0f, 1.0f)
+        };
+    }
+    return defVal;
 }
 
 void D3DRenderer::initStyle() {
     ImGuiStyle &style = ImGui::GetStyle();
     ImVec4 *colors = ImGui::GetStyle().Colors;
 
-    colors[ImGuiCol_Text] = ImVec4(0.75f, 0.75f, 0.29f, 0.90f);
+    auto txtColor = extractColor(gConfig["style.text_color"], ImVec4(0.75f, 0.75f, 0.29f, 0.90f));
+    auto markColor = extractColor(gConfig["style.check_mark_color"], ImVec4(0.74f, 0.74f, 0.29f, 0.90f));
+    auto bgColor = extractColor(gConfig["style.bg_color"], ImVec4(0.10f, 0.10f, 0.10f, 0.30f));
+    auto borderColor = extractColor(gConfig["style.border_color"], ImVec4(1.00f, 1.00f, 1.00f, 0.25f));
+    auto btnColor = extractColor(gConfig["style.button_color"], ImVec4(0.05f, 0.05f, 0.05f, 0.44f));
+    auto btnHoverColor = extractColor(gConfig["style.button_hover_color"], ImVec4(0.19f, 0.19f, 0.19f, 0.44f));
+    auto btnPressColor = extractColor(gConfig["style.button_press_color"], ImVec4(0.20f, 0.22f, 0.23f, 0.90f));
+    auto nodeColor = extractColor(gConfig["style.node_color"], ImVec4(0.00f, 0.00f, 0.00f, 0.52f));
+    auto nodeHoverColor = extractColor(gConfig["style.node_hover_color"], ImVec4(0.00f, 0.00f, 0.00f, 0.36f));
+    auto nodePressColor = extractColor(gConfig["style.node_press_color"], ImVec4(0.20f, 0.22f, 0.23f, 0.33f));
+    auto scrollBgColor = extractColor(gConfig["style.scroll_bg_color"], ImVec4(0.05f, 0.05f, 0.05f, 0.44f));
+    auto scrollColor = extractColor(gConfig["style.scroll_color"], ImVec4(0.34f, 0.34f, 0.34f, 0.44f));
+    auto scrollHoverColor = extractColor(gConfig["style.scroll_hover_color"], ImVec4(0.40f, 0.40f, 0.40f, 0.44f));
+    auto scrollPressColor = extractColor(gConfig["style.scroll_press_color"], ImVec4(0.56f, 0.56f, 0.56f, 0.44f));
+    auto borderWidth = std::stof(gConfig.get("style.border_width", "1.0"));
+    auto rounding = std::stof(gConfig.get("style.rounding", "7.0"));
+
+    colors[ImGuiCol_Text] = txtColor;
     colors[ImGuiCol_TextDisabled] = colors[ImGuiCol_Text];//ImVec4(0.86f, 0.93f, 0.89f, 0.28f);
     colors[ImGuiCol_TextSelectedBg] = ImVec4(0.27f, 0.00f, 0.63f, 0.43f);
-    colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 0.30f);
+    colors[ImGuiCol_WindowBg] = bgColor;
+/*
     colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     colors[ImGuiCol_PopupBg] = ImVec4(0.19f, 0.19f, 0.19f, 0.82f);
-    colors[ImGuiCol_Border] = ImVec4(1.00f, 1.00f, 1.00f, 0.25f);
+*/
+    colors[ImGuiCol_Border] = borderColor;
+/*
     colors[ImGuiCol_BorderShadow] = ImVec4(0.20f, 0.22f, 0.27f, 0.90f);
     colors[ImGuiCol_FrameBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.44f);
     colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.44f);
@@ -557,19 +595,23 @@ void D3DRenderer::initStyle() {
     colors[ImGuiCol_TitleBgActive] = ImVec4(0.06f, 0.06f, 0.06f, 0.90f);
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.90f);
     colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 0.90f);
-    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.44f);
-    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.44f);
-    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.40f, 0.40f, 0.44f);
-    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.44f);
-    colors[ImGuiCol_CheckMark] = ImVec4(0.74f, 0.74f, 0.29f, 0.90f);
+*/
+    colors[ImGuiCol_ScrollbarBg] = scrollBgColor;
+    colors[ImGuiCol_ScrollbarGrab] = scrollColor;
+    colors[ImGuiCol_ScrollbarGrabHovered] = scrollHoverColor;
+    colors[ImGuiCol_ScrollbarGrabActive] = scrollPressColor;
+    colors[ImGuiCol_CheckMark] = markColor;
+/*
     colors[ImGuiCol_SliderGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.44f);
     colors[ImGuiCol_SliderGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.44f);
-    colors[ImGuiCol_Button] = ImVec4(0.05f, 0.05f, 0.05f, 0.44f);
-    colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.44f);
-    colors[ImGuiCol_ButtonActive] = ImVec4(0.20f, 0.22f, 0.23f, 0.90f);
-    colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
-    colors[ImGuiCol_HeaderActive] = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
+*/
+    colors[ImGuiCol_Button] = btnColor;
+    colors[ImGuiCol_ButtonHovered] = btnHoverColor;
+    colors[ImGuiCol_ButtonActive] = btnPressColor;
+    colors[ImGuiCol_Header] = nodeColor;
+    colors[ImGuiCol_HeaderHovered] = nodeHoverColor;
+    colors[ImGuiCol_HeaderActive] = nodePressColor;
+/*
     colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.80f);
     colors[ImGuiCol_SeparatorHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
     colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.44f, 0.47f, 0.90f);
@@ -596,6 +638,7 @@ void D3DRenderer::initStyle() {
     colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 0.60f);
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
+*/
     style.DisabledAlpha = 1.0f;
     style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
     style.WindowPadding = ImVec2(8.00f, 8.00f);
@@ -607,12 +650,12 @@ void D3DRenderer::initStyle() {
     style.IndentSpacing = 25;
     style.ScrollbarSize = 15;
     style.GrabMinSize = 10;
-    style.WindowBorderSize = 1;
+    style.WindowBorderSize = borderWidth;
     style.ChildBorderSize = 1;
     style.PopupBorderSize = 1;
     style.FrameBorderSize = 1;
     style.TabBorderSize = 1;
-    style.WindowRounding = 7;
+    style.WindowRounding = rounding;
     style.ChildRounding = 4;
     style.FrameRounding = 3;
     style.PopupRounding = 4;

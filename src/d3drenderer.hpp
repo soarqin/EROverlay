@@ -5,6 +5,7 @@
 #include <dxgi1_4.h>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #include "imgui.h"
 #include "renderbase.hpp"
