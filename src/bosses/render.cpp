@@ -108,7 +108,7 @@ void Render::render(bool &showFull) {
                 for (int j = 0; j < bossCount; j++) {
                     auto &bd = bosses[region.bosses[j]];
                     bool on = dead[bd.index];
-                    if (ImGui::Checkbox(bd.displayName.c_str(), &on) && dead[bd.index] && allowRevive_) {
+                    if (ImGui::Checkbox(bd.displayName.c_str(), &on, on) && dead[bd.index] && allowRevive_) {
                         popupBossIndex_ = (int)bd.index;
                         popup = true;
                     }
