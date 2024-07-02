@@ -117,6 +117,7 @@ void mainThread() {
                 }
                 er::showMenu = false;
                 er::gRunning = false;
+                er::gHooking->showMouseCursor(false);
             }
         }
         noUnload:

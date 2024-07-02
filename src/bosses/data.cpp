@@ -15,7 +15,7 @@ static std::vector<int> deadByRegionSwapTmp;
 
 void BossDataSet::load(bool hasDLC) {
     nlohmann::ordered_json j;
-    std::wstring name = er::gConfig.getw("boss.data", L"bosses.json");
+    std::wstring name = er::gConfig.getw("boss.data_file", L"bosses.json");
     std::wstring lang = er::gConfig.getw("common.language", L"engUS");
     if (lang.empty()) {
         lang = getGameLanguage();
@@ -127,10 +127,12 @@ void BossDataSet::update() {
     if (addr1 == 0) {
         return;
     }
-    auto mapId = *(uint32_t *)(addr1 + 0xE4);
+    /* TODO: this is 0xE4 for older version than DLC,
+     *       need to check game version */
+    auto mapId = *(uint32_t *)(addr1 + 0xE8);
     if (mapId == 0 || mapId == mapId_) return;
     mapId_ = mapId;
-    auto ite = regionMap_.find(mapId < 100000 ? mapId / 10 : (mapId < 1000000 ? mapId / 100 : mapId / 1000));
+    auto ite = regionMap_.find(mapId / 1000);
     if (ite == regionMap_.end()) return;
     regionIndex_ = ite->second;
 }

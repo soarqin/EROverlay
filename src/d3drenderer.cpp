@@ -377,7 +377,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         device->Release();
     }
 
-    if (ImGui::GetCurrentContext() && commandQueue_) {
+    if (ImGui::GetCurrentContext()) {
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();

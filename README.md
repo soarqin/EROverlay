@@ -1,6 +1,15 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-07-03: v1.2.1
+  + Change data folder structure, to support multiple data files for different languages in future, and config entries are changed as follows:
+    - `data` in `[boss]` section is changed to `data_file`, which indicates data filename.
+    - `language` is added to `[common]` section.
+  + Remove `boss_display` and `place_display` and in bosses data, as they are useless.
+  + Resolve memory address by flag id for boss data now.
+  + Fix some boss flag data.
+  + Fix a mouse cursor locking issue after the mod is unloaded.
+  + Fix a player location area determination issue.
 * 2024-06-30: v1.2.0
   + Improved DX12 hooking codes to fix some crashes and support for fullscreen mode (still get some rendering bugs, but at least you can do alt-tab now).
   + DLC bosses are not included in the list if you do not have the DLC installed.
