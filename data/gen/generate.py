@@ -62,9 +62,13 @@ def process(n):
 
 
 def generate(j, lang):
+    global idmap
+    idmap = {}
+    load_text('engus')
     load_text(lang)
-    o = {}
-    for k, v in j.items():
+    o = []
+    for v in j:
+        k = v['region_name']
         if k[0] == '{':
             name = idmap[k[1:-1]]
         else:
@@ -74,15 +78,16 @@ def generate(j, lang):
             o3 = {}
             o3['boss'] = process(m['boss'])
             o3['place'] = process(m['place'])
-            o3['boss_display'] = ''
-            o3['place_display'] = ''
-            o3['offset'] = m['offset']
-            o3['bit'] = m['bit']
+            o3['flag_id'] = m['flag_id']
+            if 'rememberance' in m:
+                o3['rememberance'] = m['rememberance']
             o2.append(o3)
-        o[name] = {'regions': v['regions'], 'bosses': o2}
+        val = {'region_name': name, 'regions': v['regions'], 'bosses': o2}
         if 'dlc' in v:
-            o[name]['dlc'] = 1
-    codecs.open('../' + lang + '.json', 'w', 'utf-8').write(json.dumps(o, ensure_ascii=False))
+            val['dlc'] = v['dlc']
+        o.append(val)
+    os.makedirs('../' + lang, exist_ok=True)
+    codecs.open('../' + lang + '/bosses.json', 'w', 'utf-8').write(json.dumps(o, ensure_ascii=False, indent=2))
 
 
 if __name__ == '__main__':

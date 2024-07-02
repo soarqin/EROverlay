@@ -1,0 +1,1418 @@
+[
+  {
+    "region_name": "Limgrave",
+    "regions": [
+      1800,
+      3002,
+      3004,
+      3011,
+      3100,
+      3103,
+      3115,
+      3117,
+      3201,
+      3410,
+      6100,
+      6101
+    ],
+    "bosses": [
+      {
+        "boss": "Soldat Godricks",
+        "place": "Friedhof der Gestrandeten",
+        "flag_id": 18000850
+      },
+      {
+        "boss": "Baumwächter",
+        "place": "Kirche von Elleh",
+        "flag_id": 1042360800
+      },
+      {
+        "boss": "Halbmenschen-Herrscher(x2)",
+        "place": "Küstenhöhle",
+        "flag_id": 31150800
+      },
+      {
+        "boss": "Wachhund des Erdenbaumbegräbnisses",
+        "place": "Sturmfuß-Katakomben",
+        "flag_id": 30020800
+      },
+      {
+        "boss": "Bestienmensch von Farum Azula",
+        "place": "Hainhöhle",
+        "flag_id": 31030800
+      },
+      {
+        "boss": "Steingräbertroll",
+        "place": "Tunnel von Limgrave",
+        "flag_id": 32010800
+      },
+      {
+        "boss": "Wahnsinniger Kürbiskopf",
+        "place": "Ruinen eines Wegpunkts",
+        "flag_id": 1044360800
+      },
+      {
+        "boss": "Bluthundritter Darriwil",
+        "place": "Siegelgefängnis des Bluthundes",
+        "flag_id": 1044350800
+      },
+      {
+        "boss": "Patches",
+        "place": "Trübflusshöhle",
+        "flag_id": 31000800
+      },
+      {
+        "boss": "Grabhüterduellant",
+        "place": "Trübflusskatakomben",
+        "flag_id": 30040800
+      },
+      {
+        "boss": "Wächtergolem",
+        "place": "Hochstraßen-Höhle",
+        "flag_id": 31170800
+      },
+      {
+        "boss": "Assassine der Schwarzen Klinge",
+        "place": "Todberührte Katakomben",
+        "flag_id": 30110800
+      },
+      {
+        "boss": "Baumgeist mit Geschwüren",
+        "place": "Grab eines Randvolkshelden",
+        "flag_id": 18000800
+      },
+      {
+        "boss": "Fliegender Drache Agheel",
+        "place": "Agheel-See",
+        "flag_id": 1043360800
+      },
+      {
+        "boss": "Tibiaseefahrer",
+        "place": "Totenwasser-Dorf",
+        "flag_id": 1045390800
+      },
+      {
+        "boss": "Schmelztiegelritter",
+        "place": "Siegelgefängnis des Sturmhügels",
+        "flag_id": 1042370800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "",
+        "flag_id": 1043370800
+      },
+      {
+        "boss": "Todesvogel",
+        "place": "",
+        "flag_id": 1042380800
+      },
+      {
+        "boss": "Klangperlenjäger",
+        "place": "Hütte des Kriegsmeisters",
+        "flag_id": 1042380850
+      }
+    ]
+  },
+  {
+    "region_name": "Halbinsel der Tränen",
+    "regions": [
+      3000,
+      3001,
+      3101,
+      3102,
+      3200,
+      6102
+    ],
+    "bosses": [
+      {
+        "boss": "Runenbär",
+        "place": "Erdschlundhöhle",
+        "flag_id": 31010800
+      },
+      {
+        "boss": "Schuppenscheusal",
+        "place": "Tunnel von Morne",
+        "flag_id": 32000800
+      },
+      {
+        "boss": "Wachhund des Erdenbaumbegräbnisses",
+        "place": "Katakomben des Pfählers",
+        "flag_id": 30010800
+      },
+      {
+        "boss": "Friedhofsschemen",
+        "place": "Katakomben des Gräberwalls",
+        "flag_id": 30000800
+      },
+      {
+        "boss": "Miranda die faulige Blüte",
+        "place": "Höhle des Gräberwalls",
+        "flag_id": 31020800
+      },
+      {
+        "boss": "Avatar des Erdenbaums",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1043330800
+      },
+      {
+        "boss": "Uralter Held von Zamor",
+        "place": "Siegelgefängnis der Klagen",
+        "flag_id": 1042330800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Wall von Schloss Morne",
+        "flag_id": 1044320850
+      },
+      {
+        "boss": "Todesvogel",
+        "place": "",
+        "flag_id": 1044320800
+      },
+      {
+        "boss": "Löwenartiges Scheusal",
+        "place": "Klagengrab von Morne",
+        "flag_id": 1043300800
+      }
+    ]
+  },
+  {
+    "region_name": "Schloss Sturmschleier",
+    "regions": [
+      1000
+    ],
+    "bosses": [
+      {
+        "boss": "Margit, das Grausame Mal",
+        "place": "Schloss Sturmschleier",
+        "flag_id": 10000850
+      },
+      {
+        "boss": "Godrick der Verpflanzte",
+        "place": "Schloss Sturmschleier",
+        "flag_id": 10000800,
+        "rememberance": 1
+      }
+    ]
+  },
+  {
+    "region_name": "Liurnia das Seenland",
+    "regions": [
+      3003,
+      3005,
+      3006,
+      3104,
+      3105,
+      3106,
+      3202,
+      3411,
+      3900,
+      3920,
+      6200,
+      6201
+    ],
+    "bosses": [
+      {
+        "boss": "Reinfäule-Ritter",
+        "place": "Stillwasserhöhle",
+        "flag_id": 31040800
+      },
+      {
+        "boss": "Bluthundritter",
+        "place": "Kristallhöhle am See",
+        "flag_id": 31050800
+      },
+      {
+        "boss": "Wachhund des Erdenbaumbegräbnisses",
+        "place": "Katakomben am Klippenfuß",
+        "flag_id": 30060800
+      },
+      {
+        "boss": "Kristallianer (Stab) & Kristallianer (Speer)",
+        "place": "Kristallhöhle der Akademie",
+        "flag_id": 31060800
+      },
+      {
+        "boss": "Kristallianer (Ringklinge)",
+        "place": "Kristalltunnel von Raya Lucaria",
+        "flag_id": 32020800
+      },
+      {
+        "boss": "Friedhofsschemen",
+        "place": "Katakomben der Schwarzen Klinge",
+        "flag_id": 30050800
+      },
+      {
+        "boss": "Assassine der Schwarzen Klinge",
+        "place": "Katakomben der Schwarzen Klinge",
+        "flag_id": 30050850
+      },
+      {
+        "boss": "Geisterruferschnecke",
+        "place": "Katakomben am Wegesende",
+        "flag_id": 30030800
+      },
+      {
+        "boss": "Verpflanzter Spross",
+        "place": "Kapelle der Erwartung",
+        "flag_id": 10010800
+      },
+      {
+        "boss": "Schimmersteindrache Smarag",
+        "place": "Tempelviertel",
+        "flag_id": 1034450800
+      },
+      {
+        "boss": "Maltöter",
+        "place": "Dorf der Albinaurics",
+        "flag_id": 1035420800
+      },
+      {
+        "boss": "Königliches Gespenst",
+        "place": "Königliche Ruinen",
+        "flag_id": 1034480800
+      },
+      {
+        "boss": "Tibiaseefahrer",
+        "place": "",
+        "flag_id": 1039440800
+      },
+      {
+        "boss": "Avatar des Erdenbaums",
+        "place": "Konvertierter Turm",
+        "flag_id": 1033430800
+      },
+      {
+        "boss": "Avatar des Erdenbaums",
+        "place": "Mausoleumsgelände",
+        "flag_id": 1038480800
+      },
+      {
+        "boss": "Adan, Dieb des Feuers",
+        "place": "Siegelgefängnis der Niedertracht",
+        "flag_id": 1038410800
+      },
+      {
+        "boss": "Carianischer Ritter Bols",
+        "place": "Siegelgefängnis des Kuckucks",
+        "flag_id": 1033450800
+      },
+      {
+        "boss": "Onyxfürst",
+        "place": "Siegelgefängnis der Königsgräber",
+        "flag_id": 1036500800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Brücke der Torstadt",
+        "flag_id": 1039430800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Kirche von Bellum",
+        "flag_id": 1036480800
+      },
+      {
+        "boss": "Todesvogel",
+        "place": "Malerische Insel",
+        "flag_id": 1037420800
+      },
+      {
+        "boss": "Todesritenvogel",
+        "place": "Nordseite der Torstadt",
+        "flag_id": 1036450800
+      },
+      {
+        "boss": "Klangperlenjäger",
+        "place": "Kirche der Gelübde",
+        "flag_id": 1037460800
+      },
+      {
+        "boss": "Königliche Ritterin Loretta",
+        "place": "Anwesen von Caria",
+        "flag_id": 1035500800
+      },
+      {
+        "boss": "Magmalindwurm Makar",
+        "place": "Ruinenübersäter Abgrund",
+        "flag_id": 39200800
+      }
+    ]
+  },
+  {
+    "region_name": "Mondlichtaltar",
+    "regions": [
+      6202
+    ],
+    "bosses": [
+      {
+        "boss": "Schimmersteindrache Adula",
+        "place": "Mondlichtaltar",
+        "flag_id": 1034420800
+      },
+      {
+        "boss": "Alecto, Oberhaupt der Schwarzen Klingen",
+        "place": "Siegelgefängnis des Oberhaupts",
+        "flag_id": 1033420800
+      }
+    ]
+  },
+  {
+    "region_name": "Akademie von Raya Lucaria",
+    "regions": [
+      1400
+    ],
+    "bosses": [
+      {
+        "boss": "Roter Wolf von Radagon",
+        "place": "",
+        "flag_id": 14000850
+      },
+      {
+        "boss": "Rennala, Königin des Vollmonds",
+        "place": "",
+        "flag_id": 14000800,
+        "rememberance": 2
+      }
+    ]
+  },
+  {
+    "region_name": "Caelid",
+    "regions": [
+      3014,
+      3015,
+      3111,
+      3121,
+      3207,
+      3208,
+      6400
+    ],
+    "bosses": [
+      {
+        "boss": "Magmalindwurm",
+        "place": "Gaeltunnel",
+        "flag_id": 32070800
+      },
+      {
+        "boss": "Wachhund des Erdenbaumbegräbnisses (Schwert) & Wachhund des Erdenbaumbegräbnisses (Zepter)",
+        "place": "Niederer Erdenbaumkatakomben",
+        "flag_id": 30140800
+      },
+      {
+        "boss": "Rasender Duellant",
+        "place": "Kerkerhöhle",
+        "flag_id": 31210800
+      },
+      {
+        "boss": "Friedhofsschemen",
+        "place": "Katakomben von Caelid",
+        "flag_id": 30150800
+      },
+      {
+        "boss": "Sternenfallbestie",
+        "place": "Kristalltunnel von Sellia",
+        "flag_id": 32080800
+      },
+      {
+        "boss": "Stinkender Kristallianer (Ringklinge) & Stinkender Kristallianer (Speer) & Stinkender Kristallianer (Stab)",
+        "place": "Sellias Versteck",
+        "flag_id": 31110800
+      },
+      {
+        "boss": "Wahnsinniger Kürbiskopf (Hammer) & Wahnsinniger Kürbiskopf (Flegel)",
+        "place": "Ruinen von Caelem",
+        "flag_id": 1048400800
+      },
+      {
+        "boss": "Verfallender Ekzykes",
+        "place": "Kirche der Seuche",
+        "flag_id": 1048370800
+      },
+      {
+        "boss": "Noxmönch & Noxschwertmaid",
+        "place": "Sellia, Stadt der Zauberer",
+        "flag_id": 1049390800
+      },
+      {
+        "boss": "Kommandant O'Neil",
+        "place": "Sumpf von Aeonia",
+        "flag_id": 1049380800
+      },
+      {
+        "boss": "Stinkender Avatar",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1047400800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Südhochstraße von Caelid",
+        "flag_id": 1049370800
+      },
+      {
+        "boss": "Todesritenvogel",
+        "place": "Südliches Sumpfufer von Aeonia",
+        "flag_id": 1049370850
+      },
+      {
+        "boss": "Schmelztiegelritter & Löwenartiges Scheusal",
+        "place": "Schloss Rotmähne",
+        "flag_id": 1051360800
+      },
+      {
+        "boss": "Sternengeißel Radahn",
+        "place": "Klagedünen",
+        "flag_id": 1252380800,
+        "rememberance": 3
+      }
+    ]
+  },
+  {
+    "region_name": "Greyolls Drachenhügel",
+    "regions": [
+      3016,
+      3110,
+      3120,
+      3413,
+      6402
+    ],
+    "bosses": [
+      {
+        "boss": "Reinfäule-Ritter (Speer) & Reinfäule-Ritter (Sichel)",
+        "place": "Verlassene Höhle",
+        "flag_id": 31200800
+      },
+      {
+        "boss": "Bestienmensch von Farum Azula (Beil) & Bestienmensch von Farum Azula (Wurfmesser)",
+        "place": "Drachenhügelhöhle",
+        "flag_id": 31100800
+      },
+      {
+        "boss": "Stinkender Baumgeist",
+        "place": "Katakomben der Kriegsopfer",
+        "flag_id": 30160800
+      },
+      {
+        "boss": "Apostel der Götterskalpe",
+        "place": "Heiliger Turm von Caelid",
+        "flag_id": 34130800
+      },
+      {
+        "boss": "Verehrer der Schwarzen Klinge",
+        "place": "Refugium der Bestien",
+        "flag_id": 1051430800
+      },
+      {
+        "boss": "Fliegender Drache Greyll",
+        "place": "Greyolls Drachenhügel",
+        "flag_id": 1052410800
+      },
+      {
+        "boss": "Stinkender Avatar",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1051400800
+      },
+      {
+        "boss": "Kriegsmagier Hugues",
+        "place": "Siegelgefängnis von Sellia",
+        "flag_id": 1049390850
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Lennes Turm",
+        "flag_id": 1052410850
+      },
+      {
+        "boss": "Klangperlenjäger",
+        "place": "Hütte des abgeschiedenen Händlers",
+        "flag_id": 1048410800
+      }
+    ]
+  },
+  {
+    "region_name": "Altus-Plateau",
+    "regions": [
+      3007,
+      3008,
+      3012,
+      3118,
+      3119,
+      3204,
+      3205,
+      6300
+    ],
+    "bosses": [
+      {
+        "boss": "Nekromant Garris",
+        "place": "Höhle des Weisen",
+        "flag_id": 31190850
+      },
+      {
+        "boss": "Assassine der Schwarzen Klinge",
+        "place": "Höhle des Weisen",
+        "flag_id": 31190800
+      },
+      {
+        "boss": "Steingräbertroll",
+        "place": "Alter Altustunnel",
+        "flag_id": 32040800
+      },
+      {
+        "boss": "Kristallianer (Speer) & Kristallianer (Ringklinge)",
+        "place": "Altustunnel",
+        "flag_id": 32050800
+      },
+      {
+        "boss": "Assassine der Schwarzen Klinge",
+        "place": "Grab des heiligen Helden",
+        "flag_id": 1040520800
+      },
+      {
+        "boss": "Uralter Held von Zamor",
+        "place": "Grab des heiligen Helden",
+        "flag_id": 30080800
+      },
+      {
+        "boss": "Maltöter & Miranda die faulige Blüte",
+        "place": "Parfümeursgrotte",
+        "flag_id": 31180800
+      },
+      {
+        "boss": "Parfümeurin Tricia & Löwenartiges Scheusal",
+        "place": "Entstellte Katakomben",
+        "flag_id": 30120800
+      },
+      {
+        "boss": "Wachhund des Erdenbaumbegräbnisses",
+        "place": "Katakomben von Wyndham",
+        "flag_id": 30070800
+      },
+      {
+        "boss": "Uralter Drache Lansseax",
+        "place": "Wallpfad",
+        "flag_id": 1041520800
+      },
+      {
+        "boss": "Halbmenschliche Königin Gilika",
+        "place": "Ruinen von Lux",
+        "flag_id": 1038510800
+      },
+      {
+        "boss": "Blutadliger",
+        "place": "Sturmblutruinen",
+        "flag_id": 1040530800
+      },
+      {
+        "boss": "Apostel der Götterskalpe",
+        "place": "Dominula, Windmühlendorf",
+        "flag_id": 1042550800
+      },
+      {
+        "boss": "Sternenfallbestie",
+        "place": "Krater des gefallenen Sterns",
+        "flag_id": 1041500800
+      },
+      {
+        "boss": "Baumwächter(x2)",
+        "place": "",
+        "flag_id": 1041510800
+      },
+      {
+        "boss": "Tibiaseefahrer",
+        "place": "Ruinen von Wyndham",
+        "flag_id": 1038520800
+      },
+      {
+        "boss": "Wurmgesicht",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1041530800
+      },
+      {
+        "boss": "Godefroy der Verpflanzte",
+        "place": "Siegelgefängnis des goldenen Stammbaums",
+        "flag_id": 1039500800
+      },
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "Kreuzung der Altus-Hochstraße",
+        "flag_id": 1039510800
+      },
+      {
+        "boss": "Elemer von den Dornen",
+        "place": "Die Schattenburg",
+        "flag_id": 1039540800
+      }
+    ]
+  },
+  {
+    "region_name": "Randgebiete der Hauptstadt",
+    "regions": [
+      3010,
+      3013,
+      3412,
+      6301
+    ],
+    "bosses": [
+      {
+        "boss": "Onyxfürst",
+        "place": "Versiegelter Tunnel",
+        "flag_id": 34120800
+      },
+      {
+        "boss": "Grabhüterduellant",
+        "place": "Seitengruft von Auriza",
+        "flag_id": 30130800
+      },
+      {
+        "boss": "Schmelztiegelritter & Schmelztiegelritter Ordovis",
+        "place": "Grab des Helden von Auriza",
+        "flag_id": 30100800
+      },
+      {
+        "boss": "Drachenbaumwächter",
+        "place": "Hauptstadtwall",
+        "flag_id": 1045520800
+      },
+      {
+        "boss": "Todesvogel",
+        "place": "",
+        "flag_id": 1044530800
+      },
+      {
+        "boss": "Klangperlenjäger",
+        "place": "Hütte des Einsiedlerhändlers",
+        "flag_id": 1043530800
+      }
+    ]
+  },
+  {
+    "region_name": "Gelmir",
+    "regions": [
+      3009,
+      3107,
+      3109,
+      6302
+    ],
+    "bosses": [
+      {
+        "boss": "Halbmenschliche Königin Margot",
+        "place": "Vulkanhöhle",
+        "flag_id": 31090800
+      },
+      {
+        "boss": "Spross der Fäulnis(x2)",
+        "place": "Donnerstromhöhle",
+        "flag_id": 31070800
+      },
+      {
+        "boss": "Heldenhafter Roter Wolf",
+        "place": "Grab des Helden von Gelmir",
+        "flag_id": 30090800
+      },
+      {
+        "boss": "Magmalindwurm",
+        "place": "Festung Laiedd",
+        "flag_id": 1035530800
+      },
+      {
+        "boss": "Ausgewachsene Sternenfallbestie",
+        "place": "Neuntes Gelmirlager",
+        "flag_id": 1036540800
+      },
+      {
+        "boss": "Halbmenschliche Königin Maggie",
+        "place": "Einsiedlerdorf",
+        "flag_id": 1037530800
+      },
+      {
+        "boss": "Baumgeist mit Geschwüren",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1037540810
+      }
+    ]
+  },
+  {
+    "region_name": "Haus Vulkan",
+    "regions": [
+      1600
+    ],
+    "bosses": [
+      {
+        "boss": "Entführerjungfer (Schwungsichel) & Entführerjungfer (Rad)",
+        "place": "Unterirdische Inquisitionskammer",
+        "flag_id": 16000860
+      },
+      {
+        "boss": "Adliger der Götterskalpe",
+        "place": "Tempel von Eiglay",
+        "flag_id": 16000850
+      },
+      {
+        "boss": "Götterverschlingende Schlange & Rykard, Fürst der Blasphemie",
+        "place": "Haus Vulkan",
+        "flag_id": 16000800,
+        "rememberance": 5
+      }
+    ]
+  },
+  {
+    "region_name": "Leyndell, Königliche Hauptstadt",
+    "regions": [
+      1100,
+      3414,
+      3415,
+      3500
+    ],
+    "bosses": [
+      {
+        "boss": "Esgar, Priester des Blutes",
+        "place": "Katakomben von Leyndell",
+        "flag_id": 35000850
+      },
+      {
+        "boss": "Grausamer Zwilling(x2)",
+        "place": "Heiliger Turm von Ost-Altus",
+        "flag_id": 34140850
+      },
+      {
+        "boss": "Mohg, das Mal",
+        "place": "Kathedrale der Verlorenen",
+        "flag_id": 35000800
+      },
+      {
+        "boss": "Godfrey, Erster Eldenfürst",
+        "place": "Refugium des Erdenbaums",
+        "flag_id": 11000850
+      },
+      {
+        "boss": "Morgott, König des Mals",
+        "place": "Eldenthron",
+        "flag_id": 11000800,
+        "rememberance": 4
+      }
+    ]
+  },
+  {
+    "region_name": "Verbotene Lande",
+    "regions": [
+      6500
+    ],
+    "bosses": [
+      {
+        "boss": "Dunkelkavallerist",
+        "place": "",
+        "flag_id": 1048510800
+      },
+      {
+        "boss": "Verehrer der Schwarzen Klinge",
+        "place": "",
+        "flag_id": 1049520800
+      }
+    ]
+  },
+  {
+    "region_name": "Berggipfel der Riesen",
+    "regions": [
+      3017,
+      3018,
+      3122,
+      6501,
+      6502
+    ],
+    "bosses": [
+      {
+        "boss": "Uralter Held von Zamor",
+        "place": "Grab des heroischen Riesentöters",
+        "flag_id": 30170800
+      },
+      {
+        "boss": "Baumgeist mit Geschwüren",
+        "place": "Katakomben des Riesengipfels",
+        "flag_id": 30180800
+      },
+      {
+        "boss": "Apostel der Götterskalpe & Adliger der Götterskalpe & Geisterruferschnecke",
+        "place": "Höhle des Geisterrufers",
+        "flag_id": 31220800
+      },
+      {
+        "boss": "Borealis der eisige Nebel",
+        "place": "Eisiger See",
+        "flag_id": 1254560800
+      },
+      {
+        "boss": "Avatar des Erdenbaums",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1052560800
+      },
+      {
+        "boss": "Ritter Vyke der Tafelrundfeste",
+        "place": "Siegelgefängnis des Fürstenanwärters",
+        "flag_id": 1053560800
+      },
+      {
+        "boss": "Todesritenvogel",
+        "place": "",
+        "flag_id": 1050570800
+      },
+      {
+        "boss": "Kommandant Niall",
+        "place": "Schloss Sol",
+        "flag_id": 1051570800
+      },
+      {
+        "boss": "Feuerriese",
+        "place": "Flammengipfel",
+        "flag_id": 1052520800,
+        "rememberance": 6
+      }
+    ]
+  },
+  {
+    "region_name": "Zerfallendes Farum Azula",
+    "regions": [
+      1300
+    ],
+    "bosses": [
+      {
+        "boss": "Duo der Götterskalpe",
+        "place": "Drachentempel – Altar",
+        "flag_id": 13000850
+      },
+      {
+        "boss": "Drachenfürst Placidusax",
+        "place": "An der Großen Brücke",
+        "flag_id": 13000830,
+        "rememberance": 12
+      },
+      {
+        "boss": "Maliketh, die Schwarze Klinge",
+        "place": "",
+        "flag_id": 13000800,
+        "rememberance": 11
+      }
+    ]
+  },
+  {
+    "region_name": "Geweihtes Schneefeld",
+    "regions": [
+      3019,
+      3020,
+      3112,
+      3211,
+      6503
+    ],
+    "bosses": [
+      {
+        "boss": "Verirrte Imitator-Träne",
+        "place": "Geheimpfad zum Haligbaum",
+        "flag_id": 30200800
+      },
+      {
+        "boss": "Stinkender Grabhüterduellant",
+        "place": "Geweihtes Schneefeld – Katakomben",
+        "flag_id": 30190800
+      },
+      {
+        "boss": "Astel, Sterne der Finsternis",
+        "place": "Tunnel von Yelough Anix",
+        "flag_id": 32110800
+      },
+      {
+        "boss": "Kreuzfahrerscheusal",
+        "place": "Höhle der Verlorenen",
+        "flag_id": 31120800
+      },
+      {
+        "boss": "Großer Lindwurm Theodorix",
+        "place": "",
+        "flag_id": 1050560800
+      },
+      {
+        "boss": "Stinkender Avatar",
+        "place": "Niederer Erdenbaum",
+        "flag_id": 1050570850
+      },
+      {
+        "boss": "Dunkelkavallerist (Gleve) & Dunkelkavallerist (Flegel)",
+        "place": "Inneres Geweihtes Schneefeld",
+        "flag_id": 1248550800
+      },
+      {
+        "boss": "Todesritenvogel",
+        "place": "",
+        "flag_id": 1048570800
+      }
+    ]
+  },
+  {
+    "region_name": "Miquellas Haligbaum",
+    "regions": [
+      1500
+    ],
+    "bosses": [
+      {
+        "boss": "Loretta, Ritterin des Haligbaums",
+        "place": "",
+        "flag_id": 15000850
+      },
+      {
+        "boss": "Malenia, Miquellas Klinge & Malenia, Göttin der Fäulnis",
+        "place": "",
+        "flag_id": 15000800,
+        "rememberance": 13
+      }
+    ]
+  },
+  {
+    "region_name": "Siofra",
+    "regions": [
+      1202,
+      1207
+    ],
+    "bosses": [
+      {
+        "boss": "Drachenblutsoldat",
+        "place": "Ufer des Siofra",
+        "flag_id": 12020830
+      },
+      {
+        "boss": "Ahnengeist",
+        "place": "Ufer des Siofra",
+        "flag_id": 12080800
+      },
+      {
+        "boss": "Imitator-Träne",
+        "place": "",
+        "flag_id": 12020850
+      },
+      {
+        "boss": "Königlicher Ahnengeist",
+        "place": "Heilighornland",
+        "flag_id": 12090800,
+        "rememberance": 7
+      },
+      {
+        "boss": "Tapferer Gargoyle & Tapferer Gargoyle (Zwillingsklinge)",
+        "place": "Aquädukt am Siofra",
+        "flag_id": 12020800
+      }
+    ]
+  },
+  {
+    "region_name": "Mausoleum der Mohgwyn-Dynastie",
+    "regions": [
+      1205
+    ],
+    "bosses": [
+      {
+        "boss": "Mohg, Fürst des Blutes",
+        "place": "",
+        "flag_id": 12050800,
+        "rememberance": 10
+      }
+    ]
+  },
+  {
+    "region_name": "Ainsel",
+    "regions": [
+      1201,
+      1204
+    ],
+    "bosses": [
+      {
+        "boss": "Drachenblutsoldat von Nokstella",
+        "place": "",
+        "flag_id": 12010800
+      },
+      {
+        "boss": "Drachenblutsoldat",
+        "place": "",
+        "flag_id": 12010850
+      },
+      {
+        "boss": "Astel, Ausgeburt des Abgrunds",
+        "place": "Großer Kreuzgang",
+        "flag_id": 12040800,
+        "rememberance": 8
+      }
+    ]
+  },
+  {
+    "region_name": "Tiefen von Tiefwurz",
+    "regions": [
+      1203
+    ],
+    "bosses": [
+      {
+        "boss": "Schmelztiegelritterin Siluria",
+        "place": "",
+        "flag_id": 12030390
+      },
+      {
+        "boss": "Fias Held & Zauberer Rogier & Lionel Löwenherz",
+        "place": "",
+        "flag_id": 12030800
+      },
+      {
+        "boss": "Lichdrache Fortissax",
+        "place": "",
+        "flag_id": 12030850,
+        "rememberance": 9
+      }
+    ]
+  },
+  {
+    "region_name": "Leyndell, Aschene Hauptstadt",
+    "regions": [
+      1105,
+      1900
+    ],
+    "bosses": [
+      {
+        "boss": "Sir Gideon Ofnir der Allwissende",
+        "place": "Refugium des Erdenbaums",
+        "flag_id": 11050850
+      },
+      {
+        "boss": "Godfrey, Erster Eldenfürst",
+        "place": "Eldenthron",
+        "flag_id": 11050800,
+        "rememberance": 14
+      },
+      {
+        "boss": "Radagon von der Goldenen Ordnung & Eldenbestie",
+        "place": "Gespaltene Marika",
+        "flag_id": 19000800,
+        "rememberance": 15
+      }
+    ]
+  },
+  {
+    "region_name": "Grabfeld-Ebene",
+    "regions": [
+      4100,
+      4102,
+      4300,
+      6800,
+      6801,
+      6804,
+      6805,
+      6806,
+      6810,
+      6815,
+      6820
+    ],
+    "bosses": [
+      {
+        "boss": "Geisterflammendrache",
+        "place": "",
+        "flag_id": 2045440800
+      },
+      {
+        "boss": "Ritter des Einsamen Kerker",
+        "place": "Westliches namenloses Mausoleum",
+        "flag_id": 2046410800
+      },
+      {
+        "boss": "Blutunhold-Anführer",
+        "place": "Höhle an der Flussmündung",
+        "flag_id": 43000800
+      },
+      {
+        "boss": "Kläger",
+        "place": "Kerker des Klägers",
+        "flag_id": 41020800
+      },
+      {
+        "boss": "Halbmenschen-Schwertmeister Onze",
+        "place": "Kerker von Belurat",
+        "flag_id": 41000800
+      },
+      {
+        "boss": "Göttliche Bestie - Tanzender Löwe",
+        "place": "Belurat, Turmsiedlung",
+        "flag_id": 20000800,
+        "rememberance": 16
+      },
+      {
+        "boss": "Rellana, Zwillings-Mondritterin",
+        "place": "Schloss Ensis",
+        "flag_id": 2048440800,
+        "rememberance": 17
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Scadu Altus",
+    "regions": [
+      4000,
+      4001,
+      4101,
+      6900,
+      6901,
+      6902,
+      6903,
+      6904,
+      6905,
+      6906
+    ],
+    "bosses": [
+      {
+        "boss": "Geisterflammendrache",
+        "place": "",
+        "flag_id": 2049430800
+      },
+      {
+        "boss": "Ralva, der große rote Bär",
+        "place": "",
+        "flag_id": 2049450800
+      },
+      {
+        "boss": "Rugalea, der große rote Bär",
+        "place": "",
+        "flag_id": 2044470800
+      },
+      {
+        "boss": "Trockenblatt Dane",
+        "place": "",
+        "flag_id": 2049440800
+      },
+      {
+        "boss": "Schwarzer Ritter Edredd",
+        "place": "Festung des Tadels",
+        "flag_id": 2049430850
+      },
+      {
+        "boss": "Schwarzer Ritter Garrew",
+        "place": "Nebelriss-Festung",
+        "flag_id": 2047450800
+      },
+      {
+        "boss": "Roter Bär",
+        "place": "Nördliches namenloses Mausoleum",
+        "flag_id": 2046450800
+      },
+      {
+        "boss": "Rakshasa",
+        "place": "Östliches namenloses Mausoleum",
+        "flag_id": 2051440800
+      },
+      {
+        "boss": "Metyr, Mutter der Finger",
+        "place": "Kathedrale von Manus Metyr",
+        "flag_id": 25000800,
+        "rememberance": 18
+      },
+      {
+        "boss": "Fürst Ymir, Mutter der Finger",
+        "place": "Kathedrale von Manus Metyr",
+        "flag_id": 2051450800
+      },
+      {
+        "boss": "Todesritter",
+        "place": "Nebelriss-Katakomben",
+        "flag_id": 40000800
+      },
+      {
+        "boss": "Todesritter",
+        "place": "Katakomben am Skorpionsfluss",
+        "flag_id": 40010800
+      },
+      {
+        "boss": "Fluchklingen Labirith",
+        "place": "Kerker von Bonny",
+        "flag_id": 41010800
+      },
+      {
+        "boss": "Goldenes Nilpferd",
+        "place": "Schattenbergfried",
+        "flag_id": 21000850
+      },
+      {
+        "boss": "Messmer der Pfähler & Böse Schlange Messmer",
+        "place": "Schattenbergfried",
+        "flag_id": 21010800,
+        "rememberance": 20
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Uralte Ruinen von Rauh",
+    "regions": [
+      6940
+    ],
+    "bosses": [
+      {
+        "boss": "Göttliche Bestie - Tanzender Löwe",
+        "place": "",
+        "flag_id": 2046460800
+      },
+      {
+        "boss": "Romina, Heilige der Knospe",
+        "place": "Kirche der Knospe",
+        "flag_id": 2044450800,
+        "rememberance": 21
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Himmelblaues Ufer",
+    "regions": [
+      2200,
+      6830,
+      6835
+    ],
+    "bosses": [
+      {
+        "boss": "Geisterflammendrache",
+        "place": "",
+        "flag_id": 2048380850
+      },
+      {
+        "boss": "Tänzerin von Ranah",
+        "place": "Südliches namenloses Mausoleum",
+        "flag_id": 2046380800
+      },
+      {
+        "boss": "Fäulnisritter",
+        "place": "Riss im Steinsarg",
+        "flag_id": 22000800,
+        "rememberance": 22
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Charos verstecktes Grab",
+    "regions": [
+      6840
+    ],
+    "bosses": [
+      {
+        "boss": "Todesritenvogel",
+        "place": "",
+        "flag_id": 2047390800
+      },
+      {
+        "boss": "Halbmenschen-Königin Marigga",
+        "place": "",
+        "flag_id": 2046400800
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Klingengipfel",
+    "regions": [
+      4301,
+      6841,
+      6850
+    ],
+    "bosses": [
+      {
+        "boss": "Klingengipfel-Drachling",
+        "place": "",
+        "flag_id": 2049410800
+      },
+      {
+        "boss": "Klingengipfel-Drachling",
+        "place": "",
+        "flag_id": 2052400800
+      },
+      {
+        "boss": "Uralter Drachenmensch",
+        "place": "Drachengrube",
+        "flag_id": 43010800
+      },
+      {
+        "boss": "Uralter Drache Senessax",
+        "place": "Berghang des Klingengipfels",
+        "flag_id": 2054390850
+      },
+      {
+        "boss": "Bayle der Schreckliche",
+        "place": "Spitze des Klingengipfels",
+        "flag_id": 2054390800
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Aussicht von Scadu",
+    "regions": [
+      6920,
+      6930,
+      6960
+    ],
+    "bosses": [
+      {
+        "boss": "Baumwächter",
+        "place": "",
+        "flag_id": 2050470800
+      },
+      {
+        "boss": "Baumwächter",
+        "place": "",
+        "flag_id": 2050480860
+      },
+      {
+        "boss": "Sternenfallbestie",
+        "place": "",
+        "flag_id": 2052480800
+      },
+      {
+        "boss": "Kommandant Gaius",
+        "place": "",
+        "flag_id": 2049480800,
+        "rememberance": 19
+      },
+      {
+        "boss": "Avatar des Scadubaums",
+        "place": "Fuß des Scadubaums",
+        "flag_id": 2050480800,
+        "rememberance": 24
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Abgrundwald",
+    "regions": [
+      2800,
+      4002,
+      6860
+    ],
+    "bosses": [
+      {
+        "boss": "Jori, Ältester Inquisitor",
+        "place": "Dunkellichtkatakomben",
+        "flag_id": 2052430800
+      },
+      {
+        "boss": "Midra, Herr der Rasenden Flamme",
+        "place": "Midras Pfarrhaus",
+        "flag_id": 28000800,
+        "rememberance": 23
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Enir-Ilim",
+    "regions": [
+      2001
+    ],
+    "bosses": [
+      {
+        "boss": "Radahn, versprochener Gemahl & Radahn, Miquellas Gemahl",
+        "place": "",
+        "flag_id": 20010800,
+        "rememberance": 25
+      }
+    ],
+    "dlc": 1
+  }
+]

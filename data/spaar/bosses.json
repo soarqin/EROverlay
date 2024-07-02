@@ -1,0 +1,1418 @@
+[
+  {
+    "region_name": "Limgrave",
+    "regions": [
+      1800,
+      3002,
+      3004,
+      3011,
+      3100,
+      3103,
+      3115,
+      3117,
+      3201,
+      3410,
+      6100,
+      6101
+    ],
+    "bosses": [
+      {
+        "boss": "Soldado de Godric",
+        "place": "Cementerio Varado",
+        "flag_id": 18000850
+      },
+      {
+        "boss": "Centinela arbóreo",
+        "place": "Iglesia de Elleh",
+        "flag_id": 1042360800
+      },
+      {
+        "boss": "Semihumano jefe(x2)",
+        "place": "Cueva costera",
+        "flag_id": 31150800
+      },
+      {
+        "boss": "Perro guardián mortuorio del Terrárbol",
+        "place": "Catacumbas de Piebrumo",
+        "flag_id": 30020800
+      },
+      {
+        "boss": "Hombre bestia de Farum Azula",
+        "place": "Cueva de la Arboleda",
+        "flag_id": 31030800
+      },
+      {
+        "boss": "Trol cavarrocas",
+        "place": "Túneles de Limgrave",
+        "flag_id": 32010800
+      },
+      {
+        "boss": "Calabáceo loco",
+        "place": "Ruinas de parada de carretera",
+        "flag_id": 1044360800
+      },
+      {
+        "boss": "Caballero sabueso Darriwil",
+        "place": "Prisión eterna del sabueso solitario",
+        "flag_id": 1044350800
+      },
+      {
+        "boss": "Parches",
+        "place": "Cueva Fangal",
+        "flag_id": 31000800
+      },
+      {
+        "boss": "Duelista vigía de la tumba",
+        "place": "Catacumbas Fangal",
+        "flag_id": 30040800
+      },
+      {
+        "boss": "Gólem guardián",
+        "place": "Cueva del camino mayor",
+        "flag_id": 31170800
+      },
+      {
+        "boss": "Asesino Cuchillo Negro",
+        "place": "Catacumbas tocadas por la muerte",
+        "flag_id": 30110800
+      },
+      {
+        "boss": "Espíritu arbóreo ulceroso",
+        "place": "Tumba del Héroe de los Marginados",
+        "flag_id": 18000800
+      },
+      {
+        "boss": "Dragón volador Aguil",
+        "place": "Lago Aguil",
+        "flag_id": 1043360800
+      },
+      {
+        "boss": "Marinero de Tibia",
+        "place": "Aldea de las Aguas Invocadoras",
+        "flag_id": 1045390800
+      },
+      {
+        "boss": "Caballero del Crisol",
+        "place": "Prisión eterna de Montebrumo",
+        "flag_id": 1042370800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "",
+        "flag_id": 1043370800
+      },
+      {
+        "boss": "Ave de la muerte",
+        "place": "",
+        "flag_id": 1042380800
+      },
+      {
+        "boss": "Cazador de rodamientos de campana",
+        "place": "Choza del maestro de guerra",
+        "flag_id": 1042380850
+      }
+    ]
+  },
+  {
+    "region_name": "Península Llorona",
+    "regions": [
+      3000,
+      3001,
+      3101,
+      3102,
+      3200,
+      6102
+    ],
+    "bosses": [
+      {
+        "boss": "Oso rúnico",
+        "place": "Cueva excavada",
+        "flag_id": 31010800
+      },
+      {
+        "boss": "Malnacido escamoso",
+        "place": "Túnel de Morne",
+        "flag_id": 32000800
+      },
+      {
+        "boss": "Perro guardián mortuorio del Terrárbol",
+        "place": "Catacumbas del Empalador",
+        "flag_id": 30010800
+      },
+      {
+        "boss": "Sombra del cementerio",
+        "place": "Catacumbas de la tumba subterránea",
+        "flag_id": 30000800
+      },
+      {
+        "boss": "Miranda, la Flor Marchita",
+        "place": "Cueva de la tumba subterránea",
+        "flag_id": 31020800
+      },
+      {
+        "boss": "Avatar del Terrárbol",
+        "place": "Terrárbol menor",
+        "flag_id": 1043330800
+      },
+      {
+        "boss": "Héroe antiguo de Zamor",
+        "place": "Prisión Eterna de los Llantos",
+        "flag_id": 1042330800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "Muralla del Castillo Morne",
+        "flag_id": 1044320850
+      },
+      {
+        "boss": "Ave de la muerte",
+        "place": "",
+        "flag_id": 1044320800
+      },
+      {
+        "boss": "Malnacido Leonino",
+        "place": "Tumba del Dolor de Morne",
+        "flag_id": 1043300800
+      }
+    ]
+  },
+  {
+    "region_name": "Castillo Velobrumo",
+    "regions": [
+      1000
+    ],
+    "bosses": [
+      {
+        "boss": "Margit, el Aojo Cruel",
+        "place": "Castillo Velobrumo",
+        "flag_id": 10000850
+      },
+      {
+        "boss": "Godric el Injertado",
+        "place": "Castillo Velobrumo",
+        "flag_id": 10000800,
+        "rememberance": 1
+      }
+    ]
+  },
+  {
+    "region_name": "Liurnia de los Lagos",
+    "regions": [
+      3003,
+      3005,
+      3006,
+      3104,
+      3105,
+      3106,
+      3202,
+      3411,
+      3900,
+      3920,
+      6200,
+      6201
+    ],
+    "bosses": [
+      {
+        "boss": "Caballero purificador",
+        "place": "Cueva de Agua Estancada",
+        "flag_id": 31040800
+      },
+      {
+        "boss": "Caballero sabueso",
+        "place": "Cueva de cristal junto al lago",
+        "flag_id": 31050800
+      },
+      {
+        "boss": "Perro guardián mortuorio del Terrárbol",
+        "place": "Catacumbas del fondo del acantilado",
+        "flag_id": 30060800
+      },
+      {
+        "boss": "Cristalino (báculo) & Cristalino (lanza)",
+        "place": "Cueva de cristal de la Academia",
+        "flag_id": 31060800
+      },
+      {
+        "boss": "Cristalino (anillo cortante)",
+        "place": "Túnel de cristal de Raya Lucaria",
+        "flag_id": 32020800
+      },
+      {
+        "boss": "Sombra del cementerio",
+        "place": "Catacumbas de los Cuchillos Negros",
+        "flag_id": 30050800
+      },
+      {
+        "boss": "Asesino Cuchillo Negro",
+        "place": "Catacumbas de los Cuchillos Negros",
+        "flag_id": 30050850
+      },
+      {
+        "boss": "Caracol llamador de espíritus",
+        "place": "Catacumbas al final del camino",
+        "flag_id": 30030800
+      },
+      {
+        "boss": "Vástago injertado",
+        "place": "Capilla de la Premonición",
+        "flag_id": 10010800
+      },
+      {
+        "boss": "Dragón de destellita Smarag",
+        "place": "Distrito del Templo",
+        "flag_id": 1034450800
+      },
+      {
+        "boss": "Asesinaojos",
+        "place": "Aldea de los albináuricos",
+        "flag_id": 1035420800
+      },
+      {
+        "boss": "Espectro real",
+        "place": "Ruinas del Reino de los Soberanos",
+        "flag_id": 1034480800
+      },
+      {
+        "boss": "Marinero de Tibia",
+        "place": "",
+        "flag_id": 1039440800
+      },
+      {
+        "boss": "Avatar del Terrárbol",
+        "place": "Torre convertida",
+        "flag_id": 1033430800
+      },
+      {
+        "boss": "Avatar del Terrárbol",
+        "place": "Recinto del mausoleo",
+        "flag_id": 1038480800
+      },
+      {
+        "boss": "Adan, Ladrón del Fuego",
+        "place": "Prisión eterna del Malechor",
+        "flag_id": 1038410800
+      },
+      {
+        "boss": "Bols, caballero de Caria",
+        "place": "Prisión eterna del Cuco",
+        "flag_id": 1033450800
+      },
+      {
+        "boss": "Señor de Ónix",
+        "place": "Prisión eterna de la tumba real",
+        "flag_id": 1036500800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "Puente de la Ciudad de las Puertas",
+        "flag_id": 1039430800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "Iglesia de Bellum",
+        "flag_id": 1036480800
+      },
+      {
+        "boss": "Ave de la muerte",
+        "place": "Isla pintoresca",
+        "flag_id": 1037420800
+      },
+      {
+        "boss": "Ave del rito de la muerte",
+        "place": "Norte de la Ciudad de las Puertas",
+        "flag_id": 1036450800
+      },
+      {
+        "boss": "Cazador de rodamientos de campana",
+        "place": "Iglesia de los Votos",
+        "flag_id": 1037460800
+      },
+      {
+        "boss": "Loretta, caballera real",
+        "place": "Mansión de Caria",
+        "flag_id": 1035500800
+      },
+      {
+        "boss": "Serpiente de Magma Makar",
+        "place": "Precipicio sembrado de ruinas",
+        "flag_id": 39200800
+      }
+    ]
+  },
+  {
+    "region_name": "Altar de luz de luna",
+    "regions": [
+      6202
+    ],
+    "bosses": [
+      {
+        "boss": "Dragón de destellita Adula",
+        "place": "Altar de luz de luna",
+        "flag_id": 1034420800
+      },
+      {
+        "boss": "Alecto, Líder de los Cuchillos Negros",
+        "place": "Prisión Eterna del Cabecilla",
+        "flag_id": 1033420800
+      }
+    ]
+  },
+  {
+    "region_name": "Academia de Raya Lucaria",
+    "regions": [
+      1400
+    ],
+    "bosses": [
+      {
+        "boss": "Lobo Rojo de Rádagon",
+        "place": "",
+        "flag_id": 14000850
+      },
+      {
+        "boss": "Rennala, Reina de la Luna Llena",
+        "place": "",
+        "flag_id": 14000800,
+        "rememberance": 2
+      }
+    ]
+  },
+  {
+    "region_name": "Caelid",
+    "regions": [
+      3014,
+      3015,
+      3111,
+      3121,
+      3207,
+      3208,
+      6400
+    ],
+    "bosses": [
+      {
+        "boss": "Serpiente de Magma",
+        "place": "Túnel gaélico",
+        "flag_id": 32070800
+      },
+      {
+        "boss": "Perro guardián mortuorio del Terrárbol (espada) & Perro guardián mortuorio del Terrárbol (cetro)",
+        "place": "Catacumbas de Terrárbol menor",
+        "flag_id": 30140800
+      },
+      {
+        "boss": "Duelista frenético",
+        "place": "Cueva de la prisión",
+        "flag_id": 31210800
+      },
+      {
+        "boss": "Sombra del cementerio",
+        "place": "Catacumbas de Caelid",
+        "flag_id": 30150800
+      },
+      {
+        "boss": "Bestia de estrella fugaz",
+        "place": "Túnel de cristal de Sellia",
+        "flag_id": 32080800
+      },
+      {
+        "boss": "Cristalino podrido (anillo cortante) & Cristalino podrido (lanza) & Cristalino podrido (báculo)",
+        "place": "Escondite de Sellia",
+        "flag_id": 31110800
+      },
+      {
+        "boss": "Calabáceo loco (martillo) & Calabáceo loco (mangual)",
+        "place": "Ruinas de Caelem",
+        "flag_id": 1048400800
+      },
+      {
+        "boss": "Ekzykes en descomposición",
+        "place": "Iglesia de la Plaga",
+        "flag_id": 1048370800
+      },
+      {
+        "boss": "Monje de Nox & Espadachina nox",
+        "place": "Sellia, ciudad de hechicerías",
+        "flag_id": 1049390800
+      },
+      {
+        "boss": "Comandante O'Neil",
+        "place": "Pantano de Aeonia",
+        "flag_id": 1049380800
+      },
+      {
+        "boss": "Avatar podrido",
+        "place": "Terrárbol menor",
+        "flag_id": 1047400800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "Carretera sur de Caelid",
+        "flag_id": 1049370800
+      },
+      {
+        "boss": "Ave del rito de la muerte",
+        "place": "Banco del pantano sur de Aeonia",
+        "flag_id": 1049370850
+      },
+      {
+        "boss": "Caballero del Crisol & Malnacido Leonino",
+        "place": "Castillo Melenarroja",
+        "flag_id": 1051360800
+      },
+      {
+        "boss": "Radahn Azotestelar",
+        "place": "Dunas de los Lamentos",
+        "flag_id": 1252380800,
+        "rememberance": 3
+      }
+    ]
+  },
+  {
+    "region_name": "Túmulo de Greyoll",
+    "regions": [
+      3016,
+      3110,
+      3120,
+      3413,
+      6402
+    ],
+    "bosses": [
+      {
+        "boss": "Caballero purificador (lanza) & Caballero purificador (hoz)",
+        "place": "Cueva abandonada",
+        "flag_id": 31200800
+      },
+      {
+        "boss": "Hombre bestia de Farum Azula (cuchilla) & Hombre bestia de Farum Azula (cuchillo arrojadizo)",
+        "place": "Cueva del Túmulo del Dragón",
+        "flag_id": 31100800
+      },
+      {
+        "boss": "Espíritu arbóreo podrido",
+        "place": "Catacumbas de los Caídos",
+        "flag_id": 30160800
+      },
+      {
+        "boss": "Apóstol piel de dios",
+        "place": "Torre divina de Caelid",
+        "flag_id": 34130800
+      },
+      {
+        "boss": "Parentela de la Espada Negra",
+        "place": "Santuario bestial",
+        "flag_id": 1051430800
+      },
+      {
+        "boss": "Dragón volador Greyoll",
+        "place": "Túmulo de Greyoll",
+        "flag_id": 1052410800
+      },
+      {
+        "boss": "Avatar podrido",
+        "place": "Terrárbol menor",
+        "flag_id": 1051400800
+      },
+      {
+        "boss": "Mago de batalla Hugues",
+        "place": "Prisión eterna de Sellia",
+        "flag_id": 1049390850
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "El Ascenso de Lenne",
+        "flag_id": 1052410850
+      },
+      {
+        "boss": "Cazador de rodamientos de campana",
+        "place": "Choza de mercader aislado",
+        "flag_id": 1048410800
+      }
+    ]
+  },
+  {
+    "region_name": "Meseta Altus",
+    "regions": [
+      3007,
+      3008,
+      3012,
+      3118,
+      3119,
+      3204,
+      3205,
+      6300
+    ],
+    "bosses": [
+      {
+        "boss": "Garris, el nigromante",
+        "place": "Cueva del sabio",
+        "flag_id": 31190850
+      },
+      {
+        "boss": "Asesino Cuchillo Negro",
+        "place": "Cueva del sabio",
+        "flag_id": 31190800
+      },
+      {
+        "boss": "Trol cavarrocas",
+        "place": "Túnel del viejo Altus",
+        "flag_id": 32040800
+      },
+      {
+        "boss": "Cristalino (lanza) & Cristalino (anillo cortante)",
+        "place": "Túnel de Altus",
+        "flag_id": 32050800
+      },
+      {
+        "boss": "Asesino Cuchillo Negro",
+        "place": "Tumba de héroe canonizado",
+        "flag_id": 1040520800
+      },
+      {
+        "boss": "Héroe antiguo de Zamor",
+        "place": "Tumba de héroe canonizado",
+        "flag_id": 30080800
+      },
+      {
+        "boss": "Asesinaojos & Miranda, la Flor Marchita",
+        "place": "Gruta del Perfumista",
+        "flag_id": 31180800
+      },
+      {
+        "boss": "Perfumista Tricia & Malnacido Leonino",
+        "place": "Catacumbas desagradables",
+        "flag_id": 30120800
+      },
+      {
+        "boss": "Perro guardián mortuorio del Terrárbol",
+        "place": "Catacumbas de Wyndham",
+        "flag_id": 30070800
+      },
+      {
+        "boss": "Dragón antiguo Lansseax",
+        "place": "Sendero junto a la muralla",
+        "flag_id": 1041520800
+      },
+      {
+        "boss": "Gilika, reina semihumana",
+        "place": "Ruinas de Lux",
+        "flag_id": 1038510800
+      },
+      {
+        "boss": "Noble sanguinario",
+        "place": "Ruinas de la Sangre Agonizante",
+        "flag_id": 1040530800
+      },
+      {
+        "boss": "Apóstol piel de dios",
+        "place": "Dominula, aldea del Molino de Viento",
+        "flag_id": 1042550800
+      },
+      {
+        "boss": "Bestia de estrella fugaz",
+        "place": "Cráter estelar",
+        "flag_id": 1041500800
+      },
+      {
+        "boss": "Centinela arbóreo(x2)",
+        "place": "",
+        "flag_id": 1041510800
+      },
+      {
+        "boss": "Marinero de Tibia",
+        "place": "Ruinas de Wyndham",
+        "flag_id": 1038520800
+      },
+      {
+        "boss": "Cara de gusano",
+        "place": "Terrárbol menor",
+        "flag_id": 1041530800
+      },
+      {
+        "boss": "Godefroy el Injertado",
+        "place": "Prisión Eterna del Linaje Dorado",
+        "flag_id": 1039500800
+      },
+      {
+        "boss": "Caballería de la Noche",
+        "place": "Cruce de carreteras de Altus",
+        "flag_id": 1039510800
+      },
+      {
+        "boss": "Elemer de la Zarza",
+        "place": "El Castillo Sombrío",
+        "flag_id": 1039540800
+      }
+    ]
+  },
+  {
+    "region_name": "Afueras de la capital",
+    "regions": [
+      3010,
+      3013,
+      3412,
+      6301
+    ],
+    "bosses": [
+      {
+        "boss": "Señor de Ónix",
+        "place": "Túnel sellado",
+        "flag_id": 34120800
+      },
+      {
+        "boss": "Duelista vigía de la tumba",
+        "place": "Tumba lateral de Auriza",
+        "flag_id": 30130800
+      },
+      {
+        "boss": "Caballero del Crisol & Caballero del Crisol Ordovis",
+        "place": "Tumba de héroe de Auriza",
+        "flag_id": 30100800
+      },
+      {
+        "boss": "Centinela arbóreo dragónico",
+        "place": "Muralla de la capital",
+        "flag_id": 1045520800
+      },
+      {
+        "boss": "Ave de la muerte",
+        "place": "",
+        "flag_id": 1044530800
+      },
+      {
+        "boss": "Cazador de rodamientos de campana",
+        "place": "Choza de mercader ermitaño",
+        "flag_id": 1043530800
+      }
+    ]
+  },
+  {
+    "region_name": "Monte Gelmir",
+    "regions": [
+      3009,
+      3107,
+      3109,
+      6302
+    ],
+    "bosses": [
+      {
+        "boss": "Margot, reina semihumana",
+        "place": "Cueva volcánica",
+        "flag_id": 31090800
+      },
+      {
+        "boss": "Parentela de la Podredumbre(x2)",
+        "place": "Cueva de aguas peligrosas",
+        "flag_id": 31070800
+      },
+      {
+        "boss": "Lobo Rojo del campeón",
+        "place": "Tumba de héroe de Gelmir",
+        "flag_id": 30090800
+      },
+      {
+        "boss": "Serpiente de Magma",
+        "place": "Fuerte Laiedd",
+        "flag_id": 1035530800
+      },
+      {
+        "boss": "Bestia de estrella fugaz adulta",
+        "place": "Noveno campamento del Monte Gelmir",
+        "flag_id": 1036540800
+      },
+      {
+        "boss": "Maggie, reina semihumana",
+        "place": "Aldea del ermitaño",
+        "flag_id": 1037530800
+      },
+      {
+        "boss": "Espíritu arbóreo ulceroso",
+        "place": "Terrárbol menor",
+        "flag_id": 1037540810
+      }
+    ]
+  },
+  {
+    "region_name": "Mansión Volcánica",
+    "regions": [
+      1600
+    ],
+    "bosses": [
+      {
+        "boss": "Virgen secuestradora (hoz oscilante) & Virgen secuestradora (rueda)",
+        "place": "Cámara de inquisición subterránea",
+        "flag_id": 16000860
+      },
+      {
+        "boss": "Noble piel de dios",
+        "place": "Templo de Eiglay",
+        "flag_id": 16000850
+      },
+      {
+        "boss": "Serpiente devoradora de dioses & Rykard, Señor de la Blasfemia",
+        "place": "Mansión Volcánica",
+        "flag_id": 16000800,
+        "rememberance": 5
+      }
+    ]
+  },
+  {
+    "region_name": "Leyndell, capital real",
+    "regions": [
+      1100,
+      3414,
+      3415,
+      3500
+    ],
+    "bosses": [
+      {
+        "boss": "Esgar, Sacerdote de la Sangre",
+        "place": "Catacumbas de Leyndell",
+        "flag_id": 35000850
+      },
+      {
+        "boss": "Gemelo Cruel(x2)",
+        "place": "Torre divina del este de Altus",
+        "flag_id": 34140850
+      },
+      {
+        "boss": "Mohg, el Aojo",
+        "place": "Catedral de los Olvidados",
+        "flag_id": 35000800
+      },
+      {
+        "boss": "Godfrey, Primer Señor de Elden",
+        "place": "Santuario del Terrárbol",
+        "flag_id": 11000850
+      },
+      {
+        "boss": "Morgott, el Rey de los Aojos",
+        "place": "Trono de Elden",
+        "flag_id": 11000800,
+        "rememberance": 4
+      }
+    ]
+  },
+  {
+    "region_name": "Tierras Prohibidas",
+    "regions": [
+      6500
+    ],
+    "bosses": [
+      {
+        "boss": "Caballería de la Noche",
+        "place": "",
+        "flag_id": 1048510800
+      },
+      {
+        "boss": "Parentela de la Espada Negra",
+        "place": "",
+        "flag_id": 1049520800
+      }
+    ]
+  },
+  {
+    "region_name": "Montañas de los Gigantes",
+    "regions": [
+      3017,
+      3018,
+      3122,
+      6501,
+      6502
+    ],
+    "bosses": [
+      {
+        "boss": "Héroe antiguo de Zamor",
+        "place": "Tumba del Héroe Conquistador de Gigantes",
+        "flag_id": 30170800
+      },
+      {
+        "boss": "Espíritu arbóreo ulceroso",
+        "place": "Catacumbas de la Cumbre de los Gigantes",
+        "flag_id": 30180800
+      },
+      {
+        "boss": "Apóstol piel de dios & Noble piel de dios & Caracol llamador de espíritus",
+        "place": "Cueva de invocación de espíritus",
+        "flag_id": 31220800
+      },
+      {
+        "boss": "Borealis, la niebla congelante",
+        "place": "Lago de congelación",
+        "flag_id": 1254560800
+      },
+      {
+        "boss": "Avatar del Terrárbol",
+        "place": "Terrárbol menor",
+        "flag_id": 1052560800
+      },
+      {
+        "boss": "Vyke, el Caballero de la Mesa Redonda",
+        "place": "Prisión eterna del Señor Aspirante",
+        "flag_id": 1053560800
+      },
+      {
+        "boss": "Ave del rito de la muerte",
+        "place": "",
+        "flag_id": 1050570800
+      },
+      {
+        "boss": "Comandante Niall",
+        "place": "Castillo Sol",
+        "flag_id": 1051570800
+      },
+      {
+        "boss": "Gigante de fuego",
+        "place": "Cima Abrasadora",
+        "flag_id": 1052520800,
+        "rememberance": 6
+      }
+    ]
+  },
+  {
+    "region_name": "Farum Azula desmoronada",
+    "regions": [
+      1300
+    ],
+    "bosses": [
+      {
+        "boss": "Dúo piel de dios",
+        "place": "Altar del Templo del Dragón",
+        "flag_id": 13000850
+      },
+      {
+        "boss": "Señordragón Placidusax",
+        "place": "Junto al Gran Puente",
+        "flag_id": 13000830,
+        "rememberance": 12
+      },
+      {
+        "boss": "Maliketh, la Espada Negra",
+        "place": "",
+        "flag_id": 13000800,
+        "rememberance": 11
+      }
+    ]
+  },
+  {
+    "region_name": "Campo de nieve consagrado",
+    "regions": [
+      3019,
+      3020,
+      3112,
+      3211,
+      6503
+    ],
+    "bosses": [
+      {
+        "boss": "Lágrima mimética perdida",
+        "place": "Camino oculto hacia el Santoárbol",
+        "flag_id": 30200800
+      },
+      {
+        "boss": "Duelista pútrido vigía de la tumba",
+        "place": "Catacumbas del Campo de Nieve Consagrado",
+        "flag_id": 30190800
+      },
+      {
+        "boss": "Astel, Estrellas de la Oscuridad",
+        "place": "Túnel de Yelough Anix",
+        "flag_id": 32110800
+      },
+      {
+        "boss": "Cruzado malnacido",
+        "place": "Cueva de los Olvidados",
+        "flag_id": 31120800
+      },
+      {
+        "boss": "Theodorix, la Gran Serpiente",
+        "place": "",
+        "flag_id": 1050560800
+      },
+      {
+        "boss": "Avatar podrido",
+        "place": "Terrárbol menor",
+        "flag_id": 1050570850
+      },
+      {
+        "boss": "Caballería de la Noche (guja) & Caballería de la Noche (mangual)",
+        "place": "Interior del campo de nieve consagrado",
+        "flag_id": 1248550800
+      },
+      {
+        "boss": "Ave del rito de la muerte",
+        "place": "",
+        "flag_id": 1048570800
+      }
+    ]
+  },
+  {
+    "region_name": "Santoárbol de Miquella",
+    "regions": [
+      1500
+    ],
+    "bosses": [
+      {
+        "boss": "Loretta, caballera del Santoárbol",
+        "place": "",
+        "flag_id": 15000850
+      },
+      {
+        "boss": "Malenia, Espada de Miquella & Malenia, Diosa de la Podredumbre",
+        "place": "",
+        "flag_id": 15000800,
+        "rememberance": 13
+      }
+    ]
+  },
+  {
+    "region_name": "Río Siofra",
+    "regions": [
+      1202,
+      1207
+    ],
+    "bosses": [
+      {
+        "boss": "Soldado Dragonante",
+        "place": "Ribera del río Siofra",
+        "flag_id": 12020830
+      },
+      {
+        "boss": "Espíritu Ancestral",
+        "place": "Ribera del río Siofra",
+        "flag_id": 12080800
+      },
+      {
+        "boss": "Lágrima mimética",
+        "place": "",
+        "flag_id": 12020850
+      },
+      {
+        "boss": "Espíritu Ancestral Real",
+        "place": "Tierras del cuerno santo",
+        "flag_id": 12090800,
+        "rememberance": 7
+      },
+      {
+        "boss": "Gárgola Valiente & Gárgola Valiente (hojas gemelas)",
+        "place": "Acueducto de Siofra",
+        "flag_id": 12020800
+      }
+    ]
+  },
+  {
+    "region_name": "Mausoleo de la dinastía Mohgwyn",
+    "regions": [
+      1205
+    ],
+    "bosses": [
+      {
+        "boss": "Mohg, Señor de la Sangre",
+        "place": "",
+        "flag_id": 12050800,
+        "rememberance": 10
+      }
+    ]
+  },
+  {
+    "region_name": "Río Ainsel",
+    "regions": [
+      1201,
+      1204
+    ],
+    "bosses": [
+      {
+        "boss": "Soldado Dragonante de Nokstella",
+        "place": "",
+        "flag_id": 12010800
+      },
+      {
+        "boss": "Soldado Dragonante",
+        "place": "",
+        "flag_id": 12010850
+      },
+      {
+        "boss": "Astel, Nacido del Vacío",
+        "place": "Gran Claustro",
+        "flag_id": 12040800,
+        "rememberance": 8
+      }
+    ]
+  },
+  {
+    "region_name": "Profundidades de Profundraíz",
+    "regions": [
+      1203
+    ],
+    "bosses": [
+      {
+        "boss": "Siluria, la Caballera del Crisol",
+        "place": "",
+        "flag_id": 12030390
+      },
+      {
+        "boss": "Campeón de Fia & Rogier, el Hechicero & Lionel, el Corazón de León",
+        "place": "",
+        "flag_id": 12030800
+      },
+      {
+        "boss": "Lichdragón Fortissax",
+        "place": "",
+        "flag_id": 12030850,
+        "rememberance": 9
+      }
+    ]
+  },
+  {
+    "region_name": "Leyndell, capital cenicienta",
+    "regions": [
+      1105,
+      1900
+    ],
+    "bosses": [
+      {
+        "boss": "Sir Gideon Ofnir, el Omnisciente",
+        "place": "Santuario del Terrárbol",
+        "flag_id": 11050850
+      },
+      {
+        "boss": "Godfrey, Primer Señor de Elden",
+        "place": "Trono de Elden",
+        "flag_id": 11050800,
+        "rememberance": 14
+      },
+      {
+        "boss": "Rádagon de la Orden Dorada & Bestia de Elden",
+        "place": "Márida fracturada",
+        "flag_id": 19000800,
+        "rememberance": 15
+      }
+    ]
+  },
+  {
+    "region_name": "Llanura de las Tumbas",
+    "regions": [
+      4100,
+      4102,
+      4300,
+      6800,
+      6801,
+      6804,
+      6805,
+      6806,
+      6810,
+      6815,
+      6820
+    ],
+    "bosses": [
+      {
+        "boss": "Dragón de llama espectral",
+        "place": "",
+        "flag_id": 2045440800
+      },
+      {
+        "boss": "Caballero de la Cárcel Solitaria",
+        "place": "Mausoleo sin nombre oeste",
+        "flag_id": 2046410800
+      },
+      {
+        "boss": "Líder de los demonios sanguíneos",
+        "place": "Cueva de la desembocadura del río",
+        "flag_id": 43000800
+      },
+      {
+        "boss": "Lamentante",
+        "place": "Cárcel del lamentante",
+        "flag_id": 41020800
+      },
+      {
+        "boss": "Onze, maestro espadachín semihumano",
+        "place": "Cárcel de Belurat",
+        "flag_id": 41000800
+      },
+      {
+        "boss": "León Danzante, Bestia Divina",
+        "place": "Belurat, asentamiento de la torre",
+        "flag_id": 20000800,
+        "rememberance": 16
+      },
+      {
+        "boss": "Rellana, Caballera de las Lunas Gemelas",
+        "place": "Castillo Ensis",
+        "flag_id": 2048440800,
+        "rememberance": 17
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Noctaltus",
+    "regions": [
+      4000,
+      4001,
+      4101,
+      6900,
+      6901,
+      6902,
+      6903,
+      6904,
+      6905,
+      6906
+    ],
+    "bosses": [
+      {
+        "boss": "Dragón de llama espectral",
+        "place": "",
+        "flag_id": 2049430800
+      },
+      {
+        "boss": "Ralva, el Gran Oso Rojo",
+        "place": "",
+        "flag_id": 2049450800
+      },
+      {
+        "boss": "Rugalea, el Gran Oso Rojo",
+        "place": "",
+        "flag_id": 2044470800
+      },
+      {
+        "boss": "Dane Hojaseca",
+        "place": "",
+        "flag_id": 2049440800
+      },
+      {
+        "boss": "Edredd, el Caballero Negro",
+        "place": "Fuerte de la Reprimenda",
+        "flag_id": 2049430850
+      },
+      {
+        "boss": "Garrew, el Caballero Negro",
+        "place": "Fuerte de la Grieta Neblinosa",
+        "flag_id": 2047450800
+      },
+      {
+        "boss": "Oso Rojo",
+        "place": "Mausoleo sin nombre norte",
+        "flag_id": 2046450800
+      },
+      {
+        "boss": "Rakshasa",
+        "place": "Mausoleo sin nombre este",
+        "flag_id": 2051440800
+      },
+      {
+        "boss": "Metyr, Madre de los Dedos",
+        "place": "Catedral de Manus Metyr",
+        "flag_id": 25000800,
+        "rememberance": 18
+      },
+      {
+        "boss": "Conde Ymir, Madre de los Dedos",
+        "place": "Catedral de Manus Metyr",
+        "flag_id": 2051450800
+      },
+      {
+        "boss": "Caballero de la Muerte",
+        "place": "Catacumbas de la Grieta Neblinosa",
+        "flag_id": 40000800
+      },
+      {
+        "boss": "Caballero de la Muerte",
+        "place": "Catacumbas del río Escorpión",
+        "flag_id": 40010800
+      },
+      {
+        "boss": "Labirith, Filo Maldito",
+        "place": "Cárcel de Bonny",
+        "flag_id": 41010800
+      },
+      {
+        "boss": "Hipopótamo dorado",
+        "place": "Fortaleza Sombría",
+        "flag_id": 21000850
+      },
+      {
+        "boss": "Messmer el Empalador & Messmer, la Serpiente Vil",
+        "place": "Fortaleza Sombría",
+        "flag_id": 21010800,
+        "rememberance": 20
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Ruinas antiguas de Rauh",
+    "regions": [
+      6940
+    ],
+    "bosses": [
+      {
+        "boss": "León Danzante, Bestia Divina",
+        "place": "",
+        "flag_id": 2046460800
+      },
+      {
+        "boss": "Romina, Santa de los Capullos",
+        "place": "Iglesia del Brote",
+        "flag_id": 2044450800,
+        "rememberance": 21
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Costa Cerúlea",
+    "regions": [
+      2200,
+      6830,
+      6835
+    ],
+    "bosses": [
+      {
+        "boss": "Dragón de llama espectral",
+        "place": "",
+        "flag_id": 2048380850
+      },
+      {
+        "boss": "Bailarina de Ranah",
+        "place": "Mausoleo sin nombre sur",
+        "flag_id": 2046380800
+      },
+      {
+        "boss": "Caballero Putrescente",
+        "place": "Fisura del ataúd de piedra",
+        "flag_id": 22000800,
+        "rememberance": 22
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Tumba oculta de Charo",
+    "regions": [
+      6840
+    ],
+    "bosses": [
+      {
+        "boss": "Ave del rito de la muerte",
+        "place": "",
+        "flag_id": 2047390800
+      },
+      {
+        "boss": "Marigga, reina semihumana",
+        "place": "",
+        "flag_id": 2046400800
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Cumbre escarpada",
+    "regions": [
+      4301,
+      6841,
+      6850
+    ],
+    "bosses": [
+      {
+        "boss": "Draco de la cumbre escarpada",
+        "place": "",
+        "flag_id": 2049410800
+      },
+      {
+        "boss": "Draco de la cumbre escarpada",
+        "place": "",
+        "flag_id": 2052400800
+      },
+      {
+        "boss": "Hombre-Dragón Antiguo",
+        "place": "Pozo del dragón",
+        "flag_id": 43010800
+      },
+      {
+        "boss": "Dragón antiguo Senessax",
+        "place": "Ladera de la cumbre escarpada",
+        "flag_id": 2054390850
+      },
+      {
+        "boss": "Bayle el Temible",
+        "place": "Cima de la cumbre escarpada",
+        "flag_id": 2054390800
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Vista Nocturna",
+    "regions": [
+      6920,
+      6930,
+      6960
+    ],
+    "bosses": [
+      {
+        "boss": "Centinela arbóreo",
+        "place": "",
+        "flag_id": 2050470800
+      },
+      {
+        "boss": "Centinela arbóreo",
+        "place": "",
+        "flag_id": 2050480860
+      },
+      {
+        "boss": "Bestia de estrella fugaz",
+        "place": "",
+        "flag_id": 2052480800
+      },
+      {
+        "boss": "Comandante Gaius",
+        "place": "",
+        "flag_id": 2049480800,
+        "rememberance": 19
+      },
+      {
+        "boss": "Avatar del Noctárbol",
+        "place": "Base del Noctárbol",
+        "flag_id": 2050480800,
+        "rememberance": 24
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Bosque Abismal",
+    "regions": [
+      2800,
+      4002,
+      6860
+    ],
+    "bosses": [
+      {
+        "boss": "Jori, Inquisidor Anciano",
+        "place": "Catacumbas de la Luz Oscura",
+        "flag_id": 2052430800
+      },
+      {
+        "boss": "Midra, Señor del Fuego Frenético",
+        "place": "Mansión de Midra",
+        "flag_id": 28000800,
+        "rememberance": 23
+      }
+    ],
+    "dlc": 1
+  },
+  {
+    "region_name": "Enir-Ilim",
+    "regions": [
+      2001
+    ],
+    "bosses": [
+      {
+        "boss": "Radahn, consorte prometido & Radahn, consorte de Miquella",
+        "place": "",
+        "flag_id": 20010800,
+        "rememberance": 25
+      }
+    ],
+    "dlc": 1
+  }
+]

@@ -53,7 +53,7 @@ def load_text():
 
 if __name__ == '__main__':
     load_text()
-    sections = {}
+    sections = []
     curr_section = {}
     for l in codecs.open('origin.txt', 'r', 'utf-8').readlines():
         l = l.strip()
@@ -65,12 +65,13 @@ if __name__ == '__main__':
             regions = []
             for v in spl[1].split(','):
                 regions.append(int(v))
+            curr['region_name'] = '{' + namemap[spl[0]] + '}'
+            curr['regions'] = regions
             if len(spl) > 2 and int(spl[2]) > 0:
                 curr['dlc'] = 1
-            curr['regions'] = regions
             curr_section = []
             curr['bosses'] = curr_section
-            sections['{' + namemap[spl[0]] + '}'] = curr
+            sections.append(curr)
             continue
         if l[0] == '+':
             l = l[2:]
@@ -93,13 +94,14 @@ if __name__ == '__main__':
                 elif r[0] == '(':
                     bosses = bosses + r
                 elif r[0:3] != 'NPC':
-                    places = places + ',' + r
+                    places = places + ', ' + r
                 else:
                     bosses = bosses + ' & ' + '{' + r + '}'
             if w[-1][1:3] == 'PL':
                 print(w[-1])
             curr_boss['boss'] = bosses[3:]
             curr_boss['place'] = places[2:]
-            curr_boss['offset'] = '0x' + p[1];
-            curr_boss['bit'] = p[2]
+            curr_boss['flag_id'] = int(p[0])
+            if len(p) > 1:
+                curr_boss['rememberance'] = int(p[1])
     codecs.open('template.json', 'w', 'utf-8').write(json.dumps(sections, ensure_ascii=False))
