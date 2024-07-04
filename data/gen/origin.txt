@@ -221,8 +221,8 @@ Gravesite Plain|4100,4102,4300,6800,6801,6804,6805,6806,6810,6815,6820|1:
 Scadu Altus|4000,4001,4101,6900,6901,6902,6903,6904,6905,6906|1:
 + Ghostflame Dragon:2049430800
 + Ralva the Great Red Bear:2049450800
-+ Rugalea the Great Red Bear:2044470800
-+ Dryleaf Dane:2049440800
++ Rugalea the Great Red Bear|Rauh Base:2044470800
++ Dryleaf Dane|Moorth Ruins:2049440800
 + Black Knight Edredd|Fort of Reprimand:2049430850
 + Black Knight Garrew|Fog Rift Fort:2047450800
 + Red Bear|Northern Nameless Mausoleum:2046450800
@@ -249,16 +249,16 @@ Charo's Hidden Grave|6840|1:
 + Demi-Human Queen Marigga:2046400800
 
 Jagged Peak|4301,6841,6850|1:
-+ Jagged Peak Drake:2049410800
-+ Jagged Peak Drake:2052400800
++ Jagged Peak Drake|Foot of the Jagged Peak:2049410800
++ Jagged Peak Drake|Jagged Peak Mountainside:2052400800
 + Ancient Dragon-Man|Dragon's Pit:43010800
 + Ancient Dragon Senessax|Jagged Peak Mountainside:2054390850
 + Bayle the Dread|Jagged Peak Summit:2054390800
 
 Scaduview|6920,6930,6960|1:
-+ Tree Sentinel:2050470800
-+ Tree Sentinel:2050480860
-+ Fallingstar Beast:2052480800
++ Tree Sentinel|Hinterland:2050470800
++ Tree Sentinel|Hinterland Bridge:2050480860
++ Fallingstar Beast|Fingerstone Hill:2052480800
 + Commander Gaius:2049480800,19
 + Scadutree Avatar|Scadutree Base:2050480800,24
 

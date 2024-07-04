@@ -1,7 +1,7 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
-* 2024-07-03: v1.2.1
+* 2024-07-03: v1.3.0
   + Change data folder structure, to support multiple data files for different languages in future, and config entries are changed as follows:
     - `data` in `[boss]` section is changed to `data_file`, which indicates data filename.
     - `language` is added to `[common]` section.

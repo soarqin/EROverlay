@@ -58,7 +58,7 @@ void init() {
         freopen("CONOUT$", "w", stderr);
     }
 
-    std::this_thread::sleep_for(5000ms);
+    std::this_thread::sleep_for(1000ms);
     er::initSteamAPI();
     bool dlcInstalled = er::isDLCInstalled(2778580) || er::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", dlcInstalled ? L"installed" : L"not installed");
