@@ -12,47 +12,29 @@ idmap = {}
 sep = string.whitespace + string.punctuation
 
 
-def load_text():
+
+def load_text(tp):
     global idmap
     global namemap
-    for l in codecs.open('text\\engus\\PlaceName.txt', 'r', 'utf-8').readlines():
+    for l in codecs.open('text\\engus\\' + tp + 'Name.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:
             continue
-        idmap['PL' + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = 'PL' + l[:index]
-    for l in codecs.open('text\\engus\\PlaceName_dlc01.txt', 'r', 'utf-8').readlines():
+        idmap[tp + l[:index]] = l[index+1:]
+        namemap[l[index+1:]] = tp + l[:index]
+    for l in codecs.open('text\\engus\\' + tp + 'Name_dlc01.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:
             continue
-        idmap['PL' + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = 'PL' + l[:index]
-    for l in codecs.open('text\\engus\\NpcName.txt', 'r', 'utf-8').readlines():
-        l = l.strip()
-        index = l.find('\t')
-        if index < 0:
-            continue
-        # Skip 'Fractured Marika', this is duplicate with certain place
-        if l[:index] == '160700':
-            continue
-        idmap['NPC' + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = 'NPC' + l[:index]
-    for l in codecs.open('text\\engus\\NpcName_dlc01.txt', 'r', 'utf-8').readlines():
-        l = l.strip()
-        index = l.find('\t')
-        if index < 0:
-            continue
-        # Skip 'Fractured Marika', this is duplicate with certain place
-        if l[:index] == '160700':
-            continue
-        idmap['NPC' + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = 'NPC' + l[:index]
+        idmap[tp + l[:index]] = l[index+1:]
+        namemap[l[index+1:]] = tp + l[:index]
 
 
 if __name__ == '__main__':
-    load_text()
+    load_text('Npc')
+    load_text('Place')
     sections = []
     curr_section = {}
     for l in codecs.open('origin.txt', 'r', 'utf-8').readlines():

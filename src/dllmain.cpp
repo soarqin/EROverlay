@@ -45,7 +45,26 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     return TRUE;
 }
 
+void checkGameVersion() {
+    wchar_t exepath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exepath, MAX_PATH);
+    DWORD len = GetFileVersionInfoSizeW(exepath, nullptr);
+    if (len == 0) return;
+    BYTE *pVersionResource = new BYTE[len];
+    if (!GetFileVersionInfoW(exepath, 0, len, pVersionResource)) {
+        delete[] pVersionResource;
+        return;
+    }
+    UINT uLen;
+    VS_FIXEDFILEINFO *ptFixedFileInfo;
+    if (VerQueryValueW(pVersionResource, L"\\", reinterpret_cast<LPVOID *>(&ptFixedFileInfo), &uLen) && uLen > 0) {
+        er::gGameVersion = (uint64_t(ptFixedFileInfo->dwFileVersionMS) << 32) | uint64_t(ptFixedFileInfo->dwFileVersionLS);
+    }
+    delete[] pVersionResource;
+}
+
 void init() {
+    checkGameVersion();
     GetModuleFileNameW(::er::gModule, ::er::gModulePath, MAX_PATH);
     PathRemoveFileSpecW(::er::gModulePath);
     er::gConfig.load(std::wstring(::er::gModulePath) + L"\\EROverlay.ini");
@@ -95,7 +114,7 @@ void mainThread() {
     auto unloadKey = er::gConfig.getVirtualKey("input.unload", {VK_OEM_MINUS});
     auto toggleFullKey = er::gConfig.getVirtualKey("input.toggle_full_mode", {VK_OEM_PLUS});
 
-    er::showMenu = false;
+    er::gShowMenu = false;
     int counter = 0x1F;
     er::bosses::gBossDataSet.update();
     while (er::gRunning) {
@@ -106,7 +125,7 @@ void mainThread() {
                         goto noToggleFull;
                     }
                 }
-                er::showMenu = !er::showMenu;
+                er::gShowMenu = !er::gShowMenu;
             }
             noToggleFull:
             if (!unloadKey.empty()) {
@@ -115,7 +134,7 @@ void mainThread() {
                         goto noUnload;
                     }
                 }
-                er::showMenu = false;
+                er::gShowMenu = false;
                 er::gRunning = false;
                 er::gHooking->showMouseCursor(false);
             }

@@ -129,7 +129,7 @@ void BossDataSet::update() {
     }
     /* TODO: this is 0xE4 for older version than DLC,
      *       need to check game version */
-    auto mapId = *(uint32_t *)(addr1 + 0xE8);
+    auto mapId = *(uint32_t *)(addr1 + (er::gGameVersion < 0x0002000200000000ULL ? 0xE4 : 0xE8));
     if (mapId == 0 || mapId == mapId_) return;
     mapId_ = mapId;
     auto ite = regionMap_.find(mapId / 1000);

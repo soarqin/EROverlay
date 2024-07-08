@@ -382,11 +382,11 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        bool oldShowMenu = showMenu;
+        bool oldShowMenu = gShowMenu;
         for (auto &window: windows_)
-            window->render(showMenu);
-        if (showMenu != oldShowMenu) {
-            gHooking->showMouseCursor(showMenu);
+            window->render(gShowMenu);
+        if (gShowMenu != oldShowMenu) {
+            gHooking->showMouseCursor(gShowMenu);
         }
 
         ImGui::EndFrame();
@@ -467,7 +467,23 @@ void D3DRenderer::loadFont() {
     if (fontSize_ == 0.0f) fontSize_ = 18.0f;
     const auto& fontFile = gConfig.getw("common.font", L"");
     if (!fontFile.empty()) {
-        std::ifstream ifs((std::wstring(gModulePath) + L"\\data\\" + fontFile).c_str(), std::ios::in | std::ios::binary);
+        std::ifstream ifs;
+        std::wstring prefix;
+        if (fontFile.find(L':') != std::wstring::npos) {
+            prefix = L"";
+        } else {
+            prefix = std::wstring(gModulePath) + L"\\data\\";
+        }
+        ifs.open((prefix + fontFile).c_str(), std::ios::in | std::ios::binary);
+        if (!ifs) {
+            ifs.open((prefix + fontFile + L".ttf").c_str(), std::ios::in | std::ios::binary);
+            if (!ifs) {
+                ifs.open((prefix + fontFile + L".ttc").c_str(), std::ios::in | std::ios::binary);
+                if (!ifs) {
+                    ifs.open((prefix + fontFile + L".otf").c_str(), std::ios::in | std::ios::binary);
+                }
+            }
+        }
         if (!ifs) {
             fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
         } else {
@@ -482,7 +498,8 @@ void D3DRenderer::loadFont() {
 
     const ImGuiIO& io = ImGui::GetIO();
     auto charset = gConfig["common.charset"];
-    if (charset.empty()) {
+    charset = charset.substr(0, 2);
+    if (charset.empty() || (charset != "en" && charset != "ja" && charset != "ko" && charset != "pl" && charset != "ru" && charset != "th" && charset != "zh")) {
         const auto &lang = er::getGameLanguage();
         if (lang == L"jpnJP") charset = "ja";
         else if (lang == L"korKR") charset = "ko";
@@ -491,8 +508,6 @@ void D3DRenderer::loadFont() {
         else if (lang == L"thaTH") charset = "th";
         else if (lang == L"zhoCN") charset = "zh";
         else charset = "en";
-    } else {
-        charset = charset.substr(0, 2);
     }
     if (charset == "ja") {
         ImFontGlyphRangesBuilder builder;
