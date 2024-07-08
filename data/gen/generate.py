@@ -12,32 +12,21 @@ idmap = {}
 sep = string.whitespace + string.punctuation
 
 
-def load_text(lang):
+def load_text(lang, tp):
     global idmap
-    for l in codecs.open('text\\' + lang + '\\NpcName.txt', 'r', 'utf-8').readlines():
+    global namemap
+    for l in codecs.open('text\\' + lang + '\\' + tp + 'Name.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:
             continue
-        idmap['NPC' + l[:index]] = l[index+1:]
-    for l in codecs.open('text\\' + lang + '\\NpcName_dlc01.txt', 'r', 'utf-8').readlines():
+        idmap[tp + l[:index]] = l[index+1:]
+    for l in codecs.open('text\\' + lang + '\\' + tp + 'Name_dlc01.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:
             continue
-        idmap['NPC' + l[:index]] = l[index+1:]
-    for l in codecs.open('text\\' + lang + '\\PlaceName.txt', 'r', 'utf-8').readlines():
-        l = l.strip()
-        index = l.find('\t')
-        if index < 0:
-            continue
-        idmap['PL' + l[:index]] = l[index+1:]
-    for l in codecs.open('text\\' + lang + '\\PlaceName_dlc01.txt', 'r', 'utf-8').readlines():
-        l = l.strip()
-        index = l.find('\t')
-        if index < 0:
-            continue
-        idmap['PL' + l[:index]] = l[index+1:]
+        idmap[tp + l[:index]] = l[index+1:]
 
 
 def process(n):
@@ -64,8 +53,10 @@ def process(n):
 def generate(j, lang):
     global idmap
     idmap = {}
-    load_text('engus')
-    load_text(lang)
+    load_text('engus', 'NPC')
+    load_text('engus', 'Place')
+    load_text(lang, 'NPC')
+    load_text(lang, 'Place')
     o = []
     for v in j:
         k = v['region_name']

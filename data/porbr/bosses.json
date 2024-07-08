@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea, o Grande Urso Vermelho",
-        "place": "",
+        "place": "Base de Rauh",
         "flag_id": 2044470800
       },
       {
         "boss": "Dane Folhaseca",
-        "place": "",
+        "place": "Ruínas Moorth",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Draco do Pico Irregular",
-        "place": "",
+        "place": "Sopé do Pico Irregular",
         "flag_id": 2049410800
       },
       {
         "boss": "Draco do Pico Irregular",
-        "place": "",
+        "place": "Encosta do Pico Irregular",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Sentinela da Árvore",
-        "place": "",
+        "place": "Terrafunda",
         "flag_id": 2050470800
       },
       {
         "boss": "Sentinela da Árvore",
-        "place": "",
+        "place": "Ponte da Terrafunda",
         "flag_id": 2050480860
       },
       {
         "boss": "Fera da Estrela Cadente",
-        "place": "",
+        "place": "Colina da Pedra dos Dedos",
         "flag_id": 2052480800
       },
       {

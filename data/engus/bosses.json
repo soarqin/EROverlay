@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea the Great Red Bear",
-        "place": "",
+        "place": "Rauh Base",
         "flag_id": 2044470800
       },
       {
         "boss": "Dryleaf Dane",
-        "place": "",
+        "place": "Moorth Ruins",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Jagged Peak Drake",
-        "place": "",
+        "place": "Foot of the Jagged Peak",
         "flag_id": 2049410800
       },
       {
         "boss": "Jagged Peak Drake",
-        "place": "",
+        "place": "Jagged Peak Mountainside",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Tree Sentinel",
-        "place": "",
+        "place": "Hinterland",
         "flag_id": 2050470800
       },
       {
         "boss": "Tree Sentinel",
-        "place": "",
+        "place": "Hinterland Bridge",
         "flag_id": 2050480860
       },
       {
         "boss": "Fallingstar Beast",
-        "place": "",
+        "place": "Fingerstone Hill",
         "flag_id": 2052480800
       },
       {

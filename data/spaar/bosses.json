@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea, el Gran Oso Rojo",
-        "place": "",
+        "place": "Base de Rauh",
         "flag_id": 2044470800
       },
       {
         "boss": "Dane Hojaseca",
-        "place": "",
+        "place": "Ruinas de Moorth",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Draco de la cumbre escarpada",
-        "place": "",
+        "place": "Pie de la cumbre escarpada",
         "flag_id": 2049410800
       },
       {
         "boss": "Draco de la cumbre escarpada",
-        "place": "",
+        "place": "Ladera de la cumbre escarpada",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Centinela arbóreo",
-        "place": "",
+        "place": "Periferia",
         "flag_id": 2050470800
       },
       {
         "boss": "Centinela arbóreo",
-        "place": "",
+        "place": "Puente de la periferia",
         "flag_id": 2050480860
       },
       {
         "boss": "Bestia de estrella fugaz",
-        "place": "",
+        "place": "Colina del Dedo de Piedra",
         "flag_id": 2052480800
       },
       {

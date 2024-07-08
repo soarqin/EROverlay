@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea, wielki niedźwiedź rudy",
-        "place": "",
+        "place": "Podnóże Rauh",
         "flag_id": 2044470800
       },
       {
         "boss": "Dane, Suchy Liść",
-        "place": "",
+        "place": "Pochłonięte ruiny Moorth",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Smokowiec Wyszczerbionego Szczytu",
-        "place": "",
+        "place": "Podnóże Wyszczerbionego Szczytu",
         "flag_id": 2049410800
       },
       {
         "boss": "Smokowiec Wyszczerbionego Szczytu",
-        "place": "",
+        "place": "Zbocze Wyszczerbionego Szczytu",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Strażnik Drzewa",
-        "place": "",
+        "place": "Odludzie",
         "flag_id": 2050470800
       },
       {
         "boss": "Strażnik Drzewa",
-        "place": "",
+        "place": "Most na odludziu",
         "flag_id": 2050480860
       },
       {
         "boss": "Bestia spadającej gwiazdy",
-        "place": "",
+        "place": "Wzgórze kamiennych palców",
         "flag_id": 2052480800
       },
       {

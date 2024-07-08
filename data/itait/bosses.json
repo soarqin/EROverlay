@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea, il grande orso rosso",
-        "place": "",
+        "place": "Base di Rauh",
         "flag_id": 2044470800
       },
       {
         "boss": "Dane Fogliamorta",
-        "place": "",
+        "place": "Rovine di Moorth",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Drago del picco frastagliato",
-        "place": "",
+        "place": "Base del picco frastagliato",
         "flag_id": 2049410800
       },
       {
         "boss": "Drago del picco frastagliato",
-        "place": "",
+        "place": "Versante del picco frastagliato",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Sentinella dell'albero",
-        "place": "",
+        "place": "Entroterra",
         "flag_id": 2050470800
       },
       {
         "boss": "Sentinella dell'albero",
-        "place": "",
+        "place": "Ponte dell'entroterra",
         "flag_id": 2050480860
       },
       {
         "boss": "Belva meteoritica",
-        "place": "",
+        "place": "Collina del dito di pietra",
         "flag_id": 2052480800
       },
       {

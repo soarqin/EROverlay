@@ -12,7 +12,6 @@ idmap = {}
 sep = string.whitespace + string.punctuation
 
 
-
 def load_text(tp):
     global idmap
     global namemap
@@ -21,20 +20,30 @@ def load_text(tp):
         index = l.find('\t')
         if index < 0:
             continue
-        idmap[tp + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = tp + l[:index]
+        key = tp + l[:index]
+        # Skip 'Fractured Marika', this is duplicate with certain place
+        if key == 'NPC160700':
+            continue
+        value = l[index+1:]
+        idmap[key] = value
+        namemap[value] =  key
     for l in codecs.open('text\\engus\\' + tp + 'Name_dlc01.txt', 'r', 'utf-8').readlines():
         l = l.strip()
         index = l.find('\t')
         if index < 0:
             continue
-        idmap[tp + l[:index]] = l[index+1:]
-        namemap[l[index+1:]] = tp + l[:index]
+        key = tp + l[:index]
+        # Skip 'Fractured Marika', this is duplicate with certain place
+        if key == 'NPC160700':
+            continue
+        value = l[index+1:]
+        idmap[key] = value
+        namemap[value] = key
 
 
 if __name__ == '__main__':
-    load_text('Npc')
     load_text('Place')
+    load_text('NPC')
     sections = []
     curr_section = {}
     for l in codecs.open('origin.txt', 'r', 'utf-8').readlines():
@@ -71,7 +80,7 @@ if __name__ == '__main__':
                     r = namemap.get(z, None)
                     if r == None:
                         r = z
-                if r[0:2] == 'PL':
+                if r[0:5] == 'Place':
                     places = places + ', ' + '{' + r + '}'
                 elif r[0] == '(':
                     bosses = bosses + r
@@ -79,7 +88,7 @@ if __name__ == '__main__':
                     places = places + ', ' + r
                 else:
                     bosses = bosses + ' & ' + '{' + r + '}'
-            if w[-1][1:3] == 'PL':
+            if w[-1][1:6] == 'Place':
                 print(w[-1])
             curr_boss['boss'] = bosses[3:]
             curr_boss['place'] = places[2:]

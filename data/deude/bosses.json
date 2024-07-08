@@ -1170,12 +1170,12 @@
       },
       {
         "boss": "Rugalea, der große rote Bär",
-        "place": "",
+        "place": "Fuß von Rauh",
         "flag_id": 2044470800
       },
       {
         "boss": "Trockenblatt Dane",
-        "place": "",
+        "place": "Ruinen von Moorth",
         "flag_id": 2049440800
       },
       {
@@ -1314,12 +1314,12 @@
     "bosses": [
       {
         "boss": "Klingengipfel-Drachling",
-        "place": "",
+        "place": "Fuß des Klingengipfels",
         "flag_id": 2049410800
       },
       {
         "boss": "Klingengipfel-Drachling",
-        "place": "",
+        "place": "Berghang des Klingengipfels",
         "flag_id": 2052400800
       },
       {
@@ -1350,17 +1350,17 @@
     "bosses": [
       {
         "boss": "Baumwächter",
-        "place": "",
+        "place": "Hinterland",
         "flag_id": 2050470800
       },
       {
         "boss": "Baumwächter",
-        "place": "",
+        "place": "Hinterlandbrücke",
         "flag_id": 2050480860
       },
       {
         "boss": "Sternenfallbestie",
-        "place": "",
+        "place": "Fingersteinhügel",
         "flag_id": 2052480800
       },
       {
