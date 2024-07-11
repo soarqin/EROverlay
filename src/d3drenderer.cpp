@@ -4,12 +4,13 @@
 #include "config.hpp"
 #include "steamapi.hpp"
 
-#include "imgui_impl_dx12.h"
-#include "imgui_impl_win32.h"
-#include "MinHook.h"
 
 #include "util/string.hpp"
 #include "bosses/render.hpp"
+
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
+#include <MinHook.h>
 
 #include <algorithm>
 #include <fstream>
@@ -32,19 +33,19 @@ bool D3DRenderer::hook() {
         return false;
     }
 
-    static MH_STATUS cscStatus = MH_CreateHook(reinterpret_cast<void*>(fnCreateSwapChain_), reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_));
-    static MH_STATUS cschStatus = MH_CreateHook(reinterpret_cast<void*>(fnCreateSwapChainForHwndChain_), reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_));
-    static MH_STATUS csccwStatus = MH_CreateHook(reinterpret_cast<void*>(fnCreateSwapChainForCWindowChain_), reinterpret_cast<void*>(&hkCreateSwapChainForCoreWindow), reinterpret_cast<void**>(&oCreateSwapChainForCoreWindow_));
-    static MH_STATUS csccStatus = MH_CreateHook(reinterpret_cast<void*>(fnCreateSwapChainForCompChain_), reinterpret_cast<void*>(&hkCreateSwapChainForComposition), reinterpret_cast<void**>(&oCreateSwapChainForComposition_));
+    static MH_STATUS cscStatus = MH_CreateHook(fnCreateSwapChain_, reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_));
+    static MH_STATUS cschStatus = MH_CreateHook(fnCreateSwapChainForHwndChain_, reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_));
+    static MH_STATUS csccwStatus = MH_CreateHook(fnCreateSwapChainForCWindowChain_, reinterpret_cast<void*>(&hkCreateSwapChainForCoreWindow), reinterpret_cast<void**>(&oCreateSwapChainForCoreWindow_));
+    static MH_STATUS csccStatus = MH_CreateHook(fnCreateSwapChainForCompChain_, reinterpret_cast<void*>(&hkCreateSwapChainForComposition), reinterpret_cast<void**>(&oCreateSwapChainForComposition_));
 
-    static MH_STATUS presentStatus = MH_CreateHook(reinterpret_cast<void*>(fnPresent_), reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_));
-    static MH_STATUS present1Status = MH_CreateHook(reinterpret_cast<void*>(fnPresent1_), reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_));
+    static MH_STATUS presentStatus = MH_CreateHook(fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_));
+    static MH_STATUS present1Status = MH_CreateHook(fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_));
 
-    static MH_STATUS resizeStatus = MH_CreateHook(reinterpret_cast<void*>(fnResizeBuffers_), reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_));
-    static MH_STATUS setSourceSizeStatus = MH_CreateHook(reinterpret_cast<void*>(fnSetSourceSize_), reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_));
-    static MH_STATUS resize1Status = MH_CreateHook(reinterpret_cast<void*>(fnResizeBuffers1_), reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_));
+    static MH_STATUS resizeStatus = MH_CreateHook(fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_));
+    static MH_STATUS setSourceSizeStatus = MH_CreateHook(fnSetSourceSize_, reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_));
+    static MH_STATUS resize1Status = MH_CreateHook(fnResizeBuffers1_, reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_));
 
-    static MH_STATUS eclStatus = MH_CreateHook(reinterpret_cast<void*>(fnExecuteCommandLists_), reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_));
+    static MH_STATUS eclStatus = MH_CreateHook(fnExecuteCommandLists_, reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_));
 
     MH_EnableHook(fnCreateSwapChain_);
     MH_EnableHook(fnCreateSwapChainForHwndChain_);
@@ -68,7 +69,7 @@ bool D3DRenderer::hook() {
 void D3DRenderer::unhook() {
     disableAll();
     if (oldWndProc_) {
-        SetWindowLongPtr(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
+        SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
         oldWndProc_ = 0;
     }
     if (ImGui::GetCurrentContext()) {
@@ -112,7 +113,7 @@ bool D3DRenderer::createDevice() {
     WNDCLASSEXW cls {};
     cls.cbSize = sizeof(WNDCLASSEX);
     cls.style = CS_HREDRAW | CS_VREDRAW;
-    cls.lpfnWndProc = DefWindowProc;
+    cls.lpfnWndProc = DefWindowProcW;
     cls.cbClsExtra = 0;
     cls.cbWndExtra = 0;
     cls.hInstance = GetModuleHandle(nullptr);
@@ -196,7 +197,6 @@ bool D3DRenderer::createDevice() {
         SwapChain->Release();
     }
 
-    MH_Initialize();
     DestroyWindow(hwnd);
     UnregisterClassW(cls.lpszClassName, cls.hInstance);
 
@@ -348,7 +348,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
                             descriptorHeap_->GetCPUDescriptorHandleForHeapStart(),
                             descriptorHeap_->GetGPUDescriptorHandleForHeapStart());
         ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
-        oldWndProc_ = SetWindowLongPtr(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
+        oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
     }
     if (!backBuffer_) {
         ID3D12Device* device;
@@ -424,7 +424,7 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     if (ImGui::GetCurrentContext())
         ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
 
-    return CallWindowProc(reinterpret_cast<WNDPROC>(gD3DRenderer->oldWndProc_), hWnd, msg, wParam, lParam);
+    return CallWindowProcW(reinterpret_cast<WNDPROC>(gD3DRenderer->oldWndProc_), hWnd, msg, wParam, lParam);
 }
 
 D3DRenderer::~D3DRenderer() noexcept {

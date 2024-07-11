@@ -1,9 +1,12 @@
+#include "data.hpp"
+
 #include "../memory.hpp"
 #include "../global.hpp"
 #include "../config.hpp"
 #include "../steamapi.hpp"
-#include "data.hpp"
-#include "nlohmann/json.hpp"
+
+#include <nlohmann/json.hpp>
+
 #include <fstream>
 #include <cstdio>
 

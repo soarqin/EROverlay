@@ -1,15 +1,17 @@
 #pragma once
 
-#include <windows.h>
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <vector>
-#include <memory>
-#include <cstdint>
-
 #include "imgui.h"
 #include "renderbase.hpp"
 #include "util/vector.hpp"
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <d3d12.h>
+#include <dxgi1_4.h>
+
+#include <vector>
+#include <memory>
+#include <cstdint>
 
 namespace er {
 

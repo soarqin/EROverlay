@@ -2,10 +2,11 @@
 
 #include "util/string.hpp"
 
-#include "ini.h"
+#include <ini.h>
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cwchar>
-#include <cstdint>
 
 namespace er {
 

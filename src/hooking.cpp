@@ -1,8 +1,8 @@
-#include <cstdio>
-
 #include "hooking.hpp"
 #include "d3drenderer.hpp"
 #include "memory.hpp"
+
+#include <MinHook.h>
 
 namespace er {
 
@@ -12,10 +12,13 @@ void Hooking::findHooks() {
     csMenuManImp_ = addr.add(addr.add(3).as<uint32_t &>() + 7).as<uintptr_t>();
 }
 
-Hooking::Hooking() = default;
+Hooking::Hooking() {
+    MH_Initialize();
+}
 
 Hooking::~Hooking() noexcept {
     unhook();
+    MH_Uninitialize();
 }
 
 void Hooking::hook() {

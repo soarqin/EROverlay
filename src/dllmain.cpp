@@ -1,7 +1,3 @@
-#include <shlwapi.h>
-#include <thread>
-#include <chrono>
-
 #include "d3drenderer.hpp"
 #include "hooking.hpp"
 #include "global.hpp"
@@ -9,8 +5,11 @@
 #include "steamapi.hpp"
 
 #include "bosses/data.hpp"
-#include "config.hpp"
 #include "bosses/render.hpp"
+
+#include <thread>
+#include <chrono>
+#include <shlwapi.h>
 
 using namespace std::chrono_literals;
 

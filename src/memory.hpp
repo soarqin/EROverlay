@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Pattern16.h"
+#include <Pattern16.h>
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
 #include <type_traits>
 #include <vector>
 #include <cstdint>

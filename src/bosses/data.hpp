@@ -3,8 +3,8 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include <cstdint>
 #include <map>
+#include <cstdint>
 
 namespace er::bosses {
 
