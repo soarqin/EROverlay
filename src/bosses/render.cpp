@@ -67,7 +67,12 @@ void Render::render(bool &showFull) {
                          | ImGuiWindowFlags_AlwaysAutoResize);
         {
             std::unique_lock lock(gBossDataSet.mutex());
-            ImGui::Text("%d/%d", gBossDataSet.count(), gBossDataSet.total());
+            if (gBossDataSet.challengeMode()) {
+                ImGui::Text("PB: %d/%d  尝试次数: %d", gBossDataSet.challengeBest(), gBossDataSet.total(), gBossDataSet.challengeTries());
+                ImGui::Text("当前击杀: %d/%d", gBossDataSet.count(), gBossDataSet.total());
+            } else {
+                ImGui::Text("%d/%d", gBossDataSet.count(), gBossDataSet.total());
+            }
         }
         ImGui::SameLine();
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {

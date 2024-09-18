@@ -1,11 +1,13 @@
 #include "data.hpp"
 
+#include "../hooking.hpp"
 #include "../memory.hpp"
 #include "../global.hpp"
 #include "../config.hpp"
 #include "../steamapi.hpp"
 
 #include <nlohmann/json.hpp>
+#include <ini.h>
 
 #include <fstream>
 #include <cstdio>
@@ -61,9 +63,67 @@ void BossDataSet::load(bool hasDLC) {
     dead_.resize(bosses_.size());
     deadSwapTmp.resize(bosses_.size());
     deadByRegionSwapTmp.resize(regions_.size());
+
+    challengeMode_ = gConfig.enabled("boss.challenge_mode");
+    if (!challengeMode_) return;
+    challengeDeathCount_ = gConfig.get("boss.challenge_death_count", 0);
+}
+
+void BossDataSet::loadConfig() {
+    if (!challengeMode_) return;
+    fprintf(stdout, "Challenge Mode: Loading config\n");
+    fflush(stdout);
+    auto filename = std::wstring(::er::gModulePath) + L"\\Challenge.txt";
+    auto *f = _wfopen(filename.c_str(), L"rt");
+    if (f == nullptr) {
+        return;
+    }
+    ini_parse_file(f, [](void *user, const char *section, const char *name, const char *value) {
+        if (section != nullptr && section[0] != 0) {
+            return 0;
+        }
+        auto *bds = static_cast<BossDataSet *>(user);
+        if (lstrcmpA(name, "tries") == 0) {
+            bds->challengeTries_ = std::strtol(value, nullptr, 10);
+        } else if (lstrcmpA(name, "deaths_on_start") == 0) {
+            bds->challengeDeathsOnStart_ = std::strtol(value, nullptr, 10);
+        } else if (lstrcmpA(name, "best") == 0) {
+            bds->challengeBest_ = std::strtol(value, nullptr, 10);
+        }
+        return 1;
+    }, this);
+    fclose(f);
+    changeEvent_ = FindFirstChangeNotificationW(::er::gModulePath, FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE);
+}
+
+void BossDataSet::saveConfig() const {
+    auto filename = std::wstring(::er::gModulePath) + L"\\Challenge.txt";
+    auto *f = _wfopen(filename.c_str(), L"wt");
+    if (f == nullptr) {
+        fprintf(stderr, "Unable to open %ls for writing\n", filename.c_str());
+        fflush(stdout);
+        return;
+    }
+    fprintf(f, "# Total tries\ntries=%d\n", challengeTries_);
+    fprintf(f, "# Personal Best\nbest=%d\n", challengeBest_);
+    fprintf(f, "\n# !!!DO NOT EDIT THIS!!!\ndeaths_on_start=%d\n", challengeDeathsOnStart_);
+    fflush(f);
+    fclose(f);
+    while (WaitForSingleObject(changeEvent_, 0) == WAIT_OBJECT_0) {
+        FindNextChangeNotification(changeEvent_);
+    }
 }
 
 void BossDataSet::initMemoryAddresses() {
+    if (challengeMode_)
+    {
+        Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
+        auto res = sig.scan();
+        if (res) {
+            auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
+            gameDataMan_ = addr.as<uintptr_t>();
+        }
+    }
     {
         Signature sig("48 8B 3D ?? ?? ?? ?? 48 85 FF ?? ?? 32 C0 E9");
         auto res = sig.scan();
@@ -83,61 +143,15 @@ void BossDataSet::initMemoryAddresses() {
 }
 
 void BossDataSet::update() {
-    if (!flagResolved_) {
-        if (flagAddress_ == 0) {
-            auto addr1 = MemoryHandle(eventFlagMan_).as<uintptr_t &>();
-            if (addr1 == 0) {
-                return;
-            }
-            auto addr2 = MemoryHandle(addr1 + 0x28).as<uintptr_t &>();
-            if (addr2 == 0) {
-                return;
-            }
-            flagAddress_ = addr2;
-        }
-        for (auto &b: bosses_) {
-            resolveFlag(b.flagId, b.offset, b.bits);
-#if !defined(NDEBUG)
-            std::wstring ws;
-            ws.resize(MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, nullptr, 0));
-            MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, ws.data(), (int)ws.size());
-            while (!ws.empty() && ws.back() == 0) ws.pop_back();
-            fwprintf(stderr, L"%ls: %zX %X\n", ws.c_str(), b.offset - flagAddress_, b.bits);
-#endif
-        }
-        flagResolved_ = true;
-    }
-    int cnt = 0;
-    std::fill(deadByRegionSwapTmp.begin(), deadByRegionSwapTmp.end(), 0);
-    size_t sz = bosses_.size();
-    for (size_t i = 0; i < sz; i++) {
-        auto &b = bosses_[i];
-        bool al = (*(uint8_t *)(b.offset) & b.bits) != 0;
-        deadSwapTmp[i] = al;
-        if (al) {
-            cnt++;
-            deadByRegionSwapTmp[b.regionIndex]++;
-        }
-    }
-    std::unique_lock lock(mutex_);
-    sz = regions_.size();
-    for (size_t i = 0; i < sz; i++) {
-        regions_[i].count = deadByRegionSwapTmp[i];
-    }
-    dead_.swap(deadSwapTmp);
-    count_ = cnt;
-    auto addr1 = *(uintptr_t *)fieldArea_;
-    if (addr1 == 0) {
+    checkForConfigChange();
+    if (er::gHooking->screenState() != 0) {
         return;
     }
-    /* TODO: this is 0xE4 for older version than DLC,
-     *       need to check game version */
-    auto mapId = *(uint32_t *)(addr1 + (er::gGameVersion < 0x0002000200000000ULL ? 0xE4 : 0xE8));
-    if (mapId == 0 || mapId == mapId_) return;
-    mapId_ = mapId;
-    auto ite = regionMap_.find(mapId / 1000);
-    if (ite == regionMap_.end()) return;
-    regionIndex_ = ite->second;
+    auto igt = inGameTime();
+    if (igt == 0) return;
+    updateBosses();
+    if (!challengeMode_ || igt < 0) return;
+    updateChallengeMode();
 }
 
 void BossDataSet::revive(int index) {
@@ -197,6 +211,128 @@ void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits)
     auto shifted = least_significant_digits >> 3;
     offset = calculated_pointer + shifted;
     bits = 1 << thing;
+}
+
+void BossDataSet::updateBosses() {
+    if (!flagResolved_) {
+        if (flagAddress_ == 0) {
+            auto addr1 = MemoryHandle(eventFlagMan_).as<uintptr_t &>();
+            if (addr1 == 0) {
+                return;
+            }
+            auto addr2 = MemoryHandle(addr1 + 0x28).as<uintptr_t &>();
+            if (addr2 == 0) {
+                return;
+            }
+            flagAddress_ = addr2;
+        }
+        for (auto &b: bosses_) {
+            resolveFlag(b.flagId, b.offset, b.bits);
+#if !defined(NDEBUG)
+            std::wstring ws;
+            ws.resize(MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, nullptr, 0));
+            MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, ws.data(), (int)ws.size());
+            while (!ws.empty() && ws.back() == 0) ws.pop_back();
+            fwprintf(stderr, L"%ls: %zX %X\n", ws.c_str(), b.offset - flagAddress_, b.bits);
+#endif
+        }
+        flagResolved_ = true;
+    }
+    int cnt = 0;
+    std::fill(deadByRegionSwapTmp.begin(), deadByRegionSwapTmp.end(), 0);
+    size_t sz = bosses_.size();
+    for (size_t i = 0; i < sz; i++) {
+        auto &b = bosses_[i];
+        bool al = (*(uint8_t *)(b.offset) & b.bits) != 0;
+        deadSwapTmp[i] = al;
+        if (al) {
+            cnt++;
+            deadByRegionSwapTmp[b.regionIndex]++;
+        }
+    }
+    std::unique_lock lock(mutex_);
+    sz = regions_.size();
+    for (size_t i = 0; i < sz; i++) {
+        regions_[i].count = deadByRegionSwapTmp[i];
+    }
+    dead_.swap(deadSwapTmp);
+    count_ = cnt;
+    if (challengeMode_ && cnt > challengeBest_ && challengeDeaths() <= challengeDeathCount_) {
+        challengeBest_ = cnt;
+        fprintf(stdout, "Challenge Mode: Break PB. Current PB: %d\n", challengeBest_);
+        fflush(stdout);
+        saveConfig();
+    }
+    auto addr1 = *(uintptr_t *)fieldArea_;
+    if (addr1 == 0) {
+        return;
+    }
+    auto mapId = *(uint32_t *)(addr1 + (er::gGameVersion < 0x0002000200000000ULL ? 0xE4 : 0xE8));
+    if (mapId == 0 || mapId == mapId_) return;
+    mapId_ = mapId;
+    auto ite = regionMap_.find(mapId / 1000);
+    if (ite == regionMap_.end()) return;
+    regionIndex_ = ite->second;
+}
+
+void BossDataSet::updateChallengeMode() {
+    if (reachStrandedGraveyardFlagOffset_ == 0) {
+        // Flag 101: Reached Stranded Graveyard
+        resolveFlag(101, reachStrandedGraveyardFlagOffset_, reachStrandedGraveyardFlagBits_);
+    }
+    auto deaths = currentDeathCount();
+    auto reached = (*(uint8_t *)reachStrandedGraveyardFlagOffset_ & reachStrandedGraveyardFlagBits_) != 0;
+    bool needSave = false;
+    std::unique_lock lock(mutex_);
+    if (reached != reachedStrandedGraveyard_) {
+        reachedStrandedGraveyard_ = reached;
+        if (reached) {
+            challengeDeathsOnStart_ = deaths;
+            needSave = true;
+            fprintf(stdout, "Challenge Mode: Reached Stranded Graveyard with death count: %d\n", challengeDeathsOnStart_);
+            fflush(stdout);
+        } else {
+            playerDeaths_ = 0;
+            challengeDeathsOnStart_ = 0;
+            fprintf(stdout, "Challenge Mode: New Game Start. Current Tries: %d\n", challengeTries_);
+            fflush(stdout);
+            needSave = true;
+        }
+    }
+    if (deaths != playerDeaths_) {
+        playerDeaths_ = deaths;
+        if (challengeDeaths() > challengeDeathCount_) {
+            challengeTries_++;
+            fprintf(stdout, "Challenge Mode: Exceeded death count. Current Tries: %d\n", challengeTries_);
+            fflush(stdout);
+        }
+        needSave = true;
+    }
+    if (needSave) saveConfig();
+}
+
+void BossDataSet::checkForConfigChange() {
+    if (changeEvent_ == INVALID_HANDLE_VALUE) return;
+    while (WaitForSingleObject(changeEvent_, 0) == WAIT_OBJECT_0) {
+        loadConfig();
+        FindNextChangeNotification(changeEvent_);
+    }
+}
+
+int BossDataSet::inGameTime() const {
+    auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
+    if (addr == 0) {
+        return -1;
+    }
+    return MemoryHandle(addr + 0xA0).as<int&>();
+}
+
+int BossDataSet::currentDeathCount() const {
+    auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
+    if (addr == 0) {
+        return 0;
+    }
+    return MemoryHandle(addr + 0x94).as<int&>();
 }
 
 }

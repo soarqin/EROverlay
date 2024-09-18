@@ -1,5 +1,8 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include <mutex>
 #include <string>
 #include <vector>
@@ -28,6 +31,8 @@ struct RegionData {
 class BossDataSet {
 public:
     void load(bool hasDLC);
+    void loadConfig();
+    void saveConfig() const;
 
     [[nodiscard]] inline const std::vector<BossData> &bosses() const { return bosses_; }
     [[nodiscard]] inline const std::vector<RegionData> &regions() const { return regions_; }
@@ -37,6 +42,10 @@ public:
     [[nodiscard]] inline int total() const { return (int)bosses_.size(); }
     [[nodiscard]] inline std::mutex &mutex() { return mutex_; }
     [[nodiscard]] inline const std::vector<bool> &dead() const { return dead_; }
+    [[nodiscard]] inline bool challengeMode() const { return challengeMode_; }
+    [[nodiscard]] inline int challengeTries() const { return challengeTries_; }
+    [[nodiscard]] inline int challengeBest() const { return challengeBest_; }
+    [[nodiscard]] inline int challengeDeaths() const { return reachedStrandedGraveyard_ ? playerDeaths_ - challengeDeathsOnStart_ : 0; }
 
     void initMemoryAddresses();
     void update();
@@ -45,17 +54,46 @@ public:
     void resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits) const;
 
 private:
+    void updateBosses();
+    void updateChallengeMode();
+    void checkForConfigChange();
+    [[nodiscard]] int inGameTime() const;
+    [[nodiscard]] int currentDeathCount() const;
+
+private:
     std::vector<BossData> bosses_;
     std::vector<RegionData> regions_;
     std::map<uint32_t, int> regionMap_;
     int count_ = 0;
     uint32_t mapId_ = 0;
     int regionIndex_ = -1;
+    uintptr_t gameDataMan_ = 0;
     uintptr_t eventFlagMan_ = 0;
     uintptr_t flagAddress_ = 0;
     uintptr_t fieldArea_ = 0;
     bool flagResolved_ = false;
     std::vector<bool> dead_;
+
+    bool challengeMode_ = false;
+    int challengeDeathCount_ = 0;
+
+    // Personal Best
+    int challengeBest_ = 0;
+
+    // Deaths on reaching Stranded Graveyard, real deaths is counted by deaths_ - challengeDeathsOnStart_
+    int challengeDeathsOnStart_ = 0;
+    // Total tries
+    int challengeTries_ = 0;
+    // Current death count
+    int playerDeaths_ = 0;
+
+    // This flag is used to check if you reached the Stranded Graveyard,
+    // Deaths is counted after this flag is set.
+    uintptr_t reachStrandedGraveyardFlagOffset_ = 0;
+    uint8_t reachStrandedGraveyardFlagBits_ = 0;
+    bool reachedStrandedGraveyard_ = true;
+
+    HANDLE changeEvent_ = INVALID_HANDLE_VALUE;
     std::mutex mutex_;
 };
 

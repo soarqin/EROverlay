@@ -81,6 +81,7 @@ void init() {
     bool dlcInstalled = er::isDLCInstalled(2778580) || er::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", dlcInstalled ? L"installed" : L"not installed");
     er::bosses::gBossDataSet.load(dlcInstalled);
+    er::bosses::gBossDataSet.loadConfig();
     er::bosses::gBossDataSet.initMemoryAddresses();
 
     er::gHooking = std::make_unique<er::Hooking>();
@@ -110,7 +111,7 @@ void init() {
 }
 
 void mainThread() {
-    auto unloadKey = er::gConfig.getVirtualKey("input.unload", {VK_OEM_MINUS});
+    auto unloadKey = er::gConfig.getVirtualKey("input.unload", {});
     auto toggleFullKey = er::gConfig.getVirtualKey("input.toggle_full_mode", {VK_OEM_PLUS});
 
     er::gShowMenu = false;
@@ -142,10 +143,6 @@ void mainThread() {
 
         std::this_thread::yield();
         std::this_thread::sleep_for(20ms);
-
-        if (er::gHooking->screenState() != 0) {
-            continue;
-        }
 
         counter = (counter + 1) & 0x1F;
         if (counter == 0) {

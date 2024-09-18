@@ -4,7 +4,6 @@
 #include "config.hpp"
 #include "steamapi.hpp"
 
-
 #include "util/string.hpp"
 #include "bosses/render.hpp"
 
@@ -225,7 +224,7 @@ bool D3DRenderer::createDevice() {
     dxgiFactory->Release();
     d3dDevice->Release();
 
-	return true;
+    return true;
 
 failed:
     DestroyWindow(hwnd);
