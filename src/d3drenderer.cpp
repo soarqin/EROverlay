@@ -4,7 +4,9 @@
 #include "config.hpp"
 #include "steamapi.hpp"
 
+#include "util/file.hpp"
 #include "util/string.hpp"
+#include "util/sysfont.hpp"
 #include "bosses/render.hpp"
 
 #include <imgui_impl_dx12.h>
@@ -461,37 +463,30 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix
 //-----------------------------------------------------------------------------------
 
 void D3DRenderer::loadFont() {
-    fontData_.clear();
+    void *data = nullptr;
+    size_t fontSize = 0;
     fontSize_ = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
     if (fontSize_ == 0.0f) fontSize_ = 18.0f;
     const auto& fontFile = gConfig.getw("common.font", L"");
     if (!fontFile.empty()) {
-        std::ifstream ifs;
         std::wstring prefix;
         if (fontFile.find(L':') != std::wstring::npos) {
             prefix = L"";
         } else {
             prefix = std::wstring(gModulePath) + L"\\data\\";
         }
-        ifs.open((prefix + fontFile).c_str(), std::ios::in | std::ios::binary);
-        if (!ifs) {
-            ifs.open((prefix + fontFile + L".ttf").c_str(), std::ios::in | std::ios::binary);
-            if (!ifs) {
-                ifs.open((prefix + fontFile + L".ttc").c_str(), std::ios::in | std::ios::binary);
-                if (!ifs) {
-                    ifs.open((prefix + fontFile + L".otf").c_str(), std::ios::in | std::ios::binary);
+        data = util::getFileContent(prefix + fontFile, fontSize, ImGui::MemAlloc);
+        if (!data) {
+            data = util::getFileContent(prefix + fontFile + L".ttf", fontSize, ImGui::MemAlloc);
+            if (!data) {
+                data = util::getFileContent(prefix + fontFile + L".ttc", fontSize, ImGui::MemAlloc);
+                if (!data) {
+                    data = util::getFileContent(prefix + fontFile + L".otf", fontSize, ImGui::MemAlloc);
                 }
             }
         }
-        if (!ifs) {
+        if (!data) {
             fwprintf(stderr, L"Unable to load font file: %ls\n", fontFile.c_str());
-        } else {
-            ifs.seekg(0, std::ios::end);
-            const std::streamsize size = ifs.tellg();
-            ifs.seekg(0, std::ios::beg);
-            fontData_.resize(size);
-            ifs.read((char *)fontData_.data(), size);
-            ifs.close();
         }
     }
 
@@ -508,6 +503,7 @@ void D3DRenderer::loadFont() {
         else if (lang == L"zhoCN") charset = "zh";
         else charset = "en";
     }
+    auto useSysFont = false;
     if (charset == "ja") {
         ImFontGlyphRangesBuilder builder;
         builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
@@ -515,9 +511,11 @@ void D3DRenderer::loadFont() {
         static ImVector<ImWchar> jpRanges;
         builder.BuildRanges(&jpRanges);
         charsetRange_ = jpRanges.Data;
+        useSysFont = true;
     }
     else if (charset == "ko") {
         charsetRange_ = io.Fonts->GetGlyphRangesKorean();
+        useSysFont = true;
     }
     else if (charset == "pl") {
         ImFontGlyphRangesBuilder builder;
@@ -540,21 +538,41 @@ void D3DRenderer::loadFont() {
             0,
         };
         charsetRange_ = thaiRanges;
+        useSysFont = true;
     }
     else if (charset == "zh") {
         charsetRange_ = io.Fonts->GetGlyphRangesChineseFull();
+        useSysFont = true;
     }
     else {
         charsetRange_ = io.Fonts->GetGlyphRangesDefault();
     }
 
-    if (fontData_.empty()) {
-        fontData_.assign(embedded_font, embedded_font + embedded_font_len);
+    if (data != nullptr) {
+        io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, nullptr, charsetRange_);
+        return;
     }
-    void *data = IM_ALLOC(fontData_.size());
-    const auto fontSize = fontData_.size();
-    memcpy(data, fontData_.data(), fontSize);
-    io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, nullptr, charsetRange_);
+    if (useSysFont) {
+        auto fileList = util::systemFontFileList(L"Segoe UI");
+        bool first = true;
+        for (const auto &fn: fileList) {
+            fwprintf(stdout, L"Trying to add font file: %ls... ", fn.c_str());
+            data = util::getFileContent(fn, fontSize, ImGui::MemAlloc);
+            if (data == nullptr) {
+                fwprintf(stdout, L"not found\n");
+                continue;
+            }
+            ImFontConfig cfg;
+            cfg.MergeMode = !first;
+            io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, &cfg, charsetRange_);
+            fwprintf(stdout, L"done\n");
+            if (first) first = false;
+        }
+        if (!first) return;
+    }
+    ImFontConfig cfg;
+    cfg.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontFromMemoryTTF(embedded_font, embedded_font_len, fontSize_, &cfg, charsetRange_);
 }
 
 static inline ImVec4 extractColor(const std::string &s, const ImVec4 &defVal) {

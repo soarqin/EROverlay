@@ -23,6 +23,8 @@ add_library(${PROJECT_NAME} SHARED
     embeddedfont.cpp
 
     # util
+    util/file.cpp util/file.hpp
+    util/sysfont.cpp util/sysfont.hpp
     util/string.cpp util/string.hpp
     util/vector.hpp
 
@@ -34,7 +36,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
 if(NOT MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mlzcnt -mbmi -mbmi2)
 endif()
-target_link_libraries(${PROJECT_NAME} Pattern16 inih minhook imgui_dx12_backend nlohmann_json::nlohmann_json d3dcompiler dwmapi shlwapi version)
+target_link_libraries(${PROJECT_NAME} Pattern16 inih minhook imgui_dx12_backend nlohmann_json::nlohmann_json fmt::fmt d3dcompiler dwmapi shlwapi version)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} Microsoft::DirectXMath)
 endif()

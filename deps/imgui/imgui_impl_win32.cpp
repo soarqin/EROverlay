@@ -21,6 +21,7 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
+//  2024-07-08: Inputs: Fixed ImGuiMod_Super being mapped to VK_APPS instead of VK_LWIN||VK_RWIN. (#7768)
 //  2023-10-05: Inputs: Added support for extra ImGuiKey values: F13 to F24 function keys, app back/forward keys.
 //  2023-09-25: Inputs: Synthesize key-down event on key-up for VK_SNAPSHOT / ImGuiKey_PrintScreen as Windows doesn't emit it (same behavior as GLFW/SDL).
 //  2023-09-07: Inputs: Added support for keyboard codepage conversion for when application is compiled in MBCS mode and using a non-Unicode window.
@@ -106,7 +107,7 @@ struct ImGui_ImplWin32_Data
 {
     HWND                        hWnd;
     HWND                        MouseHwnd;
-    int                         MouseTrackedArea;   // 0: not tracked, 1: client are, 2: non-client area
+    int                         MouseTrackedArea;   // 0: not tracked, 1: client area, 2: non-client area
     int                         MouseButtonsDown;
     INT64                       Time;
     INT64                       TicksPerSecond;
@@ -294,7 +295,7 @@ static void ImGui_ImplWin32_UpdateKeyModifiers()
     io.AddKeyEvent(ImGuiMod_Ctrl, IsVkDown(VK_CONTROL));
     io.AddKeyEvent(ImGuiMod_Shift, IsVkDown(VK_SHIFT));
     io.AddKeyEvent(ImGuiMod_Alt, IsVkDown(VK_MENU));
-    io.AddKeyEvent(ImGuiMod_Super, IsVkDown(VK_APPS));
+    io.AddKeyEvent(ImGuiMod_Super, IsVkDown(VK_LWIN) || IsVkDown(VK_RWIN));
 }
 
 static void ImGui_ImplWin32_UpdateMouseData()
@@ -628,6 +629,16 @@ IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARA
         }
         return 0;
     }
+    case WM_DESTROY:
+        if (bd->MouseHwnd == hwnd && bd->MouseTrackedArea != 0)
+        {
+            TRACKMOUSEEVENT tme_cancel = { sizeof(tme_cancel), TME_CANCEL, hwnd, 0 };
+            ::TrackMouseEvent(&tme_cancel);
+            bd->MouseHwnd = nullptr;
+            bd->MouseTrackedArea = 0;
+            io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+        }
+        return 0;
     case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK:
     case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK:
     case WM_MBUTTONDOWN: case WM_MBUTTONDBLCLK:

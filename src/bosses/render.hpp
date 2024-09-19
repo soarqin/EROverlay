@@ -2,6 +2,7 @@
 
 #include "../renderbase.hpp"
 
+#include <string>
 #include <cstdint>
 
 namespace er::bosses {
@@ -12,6 +13,8 @@ public:
     void render(bool &showFull) override;
 
 private:
+    std::string killText_;
+    std::string challengeText_;
     bool allowRevive_ = false;
     int lastRegionIndex_ = -1;
     int popupBossIndex_ = -1;

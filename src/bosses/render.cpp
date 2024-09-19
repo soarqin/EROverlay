@@ -2,8 +2,11 @@
 #include "data.hpp"
 
 #include "../config.hpp"
+#include "../util/string.hpp"
 
 #include <imgui.h>
+
+#include <fmt/format.h>
 
 #include <sstream>
 #include <algorithm>
@@ -31,6 +34,12 @@ inline static std::vector<float> split(const std::string &s) {
 }
 
 void Render::init() {
+    killText_ = gConfig["boss.boss_kill_text"];
+    challengeText_ = gConfig["boss.challenge_status_text"];
+    const std::string from = "$n";
+    const std::string to = "\n";
+    util::replaceAll(killText_, from, to);
+    util::replaceAll(challengeText_, from, to);
     allowRevive_ = gConfig.enabled("boss.allow_revive");
     const auto &pos = gConfig["boss.panel_pos"];
     auto posVec = split(pos);
@@ -68,10 +77,11 @@ void Render::render(bool &showFull) {
         {
             std::unique_lock lock(gBossDataSet.mutex());
             if (gBossDataSet.challengeMode()) {
-                ImGui::Text("PB: %d/%d  尝试次数: %d", gBossDataSet.challengeBest(), gBossDataSet.total(), gBossDataSet.challengeTries());
-                ImGui::Text("当前击杀: %d/%d", gBossDataSet.count(), gBossDataSet.total());
+                auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries());
+                ImGui::TextUnformatted(text.c_str());
             } else {
-                ImGui::Text("%d/%d", gBossDataSet.count(), gBossDataSet.total());
+                auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total());
+                ImGui::TextUnformatted(text.c_str());
             }
         }
         ImGui::SameLine();
@@ -91,10 +101,11 @@ void Render::render(bool &showFull) {
             regionIndex = -1;
         }
         if (gBossDataSet.challengeMode()) {
-            ImGui::Text("PB: %d/%d  尝试次数: %d", gBossDataSet.challengeBest(), gBossDataSet.total(), gBossDataSet.challengeTries());
-            ImGui::Text("当前击杀: %d/%d", gBossDataSet.count(), gBossDataSet.total());
+            auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries());
+            ImGui::TextUnformatted(text.c_str());
         } else {
-            ImGui::Text("%d/%d", gBossDataSet.count(), gBossDataSet.total());
+            auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total());
+            ImGui::TextUnformatted(text.c_str());
         }
         auto &style = ImGui::GetStyle();
         ImGui::SameLine(

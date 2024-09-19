@@ -165,7 +165,6 @@ private:
     FrameContext *frameContext_ = nullptr;
 */
     std::vector<std::unique_ptr<RenderBase>> windows_;
-    std::vector<uint8_t> fontData_;
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
 };

@@ -21,7 +21,7 @@ static std::vector<int> deadByRegionSwapTmp;
 void BossDataSet::load(bool hasDLC) {
     nlohmann::ordered_json j;
     std::wstring name = er::gConfig.getw("boss.data_file", L"bosses.json");
-    std::wstring lang = er::gConfig.getw("common.language", L"engUS");
+    std::wstring lang = er::gConfig.getw("common.language", L"");
     if (lang.empty()) {
         lang = getGameLanguage();
     }
@@ -71,8 +71,6 @@ void BossDataSet::load(bool hasDLC) {
 
 void BossDataSet::loadConfig() {
     if (!challengeMode_) return;
-    fprintf(stdout, "Challenge Mode: Loading config\n");
-    fflush(stdout);
     auto filename = std::wstring(::er::gModulePath) + L"\\Challenge.txt";
     auto *f = _wfopen(filename.c_str(), L"rt");
     if (f == nullptr) {
@@ -101,7 +99,7 @@ void BossDataSet::saveConfig() const {
     auto *f = _wfopen(filename.c_str(), L"wt");
     if (f == nullptr) {
         fprintf(stderr, "Unable to open %ls for writing\n", filename.c_str());
-        fflush(stdout);
+        fflush(stderr);
         return;
     }
     fprintf(f, "# Total tries\ntries=%d\n", challengeTries_);
@@ -259,8 +257,6 @@ void BossDataSet::updateBosses() {
     count_ = cnt;
     if (challengeMode_ && cnt > challengeBest_ && challengeDeaths() <= challengeDeathCount_) {
         challengeBest_ = cnt;
-        fprintf(stdout, "Challenge Mode: Break PB. Current PB: %d\n", challengeBest_);
-        fflush(stdout);
         saveConfig();
     }
     auto addr1 = *(uintptr_t *)fieldArea_;
@@ -289,22 +285,16 @@ void BossDataSet::updateChallengeMode() {
         if (reached) {
             challengeDeathsOnStart_ = deaths;
             needSave = true;
-            fprintf(stdout, "Challenge Mode: Reached Stranded Graveyard with death count: %d\n", challengeDeathsOnStart_);
-            fflush(stdout);
         } else {
             playerDeaths_ = 0;
             challengeDeathsOnStart_ = 0;
-            fprintf(stdout, "Challenge Mode: New Game Start. Current Tries: %d\n", challengeTries_);
-            fflush(stdout);
             needSave = true;
         }
     }
     if (deaths != playerDeaths_) {
         playerDeaths_ = deaths;
-        if (challengeDeaths() > challengeDeathCount_) {
+        if (challengeDeaths() == challengeDeathCount_ + 1) {
             challengeTries_++;
-            fprintf(stdout, "Challenge Mode: Exceeded death count. Current Tries: %d\n", challengeTries_);
-            fflush(stdout);
         }
         needSave = true;
     }
@@ -313,10 +303,12 @@ void BossDataSet::updateChallengeMode() {
 
 void BossDataSet::checkForConfigChange() {
     if (changeEvent_ == INVALID_HANDLE_VALUE) return;
+    bool needReload = false;
     while (WaitForSingleObject(changeEvent_, 0) == WAIT_OBJECT_0) {
-        loadConfig();
+        needReload = true;
         FindNextChangeNotification(changeEvent_);
     }
+    if (needReload) loadConfig();
 }
 
 int BossDataSet::inGameTime() const {
