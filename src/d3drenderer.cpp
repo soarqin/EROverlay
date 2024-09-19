@@ -465,8 +465,8 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix
 void D3DRenderer::loadFont() {
     void *data = nullptr;
     size_t fontSize = 0;
-    fontSize_ = strtof(gConfig.get("common.font_size", "18.0").c_str(), nullptr);
-    if (fontSize_ == 0.0f) fontSize_ = 18.0f;
+    fontSize_ = strtof(gConfig.get("common.font_size", "20.0").c_str(), nullptr);
+    if (fontSize_ == 0.0f) fontSize_ = 20.0f;
     const auto& fontFile = gConfig.getw("common.font", L"");
     if (!fontFile.empty()) {
         std::wstring prefix;

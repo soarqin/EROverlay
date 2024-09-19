@@ -1,0 +1,130 @@
+[common]
+# 设为true以启用控制台
+console=false
+
+# 设置位于`data`文件夹中的字体文件
+# 也可以用绝对路径
+# 留空的话会使用备用字体:
+#   1. 对于拉丁语系，使用内嵌字体，只支持拉丁字符集
+#   2. 对于其他字体，使用系统字体，从注册表中读取(名为`Segoe UI`，带有一个备用列表)
+font=
+
+# 字体大小，默认为20
+font_size=20
+
+# 为字体加载字符集，接受的字符集如下:
+#  enUS, frFR, deDE, esES, esAR, itIT, ptBr -> Latin
+#  jaJP -> 日语
+#  koKR -> 韩语
+#  plPL -> 波兰语(拉丁语+额外波兰语用字符)
+#  ruRU -> 西里尔语
+#  thTH -> 泰语
+#  zhCN, zhTW -> 中文
+# 留空的话会使用游戏语言对应的字符集
+charset=
+
+# language used to load data file, if you set this to empty, your game language will be used
+# check `data` folder for available languages
+# 加载数据文件时使用的语言，如果设置为空，则使用游戏语言
+# 查看`data`文件夹内的列表可以看到可用的语言
+language=
+
+[input]
+# 可以使用'+'来连接组合键，例如: CTRL+SHIFT+[
+#  可用的按键名称:
+#   WIN, LWIN, RWIN, ALT, LALT, RALT, CTRL, LCTRL, RCTRL, CTRL, LSHIFT, RSHIFT, LBUTTON, RBUTTON, CANCEL, MBUTTON, XBUTTON1, XBUTTON2,
+#   BACK, BACKSPACE, TAB, CLEAR, RETURN, ENTER, PAUSE, CAPITAL, CAPSLOCK, KANA, HANGUL, JUNJA, FINAL, HANJA, KANJI, ESCAPE, ESC, CONVERT,
+#   NONCONVERT, ACCEPT, MODECHANGE, SPACE, PRIOR, NEXT, END, HOME, LEFT, UP, RIGHT, DOWN, SELECT, PRINT, EXECUTE, SNAPSHOT, INSERT, DELETE,
+#   HELP, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, APPS, SLEEP,
+#   NUMPAD0, NUMPAD1, NUMPAD2, NUMPAD3, NUMPAD4, NUMPAD5, NUMPAD6, NUMPAD7, NUMPAD8, NUMPAD9, NUM0, NUM1, NUM2, NUM3, NUM4, NUM5, NUM6, NUM7,
+#   NUM8, NUM9, MULTIPLY, ADD, SUBTRACT, MINUS, DECIMAL, DIVIDE, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17,
+#   F18, F19, F20, F21, F22, F23, F24, NUMLOCK, SCROLL, BROWSER_BACK, BROWSER_FORWARD, BROWSER_REFRESH, BROWSER_STOP, BROWSER_SEARCH,
+#   BROWSER_FAVORITES, BROWSER_HOME, VOLUME_MUTE, VOLUME_DOWN, VOLUME_UP, MEDIA_NEXT_TRACK, MEDIA_PREV_TRACK, MEDIA_STOP, MEDIA_PLAY_PAUSE,
+#   LAUNCH_MAIL, LAUNCH_MEDIA_SELECT, LAUNCH_APP1, LAUNCH_APP2, =, ',', -, ., ;, /, ~, [, \, ], ', PROCESSKEY, ATTN, CRSEL, EXSEL, EREOF,
+#   PLAY, ZOOM, PA1, OEM_CLEAR
+
+# 卸载mod用快捷键，默认为无
+unload=
+
+# 切换完整模式的快捷键，默认为`=`
+toggle_full_mode==
+
+[style]
+# 颜色对应的值范围是0-255
+# R=红 G=绿 B=蓝 A=不透明度
+
+# 文字颜色(R,G,B,A)
+text_color=191,191,74,230
+
+# 勾选标记颜色(R,G,B,A)
+check_mark_color=189,189,74,230
+
+# 背景颜色(R,G,B,A)
+bg_color=26,26,26,77
+
+# 边框颜色(R,G,B,A)
+border_color=255,255,255,64
+
+# 按钮颜色(R,G,B,A)
+button_color=13,13,13,112
+
+# 按钮悬停颜色(R,G,B,A)
+button_hover_color=48,48,48,112
+
+# 按钮按下颜色(R,G,B,A)
+button_press_color=51,56,59,230
+
+# 节点颜色(R,G,B,A)
+node_color=0,0,0,133
+
+# 节点悬停颜色(R,G,B,A)
+node_hover_color=0,0,0,92
+
+# 节点按下颜色(R,G,B,A)
+node_press_color=51,56,59,84
+
+# 滚动条背景颜色(R,G,B,A)
+scroll_bg_color=13,13,13,112
+
+# 滚动条颜色(R,G,B,A)
+scroll_color=87,87,87,112
+
+# 滚动条悬停颜色(R,G,B,A)
+scroll_hover_color=102,102,102,112
+
+# 滚动条按下颜色(R,G,B,A)
+scroll_press_color=143,143,143,112
+
+# 边框宽度
+border_width=1
+
+# 窗口圆角半径
+rounding=7
+
+[boss]
+# Boss列表数据文件名，位于`data/<language>`文件夹内
+data_file=bosses.json
+
+# 设为true以启用Boss复活功能
+allow_revive=false
+
+# 面板位置(x, y, 宽度, 高度):
+#   所有值都可以设置为百分比或固定像素宽度，x和y可以设置为负值，表示相对于屏幕右侧或底部的位置。
+#   默认值为-10,10,15%,90%，表示面板距离屏幕右边缘10像素，距离屏幕顶边缘10像素，宽度为屏幕宽度的15%，高度为屏幕高度的90%。
+panel_pos=-10,10,15%,90%
+
+# Boss击杀计数显示文本
+#  $n = 换行
+#  {0} = 当前击杀数  {1} = 总Boss数
+boss_kill_text={0}/{1}
+
+# 设为true以启用Boss挑战模式，如果死亡次数大于允许值，则停止记录Boss击杀
+challenge_mode=false
+
+# 允许死亡次数
+challenge_death_count=0
+
+# 挑战状态显示文本
+#  $n = 换行
+#  {0} = 当前击杀数  {1} = 总Boss数  {2} = 个人最佳  {3} = 总尝试次数
+challenge_status_text=PB: {2}/{1}  Tries: {3}$nCurrent: {0}/{1}
