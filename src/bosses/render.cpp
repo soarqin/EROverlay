@@ -77,10 +77,10 @@ void Render::render(bool &showFull) {
         {
             std::unique_lock lock(gBossDataSet.mutex());
             if (gBossDataSet.challengeMode()) {
-                auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries());
+                auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries(), gBossDataSet.challengeDeaths());
                 ImGui::TextUnformatted(text.c_str());
             } else {
-                auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total());
+                auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeDeaths());
                 ImGui::TextUnformatted(text.c_str());
             }
         }
@@ -101,10 +101,10 @@ void Render::render(bool &showFull) {
             regionIndex = -1;
         }
         if (gBossDataSet.challengeMode()) {
-            auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries());
+            auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries(), gBossDataSet.challengeDeaths());
             ImGui::TextUnformatted(text.c_str());
         } else {
-            auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total());
+            auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeDeaths());
             ImGui::TextUnformatted(text.c_str());
         }
         auto &style = ImGui::GetStyle();
