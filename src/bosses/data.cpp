@@ -113,7 +113,6 @@ void BossDataSet::saveConfig() const {
 }
 
 void BossDataSet::initMemoryAddresses() {
-    if (challengeMode_)
     {
         Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
         auto res = sig.scan();
