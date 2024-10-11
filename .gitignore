@@ -1,2 +1,24 @@
 /cmake-build-*/
 /.idea/
+
+# Ignore all temporary files created by text editors
+*.swp
+*.tmp
+
+
+# Ignore local configuration files
+*.env
+*.local
+
+# Ignore backup files
+*.bak
+*.orig
+
+# Ignore build folders
+/out/
+/dist/
+
+# Ignore Visual Studio IDE files
+.vscode/
+.vs/
+
