@@ -1,6 +1,10 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-10-15: v1.4.0
+  + Try to read fonts from system font links, if character sets are not Latin or Cyrillic for current language and font file is not set properly.
+  + Can set display text format manually now, check `EROverlay.ini` for details.
+  + Add `Challenge mode`, which can be enabled by setting `challenge_mode` to `true` in `[boss]` section.
 * 2024-07-03: v1.3.0
   + Change data folder structure, to support multiple data files for different languages in future, and config entries are changed as follows:
     - `data` in `[boss]` section is changed to `data_file`, which indicates data filename.
