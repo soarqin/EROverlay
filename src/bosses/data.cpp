@@ -113,7 +113,6 @@ void BossDataSet::saveConfig() const {
 }
 
 void BossDataSet::initMemoryAddresses() {
-    if (challengeMode_)
     {
         Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
         auto res = sig.scan();
@@ -145,7 +144,7 @@ void BossDataSet::update() {
     if (er::gHooking->screenState() != 0) {
         return;
     }
-    auto igt = inGameTime();
+    auto igt = readInGameTime();
     if (igt == 0) return;
     updateBosses();
     if (!challengeMode_ || igt < 0) return;
@@ -255,7 +254,7 @@ void BossDataSet::updateBosses() {
     }
     dead_.swap(deadSwapTmp);
     count_ = cnt;
-    if (challengeMode_ && cnt > challengeBest_ && challengeDeaths() <= challengeDeathCount_) {
+    if (challengeMode_ && cnt > challengeBest_ && deaths() <= challengeDeathCount_) {
         challengeBest_ = cnt;
         saveConfig();
     }
@@ -276,14 +275,14 @@ void BossDataSet::updateChallengeMode() {
         // Flag 101: Reached Stranded Graveyard
         resolveFlag(101, reachStrandedGraveyardFlagOffset_, reachStrandedGraveyardFlagBits_);
     }
-    auto deaths = currentDeathCount();
+    auto deathCount = readDeathCount();
     auto reached = (*(uint8_t *)reachStrandedGraveyardFlagOffset_ & reachStrandedGraveyardFlagBits_) != 0;
     bool needSave = false;
     std::unique_lock lock(mutex_);
     if (reached != reachedStrandedGraveyard_) {
         reachedStrandedGraveyard_ = reached;
         if (reached) {
-            challengeDeathsOnStart_ = deaths;
+            challengeDeathsOnStart_ = deathCount;
             needSave = true;
         } else {
             playerDeaths_ = 0;
@@ -291,9 +290,9 @@ void BossDataSet::updateChallengeMode() {
             needSave = true;
         }
     }
-    if (deaths != playerDeaths_) {
-        playerDeaths_ = deaths;
-        if (challengeDeaths() == challengeDeathCount_ + 1) {
+    if (deathCount != playerDeaths_) {
+        playerDeaths_ = deathCount;
+        if (deaths() == challengeDeathCount_ + 1) {
             challengeTries_++;
         }
         needSave = true;
@@ -311,7 +310,7 @@ void BossDataSet::checkForConfigChange() {
     if (needReload) loadConfig();
 }
 
-int BossDataSet::inGameTime() const {
+int BossDataSet::readInGameTime() const {
     auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return -1;
@@ -319,7 +318,7 @@ int BossDataSet::inGameTime() const {
     return MemoryHandle(addr + 0xA0).as<int&>();
 }
 
-int BossDataSet::currentDeathCount() const {
+int BossDataSet::readDeathCount() const {
     auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return 0;

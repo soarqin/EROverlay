@@ -42,10 +42,11 @@ public:
     [[nodiscard]] inline int total() const { return (int)bosses_.size(); }
     [[nodiscard]] inline std::mutex &mutex() { return mutex_; }
     [[nodiscard]] inline const std::vector<bool> &dead() const { return dead_; }
+    [[nodiscard]] inline int deaths() const { return challengeMode_ ? (reachedStrandedGraveyard_ ? playerDeaths_ - challengeDeathsOnStart_ : 0) : playerDeaths_; }
     [[nodiscard]] inline bool challengeMode() const { return challengeMode_; }
     [[nodiscard]] inline int challengeTries() const { return challengeTries_; }
     [[nodiscard]] inline int challengeBest() const { return challengeBest_; }
-    [[nodiscard]] inline int challengeDeaths() const { return reachedStrandedGraveyard_ ? playerDeaths_ - challengeDeathsOnStart_ : 0; }
+    [[nodiscard]] int readInGameTime() const;
 
     void initMemoryAddresses();
     void update();
@@ -57,8 +58,7 @@ private:
     void updateBosses();
     void updateChallengeMode();
     void checkForConfigChange();
-    [[nodiscard]] int inGameTime() const;
-    [[nodiscard]] int currentDeathCount() const;
+    [[nodiscard]] int readDeathCount() const;
 
 private:
     std::vector<BossData> bosses_;

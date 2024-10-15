@@ -6,10 +6,16 @@
 
 #include <imgui.h>
 
-#include <fmt/format.h>
-
 #include <sstream>
 #include <algorithm>
+
+namespace fmt {
+    template <> struct formatter<er::bosses::IntProxy>: formatter<string_view> {
+        auto format(const er::bosses::IntProxy& value, format_context& ctx) const {
+            return formatter<string_view>::format(std::to_string(value.value), ctx);
+        }
+    };
+}
 
 namespace er::bosses {
 
@@ -38,8 +44,18 @@ void Render::init() {
     challengeText_ = gConfig["boss.challenge_status_text"];
     const std::string from = "$n";
     const std::string to = "\n";
+    const std::string from2 = "{igt}";
+    const std::string to2 = "{igt:.0%M:%S}";
+    const std::string from3 = "{igt}";
+    const std::string to3 = "{igt:.0%H:%M:%S}";
     util::replaceAll(killText_, from, to);
     util::replaceAll(challengeText_, from, to);
+    killTextHour_ = killText_;
+    challengeTextHour_ = challengeText_;
+    util::replaceAll(killText_, from2, to2);
+    util::replaceAll(challengeText_, from2, to2);
+    util::replaceAll(killTextHour_, from3, to3);
+    util::replaceAll(challengeTextHour_, from3, to3);
     allowRevive_ = gConfig.enabled("boss.allow_revive");
     const auto &pos = gConfig["boss.panel_pos"];
     auto posVec = split(pos);
@@ -49,6 +65,13 @@ void Render::init() {
         width_ = posVec[2];
         height_ = posVec[3];
     }
+    args_.clear();
+    args_.push_back(fmt::arg("kills", std::cref(kills_)));
+    args_.push_back(fmt::arg("total", std::cref(total_)));
+    args_.push_back(fmt::arg("deaths", std::cref(deaths_)));
+    args_.push_back(fmt::arg("pb", std::cref(pb_)));
+    args_.push_back(fmt::arg("tries", std::cref(tries_)));
+    args_.push_back(fmt::arg("igt", std::cref(igt_)));
 }
 
 inline static float calculatePos(float w, float n) {
@@ -69,18 +92,31 @@ void Render::render(bool &showFull) {
     ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
                             ImGuiCond_Always,
                             ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
+
+    auto challengeMode = gBossDataSet.challengeMode();
+    {
+        std::unique_lock lock(gBossDataSet.mutex());
+        kills_ = gBossDataSet.count();
+        total_ = gBossDataSet.total();
+    }
+    deaths_ = gBossDataSet.deaths();
+    if (challengeMode) {
+        pb_ = gBossDataSet.challengeBest();
+        tries_ = gBossDataSet.challengeTries();
+    }
+    auto igt = gBossDataSet.readInGameTime();
+    igt_ = std::chrono::milliseconds(igt);
     if (!showFull) {
         ImGui::Begin("##bosses_window",
                      nullptr,
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
                          | ImGuiWindowFlags_AlwaysAutoResize);
         {
-            std::unique_lock lock(gBossDataSet.mutex());
-            if (gBossDataSet.challengeMode()) {
-                auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries(), gBossDataSet.challengeDeaths());
+            if (challengeMode) {
+                auto text = fmt::vformat(igt < 3600000 ? challengeText_: challengeTextHour_, args_);
                 ImGui::TextUnformatted(text.c_str());
             } else {
-                auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeDeaths());
+                auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
                 ImGui::TextUnformatted(text.c_str());
             }
         }
@@ -101,10 +137,10 @@ void Render::render(bool &showFull) {
             regionIndex = -1;
         }
         if (gBossDataSet.challengeMode()) {
-            auto text = fmt::format(challengeText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeBest(), gBossDataSet.challengeTries(), gBossDataSet.challengeDeaths());
+            auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
             ImGui::TextUnformatted(text.c_str());
         } else {
-            auto text = fmt::format(killText_, gBossDataSet.count(), gBossDataSet.total(), gBossDataSet.challengeDeaths());
+            auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
             ImGui::TextUnformatted(text.c_str());
         }
         auto &style = ImGui::GetStyle();
