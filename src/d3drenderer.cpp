@@ -432,7 +432,7 @@ D3DRenderer::~D3DRenderer() noexcept {
     unhook();
 }
 
-//	GUIDED HACKING TEMPLATE
+//    GUIDED HACKING TEMPLATE
 /*
 bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight) {
     //Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
@@ -459,7 +459,7 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix
 */
 
 //-----------------------------------------------------------------------------------
-//									    STYLES
+//                                        STYLES
 //-----------------------------------------------------------------------------------
 
 void D3DRenderer::loadFont() {
