@@ -1,2 +1,12 @@
-/cmake-build-*/
+# JetBrains IDE
 /.idea/
+
+# Build
+/cmake-build-*/
+/build/
+/dist/
+
+# Generator
+/data/gen/text/
+/data/gen/msg/*/
+__pycache__/

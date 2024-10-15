@@ -3,7 +3,6 @@
 
 import codecs
 import string
-import sys
 import os
 import json
 
