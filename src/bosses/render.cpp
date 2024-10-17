@@ -9,14 +9,15 @@
 #include <sstream>
 #include <algorithm>
 
-extern "C" er::EROverlayAPI *api;
+extern er::EROverlayAPI *api;
 
 namespace fmt {
-    template <> struct formatter<er::bosses::IntProxy>: formatter<string_view> {
-        auto format(const er::bosses::IntProxy& value, format_context& ctx) const {
-            return formatter<string_view>::format(std::to_string(value.value), ctx);
-        }
-    };
+template<>
+struct formatter<er::bosses::IntProxy> : formatter<string_view> {
+    auto format(const er::bosses::IntProxy &value, format_context &ctx) const {
+        return formatter<string_view>::format(std::to_string(value.value), ctx);
+    }
+};
 }
 
 namespace er::bosses {
@@ -42,7 +43,7 @@ inline static std::vector<float> split(const std::string &s) {
 }
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
-    ImGui::SetCurrentContext((ImGuiContext*)context);
+    ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
     killText_ = api->configGet("boss.boss_kill_text");
     challengeText_ = api->configGet("boss.challenge_status_text");
@@ -114,10 +115,10 @@ bool Renderer::render() {
         ImGui::Begin("##bosses_window",
                      nullptr,
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-                         | ImGuiWindowFlags_AlwaysAutoResize);
+                     | ImGuiWindowFlags_AlwaysAutoResize);
         {
             if (challengeMode) {
-                auto text = fmt::vformat(igt < 3600000 ? challengeText_: challengeTextHour_, args_);
+                auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
                 ImGui::TextUnformatted(text.c_str());
             } else {
                 auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
@@ -191,7 +192,7 @@ bool Renderer::render() {
             if (ImGui::BeginPopupModal("##bosses_revive_confirm",
                                        nullptr,
                                        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-                                           | ImGuiWindowFlags_AlwaysAutoResize)) {
+                                       | ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::Text("Revive %s?", bosses[popupBossIndex_].boss.c_str());
                 if (ImGui::Button("Yes!")) {
                     gBossDataSet.revive(popupBossIndex_);

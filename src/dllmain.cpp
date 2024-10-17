@@ -8,8 +8,6 @@
 #include <thread>
 #include <shlwapi.h>
 
-using namespace std::chrono_literals;
-
 void init();
 void mainThread();
 
@@ -73,19 +71,20 @@ void init() {
         freopen("CONOUT$", "w", stderr);
     }
 
+    using std::chrono_literals::operator""ms;
     std::this_thread::sleep_for(1000ms);
     er::steamapi::init();
     er::gIsDLC01Installed = er::steamapi::isDLCInstalled(2778580) || er::steamapi::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
     er::pluginsInit();
-    er::pluginsOnLoad();
 
     er::gHooking = std::make_unique<er::Hooking>();
-    //  WAIT FOR USER INPUT
+    /* wait for menu loaded */
     while (!er::gHooking->menuLoaded()) {
-        std::this_thread::sleep_for(1000ms);
+        std::this_thread::sleep_for(100ms);
     }
-    std::this_thread::sleep_for(2000ms);
+    /* delay for another 1s */
+    std::this_thread::sleep_for(1000ms);
     /* do not hook on game loading, high risk of crash */
     while (er::gHooking->screenState() == 1) {
         std::this_thread::sleep_for(100ms);
@@ -142,7 +141,9 @@ void mainThread() {
         noUnload:
 
         std::this_thread::yield();
-        std::this_thread::sleep_for(20ms);
+        using std::chrono_literals::operator""us;
+        static auto tick = 1000000us / 60;
+        std::this_thread::sleep_for(tick);
 
         er::pluginsUpdate();
     }

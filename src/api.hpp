@@ -4,8 +4,6 @@
 
 namespace er {
 
-extern "C" {
-
 struct EROverlayAPI {
     // Global variable
     uint64_t (*getGameVersion)();
@@ -29,31 +27,43 @@ struct EROverlayAPI {
 
 #if defined(_WIN32)
 #if defined(EROVERLAY_EXPORTS)
-__declspec(dllexport)
+#define API_EXPORT extern "C" __declspec(dllexport)
 #else
-__declspec(dllimport)
+#define API_EXPORT extern "C" __declspec(dllimport)
 #endif
+#else
+#define API_EXPORT extern "C"
 #endif
-EROverlayAPI *getEROverlayAPI();
+API_EXPORT EROverlayAPI *getEROverlayAPI();
 
 using PluginInitFunction = const wchar_t *(*)();
 using PluginUninitFunction = void (*)();
-using PluginLoadFunction = void (*)();
 using PluginUpdateFunction = void (*)();
-using PluginLoadRendererFunction = void (*)(void *, void *, void *, void *);
+using PluginCreateRendererFunction = void (*)(void *, void *, void *, void *);
 using PluginDestroyRendererFunction = void (*)();
 using PluginRenderFunction = bool (*)();
 
 struct PluginExports {
+    /* init() is called on plugin loaded, return the plugin name. */
     PluginInitFunction init;
+    /* uninit() is called on plugin uninit. */
     PluginUninitFunction uninit;
-    PluginLoadFunction load;
+    /* update() is called on each 1/60s, in an individual thread, which can be used to do heavy works. */
     PluginUpdateFunction update;
-    PluginLoadRendererFunction loadRenderer;
+    /* createRenderer() is called to create the renderer, passing important imgui arguments which should be used for ImGui::SetCurrentContext() and ImGui::SetAllocatorFunctions(). */
+    PluginCreateRendererFunction createRenderer;
+    /* destroyRenderer() is called to destroy the renderer. */
     PluginDestroyRendererFunction destroyRenderer;
+    /* render() is called to render things, return true if the plugin wants to show the cursor. */
     PluginRenderFunction render;
 };
 
-}
+#if defined(_WIN32)
+#define PLUGIN_EXPORT extern "C" __declspec(dllexport)
+#else
+#define PLUGIN_EXPORT extern "C"
+#endif
+
+#define PLUGIN_DEFINE() PLUGIN_EXPORT ::er::PluginExports *getExports()
 
 }

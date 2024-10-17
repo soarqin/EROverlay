@@ -10,7 +10,7 @@
 
 namespace er {
 
-static std::vector<std::pair<const wchar_t *, PluginExports>> plugins;
+static std::vector<std::pair<const wchar_t *, PluginExports&>> plugins;
 
 void pluginsInit() {
     plugins.clear();
@@ -21,33 +21,28 @@ void pluginsInit() {
             auto filename = path.string();
             fmt::print("Loading plugin: {}...", filename);
             if (auto *lib = dlopen(filename.c_str(), RTLD_LAZY)) {
-                PluginExports pl{};
-                pl.init = reinterpret_cast<PluginInitFunction>(dlsym(lib, "init"));
-                pl.uninit = reinterpret_cast<PluginUninitFunction>(dlsym(lib, "uninit"));
-                pl.load = reinterpret_cast<PluginLoadFunction>(dlsym(lib, "load"));
-                if (!pl.init && !pl.load) {
-                    fmt::print(" failed.\n", filename);
+                auto getExports = reinterpret_cast<er::PluginExports *(*)()>(dlsym(lib, "getExports"));
+                if (!getExports) {
+                    fmt::print(" failed.\n");
                     dlclose(lib);
                     continue;
                 }
-                pl.update = reinterpret_cast<PluginUpdateFunction>(dlsym(lib, "update"));
-                pl.loadRenderer = reinterpret_cast<PluginLoadRendererFunction>(dlsym(lib, "loadRenderer"));
-                pl.destroyRenderer = reinterpret_cast<PluginDestroyRendererFunction>(dlsym(lib, "destroyRenderer"));
-                pl.render = reinterpret_cast<PluginRenderFunction>(dlsym(lib, "render"));
-                const auto *name = pl.init();
-                plugins.emplace_back(name, pl);
+                auto *exports = getExports();
+                const auto *name = exports->init();
+                plugins.emplace_back(name, *exports);
                 fmt::print(L" successful with name {}\n", name);
             } else {
-                fmt::print(" failed.\n", filename);
+                fmt::print(" failed.\n");
             }
         }
     }
 }
 
-void pluginsOnLoad() {
+void pluginsUninit() {
     for (const auto &pl: plugins) {
-        pl.second.load();
+        pl.second.uninit();
     }
+    plugins.clear();
 }
 
 void pluginsUpdate() {
@@ -58,7 +53,7 @@ void pluginsUpdate() {
 
 void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *userData) {
     for (const auto &pl: plugins) {
-        pl.second.loadRenderer(context, allocFunc, freeFunc, userData);
+        pl.second.createRenderer(context, allocFunc, freeFunc, userData);
     }
 }
 

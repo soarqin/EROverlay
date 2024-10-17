@@ -8,7 +8,7 @@
 
 #include <fstream>
 
-extern "C" er::EROverlayAPI *api;
+extern er::EROverlayAPI *api;
 
 namespace er::bosses {
 

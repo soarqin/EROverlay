@@ -5,7 +5,7 @@
 namespace er {
 
 void pluginsInit();
-void pluginsOnLoad();
+void pluginsUninit();
 void pluginsUpdate();
 void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *userData);
 void pluginsDestroyRenderers();
