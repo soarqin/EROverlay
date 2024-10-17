@@ -1,4 +1,5 @@
 #include "render.hpp"
+
 #include "data.hpp"
 
 #include "api/api.h"
@@ -157,6 +158,7 @@ bool Renderer::render() {
         ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail());
         const auto &bosses = gBossDataSet.bosses();
         const auto &regions = gBossDataSet.regions();
+        const auto &regionCounts = gBossDataSet.regionCounts();
         const auto &dead = gBossDataSet.dead();
         int sz = (int)regions.size();
         bool popup = false;
@@ -166,7 +168,7 @@ bool Renderer::render() {
             if (regionIndex >= 0) {
                 ImGui::SetNextItemOpen(i == regionIndex);
             }
-            if (ImGui::TreeNode(&region, "%d/%d %s", region.count, bossCount, region.name.c_str())) {
+            if (ImGui::TreeNode(&region, "%d/%d %s", regionCounts[i], bossCount, region.name.c_str())) {
                 for (int j = 0; j < bossCount; j++) {
                     auto &bd = bosses[region.bosses[j]];
                     bool on = dead[bd.index];

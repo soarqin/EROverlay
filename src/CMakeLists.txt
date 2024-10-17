@@ -23,7 +23,6 @@ add_library(${PROJECT_NAME} SHARED
 
     # Plugin API
     api/api.cpp api/api.h
-    api/steamapi.h
     api/define.h
 
     # util
@@ -41,7 +40,7 @@ if(NOT MSVC)
     target_compile_options(${PROJECT_NAME} PUBLIC -mavx2 -mlzcnt -mbmi -mbmi2)
 endif()
 target_include_directories(${PROJECT_NAME} PUBLIC .)
-target_link_libraries(${PROJECT_NAME} PUBLIC Pattern16 imgui nlohmann_json::nlohmann_json inih fmt::fmt "${CMAKE_CURRENT_SOURCE_DIR}/api/steam_api64.lib" PRIVATE imgui_dx12_backend minhook d3dcompiler dwmapi shlwapi version)
+target_link_libraries(${PROJECT_NAME} PUBLIC Pattern16 imgui fmt::fmt PRIVATE nlohmann_json::nlohmann_json inih steam_api64 imgui_dx12_backend minhook d3dcompiler dwmapi shlwapi version)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
@@ -53,3 +52,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_NAME "EROverlay")
 
 add_subdirectory(bosses)
+add_subdirectory(achievements)

@@ -25,7 +25,6 @@ struct BossData {
 struct RegionData {
     std::string name;
     std::vector<size_t> bosses;
-    int count = 0;
 };
 
 class BossDataSet {
@@ -36,6 +35,7 @@ public:
 
     [[nodiscard]] inline const std::vector<BossData> &bosses() const { return bosses_; }
     [[nodiscard]] inline const std::vector<RegionData> &regions() const { return regions_; }
+    [[nodiscard]] inline const std::vector<int> &regionCounts() const { return regionCounts_; }
     [[nodiscard]] inline int count() const { return count_; }
     [[nodiscard]] inline uint32_t mapId() const { return mapId_; }
     [[nodiscard]] inline int regionIndex() const { return regionIndex_; }
@@ -63,6 +63,7 @@ private:
 private:
     std::vector<BossData> bosses_;
     std::vector<RegionData> regions_;
+    std::vector<int> regionCounts_;
     std::map<uint32_t, int> regionMap_;
     int count_ = 0;
     uint32_t mapId_ = 0;

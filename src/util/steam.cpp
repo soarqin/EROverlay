@@ -1,6 +1,6 @@
 #include "steam.hpp"
 
-#include "api/steamapi.h"
+#include "steamapi.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

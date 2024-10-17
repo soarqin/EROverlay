@@ -1,8 +1,11 @@
 #pragma once
 
 #if defined(__cplusplus)
+#include <cstdint>
+
 extern "C" {
 #else
+#include <stdint.h>
 #include <stdbool.h>
 #endif
 

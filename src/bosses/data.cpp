@@ -36,6 +36,7 @@ void BossDataSet::load(bool hasDLC) {
         }
     }
     j = nlohmann::ordered_json::parse(ifs);
+    ifs.close();
     for (auto &p: j.items()) {
         if (!hasDLC && p.value()["dlc"] == 1) {
             continue;
@@ -58,6 +59,7 @@ void BossDataSet::load(bool hasDLC) {
             bd.regionIndex = regionIndex;
         }
     }
+    regionCounts_.resize(regions_.size());
     dead_.resize(bosses_.size());
     deadSwapTmp.resize(bosses_.size());
     deadByRegionSwapTmp.resize(regions_.size());
@@ -245,27 +247,27 @@ void BossDataSet::updateBosses() {
             deadByRegionSwapTmp[b.regionIndex]++;
         }
     }
-    std::unique_lock lock(mutex_);
-    sz = regions_.size();
-    for (size_t i = 0; i < sz; i++) {
-        regions_[i].count = deadByRegionSwapTmp[i];
+    {
+        std::unique_lock lock(mutex_);
+        regionCounts_.swap(deadByRegionSwapTmp);
+        dead_.swap(deadSwapTmp);
+        count_ = cnt;
+        auto addr1 = *(uintptr_t *)fieldArea_;
+        if (addr1 == 0) {
+            return;
+        }
+        auto mapId = *(uint32_t *)(addr1 + (api->getGameVersion() < 0x0002000200000000ULL ? 0xE4 : 0xE8));
+        if (mapId == 0 || mapId == mapId_) return;
+        mapId_ = mapId;
+        auto ite = regionMap_.find(mapId / 1000);
+        if (ite == regionMap_.end()) return;
+        regionIndex_ = ite->second;
     }
-    dead_.swap(deadSwapTmp);
-    count_ = cnt;
+
     if (challengeMode_ && cnt > challengeBest_ && deaths() <= challengeDeathCount_) {
         challengeBest_ = cnt;
         saveConfig();
     }
-    auto addr1 = *(uintptr_t *)fieldArea_;
-    if (addr1 == 0) {
-        return;
-    }
-    auto mapId = *(uint32_t *)(addr1 + (api->getGameVersion() < 0x0002000200000000ULL ? 0xE4 : 0xE8));
-    if (mapId == 0 || mapId == mapId_) return;
-    mapId_ = mapId;
-    auto ite = regionMap_.find(mapId / 1000);
-    if (ite == regionMap_.end()) return;
-    regionIndex_ = ite->second;
 }
 
 void BossDataSet::updateChallengeMode() {
