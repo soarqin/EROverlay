@@ -3,7 +3,7 @@
 #include "global.hpp"
 #include "hooking.hpp"
 #include "plugin.hpp"
-#include "util/steamapi.hpp"
+#include "util/steam.hpp"
 
 #include <thread>
 #include <shlwapi.h>
@@ -73,8 +73,7 @@ void init() {
 
     using std::chrono_literals::operator""ms;
     std::this_thread::sleep_for(1000ms);
-    er::steamapi::init();
-    er::gIsDLC01Installed = er::steamapi::isDLCInstalled(2778580) || er::steamapi::isDLCInstalled(2778590);
+    er::gIsDLC01Installed = er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
     er::pluginsInit();
 

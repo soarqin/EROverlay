@@ -5,7 +5,7 @@
 #include "plugin.hpp"
 
 #include "util/file.hpp"
-#include "util/steamapi.hpp"
+#include "util/steam.hpp"
 #include "util/string.hpp"
 #include "util/sysfont.hpp"
 
@@ -488,7 +488,7 @@ void D3DRenderer::loadFont() {
     auto charset = gConfig["common.charset"];
     charset = charset.substr(0, 2);
     if (charset.empty() || (charset != "en" && charset != "ja" && charset != "ko" && charset != "pl" && charset != "ru" && charset != "th" && charset != "zh")) {
-        const std::wstring &lang = steamapi::getGameLanguage();
+        const std::wstring &lang = util::getGameLanguage();
         if (lang == L"jpnJP") charset = "ja";
         else if (lang == L"korKR") charset = "ko";
         else if (lang == L"polPL") charset = "pl";

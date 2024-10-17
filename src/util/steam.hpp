@@ -2,9 +2,8 @@
 
 #include <string>
 
-namespace er::steamapi {
+namespace er::util {
 
-bool init();
 const wchar_t *getGameLanguage();
 bool isDLCInstalled(unsigned int dlc);
 

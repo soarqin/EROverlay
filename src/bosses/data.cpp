@@ -1,6 +1,6 @@
 #include "data.hpp"
 
-#include "api.hpp"
+#include "api/api.h"
 #include "util/signature.hpp"
 
 #include <nlohmann/json.hpp>
@@ -8,7 +8,7 @@
 
 #include <fstream>
 
-extern er::EROverlayAPI *api;
+extern EROverlayAPI *api;
 
 namespace er::bosses {
 

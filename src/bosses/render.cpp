@@ -1,7 +1,7 @@
 #include "render.hpp"
 #include "data.hpp"
 
-#include "api.hpp"
+#include "api/api.h"
 #include "util/string.hpp"
 
 #include <imgui.h>
@@ -9,7 +9,7 @@
 #include <sstream>
 #include <algorithm>
 
-extern er::EROverlayAPI *api;
+extern EROverlayAPI *api;
 
 namespace fmt {
 template<>

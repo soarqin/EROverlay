@@ -1,48 +1,43 @@
-#include "api.hpp"
+#include "api.h"
 
 #include "config.hpp"
 #include "global.hpp"
 #include "hooking.hpp"
-#include "util/steamapi.hpp"
-#include <imgui.h>
-
-namespace er {
+#include "util/steam.hpp"
 
 EROverlayAPI *getEROverlayAPI() {
     static EROverlayAPI api = {[]{
-        return gGameVersion;
+        return er::gGameVersion;
     }, [] {
-        return (const wchar_t *)gModulePath;
+        return (const wchar_t *)er::gModulePath;
     }, [] {
-        return gHooking->menuLoaded();
+        return er::gHooking->menuLoaded();
     }, [] {
-        return gHooking->screenState();
+        return er::gHooking->screenState();
     }, [] {
-        return steamapi::getGameLanguage();
+        return er::util::getGameLanguage();
     }, [] {
-        return gIsDLC01Installed;
+        return er::gIsDLC01Installed;
     },
     [](const char *name) {
         static std::string value;
-        value = gConfig[name];
+        value = er::gConfig[name];
         return value.c_str();
     },
     [](const char *name, const wchar_t *defValue) {
         static std::wstring value;
-        value = gConfig.getw(name, defValue);
+        value = er::gConfig.getw(name, defValue);
         return value.c_str();
     },
     [](const char *name, int defValue) {
-        return gConfig.get(name, defValue);
+        return er::gConfig.get(name, defValue);
     },
     [](const char *name, float defValue) {
-        return gConfig.get(name, defValue);
+        return er::gConfig.get(name, defValue);
     },
     [](const char *name) {
-        return gConfig.enabled(name);
+        return er::gConfig.enabled(name);
     },
     };
     return &api;
-}
-
 }

@@ -1,10 +1,16 @@
 #pragma once
 
+#include "define.h"
+
+#if defined(__cplusplus)
+extern "C" {
 #include <cstdint>
+#else
+#include <stdint.h>
+#include <stdbool.h>
+#endif
 
-namespace er {
-
-struct EROverlayAPI {
+typedef struct {
     // Global variable
     uint64_t (*getGameVersion)();
     const wchar_t *(*getModulePath)();
@@ -23,18 +29,7 @@ struct EROverlayAPI {
     int (*configGetInt)(const char *name, int defValue);
     float (*configGetFloat)(const char *name, float defValue);
     bool (*configEnabled)(const char *name);
-};
-
-#if defined(_WIN32)
-#if defined(EROVERLAY_EXPORTS)
-#define API_EXPORT extern "C" __declspec(dllexport)
-#else
-#define API_EXPORT extern "C" __declspec(dllimport)
-#endif
-#else
-#define API_EXPORT extern "C"
-#endif
-API_EXPORT EROverlayAPI *getEROverlayAPI();
+} EROverlayAPI;
 
 using PluginInitFunction = const wchar_t *(*)();
 using PluginUninitFunction = void (*)();
@@ -43,7 +38,7 @@ using PluginCreateRendererFunction = void (*)(void *, void *, void *, void *);
 using PluginDestroyRendererFunction = void (*)();
 using PluginRenderFunction = bool (*)();
 
-struct PluginExports {
+typedef struct {
     /* init() is called on plugin loaded, return the plugin name. */
     PluginInitFunction init;
     /* uninit() is called on plugin uninit. */
@@ -56,14 +51,18 @@ struct PluginExports {
     PluginDestroyRendererFunction destroyRenderer;
     /* render() is called to render things, return true if the plugin wants to show the cursor. */
     PluginRenderFunction render;
-};
+} PluginExports;
 
 #if defined(_WIN32)
-#define PLUGIN_EXPORT extern "C" __declspec(dllexport)
+#define PLUGIN_EXPORT EXTERN_C __declspec(dllexport)
 #else
-#define PLUGIN_EXPORT extern "C"
+#define PLUGIN_EXPORT EXTERN_C
 #endif
 
-#define PLUGIN_DEFINE() PLUGIN_EXPORT ::er::PluginExports *getExports()
+API_EXPORT EROverlayAPI *getEROverlayAPI();
 
+#define PLUGIN_DEFINE() PLUGIN_EXPORT PluginExports *getExports()
+
+#if defined(__cplusplus)
 }
+#endif

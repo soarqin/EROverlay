@@ -1,12 +1,12 @@
 #include "render.hpp"
 #include "data.hpp"
 
-#include "api.hpp"
+#include "api/api.h"
 
-er::EROverlayAPI *api;
+EROverlayAPI *api;
 
 const wchar_t *init() {
-    api = er::getEROverlayAPI();
+    api = getEROverlayAPI();
 
     er::bosses::gBossDataSet.load(api->isDLC01Installed());
     er::bosses::gBossDataSet.loadConfig();
@@ -41,7 +41,7 @@ void uninit() {
     destroyRenderer();
 }
 
-static er::PluginExports exports = {
+static PluginExports exports = {
     init,
     uninit,
     update,

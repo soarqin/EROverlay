@@ -1,11 +1,10 @@
 #include "plugin.hpp"
-#include "api.hpp"
 
 #include "global.hpp"
+#include "api/api.h"
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
-#include <dlfcn.h>
 #include <filesystem>
 
 namespace er {
@@ -18,21 +17,21 @@ void pluginsInit() {
     for (const std::filesystem::directory_entry &dir_entry: std::filesystem::directory_iterator{sandbox}) {
         if (dir_entry.is_regular_file()) {
             const auto &path = dir_entry.path();
-            auto filename = path.string();
-            fmt::print("Loading plugin: {}...", filename);
-            if (auto *lib = dlopen(filename.c_str(), RTLD_LAZY)) {
-                auto getExports = reinterpret_cast<er::PluginExports *(*)()>(dlsym(lib, "getExports"));
+            auto filename = path.wstring();
+            fmt::print(L"Loading plugin: {}...", filename);
+            if (auto lib = LoadLibraryW(filename.c_str())) {
+                auto getExports = reinterpret_cast<PluginExports *(*)()>(GetProcAddress(lib, "getExports"));
                 if (!getExports) {
-                    fmt::print(" failed.\n");
-                    dlclose(lib);
+                    fmt::print(" library enty not found.\n");
+                    FreeLibrary(lib);
                     continue;
                 }
                 auto *exports = getExports();
                 const auto *name = exports->init();
                 plugins.emplace_back(name, *exports);
-                fmt::print(L" successful with name {}\n", name);
+                fmt::print(L" successful. ({})\n", name);
             } else {
-                fmt::print(" failed.\n");
+                fmt::print(" unabled to load.\n");
             }
         }
     }
