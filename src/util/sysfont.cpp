@@ -8,7 +8,7 @@
 
 namespace er::util {
 
-std::vector<std::wstring> systemFontFileList(const wchar_t *fontname) {
+wchar_t *const * systemFontFileList(const wchar_t *fontname) {
     WCHAR windir[MAX_PATH];
     GetEnvironmentVariableW(L"windir", windir, MAX_PATH);
     PathAppendW(windir, L"Fonts");
@@ -38,7 +38,22 @@ std::vector<std::wstring> systemFontFileList(const wchar_t *fontname) {
         result.emplace_back(fontfile);
     }
     delete[] fontlink;
-    return result;
+    RegCloseKey(hKey);
+    auto sz = result.size();
+    auto *paths = new wchar_t *[sz + 1];
+    for (size_t i = 0; i < sz; ++i) {
+        paths[i] = new wchar_t[result[i].size() + 1];
+        lstrcpyW(paths[i], result[i].c_str());
+    }
+    paths[sz] = nullptr;
+    return paths;
+}
+
+void freeSystemFontFileList(wchar_t *const *pathList) {
+    for (auto *p = pathList; *p; ++p) {
+        delete[] *p;
+    }
+    delete[] pathList;
 }
 
 }

@@ -1,20 +1,19 @@
-#include "d3drenderer.hpp"
-#include "hooking.hpp"
-#include "global.hpp"
 #include "config.hpp"
-#include "steamapi.hpp"
+#include "d3drenderer.hpp"
+#include "global.hpp"
+#include "hooking.hpp"
+#include "plugin.hpp"
 
 #include "util/file.hpp"
+#include "util/steamapi.hpp"
 #include "util/string.hpp"
 #include "util/sysfont.hpp"
-#include "bosses/render.hpp"
 
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 #include <MinHook.h>
 
 #include <algorithm>
-#include <fstream>
 
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -384,8 +383,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         ImGui::NewFrame();
 
         bool oldShowMenu = gShowMenu;
-        for (auto &window: windows_)
-            window->render(gShowMenu);
+        gShowMenu = pluginsRender();
         if (gShowMenu != oldShowMenu) {
             gHooking->showMouseCursor(gShowMenu);
         }
@@ -430,9 +428,9 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
 D3DRenderer::~D3DRenderer() noexcept {
     unhook();
+    pluginsDestroyRenderers();
 }
 
-//    GUIDED HACKING TEMPLATE
 /*
 bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight) {
     //Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
@@ -457,10 +455,6 @@ bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix
     return true;
 }
 */
-
-//-----------------------------------------------------------------------------------
-//                                        STYLES
-//-----------------------------------------------------------------------------------
 
 void D3DRenderer::loadFont() {
     void *data = nullptr;
@@ -494,7 +488,7 @@ void D3DRenderer::loadFont() {
     auto charset = gConfig["common.charset"];
     charset = charset.substr(0, 2);
     if (charset.empty() || (charset != "en" && charset != "ja" && charset != "ko" && charset != "pl" && charset != "ru" && charset != "th" && charset != "zh")) {
-        const auto &lang = er::getGameLanguage();
+        const std::wstring &lang = steamapi::getGameLanguage();
         if (lang == L"jpnJP") charset = "ja";
         else if (lang == L"korKR") charset = "ko";
         else if (lang == L"polPL") charset = "pl";
@@ -553,11 +547,11 @@ void D3DRenderer::loadFont() {
         return;
     }
     if (useSysFont) {
-        auto fileList = util::systemFontFileList(L"Segoe UI");
+        auto *pathList = util::systemFontFileList(L"Segoe UI");
         bool first = true;
-        for (const auto &fn: fileList) {
-            fwprintf(stdout, L"Trying to add font file: %ls... ", fn.c_str());
-            data = util::getFileContent(fn, fontSize, ImGui::MemAlloc);
+        for (auto *p = pathList; *p; p++) {
+            fwprintf(stdout, L"Trying to add font file: %ls... ", *p);
+            data = util::getFileContent(*p, fontSize, ImGui::MemAlloc);
             if (data == nullptr) {
                 fwprintf(stdout, L"not found\n");
                 continue;
@@ -568,6 +562,7 @@ void D3DRenderer::loadFont() {
             fwprintf(stdout, L"done\n");
             if (first) first = false;
         }
+        util::freeSystemFontFileList(pathList);
         if (!first) return;
     }
     ImFontConfig cfg;

@@ -7,17 +7,17 @@ typedef unsigned int AppId_t;
 
 struct ISteamApps;
 extern "C" {
-ISteamApps *(__cdecl *SteamAPI_SteamApps_v008)() = nullptr;
-const char *(__cdecl *SteamAPI_ISteamApps_GetCurrentGameLanguage)(ISteamApps *) = nullptr;
-bool (__cdecl *SteamAPI_ISteamApps_BIsDlcInstalled)(ISteamApps *self, AppId_t appID) = nullptr;
+ISteamApps *(*SteamAPI_SteamApps_v008)() = nullptr;
+const char *(*SteamAPI_ISteamApps_GetCurrentGameLanguage)(ISteamApps *) = nullptr;
+bool (*SteamAPI_ISteamApps_BIsDlcInstalled)(ISteamApps *self, AppId_t appID) = nullptr;
 }
 
-namespace er {
+namespace er::steamapi {
 
 static ISteamApps *sapps = nullptr;
 static std::wstring gameLanguage;
 
-bool initSteamAPI() {
+bool init() {
 #define LOAD_STEAM_API(name) name = (decltype(name))GetProcAddress(handle, #name)
     auto handle = GetModuleHandleW(L"steam_api64.dll");
     if (handle == nullptr) return false;
@@ -29,12 +29,11 @@ bool initSteamAPI() {
     return true;
 }
 
-const std::wstring &getGameLanguage() {
+const wchar_t *getGameLanguage() {
     if (!gameLanguage.empty())
-        return gameLanguage;
+        return gameLanguage.c_str();
     if (!SteamAPI_SteamApps_v008) {
-        static const std::wstring dummy = L"engUS";
-        return dummy;
+        return L"engUS";
     }
     if (!sapps)
         sapps = SteamAPI_SteamApps_v008();
@@ -62,7 +61,7 @@ const std::wstring &getGameLanguage() {
     else {
         gameLanguage = L"engUS";
     }
-    return gameLanguage;
+    return gameLanguage.c_str();
 }
 
 bool isDLCInstalled(unsigned int dlc) {

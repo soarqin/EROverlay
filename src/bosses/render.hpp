@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../renderbase.hpp"
-
 #include <fmt/args.h>
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -20,12 +18,13 @@ struct IntProxy {
     }
 };
 
-class Render : public RenderBase {
+class Renderer {
 public:
-    void init() override;
-    void render(bool &showFull) override;
+    void init(void *context, void *allocFunc, void *freeFunc, void *userData);
+    bool render();
 
 private:
+    bool showFull_ = false;
     bool allowRevive_ = false;
     int lastRegionIndex_ = -1;
     int popupBossIndex_ = -1;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Pattern16.h>
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -9,7 +7,8 @@
 #include <vector>
 #include <cstdint>
 
-namespace er {
+namespace er::util {
+
 class MemoryHandle {
 public:
     /**
@@ -196,24 +195,4 @@ private:
     }
 };
 
-class Signature {
-public:
-    /**
-     * \brief Constructs the signature with an IDA pattern
-     * \param pattern The IDA pattern string
-     */
-    explicit Signature(const char *pattern) : pattern_(pattern) {
-    }
-
-    /**
-     * \brief Scans for the pattern in a memory region
-     * \param region The region to search in, default is the main module
-     * \return MemoryHandle
-     */
-    MemoryHandle scan(MemoryRegion region = Module(nullptr)) {
-        return Pattern16::scan(region.base().as<void *>(), region.size(), pattern_);
-    }
-private:
-    const char *pattern_;
-};
 }

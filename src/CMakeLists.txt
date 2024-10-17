@@ -14,35 +14,41 @@ add_library(${PROJECT_NAME} SHARED
     d3drenderer.cpp d3drenderer.hpp
     hooking.cpp hooking.hpp
     global.cpp global.hpp
-    renderbase.hpp
 
-    # SteamAPI usage
-    steamapi.cpp steamapi.hpp
+    # plugins
+    api.cpp api.hpp
+    plugin.cpp plugin.hpp
 
     # Embedded font
     embeddedfont.cpp
 
     # util
     util/file.cpp util/file.hpp
+    util/memory.hpp util/signature.hpp
     util/sysfont.cpp util/sysfont.hpp
-    util/string.cpp util/string.hpp
+    util/string.hpp
     util/vector.hpp
 
-    # Bosses panel
-    bosses/data.cpp bosses/data.hpp
-    bosses/render.cpp bosses/render.hpp
+    util/steamapi.cpp util/steamapi.hpp
 )
-target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
-if(NOT MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mlzcnt -mbmi -mbmi2)
+
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS PRIVATE EROVERLAY_EXPORTS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE dl)
 endif()
-target_link_libraries(${PROJECT_NAME} Pattern16 inih minhook imgui_dx12_backend nlohmann_json::nlohmann_json fmt::fmt d3dcompiler dwmapi shlwapi version)
 if(NOT MSVC)
-    target_link_libraries(${PROJECT_NAME} Microsoft::DirectXMath)
+    target_compile_options(${PROJECT_NAME} PUBLIC -mavx2 -mlzcnt -mbmi -mbmi2)
+endif()
+target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_link_libraries(${PROJECT_NAME} PUBLIC Pattern16 imgui nlohmann_json::nlohmann_json inih fmt::fmt PRIVATE imgui_dx12_backend minhook d3dcompiler dwmapi shlwapi version)
+if(NOT MSVC)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES
     PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/$<0:>"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<0:>"
     ARCHIVE_OUTPUT_NAME "EROverlay"
     RUNTIME_OUTPUT_NAME "EROverlay")
+
+add_subdirectory(bosses)

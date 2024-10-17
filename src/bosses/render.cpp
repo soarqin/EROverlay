@@ -1,13 +1,15 @@
 #include "render.hpp"
 #include "data.hpp"
 
-#include "../config.hpp"
-#include "../util/string.hpp"
+#include "api.hpp"
+#include "util/string.hpp"
 
 #include <imgui.h>
 
 #include <sstream>
 #include <algorithm>
+
+extern "C" er::EROverlayAPI *api;
 
 namespace fmt {
     template <> struct formatter<er::bosses::IntProxy>: formatter<string_view> {
@@ -39,9 +41,11 @@ inline static std::vector<float> split(const std::string &s) {
     return elems;
 }
 
-void Render::init() {
-    killText_ = gConfig["boss.boss_kill_text"];
-    challengeText_ = gConfig["boss.challenge_status_text"];
+void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
+    ImGui::SetCurrentContext((ImGuiContext*)context);
+    ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
+    killText_ = api->configGet("boss.boss_kill_text");
+    challengeText_ = api->configGet("boss.challenge_status_text");
     const std::string from = "$n";
     const std::string to = "\n";
     const std::string from2 = "{igt}";
@@ -56,8 +60,8 @@ void Render::init() {
     util::replaceAll(challengeText_, from2, to2);
     util::replaceAll(killTextHour_, from3, to3);
     util::replaceAll(challengeTextHour_, from3, to3);
-    allowRevive_ = gConfig.enabled("boss.allow_revive");
-    const auto &pos = gConfig["boss.panel_pos"];
+    allowRevive_ = api->configEnabled("boss.allow_revive");
+    const auto &pos = api->configGet("boss.panel_pos");
     auto posVec = split(pos);
     if (posVec.size() >= 4) {
         posX_ = posVec[0];
@@ -87,7 +91,7 @@ inline static float calculatePos(float w, float n) {
     return w + w * n;
 }
 
-void Render::render(bool &showFull) {
+bool Renderer::render() {
     auto *vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
                             ImGuiCond_Always,
@@ -106,7 +110,7 @@ void Render::render(bool &showFull) {
     }
     auto igt = gBossDataSet.readInGameTime();
     igt_ = std::chrono::milliseconds(igt);
-    if (!showFull) {
+    if (!showFull_) {
         ImGui::Begin("##bosses_window",
                      nullptr,
                      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
@@ -122,7 +126,7 @@ void Render::render(bool &showFull) {
         }
         ImGui::SameLine();
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {
-            showFull = true;
+            showFull_ = true;
         }
     } else {
         ImGui::SetNextWindowSize(ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))), ImGuiCond_Always);
@@ -147,7 +151,7 @@ void Render::render(bool &showFull) {
         ImGui::SameLine(
             ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Up)) {
-            showFull = false;
+            showFull_ = false;
         }
         ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail());
         const auto &bosses = gBossDataSet.bosses();
@@ -204,6 +208,7 @@ void Render::render(bool &showFull) {
         }
     }
     ImGui::End();
+    return showFull_;
 }
 
 }

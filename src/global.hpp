@@ -12,4 +12,5 @@ extern wchar_t gModulePath[MAX_PATH];
 extern std::atomic_bool gRunning;
 extern bool gShowMenu;
 extern uint64_t gGameVersion;
+extern bool gIsDLC01Installed;
 }

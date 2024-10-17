@@ -1,16 +1,14 @@
 #include "data.hpp"
 
-#include "../hooking.hpp"
-#include "../memory.hpp"
-#include "../global.hpp"
-#include "../config.hpp"
-#include "../steamapi.hpp"
+#include "api.hpp"
+#include "util/signature.hpp"
 
 #include <nlohmann/json.hpp>
 #include <ini.h>
 
 #include <fstream>
-#include <cstdio>
+
+extern "C" er::EROverlayAPI *api;
 
 namespace er::bosses {
 
@@ -20,17 +18,17 @@ static std::vector<int> deadByRegionSwapTmp;
 
 void BossDataSet::load(bool hasDLC) {
     nlohmann::ordered_json j;
-    std::wstring name = er::gConfig.getw("boss.data_file", L"bosses.json");
-    std::wstring lang = er::gConfig.getw("common.language", L"");
+    std::wstring name = api->configGetString("boss.data_file", L"bosses.json");
+    std::wstring lang = api->configGetString("common.language", L"");
     if (lang.empty()) {
-        lang = getGameLanguage();
+        lang = api->getGameLanguage();
     }
-    std::wstring filename = std::wstring(er::gModulePath) + L"\\data\\" + lang + L"\\" + name;
+    std::wstring filename = std::wstring(api->getModulePath()) + L"\\data\\" + lang + L"\\" + name;
     std::ifstream ifs(filename.c_str());
     if (!ifs) {
         /* fallback to use english */
         lang = L"engUS";
-        filename = std::wstring(er::gModulePath) + L"\\data\\" + lang + L"\\" + name;
+        filename = std::wstring(api->getModulePath()) + L"\\data\\" + lang + L"\\" + name;
         ifs.open(filename.c_str());
         if (!ifs) {
             fwprintf(stderr, L"Unable to open %ls\n", filename.c_str());
@@ -64,14 +62,14 @@ void BossDataSet::load(bool hasDLC) {
     deadSwapTmp.resize(bosses_.size());
     deadByRegionSwapTmp.resize(regions_.size());
 
-    challengeMode_ = gConfig.enabled("boss.challenge_mode");
+    challengeMode_ = api->configEnabled("boss.challenge_mode");
     if (!challengeMode_) return;
-    challengeDeathCount_ = gConfig.get("boss.challenge_death_count", 0);
+    challengeDeathCount_ = api->configGetInt("boss.challenge_death_count", 0);
 }
 
 void BossDataSet::loadConfig() {
     if (!challengeMode_) return;
-    auto filename = std::wstring(::er::gModulePath) + L"\\Challenge.txt";
+    auto filename = std::wstring(api->getModulePath()) + L"\\Challenge.txt";
     auto *f = _wfopen(filename.c_str(), L"rt");
     if (f == nullptr) {
         return;
@@ -91,11 +89,11 @@ void BossDataSet::loadConfig() {
         return 1;
     }, this);
     fclose(f);
-    changeEvent_ = FindFirstChangeNotificationW(::er::gModulePath, FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE);
+    changeEvent_ = FindFirstChangeNotificationW(api->getModulePath(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE);
 }
 
 void BossDataSet::saveConfig() const {
-    auto filename = std::wstring(::er::gModulePath) + L"\\Challenge.txt";
+    auto filename = std::wstring(api->getModulePath()) + L"\\Challenge.txt";
     auto *f = _wfopen(filename.c_str(), L"wt");
     if (f == nullptr) {
         fprintf(stderr, "Unable to open %ls for writing\n", filename.c_str());
@@ -114,7 +112,7 @@ void BossDataSet::saveConfig() const {
 
 void BossDataSet::initMemoryAddresses() {
     {
-        Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
+        util::Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
         auto res = sig.scan();
         if (res) {
             auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
@@ -122,7 +120,7 @@ void BossDataSet::initMemoryAddresses() {
         }
     }
     {
-        Signature sig("48 8B 3D ?? ?? ?? ?? 48 85 FF ?? ?? 32 C0 E9");
+        util::Signature sig("48 8B 3D ?? ?? ?? ?? 48 85 FF ?? ?? 32 C0 E9");
         auto res = sig.scan();
         if (res) {
             auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
@@ -130,7 +128,7 @@ void BossDataSet::initMemoryAddresses() {
         }
     }
     {
-        Signature sig("48 8B 0D ?? ?? ?? ?? 48 ?? ?? ?? 44 0F B6 61 ?? E8 ?? ?? ?? ?? 48 63 87 ?? ?? ?? ?? 48 ?? ?? ?? 48 85 C0");
+        util::Signature sig("48 8B 0D ?? ?? ?? ?? 48 ?? ?? ?? 44 0F B6 61 ?? E8 ?? ?? ?? ?? 48 63 87 ?? ?? ?? ?? 48 ?? ?? ?? 48 85 C0");
         auto res = sig.scan();
         if (res) {
             auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
@@ -141,7 +139,7 @@ void BossDataSet::initMemoryAddresses() {
 
 void BossDataSet::update() {
     checkForConfigChange();
-    if (er::gHooking->screenState() != 0) {
+    if (api->screenState() != 0) {
         return;
     }
     auto igt = readInGameTime();
@@ -160,7 +158,7 @@ void BossDataSet::revive(int index) {
 }
 
 void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits) const {
-    auto addr = MemoryHandle(eventFlagMan_).as<uintptr_t &>();
+    auto addr = util::MemoryHandle(eventFlagMan_).as<uintptr_t &>();
     if (addr == 0) {
         return;
     }
@@ -170,14 +168,14 @@ void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits)
     }
     auto category = flagId / divisor;
     auto least_significant_digits = flagId - category * divisor;
-    auto current_element = MemoryHandle(addr + 0x38).as<uintptr_t &>();
-    auto current_sub_element = MemoryHandle(current_element + 0x08).as<uintptr_t &>();
+    auto current_element = util::MemoryHandle(addr + 0x38).as<uintptr_t &>();
+    auto current_sub_element = util::MemoryHandle(current_element + 0x08).as<uintptr_t &>();
     while (*(uint8_t *)(current_sub_element + 0x19) == 0) {
         if (*(uint32_t *)(current_sub_element + 0x20) < category)
-            current_sub_element = MemoryHandle(current_sub_element + 0x10).as<uintptr_t &>();
+            current_sub_element = util::MemoryHandle(current_sub_element + 0x10).as<uintptr_t &>();
         else {
             current_element = current_sub_element;
-            current_sub_element = MemoryHandle(current_sub_element).as<uintptr_t &>();
+            current_sub_element = util::MemoryHandle(current_sub_element).as<uintptr_t &>();
         }
     }
     if (current_element == current_sub_element) {
@@ -189,7 +187,7 @@ void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits)
     uintptr_t calculated_pointer = 0;
     if (mystery_value != 0) {
         if (mystery_value != 1)
-            calculated_pointer = MemoryHandle(current_element + 0x30).as<uintptr_t &>();
+            calculated_pointer = util::MemoryHandle(current_element + 0x30).as<uintptr_t &>();
         else {
             offset = 0;
             bits = 0;
@@ -213,11 +211,11 @@ void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits)
 void BossDataSet::updateBosses() {
     if (!flagResolved_) {
         if (flagAddress_ == 0) {
-            auto addr1 = MemoryHandle(eventFlagMan_).as<uintptr_t &>();
+            auto addr1 = util::MemoryHandle(eventFlagMan_).as<uintptr_t &>();
             if (addr1 == 0) {
                 return;
             }
-            auto addr2 = MemoryHandle(addr1 + 0x28).as<uintptr_t &>();
+            auto addr2 = util::MemoryHandle(addr1 + 0x28).as<uintptr_t &>();
             if (addr2 == 0) {
                 return;
             }
@@ -262,7 +260,7 @@ void BossDataSet::updateBosses() {
     if (addr1 == 0) {
         return;
     }
-    auto mapId = *(uint32_t *)(addr1 + (er::gGameVersion < 0x0002000200000000ULL ? 0xE4 : 0xE8));
+    auto mapId = *(uint32_t *)(addr1 + (api->getGameVersion() < 0x0002000200000000ULL ? 0xE4 : 0xE8));
     if (mapId == 0 || mapId == mapId_) return;
     mapId_ = mapId;
     auto ite = regionMap_.find(mapId / 1000);
@@ -311,19 +309,19 @@ void BossDataSet::checkForConfigChange() {
 }
 
 int BossDataSet::readInGameTime() const {
-    auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
+    auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return -1;
     }
-    return MemoryHandle(addr + 0xA0).as<int&>();
+    return util::MemoryHandle(addr + 0xA0).as<int&>();
 }
 
 int BossDataSet::readDeathCount() const {
-    auto addr = MemoryHandle(gameDataMan_).as<uintptr_t &>();
+    auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return 0;
     }
-    return MemoryHandle(addr + 0x94).as<int&>();
+    return util::MemoryHandle(addr + 0x94).as<int&>();
 }
 
 }

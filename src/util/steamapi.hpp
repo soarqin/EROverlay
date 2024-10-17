@@ -2,10 +2,10 @@
 
 #include <string>
 
-namespace er {
+namespace er::steamapi {
 
-bool initSteamAPI();
-const std::wstring &getGameLanguage();
+bool init();
+const wchar_t *getGameLanguage();
 bool isDLCInstalled(unsigned int dlc);
 
 }

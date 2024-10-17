@@ -1,7 +1,6 @@
 #pragma once
 
 #include "imgui.h"
-#include "renderbase.hpp"
 #include "util/vector.hpp"
 
 #define WIN32_LEAN_AND_MEAN
@@ -52,12 +51,6 @@ public:
     static bool WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight);
 */
 
-    template<typename T>
-    std::enable_if_t<std::is_base_of_v<RenderBase, T>, void> registerWindow() {
-        auto *val = new T();
-        val->init();
-        windows_.emplace_back(std::unique_ptr<RenderBase>(val));
-    }
     void loadFont();
     static void initStyle();
 
@@ -164,7 +157,6 @@ private:
 /*
     FrameContext *frameContext_ = nullptr;
 */
-    std::vector<std::unique_ptr<RenderBase>> windows_;
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
 };

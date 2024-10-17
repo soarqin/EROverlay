@@ -25,5 +25,6 @@ private:
     uintptr_t csMenuManImp_ = 0;
 };
 
-inline std::unique_ptr<Hooking> gHooking;
+extern std::unique_ptr<Hooking> gHooking;
+
 }

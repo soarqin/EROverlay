@@ -1,14 +1,11 @@
-#include "d3drenderer.hpp"
-#include "hooking.hpp"
-#include "global.hpp"
 #include "config.hpp"
-#include "steamapi.hpp"
-
-#include "bosses/data.hpp"
-#include "bosses/render.hpp"
+#include "d3drenderer.hpp"
+#include "global.hpp"
+#include "hooking.hpp"
+#include "plugin.hpp"
+#include "util/steamapi.hpp"
 
 #include <thread>
-#include <chrono>
 #include <shlwapi.h>
 
 using namespace std::chrono_literals;
@@ -77,12 +74,11 @@ void init() {
     }
 
     std::this_thread::sleep_for(1000ms);
-    er::initSteamAPI();
-    bool dlcInstalled = er::isDLCInstalled(2778580) || er::isDLCInstalled(2778590);
-    fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", dlcInstalled ? L"installed" : L"not installed");
-    er::bosses::gBossDataSet.load(dlcInstalled);
-    er::bosses::gBossDataSet.loadConfig();
-    er::bosses::gBossDataSet.initMemoryAddresses();
+    er::steamapi::init();
+    er::gIsDLC01Installed = er::steamapi::isDLCInstalled(2778580) || er::steamapi::isDLCInstalled(2778590);
+    fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
+    er::pluginsInit();
+    er::pluginsOnLoad();
 
     er::gHooking = std::make_unique<er::Hooking>();
     //  WAIT FOR USER INPUT
@@ -96,13 +92,17 @@ void init() {
     }
 
     er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
-    er::gD3DRenderer->registerWindow<er::bosses::Render>();
+    er::Hooking::hook();
 
-    er::gHooking->hook();
+    ImGuiMemAllocFunc allocFunc;
+    ImGuiMemFreeFunc freeFunc;
+    void *userData;
+    ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &userData);
+    er::pluginsLoadRenderers(ImGui::GetCurrentContext(), (void*)allocFunc, (void*)freeFunc, userData);
 
     mainThread();
 
-    er::gHooking->unhook();
+    er::Hooking::unhook();
     std::this_thread::sleep_for(500ms);
     if (enableConsole) {
         FreeConsole();
@@ -115,8 +115,8 @@ void mainThread() {
     auto toggleFullKey = er::gConfig.getVirtualKey("input.toggle_full_mode", {VK_OEM_PLUS});
 
     er::gShowMenu = false;
-    int counter = 0x1F;
-    er::bosses::gBossDataSet.update();
+
+    er::pluginsUpdate();
     while (er::gRunning) {
         if (er::gD3DRenderer->isForeground()) {
             if (!toggleFullKey.empty()) {
@@ -144,9 +144,6 @@ void mainThread() {
         std::this_thread::yield();
         std::this_thread::sleep_for(20ms);
 
-        counter = (counter + 1) & 0x1F;
-        if (counter == 0) {
-            er::bosses::gBossDataSet.update();
-        }
+        er::pluginsUpdate();
     }
 }
