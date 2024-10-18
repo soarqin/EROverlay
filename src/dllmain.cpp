@@ -75,9 +75,10 @@ void init() {
     std::this_thread::sleep_for(1000ms);
     er::gIsDLC01Installed = er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
+    er::gHooking = std::make_unique<er::Hooking>();
+
     er::pluginsInit();
 
-    er::gHooking = std::make_unique<er::Hooking>();
     /* wait for menu loaded */
     while (!er::gHooking->menuLoaded()) {
         std::this_thread::sleep_for(100ms);
@@ -123,7 +124,7 @@ void mainThread() {
                         goto noToggleFull;
                     }
                 }
-                er::gShowMenu = !er::gShowMenu;
+                er::pluginsToggleFullMode();
             }
             noToggleFull:
             if (!unloadKey.empty()) {

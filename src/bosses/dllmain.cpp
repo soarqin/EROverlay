@@ -1,17 +1,17 @@
 #include "render.hpp"
 #include "data.hpp"
 
-#include "api/api.h"
+#include "api.h"
 
 EROverlayAPI *api;
 
-const wchar_t *init() {
+int init() {
     api = getEROverlayAPI();
 
     er::bosses::gBossDataSet.load(api->isDLC01Installed());
     er::bosses::gBossDataSet.loadConfig();
     er::bosses::gBossDataSet.initMemoryAddresses();
-    return L"Bosses";
+    return 0;
 }
 
 void update() {
@@ -41,13 +41,18 @@ void uninit() {
     destroyRenderer();
 }
 
+void toggleFullMode() {
+    renderer->toggleFullMode();
+}
+
 static PluginExports exports = {
     init,
     uninit,
     update,
     createRenderer,
     destroyRenderer,
-    render
+    render,
+    toggleFullMode
 };
 
 PLUGIN_DEFINE() {

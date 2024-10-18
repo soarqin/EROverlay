@@ -5,6 +5,7 @@
 
 namespace er {
 class Hooking {
+    friend class EROverlayAPIWrapper;
 public:
     explicit Hooking();
     ~Hooking() noexcept;
@@ -17,12 +18,15 @@ public:
     static void unhook();
     void findHooks();
 
-    void showMouseCursor(bool show);
-    [[nodiscard]] bool menuLoaded();
-    [[nodiscard]] int screenState();
+    void showMouseCursor(bool show) const;
+    [[nodiscard]] bool menuLoaded() const;
+    [[nodiscard]] int screenState() const;
 
 private:
     uintptr_t csMenuManImp_ = 0;
+    uintptr_t gameDataMan_ = 0;
+    uintptr_t eventFlagMan_ = 0;
+    uintptr_t fieldArea_ = 0;
 };
 
 extern std::unique_ptr<Hooking> gHooking;

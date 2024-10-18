@@ -655,7 +655,7 @@ class json_pointer
     }
 
     /*!
-    @brief split the string input to reference tokens
+    @brief strSplitToFloatVec the string input to reference tokens
 
     @note This function is only called by the json_pointer constructor.
           All exceptions below are documented there.

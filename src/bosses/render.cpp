@@ -2,13 +2,10 @@
 
 #include "data.hpp"
 
-#include "api/api.h"
+#include "api.h"
 #include "util/string.hpp"
 
 #include <imgui.h>
-
-#include <sstream>
-#include <algorithm>
 
 extern EROverlayAPI *api;
 
@@ -22,26 +19,6 @@ struct formatter<er::bosses::IntProxy> : formatter<string_view> {
 }
 
 namespace er::bosses {
-
-inline static std::vector<float> split(const std::string &s) {
-    std::vector<float> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, ',')) {
-        if (item.empty()) {
-            elems.push_back(0);
-            continue;
-        }
-        if (item.back() == '%') {
-            item.pop_back();
-            auto val = std::stof(item);
-            elems.push_back(std::clamp(val / 100.f, -0.999999f, 0.999999f));
-            continue;
-        }
-        elems.push_back(std::stof(item));
-    }
-    return elems;
-}
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
@@ -64,7 +41,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     util::replaceAll(challengeTextHour_, from3, to3);
     allowRevive_ = api->configEnabled("boss.allow_revive");
     const auto &pos = api->configGet("boss.panel_pos");
-    auto posVec = split(pos);
+    auto posVec = util::strSplitToFloatVec(pos);
     if (posVec.size() >= 4) {
         posX_ = posVec[0];
         posY_ = posVec[1];
@@ -94,11 +71,6 @@ inline static float calculatePos(float w, float n) {
 }
 
 bool Renderer::render() {
-    auto *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
-                            ImGuiCond_Always,
-                            ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
-
     auto challengeMode = gBossDataSet.challengeMode();
     {
         std::unique_lock lock(gBossDataSet.mutex());
@@ -112,11 +84,13 @@ bool Renderer::render() {
     }
     auto igt = gBossDataSet.readInGameTime();
     igt_ = std::chrono::milliseconds(igt);
+
+    auto *vp = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
+                            ImGuiCond_Always,
+                            ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
     if (!showFull_) {
-        ImGui::Begin("##bosses_window",
-                     nullptr,
-                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-                     | ImGuiWindowFlags_AlwaysAutoResize);
+        if (ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize))
         {
             if (challengeMode) {
                 auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
@@ -125,93 +99,97 @@ bool Renderer::render() {
                 auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
                 ImGui::TextUnformatted(text.c_str());
             }
-        }
-        ImGui::SameLine();
-        if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {
-            showFull_ = true;
+            ImGui::SameLine();
+            if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {
+                showFull_ = true;
+            }
         }
     } else {
         ImGui::SetNextWindowSize(ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))), ImGuiCond_Always);
-        ImGui::Begin("##bosses_window",
-                     nullptr,
-                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-        std::unique_lock lock(gBossDataSet.mutex());
-        auto regionIndex = gBossDataSet.regionIndex();
-        if (regionIndex != lastRegionIndex_) {
-            lastRegionIndex_ = regionIndex;
-        } else {
-            regionIndex = -1;
-        }
-        if (gBossDataSet.challengeMode()) {
-            auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
-            ImGui::TextUnformatted(text.c_str());
-        } else {
-            auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
-            ImGui::TextUnformatted(text.c_str());
-        }
-        auto &style = ImGui::GetStyle();
-        ImGui::SameLine(
-            ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
-        if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Up)) {
-            showFull_ = false;
-        }
-        ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail());
-        const auto &bosses = gBossDataSet.bosses();
-        const auto &regions = gBossDataSet.regions();
-        const auto &regionCounts = gBossDataSet.regionCounts();
-        const auto &dead = gBossDataSet.dead();
-        int sz = (int)regions.size();
-        bool popup = false;
-        for (int i = 0; i < sz; i++) {
-            const auto &region = regions[i];
-            auto bossCount = (int)region.bosses.size();
-            if (regionIndex >= 0) {
-                ImGui::SetNextItemOpen(i == regionIndex);
+        if (ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+            std::unique_lock lock(gBossDataSet.mutex());
+            auto regionIndex = gBossDataSet.regionIndex();
+            if (regionIndex != lastRegionIndex_) {
+                lastRegionIndex_ = regionIndex;
+            } else {
+                regionIndex = -1;
             }
-            if (ImGui::TreeNode(&region, "%d/%d %s", regionCounts[i], bossCount, region.name.c_str())) {
-                for (int j = 0; j < bossCount; j++) {
-                    auto &bd = bosses[region.bosses[j]];
-                    bool on = dead[bd.index];
-                    if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && dead[bd.index] && allowRevive_) {
-                        popupBossIndex_ = (int)bd.index;
-                        popup = true;
+            if (gBossDataSet.challengeMode()) {
+                auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
+                ImGui::TextUnformatted(text.c_str());
+            } else {
+                auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
+                ImGui::TextUnformatted(text.c_str());
+            }
+            auto &style = ImGui::GetStyle();
+            ImGui::SameLine(
+                ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
+            if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Up)) {
+                showFull_ = false;
+            }
+            const auto &bosses = gBossDataSet.bosses();
+            bool popup = false;
+            if (ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail())) {
+                const auto &regions = gBossDataSet.regions();
+                const auto &regionCounts = gBossDataSet.regionCounts();
+                const auto &dead = gBossDataSet.dead();
+                int sz = (int)regions.size();
+                for (int i = 0; i < sz; i++) {
+                    const auto &region = regions[i];
+                    auto bossCount = (int)region.bosses.size();
+                    if (regionIndex >= 0) {
+                        ImGui::SetNextItemOpen(i == regionIndex);
                     }
-                    if (ImGui::IsItemHovered() && !bd.tip.empty()) {
-                        ImGui::SetTooltip("%s", bd.tip.c_str());
+                    if (ImGui::TreeNode(&region, "%d/%d %s", regionCounts[i], bossCount, region.name.c_str())) {
+                        for (int j = 0; j < bossCount; j++) {
+                            auto &bd = bosses[region.bosses[j]];
+                            bool on = dead[bd.index];
+                            if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && dead[bd.index] && allowRevive_) {
+                                popupBossIndex_ = (int)bd.index;
+                                popup = true;
+                            }
+                            if (ImGui::IsItemHovered() && !bd.tip.empty()) {
+                                ImGui::SetTooltip("%s", bd.tip.c_str());
+                            }
+                        }
+                        ImGui::TreePop();
                     }
                 }
-                ImGui::TreePop();
             }
-        }
-        ImGui::EndChild();
-        if (allowRevive_) {
-            if (popup) {
-                ImGui::OpenPopup("##bosses_revive_confirm");
-                ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f),
-                                        ImGuiCond_Appearing,
-                                        ImVec2(.5f, .5f));
-            }
-            if (ImGui::BeginPopupModal("##bosses_revive_confirm",
-                                       nullptr,
-                                       ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-                                       | ImGuiWindowFlags_AlwaysAutoResize)) {
-                ImGui::Text("Revive %s?", bosses[popupBossIndex_].boss.c_str());
-                if (ImGui::Button("Yes!")) {
-                    gBossDataSet.revive(popupBossIndex_);
-                    ImGui::CloseCurrentPopup();
-                    popupBossIndex_ = -1;
+            ImGui::EndChild();
+            if (allowRevive_) {
+                if (popup) {
+                    ImGui::OpenPopup("##bosses_revive_confirm");
+                    ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f),
+                                            ImGuiCond_Appearing,
+                                            ImVec2(.5f, .5f));
                 }
-                ImGui::SameLine();
-                if (ImGui::Button("NO!")) {
-                    ImGui::CloseCurrentPopup();
-                    popupBossIndex_ = -1;
+                if (ImGui::BeginPopupModal("##bosses_revive_confirm",
+                                           nullptr,
+                                           ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
+                                           | ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::Text("Revive %s?", bosses[popupBossIndex_].boss.c_str());
+                    if (ImGui::Button("Yes!")) {
+                        gBossDataSet.revive(popupBossIndex_);
+                        ImGui::CloseCurrentPopup();
+                        popupBossIndex_ = -1;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("NO!")) {
+                        ImGui::CloseCurrentPopup();
+                        popupBossIndex_ = -1;
+                    }
+                    ImGui::EndPopup();
                 }
-                ImGui::EndPopup();
             }
         }
     }
     ImGui::End();
     return showFull_;
+}
+
+void Renderer::toggleFullMode() {
+    showFull_ = !showFull_;
 }
 
 }

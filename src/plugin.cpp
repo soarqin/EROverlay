@@ -1,7 +1,7 @@
 #include "plugin.hpp"
 
 #include "global.hpp"
-#include "api/api.h"
+#include "api.h"
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
@@ -9,7 +9,7 @@
 
 namespace er {
 
-static std::vector<std::pair<const wchar_t *, PluginExports&>> plugins;
+static std::vector<std::pair<int, PluginExports&>> plugins;
 
 void pluginsInit() {
     plugins.clear();
@@ -27,9 +27,9 @@ void pluginsInit() {
                     continue;
                 }
                 auto *exports = getExports();
-                const auto *name = exports->init();
-                plugins.emplace_back(name, *exports);
-                fmt::print(L" successful. ({})\n", name);
+                auto ver = exports->init();
+                plugins.emplace_back(ver, *exports);
+                fmt::print(" successful. (API Version {})\n", ver);
             } else {
                 fmt::print(" unabled to load.\n");
             }
@@ -68,6 +68,12 @@ bool pluginsRender() {
         showCursor = showCursor || pl.second.render();
     }
     return showCursor;
+}
+
+void pluginsToggleFullMode() {
+    for (const auto &pl: plugins) {
+        if (pl.second.toggleFullMode) pl.second.toggleFullMode();
+    }
 }
 
 }

@@ -1,21 +1,22 @@
 #include "data.hpp"
 #include "render.hpp"
 
-#include "api/api.h"
+#include "api.h"
 
 EROverlayAPI *api;
 
-const wchar_t *init() {
+int init() {
     api = getEROverlayAPI();
 
     er::achievements::gData.load();
 
-    return L"Achievements";
+    return 0;
 }
 
 void update() {
     static int counter = 0;
-    if ((counter++ & 0x1F) == 0) {
+    if ((counter++ & 0x3F) == 0) {
+        /* do check on each 64 frames */
         er::achievements::gData.update();
     }
 }

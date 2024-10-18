@@ -1,7 +1,7 @@
 #include "data.hpp"
 
-#include "api/api.h"
-#include "util/signature.hpp"
+#include "api.h"
+#include "util/memory.hpp"
 
 #include <nlohmann/json.hpp>
 #include <ini.h>
@@ -113,30 +113,10 @@ void BossDataSet::saveConfig() const {
 }
 
 void BossDataSet::initMemoryAddresses() {
-    {
-        util::Signature sig("48 8B 05 ?? ?? ?? ?? 48 85 C0 74 05 48 8B 40 58 C3 C3");
-        auto res = sig.scan();
-        if (res) {
-            auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
-            gameDataMan_ = addr.as<uintptr_t>();
-        }
-    }
-    {
-        util::Signature sig("48 8B 3D ?? ?? ?? ?? 48 85 FF ?? ?? 32 C0 E9");
-        auto res = sig.scan();
-        if (res) {
-            auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
-            eventFlagMan_ = addr.as<uintptr_t>();
-        }
-    }
-    {
-        util::Signature sig("48 8B 0D ?? ?? ?? ?? 48 ?? ?? ?? 44 0F B6 61 ?? E8 ?? ?? ?? ?? 48 63 87 ?? ?? ?? ?? 48 ?? ?? ?? 48 85 C0");
-        auto res = sig.scan();
-        if (res) {
-            auto addr = res.add(res.add(3).as<std::uint32_t &>() + 7);
-            fieldArea_ = addr.as<uintptr_t>();
-        }
-    }
+    auto addr = api->getGameAddresses();
+    gameDataMan_ = addr.gameDataMan;
+    eventFlagMan_ = addr.eventFlagMan;
+    fieldArea_ = addr.fieldArea;
 }
 
 void BossDataSet::update() {
@@ -152,86 +132,20 @@ void BossDataSet::update() {
 }
 
 void BossDataSet::revive(int index) {
-    if (flagAddress_ == 0) {
+    if (!flagResolved_) {
         return;
     }
     auto &b = bosses_[index];
     *(uint8_t *)(b.offset) &= ~b.bits;
 }
 
-void BossDataSet::resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits) const {
-    auto addr = util::MemoryHandle(eventFlagMan_).as<uintptr_t &>();
-    if (addr == 0) {
-        return;
-    }
-    auto divisor = *(uint32_t *)(addr + 0x1C);
-    if (divisor == 0) {
-        return;
-    }
-    auto category = flagId / divisor;
-    auto least_significant_digits = flagId - category * divisor;
-    auto current_element = util::MemoryHandle(addr + 0x38).as<uintptr_t &>();
-    auto current_sub_element = util::MemoryHandle(current_element + 0x08).as<uintptr_t &>();
-    while (*(uint8_t *)(current_sub_element + 0x19) == 0) {
-        if (*(uint32_t *)(current_sub_element + 0x20) < category)
-            current_sub_element = util::MemoryHandle(current_sub_element + 0x10).as<uintptr_t &>();
-        else {
-            current_element = current_sub_element;
-            current_sub_element = util::MemoryHandle(current_sub_element).as<uintptr_t &>();
-        }
-    }
-    if (current_element == current_sub_element) {
-        offset = 0;
-        bits = 0;
-        return;
-    }
-    auto mystery_value = *(uint32_t *)(current_element + 0x28) - 1;
-    uintptr_t calculated_pointer = 0;
-    if (mystery_value != 0) {
-        if (mystery_value != 1)
-            calculated_pointer = util::MemoryHandle(current_element + 0x30).as<uintptr_t &>();
-        else {
-            offset = 0;
-            bits = 0;
-            return;
-        }
-    } else {
-        calculated_pointer = (*(uint32_t *)(addr + 0x20)) * (*(uint32_t *)(current_element + 0x30)) + flagAddress_;
-    }
-
-    if (calculated_pointer == 0) {
-        offset = 0;
-        bits = 0;
-        return;
-    }
-    auto thing = 7 - (least_significant_digits & 7);
-    auto shifted = least_significant_digits >> 3;
-    offset = calculated_pointer + shifted;
-    bits = 1 << thing;
-}
-
 void BossDataSet::updateBosses() {
     if (!flagResolved_) {
-        if (flagAddress_ == 0) {
-            auto addr1 = util::MemoryHandle(eventFlagMan_).as<uintptr_t &>();
-            if (addr1 == 0) {
-                return;
-            }
-            auto addr2 = util::MemoryHandle(addr1 + 0x28).as<uintptr_t &>();
-            if (addr2 == 0) {
-                return;
-            }
-            flagAddress_ = addr2;
-        }
         for (auto &b: bosses_) {
-            resolveFlag(b.flagId, b.offset, b.bits);
-#if !defined(NDEBUG)
-            std::wstring ws;
-            ws.resize(MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, nullptr, 0));
-            MultiByteToWideChar(CP_UTF8, 0, b.boss.c_str(), -1, ws.data(), (int)ws.size());
-            while (!ws.empty() && ws.back() == 0) ws.pop_back();
-            fwprintf(stderr, L"%ls: %zX %X\n", ws.c_str(), b.offset - flagAddress_, b.bits);
-#endif
+            b.offset = api->resolveFlagAddress(b.flagId, &b.bits);
+            if (b.offset == 0) {
+                return;
+            }
         }
         flagResolved_ = true;
     }
@@ -273,7 +187,7 @@ void BossDataSet::updateBosses() {
 void BossDataSet::updateChallengeMode() {
     if (reachStrandedGraveyardFlagOffset_ == 0) {
         // Flag 101: Reached Stranded Graveyard
-        resolveFlag(101, reachStrandedGraveyardFlagOffset_, reachStrandedGraveyardFlagBits_);
+        reachStrandedGraveyardFlagOffset_ = api->resolveFlagAddress(101, &reachStrandedGraveyardFlagBits_);
     }
     auto deathCount = readDeathCount();
     auto reached = (*(uint8_t *)reachStrandedGraveyardFlagOffset_ & reachStrandedGraveyardFlagBits_) != 0;

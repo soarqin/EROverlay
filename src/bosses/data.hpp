@@ -52,8 +52,6 @@ public:
     void update();
     void revive(int index);
 
-    void resolveFlag(uint32_t flagId, uintptr_t &offset, uint8_t &bits) const;
-
 private:
     void updateBosses();
     void updateChallengeMode();
@@ -70,7 +68,6 @@ private:
     int regionIndex_ = -1;
     uintptr_t gameDataMan_ = 0;
     uintptr_t eventFlagMan_ = 0;
-    uintptr_t flagAddress_ = 0;
     uintptr_t fieldArea_ = 0;
     bool flagResolved_ = false;
     std::vector<bool> dead_;

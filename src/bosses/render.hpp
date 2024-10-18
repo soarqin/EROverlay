@@ -22,6 +22,7 @@ class Renderer {
 public:
     void init(void *context, void *allocFunc, void *freeFunc, void *userData);
     bool render();
+    void toggleFullMode();
 
 private:
     bool showFull_ = false;

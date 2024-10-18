@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
 #include <string>
+#include <sstream>
 
 namespace er::util {
 
@@ -28,6 +30,26 @@ inline int replaceAll(T &str, const T &from, const T &to) {
         ++count;
     }
     return count;
+}
+
+inline std::vector<float> strSplitToFloatVec(const std::string &s) {
+    std::vector<float> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, ',')) {
+        if (item.empty()) {
+            elems.push_back(0);
+            continue;
+        }
+        if (item.back() == '%') {
+            item.pop_back();
+            auto val = std::stof(item);
+            elems.push_back(std::clamp(val / 100.f, -0.999999f, 0.999999f));
+            continue;
+        }
+        elems.push_back(std::stof(item));
+    }
+    return elems;
 }
 
 }

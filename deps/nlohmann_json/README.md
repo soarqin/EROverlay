@@ -1457,7 +1457,7 @@ I deeply appreciate the help of the following people.
 38. [duncanwerner](https://github.com/duncanwerner) found a really embarrassing performance regression in the 2.0.0 release.
 39. [Damien](https://github.com/dtoma) fixed one of the last conversion warnings.
 40. [Thomas Braun](https://github.com/t-b) fixed a warning in a test case and adjusted MSVC calls in the CI.
-41. [Théo DELRIEU](https://github.com/theodelrieu) patiently and constructively oversaw the long way toward [iterator-range parsing](https://github.com/nlohmann/json/issues/290). He also implemented the magic behind the serialization/deserialization of user-defined types and split the single header file into smaller chunks.
+41. [Théo DELRIEU](https://github.com/theodelrieu) patiently and constructively oversaw the long way toward [iterator-range parsing](https://github.com/nlohmann/json/issues/290). He also implemented the magic behind the serialization/deserialization of user-defined types and strSplitToFloatVec the single header file into smaller chunks.
 42. [Stefan](https://github.com/5tefan) fixed a minor issue in the documentation.
 43. [Vasil Dimov](https://github.com/vasild) fixed the documentation regarding conversions from `std::multiset`.
 44. [ChristophJud](https://github.com/ChristophJud) overworked the CMake files to ease project inclusion.

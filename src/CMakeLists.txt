@@ -22,8 +22,7 @@ add_library(${PROJECT_NAME} SHARED
     embeddedfont.cpp
 
     # Plugin API
-    api/api.cpp api/api.h
-    api/define.h
+    api.cpp api.h
 
     # util
     util/file.cpp util/file.hpp
@@ -40,7 +39,7 @@ if(NOT MSVC)
     target_compile_options(${PROJECT_NAME} PUBLIC -mavx2 -mlzcnt -mbmi -mbmi2)
 endif()
 target_include_directories(${PROJECT_NAME} PUBLIC .)
-target_link_libraries(${PROJECT_NAME} PUBLIC Pattern16 imgui fmt::fmt PRIVATE nlohmann_json::nlohmann_json inih steam_api64 imgui_dx12_backend minhook d3dcompiler dwmapi shlwapi version)
+target_link_libraries(${PROJECT_NAME} PUBLIC imgui fmt::fmt PRIVATE Pattern16 nlohmann_json::nlohmann_json inih steam_api64 imgui_dx12_backend minhook d3dcompiler dwmapi shlwapi version)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
