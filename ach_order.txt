@@ -1,0 +1,56 @@
+ach39 # Roundtable Hold
+
+ach25 # Margit, the Fell Omen
+ach04 # Shardbearer Godrick
+ach05 # Shardbearer Radahn
+ach26 # Red Wolf of Radagon
+ach18 # Rennala, Queen of the Full Moon
+ach40 # Great Rune
+ach29 # Godfrey, First Elden Lord
+ach06 # Shardbearer Morgott
+ach27 # Godskin Noble
+ach07 # Shardbearer Rykard
+ach21 # Fire Giant
+ach41 # Erdtree Aflame
+ach20 # Godskin Duo
+ach13 # God-Slaying Armament
+
+ach34 # Leonine Misbegotten
+
+ach35 # Royal Knight Loretta
+
+ach36 # Elemer of the Briar
+
+ach31 # Mimic Tear
+ach22 # Dragonkin Soldier of Nokstella
+ach37 # Ancestor Spirit
+ach23 # Regal Ancestor Spirit
+ach24 # Valiant Gargoyles
+ach16 # Legendary Sorceries and Incantations
+ach33 # Astel, Naturalborn of the Void
+ach19 # Lichdragon Fortissax
+
+ach10 # Maliketh the Black Blade
+ach11 # Hoarah Loux, Warrior
+
+ach12 # Dragonlord Placidusax
+
+ach38 # Commander Niall
+ach09 # Shardbearer Mohg
+ach14 # Legendary Armaments
+ach15 # Legendary Ashen Remains
+ach17 # Legendary Talismans
+ach32 # Loretta, Knight of the Haligtree
+ach08 # Shardbearer Malenia
+ach02 # Age of the Stars
+
+# NG+1
+ach28 # Magma Wyrm Makar
+ach30 # Mohg, the Omen
+ach03 # Lord of Frenzied Flame
+
+# NG+2
+ach01 # Elden Lord
+
+# We did it!
+ach00 # Elden Ring

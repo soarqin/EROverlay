@@ -11,9 +11,10 @@ public:
     bool render();
 
 private:
-    float posX_ = -0.0001f;
+    int maxAchievements_ = 0;
+    float posX_ = 0.0f;
     float posY_ = 0.05f;
-    float width_ = 0.1f;
+    float width_ = 0.0f;
     float height_ = 0.9f;
 };
 

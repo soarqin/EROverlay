@@ -12,9 +12,16 @@
 #include <immintrin.h>
 
 #ifdef PATTERN16_64BIT
+#if defined __GNUC__ || defined __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
 #include "x64/x64.h"
 #include "x64/SSE.h"
 #include "x64/AVX.h"
+#if defined __GNUC__ || defined __clang__
+#pragma GCC diagnostic pop
+#endif
 #else 
 #error 32-bit compilation is not currently supported by Pattern16
 #endif

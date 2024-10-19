@@ -8,6 +8,14 @@
 namespace er::util {
 
 template<typename T>
+inline void trimString(T &str) {
+    auto pos = str.find_last_not_of(" \f\n\r\t\v");
+    if (pos != T::npos) str.erase(pos + 1);
+    auto pos2 = str.find_first_not_of(" \f\n\r\t\v");
+    if (pos2 != T::npos) str.erase(0, pos2);
+}
+
+template<typename T>
 inline std::vector<T> splitString(const T &str, typename T::value_type c) {
     typename std::string::size_type pos = 0;
     std::vector<T> result;

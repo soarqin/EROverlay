@@ -90,7 +90,7 @@ bool Renderer::render() {
                             ImGuiCond_Always,
                             ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
     if (!showFull_) {
-        if (ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             if (challengeMode) {
                 auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
@@ -106,7 +106,7 @@ bool Renderer::render() {
         }
     } else {
         ImGui::SetNextWindowSize(ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))), ImGuiCond_Always);
-        if (ImGui::Begin("##bosses_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+        if (ImGui::Begin("##bosses_window", nullptr, (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoSavedSettings)) {
             std::unique_lock lock(gBossDataSet.mutex());
             auto regionIndex = gBossDataSet.regionIndex();
             if (regionIndex != lastRegionIndex_) {
@@ -164,10 +164,8 @@ bool Renderer::render() {
                                             ImGuiCond_Appearing,
                                             ImVec2(.5f, .5f));
                 }
-                if (ImGui::BeginPopupModal("##bosses_revive_confirm",
-                                           nullptr,
-                                           ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-                                           | ImGuiWindowFlags_AlwaysAutoResize)) {
+                if (ImGui::BeginPopupModal("##bosses_revive_confirm", nullptr,
+                                           ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize)) {
                     ImGui::Text("Revive %s?", bosses[popupBossIndex_].boss.c_str());
                     if (ImGui::Button("Yes!")) {
                         gBossDataSet.revive(popupBossIndex_);
