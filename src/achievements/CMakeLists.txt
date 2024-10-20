@@ -6,7 +6,7 @@ add_library(${PROJECT_NAME} SHARED
     render.cpp render.hpp
 )
 
-target_link_libraries(${PROJECT_NAME} EROverlayDLL steam_api64)
+target_link_libraries(${PROJECT_NAME} EROverlayDLL minhook steam_api64)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     PREFIX ""

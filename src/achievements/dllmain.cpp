@@ -14,11 +14,6 @@ int init() {
 }
 
 void update() {
-    static int counter = 0;
-    if ((counter++ & 0x3F) == 0) {
-        /* do check on each 64 frames */
-        er::achievements::gData.update();
-    }
 }
 
 static er::achievements::Renderer *renderer = nullptr;

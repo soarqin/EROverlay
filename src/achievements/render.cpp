@@ -45,22 +45,34 @@ bool Renderer::render() {
     ImGui::SetNextWindowSizeConstraints(ImVec2(-1, -1), ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))));
 
     if (ImGui::Begin("##achievements_window", nullptr,
-                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
+                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_AlwaysAutoResize |
+                     ImGuiWindowFlags_NoSavedSettings)) {
         const auto &achievements = gData.achievements();
         std::lock_guard lock(gData.mutex());
         const auto &locked = gData.locked();
+        const auto &unlocking = gData.unlocking();
         auto total = achievements.size();
         auto sz = locked.size();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
         ImGui::Text("%zu/%zu", total - sz, total);
+        ImGui::PopStyleColor();
         ImGui::Spacing();
         if (sz > maxAchievements_) sz = size_t(maxAchievements_);
+        if (!unlocking.empty()) {
+            gData.updateUnlockingStatus();
+            for (const auto &p: unlocking) {
+                const auto &ach = achievements[std::get<0>(p)];
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 1, 0.5f, std::get<2>(p)));
+                ImGui::Text("☑ %s", ach.displayName);
+                ImGui::PopStyleColor();
+            }
+        }
         for (size_t i = 0; i < sz; i++) {
             const auto &ach = achievements[locked[i]];
             ImGui::TextUnformatted(ach.displayName);
         }
     }
     ImGui::End();
-
     return false;
 }
 

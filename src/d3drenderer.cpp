@@ -487,6 +487,7 @@ void D3DRenderer::loadFont() {
     const ImGuiIO& io = ImGui::GetIO();
     auto charset = gConfig["common.charset"];
     charset = charset.substr(0, 2);
+    ImFontGlyphRangesBuilder builder;
     if (charset.empty() || (charset != "en" && charset != "ja" && charset != "ko" && charset != "pl" && charset != "ru" && charset != "th" && charset != "zh")) {
         const std::wstring &lang = util::getGameLanguage();
         if (lang == L"jpnJP") charset = "ja";
@@ -499,29 +500,24 @@ void D3DRenderer::loadFont() {
     }
     auto useSysFont = false;
     if (charset == "ja") {
-        ImFontGlyphRangesBuilder builder;
         builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
         builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
-        static ImVector<ImWchar> jpRanges;
-        builder.BuildRanges(&jpRanges);
-        charsetRange_ = jpRanges.Data;
         useSysFont = true;
     }
     else if (charset == "ko") {
-        charsetRange_ = io.Fonts->GetGlyphRangesKorean();
+        builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
         useSysFont = true;
     }
     else if (charset == "pl") {
-        ImFontGlyphRangesBuilder builder;
         static const ImWchar plRanges[] =
         {
             0x0020, 0x017F, // Basic Latin + Latin Supplement + Polish characters
             0,
         };
-        charsetRange_ = plRanges;
+        builder.AddRanges(plRanges);
     }
     else if (charset == "ru") {
-        charsetRange_ = io.Fonts->GetGlyphRangesCyrillic();
+        builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
     }
     else if (charset == "th") {
         static const ImWchar thaiRanges[] =
@@ -531,16 +527,25 @@ void D3DRenderer::loadFont() {
             0x0E00, 0x0E7F, // Thai
             0,
         };
-        charsetRange_ = thaiRanges;
+        builder.AddRanges(thaiRanges);
         useSysFont = true;
     }
     else if (charset == "zh") {
-        charsetRange_ = io.Fonts->GetGlyphRangesChineseFull();
+        builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
         useSysFont = true;
     }
     else {
-        charsetRange_ = io.Fonts->GetGlyphRangesDefault();
+        builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
     }
+    static const ImWchar symbolRanges[] =
+        {
+            0x2000, 0x2fFF, // Various symbols
+            0,
+        };
+    builder.AddRanges(symbolRanges);
+    static ImVector<ImWchar> finalRanges;
+    builder.BuildRanges(&finalRanges);
+    charsetRange_ = finalRanges.Data;
 
     if (data != nullptr) {
         io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, nullptr, charsetRange_);

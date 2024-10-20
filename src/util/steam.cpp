@@ -1,6 +1,6 @@
 #include "steam.hpp"
 
-#include <steamapi.h>
+#include <steam/steam_api_flat.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -16,7 +16,7 @@ const wchar_t *getGameLanguage() {
     if (!gameLanguage.empty())
         return gameLanguage.c_str();
     if (!sapps)
-        sapps = SteamAPI_SteamApps_v008();
+        sapps = SteamAPI_SteamApps();
     const char *lang = SteamAPI_ISteamApps_GetCurrentGameLanguage(sapps);
 
 #define LANG_CHECK_AND_SET(str, str2) else if (lstrcmpA(lang, #str) == 0) { gameLanguage = L ## #str2; }

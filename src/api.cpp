@@ -45,7 +45,7 @@ public:
         },
 
         [] {
-            return GameAddresses{.csMenuManImp = er::gHooking->csMenuManImp_, .gameDataMan = er::gHooking->gameDataMan_, .eventFlagMan = er::gHooking->eventFlagMan_, .fieldArea = er::gHooking->fieldArea_};
+            return GameAddresses {er::gHooking->csMenuManImp_, er::gHooking->gameDataMan_, er::gHooking->eventFlagMan_, er::gHooking->fieldArea_};
         },
         [](uint32_t flagId, uint8_t *bits) {
             auto eventFlagMan = er::gHooking->eventFlagMan_;

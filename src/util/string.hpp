@@ -4,8 +4,19 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <cctype>
 
 namespace er::util {
+
+template<typename T>
+inline void toLower(T &str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+}
+
+template<typename T>
+inline void toUpper(T &str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
 
 template<typename T>
 inline void trimString(T &str) {
