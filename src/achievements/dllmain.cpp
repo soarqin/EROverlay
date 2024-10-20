@@ -14,6 +14,10 @@ int init() {
 }
 
 void update() {
+    static int counter = 0;
+    if ((counter++ & 0x1F) == 0) {
+        er::achievements::gData.update();
+    }
 }
 
 static er::achievements::Renderer *renderer = nullptr;

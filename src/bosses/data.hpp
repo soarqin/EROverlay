@@ -67,7 +67,6 @@ private:
     uint32_t mapId_ = 0;
     int regionIndex_ = -1;
     uintptr_t gameDataMan_ = 0;
-    uintptr_t eventFlagMan_ = 0;
     uintptr_t fieldArea_ = 0;
     bool flagResolved_ = false;
     std::vector<bool> dead_;

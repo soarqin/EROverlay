@@ -68,8 +68,14 @@ bool Renderer::render() {
             }
         }
         for (size_t i = 0; i < sz; i++) {
-            const auto &ach = achievements[locked[i]];
-            ImGui::TextUnformatted(ach.displayName);
+            auto &l = locked[i];
+            const auto &ach = achievements[l.index];
+            auto flagTotal = int(ach.collectionFlags.size());
+            if (flagTotal == 0) {
+                ImGui::TextUnformatted(ach.displayName);
+                continue;
+            }
+            ImGui::Text("%s [%d/%d]", ach.displayName, l.flagCount, flagTotal);
         }
     }
     ImGui::End();

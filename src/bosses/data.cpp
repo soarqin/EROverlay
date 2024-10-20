@@ -115,7 +115,6 @@ void BossDataSet::saveConfig() const {
 void BossDataSet::initMemoryAddresses() {
     auto addr = api->getGameAddresses();
     gameDataMan_ = addr.gameDataMan;
-    eventFlagMan_ = addr.eventFlagMan;
     fieldArea_ = addr.fieldArea;
 }
 

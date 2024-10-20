@@ -1,0 +1,63 @@
+# Devourer's Scepter
+ach14,400293
+# Dark Moon Greatsword
+ach14,400393
+# Grafted Blade Greatsword
+ach14,510800
+# Marais Executioner's Sword
+ach14,510820
+# Ruins Greatsword
+ach14,510830
+# Golden Order Greatsword
+ach14,520470
+# Bolt of Gransax
+ach14,11007997
+# Sword of Night and Flame
+ach14,1035507900
+# Eclipse Shotel
+ach14,1051577600
+
+# Lhutel the Headless
+ach15,520000
+# Ancient Dragon Knight Kristoff
+ach15,520080
+# Redmane Knight Ogha
+ach15,520160
+# Black Knife Tiche
+ach15,530265
+# Mimic Tear Ashes
+ach15,12027880
+# Cleanrot Knight Finlay
+ach15,15007580
+
+# Stars of Ruin
+ach16,400430
+# Comet Azur
+ach16,400440
+# Greyoll's Roar
+ach16,290790
+# Flame of the Fell God
+ach16,530245
+# Elden Stars
+ach16,12037080
+# Ranni's Dark Moon
+ach16,1033407100
+# Founding Rain of Stars
+ach16,1052577900
+
+# Erdtree's Favor +2
+ach17,11057100
+# Moon of Nokstella
+ach17,12017960
+# Old Lord's Talisman
+ach17,13007950
+# Radagon Icon
+ach17,14007940
+# Marika's Soreseal
+ach17,15007800
+# Dragoncrest Greatshield Talisman
+ach17,15007930
+# Godfrey Icon
+ach17,1039507100
+# Radagon's Soreseal
+ach17,1051397060
