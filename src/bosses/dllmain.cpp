@@ -55,6 +55,4 @@ static PluginExports exports = {
     toggleFullMode
 };
 
-PLUGIN_DEFINE() {
-    return &exports;
-}
+PLUGIN_DEFINE(exports)

@@ -49,6 +49,4 @@ static PluginExports exports = {
     render
 };
 
-PLUGIN_DEFINE() {
-    return &exports;
-}
+PLUGIN_DEFINE(exports)

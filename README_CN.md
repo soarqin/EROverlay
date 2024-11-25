@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
+* 2024-??-??: v1.5.0
+  + 重构：将`Boss`模块拆分为单独的dll。
+  + 尝试修复启动崩溃，感谢[samjviana](https://github.com/samjviana)在[#8](https://github.com/soarqin/EROverlay/issues/8)中的提示。
 * 2024-10-15: v1.4.0
   + 尝试从系统字体链接中读取字体，如果当前语言的字符集不是拉丁或西里尔文且字体文件未设置
   + 现在可以手动设置显示文本格式，详细信息请查看`EROverlay.ini`
@@ -48,8 +51,12 @@
 * 按自己需求修改 `EROverlay.ini`
 * 将 `EROverlay.dll` 注入艾尔登法环游戏，你可以：
   + 使用Mod加载器(你可以选择[EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) 或 [ModEngine2](https://github.com/soulsmods/ModEngine2))
-  + 运行Mod附带的 `injector.exe` 注入
-* 等待数秒等Mod加载完成后，可以按 `=` 切换迷你/完全模式，按 `-` 卸载Mod
+  + 运行Mod附带的 `injector.exe` 注入 (不推荐，因为这种方法不太稳定且被一些安全软件阻止)
+* 等待数秒等Mod加载完成后，可以按 `=` 切换迷你/完全模式
+
+## 编写Overlay插件
+* 请阅读 [src/api.h](src/api.h) 中的代码注释
+* 请参考 [src/bosses/dllmain.cpp](src/bosses/dllmain.cpp) 中的代码作为示例
 
 ## [代码许可证](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

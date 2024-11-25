@@ -1,6 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2024-??-??: v1.5.0
+  + Refactorying: split the `Boss` module into a separate dll.
+  + Try to fix startup crashes, thanks to [samjviana](https://github.com/samjviana) for hinting in [#8](https://github.com/soarqin/EROverlay/issues/8).
 * 2024-10-15: v1.4.0
   + Try to read fonts from system font links, if character sets are not Latin or Cyrillic for current language and font file is not set properly.
   + Can set display text format manually now, check `EROverlay.ini` for details.
@@ -48,8 +51,12 @@
 * Modify `EROverlay.ini` to your liking.
 * Inject the mod to Elden Ring, you can either:
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) or [ModEngine2](https://github.com/soulsmods/ModEngine2)).
-  + Run `injector.exe` to inject.
-* Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode, press `-` to unload the mod.
+  + Run `injector.exe` to inject (not recommented, because that this method is not very stable and is blocked by some security softwares).
+* Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode.
+
+## WRITE AN OVERLAY PLUGIN
+* Read code comments in [src/api.h](src/api.h) for details.
+* Read codes in [src/bosses/dllmain.cpp](src/bosses/dllmain.cpp) as an example.
 
 ## [LICENSE](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

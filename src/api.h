@@ -86,7 +86,8 @@ typedef struct {
 
 API_EXPORT EROverlayAPI *getEROverlayAPI();
 
-#define PLUGIN_DEFINE() PLUGIN_EXPORT PluginExports *getExports()
+#define PLUGIN_DEFINE(pexp) \
+    PLUGIN_EXPORT PluginExports *getExports() { return &pexp; }
 
 #if defined(__cplusplus)
 }
