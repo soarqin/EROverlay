@@ -75,7 +75,7 @@ bool Hooking::menuLoaded() const {
     if (csMenuManImp_ == 0) return false;
     auto addr = *(uintptr_t *)csMenuManImp_;
     if (addr == 0) return false;
-    return *(uint8_t *)(addr + 0x21) == 1;
+    return *(float *)(addr + 0x744) > 0.0f;
 }
 
 int Hooking::screenState() const {
