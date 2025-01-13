@@ -76,7 +76,7 @@ void Data::load() {
     }
     for (auto &pair : indexMap) {
         bool b;
-        if (SteamAPI_ISteamUserStats_GetAchievement(SteamAPI_SteamUserStats(), pair.first.c_str(), &b) && !b) {
+        if (SteamAPI_ISteamUserStats_GetAchievement(stats, pair.first.c_str(), &b) && !b) {
             locked_[i++] = Locked { pair.second, 0, 0 };
         }
     }

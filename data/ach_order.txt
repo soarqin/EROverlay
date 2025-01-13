@@ -1,3 +1,8 @@
+ach14 # Legendary Armaments
+ach16 # Legendary Sorceries and Incantations
+ach15 # Legendary Ashen Remains
+ach17 # Legendary Talismans
+
 ach39 # Roundtable Hold
 
 ach25 # Margit, the Fell Omen
@@ -31,7 +36,6 @@ ach37 # Ancestor Spirit
 ach23 # Regal Ancestor Spirit
 ach24 # Valiant Gargoyles
 
-ach16 # Legendary Sorceries and Incantations
 ach33 # Astel, Naturalborn of the Void
 ach19 # Lichdragon Fortissax
 
@@ -40,9 +44,6 @@ ach10 # Maliketh the Black Blade
 ach11 # Hoarah Loux, Warrior
 
 ach38 # Commander Niall
-ach14 # Legendary Armaments
-ach15 # Legendary Ashen Remains
-ach17 # Legendary Talismans
 ach32 # Loretta, Knight of the Haligtree
 ach08 # Shardbearer Malenia
 ach02 # Age of the Stars
