@@ -4,6 +4,8 @@
 
 #include <MinHook.h>
 
+#include "global.hpp"
+
 namespace er {
 
 std::unique_ptr<Hooking> gHooking;
@@ -40,6 +42,16 @@ void Hooking::findHooks() {
             fieldArea_ = addr.as<uintptr_t>();
         }
     }
+    // 1.02 ~ 1.02.3
+    if (gGameVersion < 0x0001000300000000ULL) {
+        menuInfoOffset_ = 0x708;
+    }
+    // 1.03 ~ 1.10.1
+    if (gGameVersion < 0x0002000100000000ULL) {
+        menuInfoOffset_ = 0x718;
+    }
+    // 1.12+
+    menuInfoOffset_ = 0x720;
 }
 
 Hooking::Hooking() {
@@ -75,14 +87,14 @@ bool Hooking::menuLoaded() const {
     if (csMenuManImp_ == 0) return false;
     auto addr = *(uintptr_t *)csMenuManImp_;
     if (addr == 0) return false;
-    return *(float *)(addr + 0x744) > 0.0f;
+    return *(float*)(addr + menuInfoOffset_ + 0x24) > 0.0f;
 }
 
 int Hooking::screenState() const {
     if (csMenuManImp_ == 0) return 1;
     auto addr = *(uintptr_t *)csMenuManImp_;
     if (addr == 0) return false;
-    return *(int *)(addr + 0x730);
+    return *(int *)(addr + menuInfoOffset_ + 0x10);
 }
 
 }
