@@ -38,16 +38,15 @@ void Hooking::findHooks() {
             fieldArea_ = addr.as<uintptr_t>();
         }
     }
-    // 1.02 ~ 1.02.3
     if (gGameVersion < 0x0001000300000000ULL) {
+        // 1.02 ~ 1.02.3
         menuInfoOffset_ = 0x708;
-    }
-    // 1.03 ~ 1.10.1
-    if (gGameVersion < 0x0002000100000000ULL) {
+    } else if (gGameVersion < 0x0002000100000000ULL) {
+        // 1.03 ~ 1.10.1
         menuInfoOffset_ = 0x718;
-    }
-    // 1.12+
-    menuInfoOffset_ = 0x720;
+    } else
+        // 1.12+
+        menuInfoOffset_ = 0x720;
 }
 
 Hooking::Hooking() {
