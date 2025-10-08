@@ -9,6 +9,9 @@
 #include "util/string.hpp"
 #include "util/sysfont.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 #include <MinHook.h>
@@ -267,6 +270,32 @@ void D3DRenderer::initOverlay() {
     ImGui_ImplWin32_Init(gameWindow_);
 }
 
+void D3DRenderer::SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
+    ((D3DRenderer*)info->UserData)->HeapDescriptorAlloc(pOutCpuDescHandle, pOutGpuDescHandle);
+}
+
+void D3DRenderer::SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle) {
+    ((D3DRenderer*)info->UserData)->HeapDescriptorFree(hCpuDescHandle, hGpuDescHandle);
+}
+
+void D3DRenderer::HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
+    auto cpu_handle = descriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+    auto gpu_handle = descriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+    auto idx = freeDescriptors_.back();
+    freeDescriptors_.pop_back();
+    cpu_handle.ptr += rtvDescriptorSize_ * idx;
+    gpu_handle.ptr += rtvDescriptorSize_ * idx;
+    *pOutCpuDescHandle = cpu_handle;
+    *pOutGpuDescHandle = gpu_handle;
+}
+
+void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle) {
+    auto cpuIdx = (hCpuDescHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
+    auto gpuIdx = (hGpuDescHandle.ptr - descriptorHeap_->GetGPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
+    assert(cpuIdx == gpuIdx);
+    freeDescriptors_.push_back((int)cpuIdx);
+}
+
 void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
     if (commandQueue_ == nullptr)
         return;
@@ -279,6 +308,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         if (pSwapChain->GetDevice(IID_PPV_ARGS(&device)) != S_OK)
             return;
 
+        device_ = device;
         buffersCounts_ = sd.BufferCount;
 
         renderTargets_.clear();
@@ -293,10 +323,15 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
                 return;
             }
         }
+
+        freeDescriptors_.clear();
         {
+            enum {
+                DESCRIPTOR_COUNT = 996,
+            };
             D3D12_DESCRIPTOR_HEAP_DESC desc = {};
             desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-            desc.NumDescriptors = static_cast<UINT>(buffersCounts_);
+            desc.NumDescriptors = buffersCounts_ + DESCRIPTOR_COUNT;
             desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
             desc.NodeMask = 1;
             if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap_)) != S_OK) {
@@ -304,16 +339,19 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
                 device->Release();
                 return;
             }
+            freeDescriptors_.resize(DESCRIPTOR_COUNT);
+            for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
+                freeDescriptors_[DESCRIPTOR_COUNT - i] = buffersCounts_ + i - 1;
+            }
 
-            const SIZE_T rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(
+            rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
             D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
             commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_];
-            for (int i = 0; i < buffersCounts_; ++i) {
+            for (uint32_t i = 0; i < buffersCounts_; ++i) {
                 renderTargets_.push_back(rtvHandle);
-                rtvHandle.ptr += rtvDescriptorSize;
+                rtvHandle.ptr += rtvDescriptorSize_;
             }
-            device->Release();
         }
 
         for (UINT i = 0; i < sd.BufferCount; ++i) {
@@ -343,12 +381,19 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         }
 
         loadFont();
-        ImGui_ImplDX12_Init(device, static_cast<int>(buffersCounts_),
-                            DXGI_FORMAT_R8G8B8A8_UNORM, descriptorHeap_,
-                            descriptorHeap_->GetCPUDescriptorHandleForHeapStart(),
-                            descriptorHeap_->GetGPUDescriptorHandleForHeapStart());
+        ImGui_ImplDX12_InitInfo init_info = {};
+        init_info.Device = device;
+        init_info.NumFramesInFlight = static_cast<int>(buffersCounts_);
+        init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+        init_info.SrvDescriptorHeap = descriptorHeap_;
+        init_info.CommandQueue = commandQueue_;
+        init_info.SrvDescriptorAllocFn = SrvDescriptorAlloc;
+        init_info.SrvDescriptorFreeFn = SrvDescriptorFree;
+        init_info.UserData = this;
+        ImGui_ImplDX12_Init(&init_info);
         ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
         oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
+        device->Release();
     }
     if (!backBuffer_) {
         ID3D12Device* device;
@@ -788,6 +833,185 @@ HRESULT WINAPI D3DRenderer::hkCreateSwapChainForComposition(IDXGIFactory *pFacto
                                                             IDXGISwapChain1 **ppSwapChain) {
     gD3DRenderer->CleanupRenderTarget();
     return gD3DRenderer->oCreateSwapChainForComposition_(pFactory, pDevice, pDesc, pRestrictToOutput, ppSwapChain);
+}
+
+bool D3DRenderer::LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource,
+                           int *outWidth, int *outHeight) {
+    // Load from disk into a raw RGBA buffer
+    int image_width = 0;
+    int image_height = 0;
+    unsigned char *image_data = stbi_load_from_memory((const unsigned char *)data, (int)dataSize, &image_width, &image_height, NULL, 4);
+    if (image_data == NULL)
+        return false;
+
+    // Create texture resource
+    D3D12_HEAP_PROPERTIES props;
+    memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+    props.Type = D3D12_HEAP_TYPE_DEFAULT;
+    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    D3D12_RESOURCE_DESC desc;
+    ZeroMemory(&desc, sizeof(desc));
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Alignment = 0;
+    desc.Width = image_width;
+    desc.Height = image_height;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    ID3D12Resource *pTexture = NULL;
+    device_->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+
+    // Create a temporary upload resource to move the data in
+    UINT uploadPitch = (image_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+    UINT uploadSize = image_height * uploadPitch;
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Alignment = 0;
+    desc.Width = uploadSize;
+    desc.Height = 1;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_UNKNOWN;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    props.Type = D3D12_HEAP_TYPE_UPLOAD;
+    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    ID3D12Resource *uploadBuffer = NULL;
+    HRESULT hr = device_->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    // Write pixels into the upload resource
+    void *mapped = NULL;
+    D3D12_RANGE range = {0, uploadSize};
+    hr = uploadBuffer->Map(0, &range, &mapped);
+    IM_ASSERT(SUCCEEDED(hr));
+    for (int y = 0; y < image_height; y++)
+        memcpy((void *)((uintptr_t)mapped + y * uploadPitch), image_data + y * image_width * 4, image_width * 4);
+    uploadBuffer->Unmap(0, &range);
+    stbi_image_free(image_data);
+
+    // Copy the upload resource content into the real resource
+    D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+    srcLocation.pResource = uploadBuffer;
+    srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+    srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srcLocation.PlacedFootprint.Footprint.Width = image_width;
+    srcLocation.PlacedFootprint.Footprint.Height = image_height;
+    srcLocation.PlacedFootprint.Footprint.Depth = 1;
+    srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+
+    D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+    dstLocation.pResource = pTexture;
+    dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+    dstLocation.SubresourceIndex = 0;
+
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = pTexture;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+    // Create a temporary command queue to do the copy with
+    ID3D12Fence *fence = NULL;
+    hr = device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    HANDLE event = CreateEvent(0, 0, 0, 0);
+    IM_ASSERT(event != NULL);
+
+    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+    queueDesc.NodeMask = 1;
+
+    ID3D12CommandQueue *cmdQueue = NULL;
+    hr = device_->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    ID3D12CommandAllocator *cmdAlloc = NULL;
+    hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    ID3D12GraphicsCommandList *cmdList = NULL;
+    hr = device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
+    IM_ASSERT(SUCCEEDED(hr));
+
+    cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+    cmdList->ResourceBarrier(1, &barrier);
+
+    hr = cmdList->Close();
+    IM_ASSERT(SUCCEEDED(hr));
+
+    // Execute the copy
+    cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList *const *)&cmdList);
+    hr = cmdQueue->Signal(fence, 1);
+    IM_ASSERT(SUCCEEDED(hr));
+
+    // Wait for everything to complete
+    fence->SetEventOnCompletion(1, event);
+    WaitForSingleObject(event, INFINITE);
+
+    // Tear down our temporary command queue and release the upload resource
+    cmdList->Release();
+    cmdAlloc->Release();
+    cmdQueue->Release();
+    CloseHandle(event);
+    fence->Release();
+    uploadBuffer->Release();
+
+    // Create a shader resource view for the texture
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = desc.MipLevels;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    device_->CreateShaderResourceView(pTexture, &srvDesc, srvCpuHandle);
+
+    // Return results
+    *outTexResource = pTexture;
+    *outWidth = image_width;
+    *outHeight = image_height;
+
+    return true;
+}
+
+// Open and read a file, then forward to LoadTextureFromMemory()
+bool D3DRenderer::LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource,
+                                      int *outWidth, int *outHeight) {
+    HANDLE file = CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (file == INVALID_HANDLE_VALUE)
+        return false;
+    DWORD file_size = GetFileSize(file, NULL);
+    if (file_size == INVALID_FILE_SIZE)
+        return false;
+    void *file_data = IM_ALLOC(file_size);
+    DWORD bytes_read = 0;
+    ReadFile(file, file_data, file_size, &bytes_read, NULL);
+    CloseHandle(file);
+    bool ret = LoadTextureFromMemory(file_data, file_size, srvCpuHandle, outTexResource, outWidth, outHeight);
+    IM_FREE(file_data);
+    return ret;
+}
+
+void D3DRenderer::DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle) {
+    (*texResource)->Release();
+    *texResource = NULL;
+    HeapDescriptorFree(srvCpuHandle, srvGpuHandle);
 }
 
 }

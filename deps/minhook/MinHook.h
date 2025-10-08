@@ -85,11 +85,7 @@ MH_STATUS;
 
 // Can be passed as a parameter to MH_EnableHook, MH_DisableHook,
 // MH_QueueEnableHook or MH_QueueDisableHook.
-#ifdef __cplusplus
-#define MH_ALL_HOOKS nullptr
-#else
 #define MH_ALL_HOOKS NULL
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -182,7 +178,7 @@ extern "C" {
     MH_STATUS WINAPI MH_ApplyQueued(VOID);
 
     // Translates the MH_STATUS to its name as a string.
-    const char * WINAPI MH_StatusToString(MH_STATUS status);
+    const char *WINAPI MH_StatusToString(MH_STATUS status);
 
 #ifdef __cplusplus
 }

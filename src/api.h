@@ -34,6 +34,17 @@ typedef struct {
 } GameAddresses;
 
 typedef struct {
+    void *texture;
+    int width;
+    int height;
+    void *cpuHandle;
+    void *gpuHandle;
+    // If the texture is loaded, even the load was failed.
+    // This is used to avoid loading the texture multiple times.
+    bool loaded;
+} TextureContext;
+
+typedef struct {
     // Global variable
     uint64_t (*getGameVersion)();
     const wchar_t *(*getModulePath)();
@@ -56,6 +67,10 @@ typedef struct {
     // Game addresses
     GameAddresses (*getGameAddresses)();
     uintptr_t (*resolveFlagAddress)(uint32_t flagId, uint8_t *bits);
+
+    // Rendering functions
+    TextureContext (*loadTexture)(const wchar_t *filename);
+    void (*destroyTexture)(TextureContext *texture);
 } EROverlayAPI;
 
 typedef struct {

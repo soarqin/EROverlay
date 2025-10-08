@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "global.hpp"
 #include "hooking.hpp"
+#include "d3drenderer.hpp"
 #include "util/memory.hpp"
 #include "util/steam.hpp"
 
@@ -105,6 +106,30 @@ public:
             auto shifted = least_significant_digits >> 3;
             *bits = 1 << thing;
             return calculated_pointer + shifted;
+        },
+        [](const wchar_t *filename)->TextureContext {
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+            D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+            er::gD3DRenderer->HeapDescriptorAlloc(&cpuHandle, &gpuHandle);
+            TextureContext texture = {};
+            texture.cpuHandle = (void *)cpuHandle.ptr;
+            texture.gpuHandle = (void *)gpuHandle.ptr;
+            texture.loaded = true;
+            if (er::gD3DRenderer->LoadTextureFromFile(filename, cpuHandle, (ID3D12Resource **)&texture.texture, &texture.width, &texture.height)) {
+                return texture;
+            }
+            er::gD3DRenderer->HeapDescriptorFree(cpuHandle, gpuHandle);
+            return {};
+        },
+        [](TextureContext *texture) {
+            if (texture->texture == nullptr) {
+                return;
+            }
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+            D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+            cpuHandle.ptr = (uintptr_t)texture->cpuHandle;
+            gpuHandle.ptr = (uintptr_t)texture->gpuHandle;
+            er::gD3DRenderer->DestroyTexture((ID3D12Resource **)&texture->texture, cpuHandle, gpuHandle);
         }
         };
         return &api;

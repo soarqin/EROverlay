@@ -17,4 +17,4 @@ add_library(imgui_dx12_backend STATIC ${SOURCES_BACKEND})
 target_include_directories(imgui PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(imgui_dx12_backend PUBLIC imgui)
+target_link_libraries(imgui_dx12_backend PUBLIC imgui dxgi d3dcompiler)

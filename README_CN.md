@@ -2,8 +2,12 @@
 
 ## 更新记录
 * 2024-??-??: v1.5.0
-  + 重构：将`Boss`模块拆分为单独的dll。
-  + 尝试修复启动崩溃，感谢[samjviana](https://github.com/samjviana)在[#8](https://github.com/soarqin/EROverlay/issues/8)中的提示。
+  + 重构：覆盖层功能被拆分为`overlays`文件夹中的独立dll模块
+    + `Boss`现在是一个覆盖层模块
+    + 新模块：`Achievements`用于追踪Steam成就进度
+    + 新模块：`Minimap`用于显示游戏内小地图
+  + 将`EROverlay.ini`拆分为`configs`文件夹中的多个独立`.ini`文件，以灵活支持覆盖层模块
+  + 尝试修复启动崩溃，感谢[samjviana](https://github.com/samjviana)在[#8](https://github.com/soarqin/EROverlay/issues/8)中的建议
 * 2024-10-15: v1.4.0
   + 尝试从系统字体链接中读取字体，如果当前语言的字符集不是拉丁或西里尔文且字体文件未设置
   + 现在可以手动设置显示文本格式，详细信息请查看`EROverlay.ini`
@@ -48,7 +52,7 @@
 * 请不要与一些覆盖层(如`Nvidia GeForce Experience`中的`FPS Counter`、`MSI Afterburner`、`RivaTuner Statistics Server`等)一起使用此Mod，它们可能导致游戏崩溃。
 
 ## 用法
-* 按自己需求修改 `EROverlay.ini`
+* 按自己需求修改 `configs` 目录内的 .ini 文件
 * 将 `EROverlay.dll` 注入艾尔登法环游戏，你可以：
   + 使用Mod加载器(你可以选择[EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) 或 [ModEngine2](https://github.com/soulsmods/ModEngine2))
   + 运行Mod附带的 `injector.exe` 注入 (不推荐，因为这种方法不太稳定且被一些安全软件阻止)

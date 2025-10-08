@@ -4,6 +4,7 @@
 
 #include <ini.h>
 
+#include <filesystem>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cwchar>
@@ -217,17 +218,37 @@ std::vector<int> mapStringToVKey(const std::string &name) {
 
 Config gConfig;
 
-void Config::load(const std::wstring &filename) {
+void Config::loadDir(const std::wstring &dir) {
+    std::error_code ec;
+    for (const auto &entry: std::filesystem::directory_iterator(dir, ec)) {
+        fflush(stderr);
+        if (entry.is_regular_file() && entry.path().extension() == L".ini") {
+            load(entry.path(), entry.path().stem().string());
+        }
+    }
+}
+
+void Config::load(const std::wstring &filename, const std::string &modname) {
     auto *f = _wfopen(filename.c_str(), L"r");
     if (f == nullptr) {
         fwprintf(stderr, L"Unable to open %ls\n", filename.c_str());
         return;
     }
+    struct ConfigData {
+        std::map<std::string, std::string> &entries;
+        const std::string &modname;
+    } configData = {entries_, modname};
     ini_parse_file(f, [](void *user, const char *section, const char *name, const char *value) {
-        auto &entries = *static_cast<std::map<std::string, std::string> *>(user);
-        entries[section + std::string(".") + name] = value;
+        auto &configData = *static_cast<ConfigData *>(user);
+        auto &entries = configData.entries;
+        auto modulename = configData.modname;
+        if (!modulename.empty()) modulename += '.';
+        if (section != nullptr && section[0] != '\0') {
+            modulename = modulename + section + '.';
+        }
+        entries[modulename + name] = value;
         return 1;
-    }, &entries_);
+    }, &configData);
     fclose(f);
 }
 

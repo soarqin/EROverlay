@@ -12,6 +12,8 @@
 #include <memory>
 #include <cstdint>
 
+struct ImGui_ImplDX12_InitInfo;
+
 namespace er {
 
 class D3DRenderer {
@@ -22,6 +24,7 @@ class D3DRenderer {
         D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
     };
 */
+    friend class EROverlayAPIWrapper;
 public:
     explicit D3DRenderer() = default;
     ~D3DRenderer() noexcept;
@@ -33,8 +36,6 @@ public:
     [[nodiscard]] inline bool isForeground() const {
         return GetForegroundWindow() == gameWindow_;
     }
-
-    void resetRenderState();
 
     bool createDevice();
     bool hook();
@@ -53,6 +54,10 @@ public:
 
     void loadFont();
     static void initStyle();
+
+    bool LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
+    bool LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
+    void DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle);
 
 private:
     void CleanupRenderTarget();
@@ -107,6 +112,13 @@ private:
                                                           IDXGIOutput *pRestrictToOutput,
                                                           IDXGISwapChain1 **ppSwapChain);
 
+    static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
+    static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
+    void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
+    void HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
+
+    std::vector<uint32_t> freeDescriptors_;
+
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT)> oPresent_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, const DXGI_PRESENT_PARAMETERS *)> oPresent1_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain *, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers_;
@@ -144,6 +156,7 @@ private:
 
     HWND gameWindow_ = nullptr;
 
+    ID3D12Device *device_ = nullptr;
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
     ID3D12CommandAllocator **commandAllocator_ = nullptr;
@@ -152,7 +165,8 @@ private:
     ID3D12Resource **backBuffer_ = nullptr;
     std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargets_;
 
-    uint64_t buffersCounts_ = 0;
+    uint32_t buffersCounts_ = 0;
+    size_t rtvDescriptorSize_ = 0;
 
 /*
     FrameContext *frameContext_ = nullptr;

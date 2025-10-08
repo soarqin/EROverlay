@@ -2,7 +2,11 @@
 
 ## Release Notes
 * 2024-??-??: v1.5.0
-  + Refactorying: split the `Boss` module into a separate dll.
+  + Refactorying: overlay functions are separated into modules with individual dlls in `overlays` folder.
+    + `Boss` is an overlay module now.
+    + New module: `Achievements` to tracking progression of Steam achievements.
+    + New module: `Minimap` to show an in-game minimap.
+  + Separate `EROverlay.ini` into individual `.ini`'s in `configs` folder, to flexibly support overlay modules.
   + Try to fix startup crashes, thanks to [samjviana](https://github.com/samjviana) for hinting in [#8](https://github.com/soarqin/EROverlay/issues/8).
 * 2024-10-15: v1.4.0
   + Try to read fonts from system font links, if character sets are not Latin or Cyrillic for current language and font file is not set properly.
@@ -48,7 +52,7 @@
 * Please do not use this mod with some overlays like `FPS Counter` in `Nvidia GeForce Experience`, `MSI Afterburner`, `RivaTuner Statistics Server`, etc. They may cause the game to crash.
 
 ## USAGE
-* Modify `EROverlay.ini` to your liking.
+* Modify .ini's inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) or [ModEngine2](https://github.com/soulsmods/ModEngine2)).
   + Run `injector.exe` to inject (not recommented, because that this method is not very stable and is blocked by some security softwares).

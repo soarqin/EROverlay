@@ -63,6 +63,7 @@ void init() {
     GetModuleFileNameW(::er::gModule, ::er::gModulePath, MAX_PATH);
     PathRemoveFileSpecW(::er::gModulePath);
     er::gConfig.load(std::wstring(::er::gModulePath) + L"\\EROverlay.ini");
+    er::gConfig.loadDir(std::wstring(::er::gModulePath) + L"\\configs");
     bool enableConsole = false;
     if (er::gConfig.enabled("common.console")) {
         enableConsole = true;

@@ -62,13 +62,19 @@ inline std::vector<float> strSplitToFloatVec(const std::string &s) {
         }
         if (item.back() == '%') {
             item.pop_back();
-            auto val = std::stof(item);
-            elems.push_back(std::clamp(val / 100.f, -0.999999f, 0.999999f));
+            elems.push_back(std::clamp(std::stof(item) / 100.f, -1.f, 1.f));
             continue;
         }
         elems.push_back(std::stof(item));
     }
     return elems;
+}
+
+inline float strToFloat(const std::string &s) {
+    if (s.back() == '%') {
+        return std::stof(s.substr(0, s.size() - 1)) / 100.f;
+    }
+    return std::stof(s);
 }
 
 }

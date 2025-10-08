@@ -9,7 +9,8 @@ namespace er {
 
 class Config {
 public:
-    void load(const std::wstring &filename);
+    void loadDir(const std::wstring &dir);
+    void load(const std::wstring &filename, const std::string &modname = "");
 
     [[nodiscard]] const std::string &operator[](const std::string &key) const;
     [[nodiscard]] const std::string &get(const std::string &key, const std::string &defaultValue) const;
@@ -28,6 +29,9 @@ public:
         const auto it = entries_.find(key);
         if (it == entries_.end()) {
             return defaultValue;
+        }
+        if (it->second.back() == '%') {
+            return static_cast<T>(std::stod(it->second.substr(0, it->second.size() - 1)) / 100.0);
         }
         return static_cast<T>(std::stod(it->second));
     }

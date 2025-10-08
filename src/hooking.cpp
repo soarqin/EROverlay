@@ -44,9 +44,10 @@ void Hooking::findHooks() {
     } else if (gGameVersion < 0x0002000100000000ULL) {
         // 1.03 ~ 1.10.1
         menuInfoOffset_ = 0x718;
-    } else
+    } else {
         // 1.12+
         menuInfoOffset_ = 0x720;
+    }
 }
 
 Hooking::Hooking() {
