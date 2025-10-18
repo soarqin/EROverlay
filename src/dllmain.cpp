@@ -73,7 +73,7 @@ void init() {
         freopen("CONOUT$", "w", stderr);
     }
 
-    using std::chrono_literals::operator""ms;
+    using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
     er::gIsDLC01Installed = er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590);
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
@@ -143,7 +143,7 @@ void mainThread() {
         noUnload:
 
         std::this_thread::yield();
-        using std::chrono_literals::operator""us;
+        using namespace std::chrono_literals;
         static auto tick = 1000000us / 60;
         std::this_thread::sleep_for(tick);
 

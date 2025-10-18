@@ -148,8 +148,8 @@ void Data::update() {
     }
 }
 
-using std::chrono_literals::operator""s;
 void Data::unlock(const char *name) {
+    using namespace std::chrono_literals;
     std::string n = name;
     util::toLower(n);
     auto it = indexMap_.find(n);
