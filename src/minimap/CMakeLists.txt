@@ -1,16 +1,14 @@
-project(minimap CXX)
-
-add_library(${PROJECT_NAME} SHARED
+add_project(minimap SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
+
+    LANGUAGES CXX
+    FOLDER overlays
+    OUTPUT_SUBDIR overlays
+    OUTPUT_NAME Minimap
 )
 
 target_link_libraries(${PROJECT_NAME} EROverlayDLL)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/$<0:>"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/overlays/$<0:>"
-    ARCHIVE_OUTPUT_NAME "Minimap"
-    RUNTIME_OUTPUT_NAME "Minimap")
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")

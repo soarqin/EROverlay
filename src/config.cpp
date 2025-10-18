@@ -1,5 +1,6 @@
 #include "config.hpp"
 
+#include "global.hpp"
 #include "util/string.hpp"
 
 #include <ini.h>
@@ -218,17 +219,23 @@ std::vector<int> mapStringToVKey(const std::string &name) {
 
 Config gConfig;
 
-void Config::loadDir(const std::wstring &dir) {
+void Config::loadDir(const wchar_t *dir) {
     std::error_code ec;
-    for (const auto &entry: std::filesystem::directory_iterator(dir, ec)) {
+    std::filesystem::path path = er::gModulePath;
+    for (const auto &entry: std::filesystem::directory_iterator(path / dir, ec)) {
         fflush(stderr);
         if (entry.is_regular_file() && entry.path().extension() == L".ini") {
-            load(entry.path(), entry.path().stem().string());
+            loadSingleFile(entry.path().wstring(), entry.path().stem().string());
         }
     }
 }
 
-void Config::load(const std::wstring &filename, const std::string &modname) {
+void Config::loadFile(const wchar_t *filename) {
+    std::filesystem::path path = er::gModulePath;
+    loadSingleFile((path / filename).wstring());
+}
+
+void Config::loadSingleFile(const std::wstring &filename, const std::string &modname) {
     auto *f = _wfopen(filename.c_str(), L"r");
     if (f == nullptr) {
         fwprintf(stderr, L"Unable to open %ls\n", filename.c_str());

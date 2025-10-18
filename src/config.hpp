@@ -9,8 +9,8 @@ namespace er {
 
 class Config {
 public:
-    void loadDir(const std::wstring &dir);
-    void load(const std::wstring &filename, const std::string &modname = "");
+    void loadDir(const wchar_t *dir);
+    void loadFile(const wchar_t *filename);
 
     [[nodiscard]] const std::string &operator[](const std::string &key) const;
     [[nodiscard]] const std::string &get(const std::string &key, const std::string &defaultValue) const;
@@ -36,6 +36,9 @@ public:
         return static_cast<T>(std::stod(it->second));
     }
     [[nodiscard]] std::vector<int> getVirtualKey(const std::string &key, const std::vector<int> &defaultValue) const;
+
+private:
+    void loadSingleFile(const std::wstring &filename, const std::string &modname = "");
 
 private:
     std::map<std::string, std::string> entries_;

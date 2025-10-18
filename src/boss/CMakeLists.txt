@@ -1,16 +1,14 @@
-project(boss CXX)
-
-add_library(${PROJECT_NAME} SHARED
+add_project(boss SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
+
+    LANGUAGES CXX
+    FOLDER overlays
+    OUTPUT_SUBDIR overlays
+    OUTPUT_NAME Boss
 )
 
 target_link_libraries(${PROJECT_NAME} EROverlayDLL nlohmann_json::nlohmann_json inih)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/$<0:>"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/overlays/$<0:>"
-    ARCHIVE_OUTPUT_NAME "Boss"
-    RUNTIME_OUTPUT_NAME "Boss")
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")

@@ -1,13 +1,4 @@
-project(EROverlayDLL CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(NOT MSVC)
-    find_package(DirectXMath REQUIRED)
-endif()
-
-add_library(${PROJECT_NAME} SHARED
+add_project(EROverlayDLL SHARED
     # main files
     dllmain.cpp
     config.cpp config.hpp
@@ -30,8 +21,15 @@ add_library(${PROJECT_NAME} SHARED
     util/steam.cpp util/steam.hpp
     util/sysfont.cpp util/sysfont.hpp
     util/string.hpp util/vector.hpp
+
+    LANGUAGES CXX
+    FOLDER app
+    OUTPUT_NAME EROverlay
 )
 
+if(NOT MSVC)
+    find_package(DirectXMath REQUIRED)
+endif()
 if(WIN32)
     target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS PRIVATE EROVERLAY_EXPORTS)
 endif()
@@ -50,12 +48,7 @@ target_link_libraries(${PROJECT_NAME}
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    PREFIX ""
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/$<0:>"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<0:>"
-    ARCHIVE_OUTPUT_NAME "EROverlay"
-    RUNTIME_OUTPUT_NAME "EROverlay")
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 add_subdirectory(boss)
 add_subdirectory(achievements)

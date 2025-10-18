@@ -13,8 +13,8 @@ static std::vector<std::pair<int, PluginExports&>> plugins;
 
 void pluginsInit() {
     plugins.clear();
-    const std::filesystem::path sandbox{std::wstring(gModulePath) + L"\\overlays"};
-    for (const auto &dir_entry: std::filesystem::directory_iterator{sandbox}) {
+    const std::filesystem::path sandbox{std::wstring(gModulePath)};
+    for (const auto &dir_entry: std::filesystem::directory_iterator{sandbox / L"overlays"}) {
         if (dir_entry.is_regular_file()) {
             const auto &path = dir_entry.path();
             auto filename = path.wstring();
