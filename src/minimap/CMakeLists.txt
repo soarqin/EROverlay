@@ -2,6 +2,7 @@ add_project(minimap SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
+    paramdefs.hpp
 
     LANGUAGES CXX
     FOLDER overlays

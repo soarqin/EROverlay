@@ -4,6 +4,7 @@
 #include "global.hpp"
 #include "hooking.hpp"
 #include "d3drenderer.hpp"
+#include "params/paraminternal.hpp"
 #include "util/memory.hpp"
 #include "util/steam.hpp"
 
@@ -106,6 +107,9 @@ public:
             auto shifted = least_significant_digits >> 3;
             *bits = 1 << thing;
             return calculated_pointer + shifted;
+        },
+        [](const wchar_t *name) {
+            return (const void *)er::params::paramFindTable(name);
         },
         [](const wchar_t *filename)->TextureContext {
             D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;

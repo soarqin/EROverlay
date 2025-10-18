@@ -116,26 +116,28 @@ bool Renderer::render() {
             wsprintfW(path, L"%ls\\data\\map\\bonfire.png", api->getModulePath());
             bonfireTexture_ = api->loadTexture(path);
         }
-        auto boundMaxX = minimapWidth_ + 100.f;
-        auto boundMaxY = minimapHeight_ + 100.f;
-        ny = cy;
-        auto bonfireSize = 30.f * mapScale_;
-        auto bonfireOffset = -bonfireSize * .5f;
-        for (auto y = y0; y <= y1; y++, ny += texSize) {
-            auto index0 = layer * 100 + y * 10 + x0;
-            auto nx = cx;
-            for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                auto p = gData.bonfiresAround(layer, x, y);
-                auto *begin = std::get<0>(p);
-                if (begin == nullptr) continue;
-                auto *end = std::get<1>(p);
-                for (auto *bonfire = begin; bonfire < end; bonfire++) {
-                    if (!bonfire->isUnlocked()) continue;
-                    auto rx = bonfire->localX * mapScale_ + nx;
-                    auto ry = bonfire->localY * mapScale_ + ny;
-                    if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
-                        ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                        ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize));
+        if (gData.paramsLoaded()) {
+            auto boundMaxX = minimapWidth_ + 100.f;
+            auto boundMaxY = minimapHeight_ + 100.f;
+            ny = cy;
+            auto bonfireSize = 30.f * mapScale_;
+            auto bonfireOffset = -bonfireSize * .5f;
+            for (auto y = y0; y <= y1; y++, ny += texSize) {
+                auto index0 = layer * 100 + y * 10 + x0;
+                auto nx = cx;
+                for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
+                    auto p = gData.bonfiresAround(layer, x, y);
+                    auto *begin = std::get<0>(p);
+                    if (begin == nullptr) continue;
+                    auto *end = std::get<1>(p);
+                    for (auto *bonfire = begin; bonfire < end; bonfire++) {
+                        if (!bonfire->isUnlocked()) continue;
+                        auto rx = bonfire->localX * mapScale_ + nx;
+                        auto ry = bonfire->localY * mapScale_ + ny;
+                        if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
+                            ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
+                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize));
+                        }
                     }
                 }
             }

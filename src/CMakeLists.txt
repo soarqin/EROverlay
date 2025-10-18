@@ -15,6 +15,12 @@ add_project(EROverlayDLL SHARED
     # Plugin API
     api.cpp api.h
 
+    # params
+    params/param.cpp params/param.hpp
+    params/paraminternal.hpp
+    params/pointers.cpp params/pointers.hpp
+    params/wstring.cpp params/wstring.hpp
+
     # util
     util/file.cpp util/file.hpp
     util/memory.hpp util/signature.hpp

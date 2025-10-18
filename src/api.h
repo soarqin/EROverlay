@@ -68,6 +68,9 @@ typedef struct {
     GameAddresses (*getGameAddresses)();
     uintptr_t (*resolveFlagAddress)(uint32_t flagId, uint8_t *bits);
 
+    // Params
+    const void *(*paramFindTable)(const wchar_t *name);
+
     // Rendering functions
     TextureContext (*loadTexture)(const wchar_t *filename);
     void (*destroyTexture)(TextureContext *texture);

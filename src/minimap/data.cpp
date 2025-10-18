@@ -1,10 +1,14 @@
 #include "data.hpp"
 
-#include "api.h"
+#include "paramdefs.hpp"
 
-#include <nlohmann/json.hpp>
+#include "api.h"
+#include "params/param.hpp"
+
 #include <fstream>
 #include <filesystem>
+#include <thread>
+#include <cmath>
 
 extern EROverlayAPI *api;
 
@@ -26,6 +30,137 @@ bool BonfireInfo::isUnlocked() const {
 }
 
 void Data::load() {
+    std::thread th([this]() {
+        const void *t = api->paramFindTable(L"WorldMapLegacyConvParam");
+        if (t == nullptr) {
+            fwprintf(stderr, L"Unable to find WorldMapLegacyConvParam\n");
+            return;
+        }
+        struct ConvValue {
+            uint8_t u;
+            uint8_t v;
+            uint8_t w;
+            float x;
+            float y;
+            float z;
+        };
+        auto buildKey = [](uint8_t area, uint8_t gridX, uint8_t gridZ) {
+            return (uint32_t)area * 10000 + (uint32_t)gridX * 100 + (uint32_t)gridZ;
+        };
+        std::unordered_map<uint32_t, ConvValue> convTable;
+        paramTableIterateBegin(t, WorldMapLegacyConvParam, wmlcp) {
+            auto u0 = wmlcp->srcAreaNo;
+            auto u1 = wmlcp->dstAreaNo;
+            if (u0 != 60 && u0 != 61 && (u1 == 60 || u1 == 61)) {
+                auto key = buildKey(u0, wmlcp->srcGridXNo, wmlcp->srcGridZNo);
+                convTable[key] = { u1, wmlcp->dstGridXNo, wmlcp->dstGridZNo, wmlcp->dstPosX - wmlcp->srcPosX, wmlcp->dstPosY - wmlcp->srcPosY, wmlcp->dstPosZ - wmlcp->srcPosZ };
+            }
+        } paramTableIterateEnd();
+        paramTableIterateBegin(t, WorldMapLegacyConvParam, wmlcp) {
+            auto u0 = wmlcp->srcAreaNo;
+            auto u1 = wmlcp->dstAreaNo;
+            if (u0 != 60 && u0 != 61 && u1 != 60 && u1 != 61) {
+                auto key = buildKey(u0, wmlcp->srcGridXNo, wmlcp->srcGridZNo);
+                auto key2 = buildKey(u1, wmlcp->dstGridXNo, wmlcp->dstGridZNo);
+                if (convTable.find(key) == convTable.end()) {
+                    if (convTable.find(key2) != convTable.end()) {
+                        auto &c = convTable[key2];
+                        convTable[key] = { c.u, c.v, c.w, c.x + wmlcp->dstPosX - wmlcp->srcPosX, c.y + wmlcp->dstPosY - wmlcp->srcPosY, c.z + wmlcp->dstPosZ - wmlcp->srcPosZ };
+                    }
+                }
+                if (convTable.find(key2) == convTable.end()) {
+                    if (convTable.find(key) != convTable.end()) {
+                        auto &c = convTable[key];
+                        convTable[key2] = { c.u, c.v, c.w, c.x + wmlcp->srcPosX - wmlcp->dstPosX, c.y + wmlcp->srcPosY - wmlcp->dstPosY, c.z + wmlcp->srcPosZ - wmlcp->dstPosZ };
+                    }
+                }
+            }
+        } paramTableIterateEnd();
+
+        for (auto i = 0; i < 3; ++i) {
+            bonfires_[i].clear();
+            bonfiresAround_[i].clear();
+        }
+        t = api->paramFindTable(L"BonfireWarpParam");
+        if (t == nullptr) {
+            fwprintf(stderr, L"Unable to find BonfireWarpParam\n");
+            return;
+        }
+        paramTableIterateBegin(t, BonfireWarpParam, bwp) {
+            uint8_t layer;
+            if (bwp->dispMask00) {
+                layer = 0;
+            } else if (bwp->dispMask01) {
+                layer = 1;
+            } else if (bwp->dispMask02) {
+                layer = 2;
+            } else {
+                continue;
+            }
+            auto u0 = bwp->areaNo;
+            float worldX, worldZ;
+            if (u0 == 60 || u0 == 61) {
+                worldX = (bwp->gridXNo - 28) * 256.0f + 128.0f + bwp->posX;
+                worldZ = (64 - bwp->gridZNo) * 256.0f + 128.0f - bwp->posZ;
+                if (layer == 2) {
+                    worldX -= 3035.0f;
+                    worldZ -= 1864.0f;
+                }
+            } else {
+                auto key = buildKey(u0, bwp->gridXNo, bwp->gridZNo);
+                if (convTable.find(key) != convTable.end()) {
+                    auto &c = convTable[key];
+                    worldX = (c.v - 28) * 256.0f + 128.0f + bwp->posX + c.x;
+                    worldZ = (64 - c.w) * 256.0f + 128.0f - bwp->posZ - c.z;
+                    if (layer == 2) {
+                        worldX -= 3035.0f;
+                        worldZ -= 1864.0f;
+                    }
+                } else {
+                    continue;
+                }
+            }
+            auto &g = bonfires_[layer].emplace_back();
+            g.x = worldX;
+            g.y = worldZ;
+            g.id = entry->paramId;
+            g.textId = bwp->textId1;
+            g.eventFlagId = bwp->eventflagId;
+            g.layer = layer;
+            int areaX = (int32_t)std::floor(g.x) / 1024;
+            int areaY = (int32_t)std::floor(g.y) / 1024;
+            g.localX = g.x - areaX * 1024;
+            g.localY = g.y - areaY * 1024;
+            g.sortKey = areaY * 10 + areaX;
+        } paramTableIterateEnd();
+        for (auto i = 0; i < 3; ++i) {
+            auto &l = bonfires_[i];
+            std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
+                if (a.sortKey == b.sortKey) {
+                    return a.id < b.id;
+                }
+                return a.sortKey < b.sortKey;
+            });
+            auto sz = l.size();
+            auto lastSortKey = -1;
+            const auto *lastBonfire = &l.front();
+            auto &garound = bonfiresAround_[i];
+            for (auto &g: l) {
+                if (g.sortKey != lastSortKey) {
+                    if (lastSortKey != -1) {
+                        garound[lastSortKey] = { lastBonfire, &g };
+                    }
+                    lastSortKey = g.sortKey;
+                    lastBonfire = &g;
+                }
+            }
+            if (lastSortKey != -1) {
+                garound[lastSortKey] = { lastBonfire, &l.front() + sz };
+            }
+        }
+        paramsLoaded_ = true;
+    });
+    th.detach();
     csMenuManImp_ = api->getGameAddresses().csMenuManImp;
     if (api->getGameVersion() < 0x0002000100000000ULL) {
         // 1.02 ~ 1.10.1
@@ -33,60 +168,6 @@ void Data::load() {
     } else {
         // 1.12+
         locationOffset_ = 0x250;
-    }
-
-    for (auto i = 0; i < 3; ++i) {
-        bonfires_[i].clear();
-        bonfiresAround_[i].clear();
-    }
-    auto path = std::filesystem::path(api->getModulePath());
-    path /= "data";
-    path /= "bonfires.json";
-    std::ifstream ifs(path);
-    if (!ifs) {
-        fwprintf(stderr, L"Unable to open %ls\n", path.wstring().c_str());
-        return;
-    }
-    auto json = nlohmann::json::parse(ifs);
-    for (auto &p: json.items()) {
-        auto& val = p.value();
-        auto &g = bonfires_[val["layer"].get<int32_t>()].emplace_back();
-        g.id = std::stoi(p.key());
-        g.textId = val["textId"];
-        g.eventFlagId = val["eventFlagId"];
-        g.layer = val["layer"];
-        g.x = val["worldX"];
-        g.y = val["worldZ"];
-        int areaX = (int32_t)std::floor(g.x) / 1024;
-        int areaY = (int32_t)std::floor(g.y) / 1024;
-        g.localX = g.x - areaX * 1024;
-        g.localY = g.y - areaY * 1024;
-        g.sortKey = areaY * 10 + areaX;
-    }
-    for (auto i = 0; i < 3; ++i) {
-        auto &l = bonfires_[i];
-        std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
-            if (a.sortKey == b.sortKey) {
-                return a.id < b.id;
-            }
-            return a.sortKey < b.sortKey;
-        });
-        auto sz = l.size();
-        auto lastSortKey = -1;
-        const auto *lastBonfire = &l.front();
-        auto &garound = bonfiresAround_[i];
-        for (auto &g: l) {
-            if (g.sortKey != lastSortKey) {
-                if (lastSortKey != -1) {
-                    garound[lastSortKey] = { lastBonfire, &g };
-                }
-                lastSortKey = g.sortKey;
-                lastBonfire = &g;
-            }
-        }
-        if (lastSortKey != -1) {
-            garound[lastSortKey] = { lastBonfire, &l.front() + sz };
-        }
     }
 }
 

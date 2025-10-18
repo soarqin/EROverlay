@@ -19,9 +19,9 @@ struct Location {
 };
 
 struct BonfireInfo {
-    int32_t id;
+    uint64_t id;
     int32_t textId;
-    int32_t eventFlagId;
+    uint32_t eventFlagId;
     int32_t layer;
     float x;
     float y;
@@ -38,6 +38,7 @@ class Data {
 public:
     void load();
     void update();
+    [[nodiscard]] inline bool paramsLoaded() const { return paramsLoaded_; }
     [[nodiscard]] inline const Location &location() const { return location_; }
     [[nodiscard]] inline bool onGUI() const { return onGUI_; }
     [[nodiscard]] inline const std::vector<BonfireInfo> &bonfires(int32_t layer) const { return bonfires_[layer]; }
@@ -48,6 +49,7 @@ private:
     size_t locationOffset_ = 0;
     Location location_ = {};
     bool onGUI_ = false;
+    bool paramsLoaded_ = false;
 
     std::vector<BonfireInfo> bonfires_[3];
     std::unordered_map<int32_t, std::tuple<const BonfireInfo *, const BonfireInfo *>> bonfiresAround_[3];
