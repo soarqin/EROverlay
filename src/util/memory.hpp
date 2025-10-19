@@ -4,7 +4,6 @@
 #include <windows.h>
 
 #include <type_traits>
-#include <vector>
 #include <cstdint>
 
 namespace er::util {
