@@ -1,12 +1,14 @@
 #include "data.hpp"
 
-#include "paramdefs.hpp"
+#include "defs/BonfireWarpParam.h"
+#include "defs/WorldMapLegacyConvParam.h"
 
 #include "api.h"
 #include "params/param.hpp"
+#include "util/string.hpp"
 
-#include <fstream>
-#include <filesystem>
+#include <imgui.h>
+
 #include <thread>
 #include <cmath>
 
@@ -87,16 +89,8 @@ void Data::load() {
             return;
         }
         paramTableIterateBegin(t, BonfireWarpParam, bwp) {
-            uint8_t layer;
-            if (bwp->dispMask00) {
-                layer = 0;
-            } else if (bwp->dispMask01) {
-                layer = 1;
-            } else if (bwp->dispMask02) {
-                layer = 2;
-            } else {
-                continue;
-            }
+            int32_t layer = bwp->dispMask00 ? 0 : bwp->dispMask01 ? 1 : bwp->dispMask02 ? 2 : -1;
+            if (layer == -1) continue;
             auto u0 = bwp->areaNo;
             float worldX, worldZ;
             if (u0 == 60 || u0 == 61) {
@@ -169,12 +163,51 @@ void Data::load() {
         // 1.12+
         locationOffset_ = 0x250;
     }
+
+    toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
+    scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
+    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,40%"));
+    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,40%"));
+    scales_ = util::strSplitToFloatVec(api->configGetString("minimap.scale", L"0.75,1"));
+    auto maxCount = std::max(widthRatios_.size(), std::max(heightRatios_.size(), scales_.size()));
+    if (maxCount == 0) {
+        maxCount = 1;
+        widthRatios_.push_back(0.3f);
+        heightRatios_.push_back(0.3f);
+        scales_.push_back(0.75f);
+    } else {
+        while (widthRatios_.size() < maxCount) {
+            widthRatios_.push_back(widthRatios_.back());
+        }
+        while (heightRatios_.size() < maxCount) {
+            heightRatios_.push_back(heightRatios_.back());
+        }
+        while (scales_.size() < maxCount) {
+            scales_.push_back(scales_.back());
+        }
+    }
+    currentWidthRatio_ = widthRatios_[0];
+    currentHeightRatio_ = heightRatios_[0];
+    currentScale_ = scales_[0];
+    alpha_ = api->configGetFloat("minimap.alpha", 0.8f);
 }
 
 void Data::update() {
     auto addr = *(uintptr_t*)csMenuManImp_;
-    if (addr == 0) return;
+    if (addr == 0) {
+        onGUI_ = true;
+        return;
+    }
     onGUI_ = api->screenState() != 0 || (*reinterpret_cast<uint8_t*>(addr + 0xAC) & 1u) == 1u || (*reinterpret_cast<uint8_t*>(addr + 0xCD) & 1u) == 1u;
+    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyPressed(static_cast<ImGuiKey>(toggleKey_))) {
+        show_ = !show_;
+    }
+    if (scaleKey_ != 0 && ImGui::IsKeyPressed(static_cast<ImGuiKey>(scaleKey_))) {
+        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
+        currentScale_ = scales_[currentScaleIndex_];
+        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
+        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
+    }
 
     addr = *(uintptr_t*)(addr + 0x80);
     if (addr == 0) return;

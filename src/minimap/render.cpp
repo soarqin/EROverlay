@@ -31,25 +31,22 @@ static constexpr float texturePlayerOriginY = 34.f;
 static constexpr float texturePlayerScale = 0.33f;
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
-    minimapWidthRatio_ = std::clamp(api->configGetFloat("minimap.width_ratio", 0.3f), 0.1f, 0.5f);
-    minimapHeightRatio_ = std::clamp(api->configGetFloat("minimap.height_ratio", 0.3f), 0.1f, 0.5f);
-    mapScale_ = std::clamp(api->configGetFloat("minimap.scale", 0.75f), 0.3f, 1.5f);
-    mapAlpha_ = std::clamp(api->configGetFloat("minimap.alpha", 0.8f), 0.f, 1.f);
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
     textures_.resize(300);
 }
 
 bool Renderer::render() {
-    if (gData.onGUI()) {
+    if (!gData.visible()) {
         return false;
     }
+    auto [widthRatio, heightRatio, scale, mapAlpha_] = gData.currentRatioScaleAlpha();
     const auto &location = gData.location();
     if (location.x == 0.f) return false;
     auto *vp = ImGui::GetMainViewport();
     auto realHeight = vp->Size.x * .5625f >= vp->Size.y ? vp->Size.y : vp->Size.x * .5625f;
-    minimapWidth_ = realHeight * minimapWidthRatio_;
-    minimapHeight_ = realHeight * minimapHeightRatio_;
+    minimapWidth_ = realHeight * widthRatio;
+    minimapHeight_ = realHeight * heightRatio;
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec2 originalPadding = style.WindowPadding;
     style.WindowPadding = ImVec2(0, 0);
@@ -84,7 +81,7 @@ bool Renderer::render() {
         }
         dx /= textureSize;
         dy /= textureSize;
-        auto texSize = textureSize * mapScale_;
+        auto texSize = textureSize * scale;
         auto u = minimapWidth_ / texSize;
         auto v = minimapHeight_ / texSize;
         dx -= u * 0.5f;
@@ -100,7 +97,7 @@ bool Renderer::render() {
             auto index0 = layer * 100 + y * 10 + x0;
             auto nx = cx;
             for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                renderMinimap(index0, nx, ny, mapScale_);
+                renderMinimap(index0, nx, ny, scale);
             }
         }
         if (!playerTexture_.loaded) {
@@ -118,7 +115,7 @@ bool Renderer::render() {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
-            auto bonfireSize = 39.f * mapScale_;
+            auto bonfireSize = 39.f * scale;
             auto bonfireOffset = -bonfireSize * .5f;
             for (auto y = y0; y <= y1; y++, ny += texSize) {
                 auto index0 = layer * 100 + y * 10 + x0;
@@ -130,11 +127,11 @@ bool Renderer::render() {
                     auto *end = std::get<1>(p);
                     for (auto *bonfire = begin; bonfire < end; bonfire++) {
                         if (!bonfire->isUnlocked()) continue;
-                        auto rx = bonfire->localX * mapScale_ + nx;
-                        auto ry = bonfire->localY * mapScale_ + ny;
+                        auto rx = bonfire->localX * scale + nx;
+                        auto ry = bonfire->localY * scale + ny;
                         if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
                             ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize));
+                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
                         }
                     }
                 }
@@ -142,7 +139,7 @@ bool Renderer::render() {
         }
         if (drawRoundTable && roundTableTexture_.texture != nullptr) {
             ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableTexture_.width * .25f, minimapHeight_ * .5f - roundTableTexture_.height * .25f));
-            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f));
+            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
         }
         renderPlayer();
     }
@@ -194,7 +191,7 @@ void Renderer::renderPlayer() {
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
     ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * texturePlayerScale, halfHeight - texturePlayerOriginY * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale));
+    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
     if (arrowTexture_.texture == nullptr) {
         return;
     }

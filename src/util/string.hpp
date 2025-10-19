@@ -70,6 +70,10 @@ inline std::vector<float> strSplitToFloatVec(const std::string &s) {
     return elems;
 }
 
+inline std::vector<float> strSplitToFloatVec(const std::wstring &s) {
+    return strSplitToFloatVec(std::string(s.begin(), s.end()));
+}
+
 inline float strToFloat(const std::string &s) {
     if (s.back() == '%') {
         return std::stof(s.substr(0, s.size() - 1)) / 100.f;

@@ -2,7 +2,8 @@ add_project(minimap SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
-    paramdefs.hpp
+    defs/BonfireWarpParam.h
+    defs/WorldMapLegacyConvParam.h
 
     LANGUAGES CXX
     FOLDER overlays

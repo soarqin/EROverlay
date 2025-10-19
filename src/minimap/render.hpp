@@ -2,9 +2,7 @@
 
 #include "api.h"
 
-#include <string>
 #include <vector>
-#include <cstdint>
 
 namespace er::minimap {
 
@@ -23,12 +21,10 @@ private:
     TextureContext roundTableTexture_ = {};
     TextureContext bonfireTexture_ = {};
     std::vector<TextureContext> textures_;
-    float minimapWidthRatio_ = .3f;
-    float minimapHeightRatio_ = .3f;
-    float minimapWidth_ = 400.0f;
-    float minimapHeight_ = 400.0f;
-    float mapScale_ = 0.75f;
-    float mapAlpha_ = 0.8f;
+
+    float minimapWidth_ = 0.f;
+    float minimapHeight_ = 0.f;
+    float mapAlpha_ = 0.f;
 };
 
 }
