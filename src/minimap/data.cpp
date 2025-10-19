@@ -186,6 +186,11 @@ void Data::load() {
             scales_.push_back(scales_.back());
         }
     }
+    if (toggleKey_ == scaleKey_) {
+        scales_.push_back(0.f);
+        widthRatios_.push_back(widthRatios_.back());
+        heightRatios_.push_back(heightRatios_.back());
+    }
     currentWidthRatio_ = widthRatios_[0];
     currentHeightRatio_ = heightRatios_[0];
     currentScale_ = scales_[0];
@@ -199,21 +204,25 @@ void Data::update() {
         return;
     }
     onGUI_ = api->screenState() != 0 || (*reinterpret_cast<uint8_t*>(addr + 0xAC) & 1u) == 1u || (*reinterpret_cast<uint8_t*>(addr + 0xCD) & 1u) == 1u;
-    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyPressed(static_cast<ImGuiKey>(toggleKey_))) {
-        show_ = !show_;
-    }
-    if (scaleKey_ != 0 && ImGui::IsKeyPressed(static_cast<ImGuiKey>(scaleKey_))) {
-        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-        currentScale_ = scales_[currentScaleIndex_];
-        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
-        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
-    }
 
     addr = *(uintptr_t*)(addr + 0x80);
     if (addr == 0) return;
     addr = *(uintptr_t*)(addr + locationOffset_);
     if (addr == 0) return;
     location_ = *(Location*)(addr + 0x24);
+}
+
+void Data::updateInput() {
+    if (onGUI_) return;
+    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
+        show_ = !show_;
+    }
+    if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
+        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
+        currentScale_ = scales_[currentScaleIndex_];
+        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
+        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
+    }
 }
 
 std::tuple<const BonfireInfo *, const BonfireInfo *> Data::bonfiresAround(int32_t layer, int u, int v) const {

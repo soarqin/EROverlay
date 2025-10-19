@@ -12,8 +12,8 @@ public:
     bool render();
 
 private:
-    void renderMinimap(int index, float posX, float posY, float scale = 1.0f);
-    void renderPlayer();
+    void renderMinimap(int index, float posX, float posY, float alpha,float scale = 1.0f);
+    void renderPlayer(float alpha);
 
 private:
     TextureContext playerTexture_ = {};
@@ -24,7 +24,6 @@ private:
 
     float minimapWidth_ = 0.f;
     float minimapHeight_ = 0.f;
-    float mapAlpha_ = 0.f;
 };
 
 }

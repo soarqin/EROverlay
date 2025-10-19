@@ -37,10 +37,11 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 }
 
 bool Renderer::render() {
+    gData.updateInput();
     if (!gData.visible()) {
         return false;
     }
-    auto [widthRatio, heightRatio, scale, mapAlpha_] = gData.currentRatioScaleAlpha();
+    auto [widthRatio, heightRatio, scale, alpha] = gData.currentRatioScaleAlpha();
     const auto &location = gData.location();
     if (location.x == 0.f) return false;
     auto *vp = ImGui::GetMainViewport();
@@ -97,7 +98,7 @@ bool Renderer::render() {
             auto index0 = layer * 100 + y * 10 + x0;
             auto nx = cx;
             for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                renderMinimap(index0, nx, ny, scale);
+                renderMinimap(index0, nx, ny, alpha, scale);
             }
         }
         if (!playerTexture_.loaded) {
@@ -131,7 +132,7 @@ bool Renderer::render() {
                         auto ry = bonfire->localY * scale + ny;
                         if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
                             ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
+                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
                         }
                     }
                 }
@@ -139,16 +140,16 @@ bool Renderer::render() {
         }
         if (drawRoundTable && roundTableTexture_.texture != nullptr) {
             ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableTexture_.width * .25f, minimapHeight_ * .5f - roundTableTexture_.height * .25f));
-            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
+            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
         }
-        renderPlayer();
+        renderPlayer(alpha);
     }
     ImGui::End();
     style.WindowPadding = originalPadding;
     return false;
 }
 
-void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
+void Renderer::renderMinimap(int index, float posX, float posY, float alpha, float scale) {
     auto &t = textures_[index];
     if (!t.loaded) {
         wchar_t path[256];
@@ -181,17 +182,17 @@ void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
         height = minimapHeight_ - posY;
     }
     ImGui::SetCursorPos(ImVec2(posX, posY));
-    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
+    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
 }
 
-void Renderer::renderPlayer() {
+void Renderer::renderPlayer(float alpha) {
     if (playerTexture_.texture == nullptr) {
         return;
     }
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
     ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * texturePlayerScale, halfHeight - texturePlayerOriginY * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, mapAlpha_));
+    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
     if (arrowTexture_.texture == nullptr) {
         return;
     }
@@ -210,7 +211,7 @@ void Renderer::renderPlayer() {
     auto p4 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
     drawList->PushTexture((ImTextureID)arrowTexture_.gpuHandle);
     drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32_WHITE);
+    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(alpha * 255.f)));
     drawList->PopTexture();
 }
 

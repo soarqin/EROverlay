@@ -35,6 +35,7 @@ class Data {
 public:
     void load();
     void update();
+    void updateInput();
 
     [[nodiscard]] inline bool visible() const { return !onGUI_ && show_ && currentScale_ > 0.0001f; }
     [[nodiscard]] inline std::tuple<float, float, float, float> currentRatioScaleAlpha() const { return { currentWidthRatio_, currentHeightRatio_, currentScale_, alpha_ }; }
