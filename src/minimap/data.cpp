@@ -5,11 +5,9 @@
 
 #include "api.h"
 #include "params/param.hpp"
-#include "util/string.hpp"
-
-#include <imgui.h>
 
 #include <unordered_map>
+#include <algorithm>
 #include <thread>
 #include <cmath>
 
@@ -171,38 +169,6 @@ void Data::load() {
         // 1.12+
         locationOffset_ = 0x250;
     }
-
-    toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
-    scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
-    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,40%"));
-    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,40%"));
-    scales_ = util::strSplitToFloatVec(api->configGetString("minimap.scale", L"0.75,1"));
-    auto maxCount = std::max(widthRatios_.size(), std::max(heightRatios_.size(), scales_.size()));
-    if (maxCount == 0) {
-        maxCount = 1;
-        widthRatios_.push_back(0.3f);
-        heightRatios_.push_back(0.3f);
-        scales_.push_back(0.75f);
-    } else {
-        while (widthRatios_.size() < maxCount) {
-            widthRatios_.push_back(widthRatios_.back());
-        }
-        while (heightRatios_.size() < maxCount) {
-            heightRatios_.push_back(heightRatios_.back());
-        }
-        while (scales_.size() < maxCount) {
-            scales_.push_back(scales_.back());
-        }
-    }
-    if (toggleKey_ == scaleKey_) {
-        scales_.push_back(0.f);
-        widthRatios_.push_back(widthRatios_.back());
-        heightRatios_.push_back(heightRatios_.back());
-    }
-    currentWidthRatio_ = widthRatios_[0];
-    currentHeightRatio_ = heightRatios_[0];
-    currentScale_ = scales_[0];
-    alpha_ = api->configGetFloat("minimap.alpha", 0.8f);
 }
 
 void Data::update() {
@@ -218,19 +184,6 @@ void Data::update() {
     addr = *(uintptr_t*)(addr + locationOffset_);
     if (addr == 0) return;
     location_ = *(Location*)(addr + 0x24);
-}
-
-void Data::updateInput() {
-    if (onGUI_) return;
-    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
-        show_ = !show_;
-    }
-    if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
-        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-        currentScale_ = scales_[currentScaleIndex_];
-        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
-        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
-    }
 }
 
 std::tuple<const BonfireInfo *, const BonfireInfo *> Data::bonfiresAround(int32_t layer, int u, int v) const {

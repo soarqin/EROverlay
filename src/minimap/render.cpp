@@ -1,8 +1,12 @@
 #define _USE_MATH_DEFINES
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include "render.hpp"
 
 #include "data.hpp"
 
+#include "util/string.hpp"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <windows.h>
@@ -20,8 +24,8 @@ static constexpr float roundTableMapX1 = 2940.f;
 static constexpr float roundTableMapY1 = 7710.f;
 static constexpr float roundTableAltPosX = 800.f;
 static constexpr float roundTableAltPosY = 9119.f - 800.f;
-static constexpr float dlcOffsetX = 3035.f;
-static constexpr float dlcOffsetY = 1864.f;
+static constexpr float dlcMapOffsetX = 3035.f;
+static constexpr float dlcMapOffsetY = 1864.f;
 static constexpr int textureSizeInt = 1024;
 static constexpr float textureSize = (float)textureSizeInt;
 static constexpr float textureArrowOriginX = 34.f;
@@ -34,20 +38,61 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
     textures_.resize(300);
+
+    toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
+    scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
+    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,40%"));
+    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,40%"));
+    scales_ = util::strSplitToFloatVec(api->configGetString("minimap.scale", L"0.75,1"));
+    auto maxCount = std::max(widthRatios_.size(), std::max(heightRatios_.size(), scales_.size()));
+    if (maxCount == 0) {
+        maxCount = 1;
+        widthRatios_.push_back(0.3f);
+        heightRatios_.push_back(0.3f);
+        scales_.push_back(0.75f);
+    } else {
+        while (widthRatios_.size() < maxCount) {
+            widthRatios_.push_back(widthRatios_.back());
+        }
+        while (heightRatios_.size() < maxCount) {
+            heightRatios_.push_back(heightRatios_.back());
+        }
+        while (scales_.size() < maxCount) {
+            scales_.push_back(scales_.back());
+        }
+    }
+    if (toggleKey_ == scaleKey_) {
+        scales_.push_back(0.f);
+        widthRatios_.push_back(widthRatios_.back());
+        heightRatios_.push_back(heightRatios_.back());
+    }
+    currentWidthRatio_ = widthRatios_[0];
+    currentHeightRatio_ = heightRatios_[0];
+    currentScale_ = scales_[0];
+    alpha_ = api->configGetFloat("minimap.alpha", 0.8f);
 }
 
 bool Renderer::render() {
-    gData.updateInput();
-    if (!gData.visible()) {
+    if (gData.onGUI()) return false;
+    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
+        show_ = !show_;
+    }
+    if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
+        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
+        currentScale_ = scales_[currentScaleIndex_];
+        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
+        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
+    }
+    if (!show_ || currentScale_ < 0.0001f) {
         return false;
     }
-    auto [widthRatio, heightRatio, scale, alpha] = gData.currentRatioScaleAlpha();
+
     const auto &location = gData.location();
     if (location.x == 0.f) return false;
     auto *vp = ImGui::GetMainViewport();
     auto realHeight = vp->Size.x * .5625f >= vp->Size.y ? vp->Size.y : vp->Size.x * .5625f;
-    minimapWidth_ = realHeight * widthRatio;
-    minimapHeight_ = realHeight * heightRatio;
+    minimapWidth_ = realHeight * currentWidthRatio_;
+    minimapHeight_ = realHeight * currentHeightRatio_;
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec2 originalPadding = style.WindowPadding;
     style.WindowPadding = ImVec2(0, 0);
@@ -73,8 +118,8 @@ bool Renderer::render() {
             }
             case 10:
                 layer = 2;
-                dx = location.x - dlcOffsetX;
-                dy = location.y - dlcOffsetY;
+                dx = location.x - dlcMapOffsetX;
+                dy = location.y - dlcMapOffsetY;
                 break;
             default:
                 ImGui::End();
@@ -82,7 +127,7 @@ bool Renderer::render() {
         }
         dx /= textureSize;
         dy /= textureSize;
-        auto texSize = textureSize * scale;
+        auto texSize = textureSize * currentScale_;
         auto u = minimapWidth_ / texSize;
         auto v = minimapHeight_ / texSize;
         dx -= u * 0.5f;
@@ -98,7 +143,7 @@ bool Renderer::render() {
             auto index0 = layer * 100 + y * 10 + x0;
             auto nx = cx;
             for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                renderMinimap(index0, nx, ny, alpha, scale);
+                renderMinimap(index0, nx, ny, currentScale_);
             }
         }
         if (!playerTexture_.loaded) {
@@ -116,7 +161,7 @@ bool Renderer::render() {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
-            auto bonfireSize = 39.f * scale;
+            auto bonfireSize = 39.f * currentScale_;
             auto bonfireOffset = -bonfireSize * .5f;
             for (auto y = y0; y <= y1; y++, ny += texSize) {
                 auto index0 = layer * 100 + y * 10 + x0;
@@ -128,11 +173,11 @@ bool Renderer::render() {
                     auto *end = std::get<1>(p);
                     for (auto *bonfire = begin; bonfire < end; bonfire++) {
                         if (!bonfire->isUnlocked()) continue;
-                        auto rx = bonfire->localX * scale + nx;
-                        auto ry = bonfire->localY * scale + ny;
+                        auto rx = bonfire->localX * currentScale_ + nx;
+                        auto ry = bonfire->localY * currentScale_ + ny;
                         if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
                             ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
+                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
                         }
                     }
                 }
@@ -140,16 +185,16 @@ bool Renderer::render() {
         }
         if (drawRoundTable && roundTableTexture_.texture != nullptr) {
             ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableTexture_.width * .25f, minimapHeight_ * .5f - roundTableTexture_.height * .25f));
-            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
+            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
         }
-        renderPlayer(alpha);
+        renderPlayer();
     }
     ImGui::End();
     style.WindowPadding = originalPadding;
     return false;
 }
 
-void Renderer::renderMinimap(int index, float posX, float posY, float alpha, float scale) {
+void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
     auto &t = textures_[index];
     if (!t.loaded) {
         wchar_t path[256];
@@ -182,17 +227,17 @@ void Renderer::renderMinimap(int index, float posX, float posY, float alpha, flo
         height = minimapHeight_ - posY;
     }
     ImGui::SetCursorPos(ImVec2(posX, posY));
-    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
+    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
 }
 
-void Renderer::renderPlayer(float alpha) {
+void Renderer::renderPlayer() {
     if (playerTexture_.texture == nullptr) {
         return;
     }
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
     ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * texturePlayerScale, halfHeight - texturePlayerOriginY * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha));
+    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
     if (arrowTexture_.texture == nullptr) {
         return;
     }
@@ -211,7 +256,7 @@ void Renderer::renderPlayer(float alpha) {
     auto p4 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
     drawList->PushTexture((ImTextureID)arrowTexture_.gpuHandle);
     drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(alpha * 255.f)));
+    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(alpha_ * 255.f)));
     drawList->PopTexture();
 }
 
