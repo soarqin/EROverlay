@@ -71,7 +71,11 @@ inline std::vector<float> strSplitToFloatVec(const std::string &s) {
 }
 
 inline std::vector<float> strSplitToFloatVec(const std::wstring &s) {
-    return strSplitToFloatVec(std::string(s.begin(), s.end()));
+    std::string str;
+    std::transform(s.begin(), s.end(), std::back_inserter(str), [] (wchar_t c) {
+        return (char)c;
+    });
+    return strSplitToFloatVec(str);
 }
 
 inline float strToFloat(const std::string &s) {

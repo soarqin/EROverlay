@@ -1,6 +1,6 @@
+#define _USE_MATH_DEFINES
 #include "render.hpp"
 
-#define _USE_MATH_DEFINES
 #include "data.hpp"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
