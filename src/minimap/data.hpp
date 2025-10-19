@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 #include <tuple>
 #include <cstdint>
 
@@ -66,7 +65,7 @@ private:
     float alpha_ = 0.8f;
 
     std::vector<BonfireInfo> bonfires_[3];
-    std::unordered_map<int32_t, std::tuple<const BonfireInfo *, const BonfireInfo *>> bonfiresAround_[3];
+    std::vector<std::tuple<const BonfireInfo *, const BonfireInfo *>> bonfiresAround_[3];
 };
 
 extern Data gData;

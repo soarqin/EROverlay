@@ -9,6 +9,7 @@
 
 #include <imgui.h>
 
+#include <unordered_map>
 #include <thread>
 #include <cmath>
 
@@ -82,6 +83,7 @@ void Data::load() {
         for (auto i = 0; i < 3; ++i) {
             bonfires_[i].clear();
             bonfiresAround_[i].clear();
+            bonfiresAround_[i].resize(100);
         }
         t = api->paramFindTable(L"BonfireWarpParam");
         if (t == nullptr) {
@@ -142,6 +144,9 @@ void Data::load() {
             for (auto &g: l) {
                 if (g.sortKey != lastSortKey) {
                     if (lastSortKey != -1) {
+                        if ((size_t)lastSortKey >= garound.size()) {
+                            garound.resize((size_t)(lastSortKey + 1));
+                        }
                         garound[lastSortKey] = { lastBonfire, &g };
                     }
                     lastSortKey = g.sortKey;
@@ -149,6 +154,9 @@ void Data::load() {
                 }
             }
             if (lastSortKey != -1) {
+                if ((size_t)lastSortKey >= garound.size()) {
+                    garound.resize((size_t)(lastSortKey + 1));
+                }
                 garound[lastSortKey] = { lastBonfire, &l.front() + sz };
             }
         }
@@ -226,13 +234,12 @@ void Data::updateInput() {
 }
 
 std::tuple<const BonfireInfo *, const BonfireInfo *> Data::bonfiresAround(int32_t layer, int u, int v) const {
-    auto sortKey = v * 10 + u;
+    size_t sortKey = (size_t)(v * 10 + u);
     auto &bonfires = bonfiresAround_[layer];
-    auto it = bonfires.find(sortKey);
-    if (it == bonfires.end()) {
+    if (sortKey >= bonfires.size()) {
         return { nullptr, nullptr };
     }
-    return it->second;
+    return bonfires[sortKey];
 }
 
 }
