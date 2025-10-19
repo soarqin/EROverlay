@@ -3,6 +3,7 @@
 #include "global.hpp"
 #include "util/string.hpp"
 
+#include <imgui.h>
 #include <ini.h>
 
 #include <filesystem>
@@ -12,209 +13,217 @@
 
 namespace er {
 
-std::vector<int> mapStringToVKey(const std::string &name) {
+int mapStringToImGuiKey(const std::string &name) {
     static const std::map<std::string, int> sVKeyMap = {
-        {"LWIN", VK_LWIN | 0x8000},
-        {"WIN", VK_LWIN | 0x8000},
-        {"RWIN", VK_RWIN | 0x8000},
-        {"ALT", VK_MENU | 0x8000},
-        {"LALT", VK_LMENU | 0x8000},
-        {"RALT", VK_RMENU | 0x8000},
-        {"CTRL", VK_CONTROL | 0x8000},
-        {"LCTRL", VK_LCONTROL | 0x8000},
-        {"RCTRL", VK_RCONTROL | 0x8000},
-        {"CTRL", VK_SHIFT | 0x8000},
-        {"LSHIFT", VK_LSHIFT | 0x8000},
-        {"RSHIFT", VK_RSHIFT | 0x8000},
-        {"LBUTTON", VK_LBUTTON},
-        {"RBUTTON", VK_RBUTTON},
-        {"CANCEL", VK_CANCEL},
-        {"MBUTTON", VK_MBUTTON},
-        {"XBUTTON1", VK_XBUTTON1},
-        {"XBUTTON2", VK_XBUTTON2},
-        {"BACK", VK_BACK},
-        {"BACKSPACE", VK_BACK},
-        {"TAB", VK_TAB},
-        {"CLEAR", VK_CLEAR},
-        {"RETURN", VK_RETURN},
-        {"ENTER", VK_RETURN},
-        {"PAUSE", VK_PAUSE},
-        {"CAPITAL", VK_CAPITAL},
-        {"CAPSLOCK", VK_CAPITAL},
-        {"KANA", VK_KANA},
-        {"HANGUL", VK_HANGUL},
-        {"JUNJA", VK_JUNJA},
-        {"FINAL", VK_FINAL},
-        {"HANJA", VK_HANJA},
-        {"KANJI", VK_KANJI},
-        {"ESCAPE", VK_ESCAPE},
-        {"ESC", VK_ESCAPE},
-        {"CONVERT", VK_CONVERT},
-        {"NONCONVERT", VK_NONCONVERT},
-        {"ACCEPT", VK_ACCEPT},
-        {"MODECHANGE", VK_MODECHANGE},
-        {"SPACE", VK_SPACE},
-        {"PRIOR", VK_PRIOR},
-        {"NEXT", VK_NEXT},
-        {"END", VK_END},
-        {"HOME", VK_HOME},
-        {"LEFT", VK_LEFT},
-        {"UP", VK_UP},
-        {"RIGHT", VK_RIGHT},
-        {"DOWN", VK_DOWN},
-        {"SELECT", VK_SELECT},
-        {"PRINT", VK_PRINT},
-        {"EXECUTE", VK_EXECUTE},
-        {"SNAPSHOT", VK_SNAPSHOT},
-        {"INSERT", VK_INSERT},
-        {"DELETE", VK_DELETE},
-        {"HELP", VK_HELP},
-        {"0", 0x30},
-        {"1", 0x31},
-        {"2", 0x32},
-        {"3", 0x33},
-        {"4", 0x34},
-        {"5", 0x35},
-        {"6", 0x36},
-        {"7", 0x37},
-        {"8", 0x38},
-        {"9", 0x39},
-        {"A", 0x41},
-        {"B", 0x42},
-        {"C", 0x43},
-        {"D", 0x44},
-        {"E", 0x45},
-        {"F", 0x46},
-        {"G", 0x47},
-        {"H", 0x48},
-        {"I", 0x49},
-        {"J", 0x4A},
-        {"K", 0x4B},
-        {"L", 0x4C},
-        {"M", 0x4D},
-        {"N", 0x4E},
-        {"O", 0x4F},
-        {"P", 0x50},
-        {"Q", 0x51},
-        {"R", 0x52},
-        {"S", 0x53},
-        {"T", 0x54},
-        {"U", 0x55},
-        {"V", 0x56},
-        {"W", 0x57},
-        {"X", 0x58},
-        {"Y", 0x59},
-        {"Z", 0x5A},
-        {"APPS", VK_APPS},
-        {"SLEEP", VK_SLEEP},
-        {"NUMPAD0", VK_NUMPAD0},
-        {"NUMPAD1", VK_NUMPAD1},
-        {"NUMPAD2", VK_NUMPAD2},
-        {"NUMPAD3", VK_NUMPAD3},
-        {"NUMPAD4", VK_NUMPAD4},
-        {"NUMPAD5", VK_NUMPAD5},
-        {"NUMPAD6", VK_NUMPAD6},
-        {"NUMPAD7", VK_NUMPAD7},
-        {"NUMPAD8", VK_NUMPAD8},
-        {"NUMPAD9", VK_NUMPAD9},
-        {"NUM0", VK_NUMPAD0},
-        {"NUM1", VK_NUMPAD1},
-        {"NUM2", VK_NUMPAD2},
-        {"NUM3", VK_NUMPAD3},
-        {"NUM4", VK_NUMPAD4},
-        {"NUM5", VK_NUMPAD5},
-        {"NUM6", VK_NUMPAD6},
-        {"NUM7", VK_NUMPAD7},
-        {"NUM8", VK_NUMPAD8},
-        {"NUM9", VK_NUMPAD9},
-        {"MULTIPLY", VK_MULTIPLY},
-        {"ADD", VK_ADD},
-        {"SUBTRACT", VK_SUBTRACT},
-        {"MINUS", VK_SUBTRACT},
-        {"DECIMAL", VK_DECIMAL},
-        {"DIVIDE", VK_DIVIDE},
-        {"F1", VK_F1},
-        {"F2", VK_F2},
-        {"F3", VK_F3},
-        {"F4", VK_F4},
-        {"F5", VK_F5},
-        {"F6", VK_F6},
-        {"F7", VK_F7},
-        {"F8", VK_F8},
-        {"F9", VK_F9},
-        {"F10", VK_F10},
-        {"F11", VK_F11},
-        {"F12", VK_F12},
-        {"F13", VK_F13},
-        {"F14", VK_F14},
-        {"F15", VK_F15},
-        {"F16", VK_F16},
-        {"F17", VK_F17},
-        {"F18", VK_F18},
-        {"F19", VK_F19},
-        {"F20", VK_F20},
-        {"F21", VK_F21},
-        {"F22", VK_F22},
-        {"F23", VK_F23},
-        {"F24", VK_F24},
-        {"NUMLOCK", VK_NUMLOCK},
-        {"SCROLL", VK_SCROLL},
-        {"BROWSER_BACK", VK_BROWSER_BACK},
-        {"BROWSER_FORWARD", VK_BROWSER_FORWARD},
-        {"BROWSER_REFRESH", VK_BROWSER_REFRESH},
-        {"BROWSER_STOP", VK_BROWSER_STOP},
-        {"BROWSER_SEARCH", VK_BROWSER_SEARCH},
-        {"BROWSER_FAVORITES", VK_BROWSER_FAVORITES},
-        {"BROWSER_HOME", VK_BROWSER_HOME},
-        {"VOLUME_MUTE", VK_VOLUME_MUTE},
-        {"VOLUME_DOWN", VK_VOLUME_DOWN},
-        {"VOLUME_UP", VK_VOLUME_UP},
-        {"MEDIA_NEXT_TRACK", VK_MEDIA_NEXT_TRACK},
-        {"MEDIA_PREV_TRACK", VK_MEDIA_PREV_TRACK},
-        {"MEDIA_STOP", VK_MEDIA_STOP},
-        {"MEDIA_PLAY_PAUSE", VK_MEDIA_PLAY_PAUSE},
-        {"LAUNCH_MAIL", VK_LAUNCH_MAIL},
-        {"LAUNCH_MEDIA_SELECT", VK_LAUNCH_MEDIA_SELECT},
-        {"LAUNCH_APP1", VK_LAUNCH_APP1},
-        {"LAUNCH_APP2", VK_LAUNCH_APP2},
-        {"=", VK_OEM_PLUS},
-        {",", VK_OEM_COMMA},
-        {"-", VK_OEM_MINUS},
-        {".", VK_OEM_PERIOD},
-        {";", VK_OEM_1},
-        {"/", VK_OEM_2},
-        {"~", VK_OEM_3},
-        {"`", VK_OEM_3},
-        {"[", VK_OEM_4},
-        {"\\", VK_OEM_5},
-        {"]", VK_OEM_6},
-        {"'", VK_OEM_7},
-        {"PROCESSKEY", VK_PROCESSKEY},
-        {"ATTN", VK_ATTN},
-        {"CRSEL", VK_CRSEL},
-        {"EXSEL", VK_EXSEL},
-        {"EREOF", VK_EREOF},
-        {"PLAY", VK_PLAY},
-        {"ZOOM", VK_ZOOM},
-        {"PA1", VK_PA1},
-        {"OEM_CLEAR", VK_OEM_CLEAR},
+        {"WIN", ImGuiMod_Super},
+        {"LWIN", ImGuiKey_LeftSuper},
+        {"RWIN", ImGuiKey_RightSuper},
+        {"ALT", ImGuiMod_Alt},
+        {"LALT", ImGuiKey_LeftAlt},
+        {"RALT", ImGuiKey_RightAlt},
+        {"CTRL", ImGuiMod_Ctrl},
+        {"LCTRL", ImGuiKey_LeftCtrl},
+        {"RCTRL", ImGuiKey_RightCtrl},
+        {"SHIFT", ImGuiMod_Shift},
+        {"LSHIFT", ImGuiKey_LeftShift},
+        {"RSHIFT", ImGuiKey_RightShift},
+        // {"LBUTTON", VK_LBUTTON}, // Not available in ImGuiKey_
+        // {"RBUTTON", VK_RBUTTON}, // Not available in ImGuiKey_
+        // {"CANCEL", VK_CANCEL}, // Not available in ImGuiKey_
+        // {"MBUTTON", VK_MBUTTON}, // Not available in ImGuiKey_
+        // {"XBUTTON1", VK_XBUTTON1}, // Not available in ImGuiKey_
+        // {"XBUTTON2", VK_XBUTTON2}, // Not available in ImGuiKey_
+        {"BACK", ImGuiKey_Backspace},
+        {"BACKSPACE", ImGuiKey_Backspace},
+        {"TAB", ImGuiKey_Tab},
+        // {"CLEAR", VK_CLEAR},
+        {"RETURN", ImGuiKey_Enter},
+        {"ENTER", ImGuiKey_Enter},
+        {"PAUSE", ImGuiKey_Pause},
+        {"CAPITAL", ImGuiKey_CapsLock},
+        {"CAPSLOCK", ImGuiKey_CapsLock},
+        // {"KANA", VK_KANA}, // Not available in ImGuiKey_
+        // {"HANGUL", VK_HANGUL}, // Not available in ImGuiKey_
+        // {"JUNJA", VK_JUNJA}, // Not available in ImGuiKey_
+        // {"FINAL", VK_FINAL}, // Not available in ImGuiKey_
+        // {"HANJA", VK_HANJA}, // Not available in ImGuiKey_
+        // {"KANJI", VK_KANJI}, // Not available in ImGuiKey_
+        {"ESCAPE", ImGuiKey_Escape},
+        {"ESC", ImGuiKey_Escape},
+        // {"CONVERT", VK_CONVERT}, // Not available in ImGuiKey_
+        // {"NONCONVERT", VK_NONCONVERT}, // Not available in ImGuiKey_
+        // {"ACCEPT", VK_ACCEPT}, // Not available in ImGuiKey_
+        // {"MODECHANGE", VK_MODECHANGE}, // Not available in ImGuiKey_
+        {"SPACE", ImGuiKey_Space},
+        {"PAGEUP", ImGuiKey_PageUp},
+        {"PAGEDOWN", ImGuiKey_PageDown},
+        {"END", ImGuiKey_End},
+        {"HOME", ImGuiKey_Home},
+        {"LEFT", ImGuiKey_LeftArrow},
+        {"UP", ImGuiKey_UpArrow},
+        {"RIGHT", ImGuiKey_RightArrow},
+        {"DOWN", ImGuiKey_DownArrow},
+        // {"SELECT", VK_SELECT}, // Not available in ImGuiKey_
+        {"PRINT", ImGuiKey_PrintScreen},
+        // {"EXECUTE", VK_EXECUTE}, // Not available in ImGuiKey_
+        {"SNAPSHOT", ImGuiKey_PrintScreen},
+        {"INSERT", ImGuiKey_Insert},
+        {"DELETE", ImGuiKey_Delete},
+        // {"HELP", VK_HELP}, // Not available in ImGuiKey_
+        {"0", ImGuiKey_0},
+        {"1", ImGuiKey_1},
+        {"2", ImGuiKey_2},
+        {"3", ImGuiKey_3},
+        {"4", ImGuiKey_4},
+        {"5", ImGuiKey_5},
+        {"6", ImGuiKey_6},
+        {"7", ImGuiKey_7},
+        {"8", ImGuiKey_8},
+        {"9", ImGuiKey_9},
+        {"A", ImGuiKey_A},
+        {"B", ImGuiKey_B},
+        {"C", ImGuiKey_C},
+        {"D", ImGuiKey_D},
+        {"E", ImGuiKey_E},
+        {"F", ImGuiKey_F},
+        {"G", ImGuiKey_G},
+        {"H", ImGuiKey_H},
+        {"I", ImGuiKey_I},
+        {"J", ImGuiKey_J},
+        {"K", ImGuiKey_K},
+        {"L", ImGuiKey_L},
+        {"M", ImGuiKey_M},
+        {"N", ImGuiKey_N},
+        {"O", ImGuiKey_O},
+        {"P", ImGuiKey_P},
+        {"Q", ImGuiKey_Q},
+        {"R", ImGuiKey_R},
+        {"S", ImGuiKey_S},
+        {"T", ImGuiKey_T},
+        {"U", ImGuiKey_U},
+        {"V", ImGuiKey_V},
+        {"W", ImGuiKey_W},
+        {"X", ImGuiKey_X},
+        {"Y", ImGuiKey_Y},
+        {"Z", ImGuiKey_Z},
+        {"APPS", ImGuiKey_Menu},
+        // {"SLEEP", VK_SLEEP}, // Not available in ImGuiKey_
+        {"NUMPAD0", ImGuiKey_Keypad0},
+        {"NUMPAD1", ImGuiKey_Keypad1},
+        {"NUMPAD2", ImGuiKey_Keypad2},
+        {"NUMPAD3", ImGuiKey_Keypad3},
+        {"NUMPAD4", ImGuiKey_Keypad4},
+        {"NUMPAD5", ImGuiKey_Keypad5},
+        {"NUMPAD6", ImGuiKey_Keypad6},
+        {"NUMPAD7", ImGuiKey_Keypad7},
+        {"NUMPAD8", ImGuiKey_Keypad8},
+        {"NUMPAD9", ImGuiKey_Keypad9},
+        {"NUM0", ImGuiKey_Keypad0},
+        {"NUM1", ImGuiKey_Keypad1},
+        {"NUM2", ImGuiKey_Keypad2},
+        {"NUM3", ImGuiKey_Keypad3},
+        {"NUM4", ImGuiKey_Keypad4},
+        {"NUM5", ImGuiKey_Keypad5},
+        {"NUM6", ImGuiKey_Keypad6},
+        {"NUM7", ImGuiKey_Keypad7},
+        {"NUM8", ImGuiKey_Keypad8},
+        {"NUM9", ImGuiKey_Keypad9},
+        {"MULTIPLY", ImGuiKey_KeypadMultiply},
+        {"ADD", ImGuiKey_KeypadAdd},
+        {"SUBTRACT", ImGuiKey_KeypadSubtract},
+        {"MINUS", ImGuiKey_KeypadSubtract},
+        {"DECIMAL", ImGuiKey_KeypadDecimal},
+        {"DIVIDE", ImGuiKey_KeypadDivide},
+        {"F1", ImGuiKey_F1},
+        {"F2", ImGuiKey_F2},
+        {"F3", ImGuiKey_F3},
+        {"F4", ImGuiKey_F4},
+        {"F5", ImGuiKey_F5},
+        {"F6", ImGuiKey_F6},
+        {"F7", ImGuiKey_F7},
+        {"F8", ImGuiKey_F8},
+        {"F9", ImGuiKey_F9},
+        {"F10", ImGuiKey_F10},
+        {"F11", ImGuiKey_F11},
+        {"F12", ImGuiKey_F12},
+        {"F13", ImGuiKey_F13},
+        {"F14", ImGuiKey_F14},
+        {"F15", ImGuiKey_F15},
+        {"F16", ImGuiKey_F16},
+        {"F17", ImGuiKey_F17},
+        {"F18", ImGuiKey_F18},
+        {"F19", ImGuiKey_F19},
+        {"F20", ImGuiKey_F20},
+        {"F21", ImGuiKey_F21},
+        {"F22", ImGuiKey_F22},
+        {"F23", ImGuiKey_F23},
+        {"F24", ImGuiKey_F24},
+        {"NUMLOCK", ImGuiKey_NumLock},
+        {"SCROLL", ImGuiKey_ScrollLock},
+        {"BROWSER_BACK", ImGuiKey_AppBack},
+        {"BROWSER_FORWARD", ImGuiKey_AppForward},
+        // {"BROWSER_REFRESH", VK_BROWSER_REFRESH}, // Not available in ImGuiKey_
+        // {"BROWSER_STOP", VK_BROWSER_STOP}, // Not available in ImGuiKey_
+        // {"BROWSER_SEARCH", VK_BROWSER_SEARCH}, // Not available in ImGuiKey_
+        // {"BROWSER_FAVORITES", VK_BROWSER_FAVORITES}, // Not available in ImGuiKey_
+        // {"BROWSER_HOME", VK_BROWSER_HOME}, // Not available in ImGuiKey_
+        // {"VOLUME_MUTE", VK_VOLUME_MUTE}, // Not available in ImGuiKey_
+        // {"VOLUME_DOWN", VK_VOLUME_DOWN}, // Not available in ImGuiKey_
+        // {"VOLUME_UP", VK_VOLUME_UP}, // Not available in ImGuiKey_
+        // {"MEDIA_NEXT_TRACK", VK_MEDIA_NEXT_TRACK}, // Not available in ImGuiKey_
+        // {"MEDIA_PREV_TRACK", VK_MEDIA_PREV_TRACK}, // Not available in ImGuiKey_
+        // {"MEDIA_STOP", VK_MEDIA_STOP}, // Not available in ImGuiKey_
+        // {"MEDIA_PLAY_PAUSE", VK_MEDIA_PLAY_PAUSE}, // Not available in ImGuiKey_
+        // {"LAUNCH_MAIL", VK_LAUNCH_MAIL}, // Not available in ImGuiKey_
+        // {"LAUNCH_MEDIA_SELECT", VK_LAUNCH_MEDIA_SELECT}, // Not available in ImGuiKey_
+        // {"LAUNCH_APP1", VK_LAUNCH_APP1}, // Not available in ImGuiKey_
+        // {"LAUNCH_APP2", VK_LAUNCH_APP2}, // Not available in ImGuiKey_
+        {"=", ImGuiKey_Equal},
+        {",", ImGuiKey_Comma},
+        {"-", ImGuiKey_Minus},
+        {".", ImGuiKey_Period},
+        {";", ImGuiKey_Semicolon},
+        {"/", ImGuiKey_Slash},
+        {"~", ImGuiKey_GraveAccent},
+        {"`", ImGuiKey_GraveAccent},
+        {"[", ImGuiKey_LeftBracket},
+        {"\\", ImGuiKey_Backslash},
+        {"]", ImGuiKey_RightBracket},
+        {"'", ImGuiKey_Apostrophe},
+        // {"PROCESSKEY", VK_PROCESSKEY}, // Not available in ImGuiKey_
+        // {"ATTN", VK_ATTN}, // Not available in ImGuiKey_
+        // {"CRSEL", VK_CRSEL}, // Not available in ImGuiKey_
+        // {"EXSEL", VK_EXSEL}, // Not available in ImGuiKey_
+        // {"EREOF", VK_EREOF}, // Not available in ImGuiKey_
+        // {"PLAY", VK_PLAY}, // Not available in ImGuiKey_
+        // {"ZOOM", VK_ZOOM}, // Not available in ImGuiKey_
+        // {"PA1", VK_PA1}, // Not available in ImGuiKey_
+        // {"OEM_CLEAR", VK_OEM_CLEAR}, // Not available in ImGuiKey_
     };
 
     std::string str = name;
     for (auto &c: str) { c = char(std::toupper(c)); }
     auto sl = util::splitString(str, '+');
-    std::vector<int> res;
     if (sl.empty()) {
-        return res;
+        return 0;
     }
+    // For key combinations, we'll return the first key
+    int result = 0; 
     for (const auto &s: sl) {
-        auto ite2 = sVKeyMap.find(s);
-        if (ite2 == sVKeyMap.end()) {
-            return res;
+        auto ite = sVKeyMap.find(s);
+        if (ite != sVKeyMap.end()) {
+            if (ite->second & 0x0FFF) {
+                // Is normal key, we only allow one normal key in the combination
+                if (!(result & 0x0FFF)) {
+                    result = result | ite->second;
+                }
+            } else {
+                // Is modifier key, we can have multiple modifier keys in the combination
+                result |= ite->second;
+            }
         }
-        res.emplace_back(ite2->second);
     }
-    return res;
+    return result;
 }
 
 Config gConfig;
@@ -297,23 +306,10 @@ bool Config::enabled(const std::string &key) const {
     return s == "on" || s == "true" || s == "1";
 }
 
-std::vector<int> Config::getVirtualKey(const std::string &key, const std::vector<int> &defaultValue) const {
+int Config::getImGuiKey(const std::string &key, int defaultValue) const {
     const auto &s = get(key, "");
     if (s.empty()) return defaultValue;
-    auto vkey = mapStringToVKey(s);
-    if (vkey.empty()) return defaultValue;
-    /* Check for all vkey values, if all with 0x8000, remove last one */
-    bool allWith0x8000 = true;
-    for (auto &vk: vkey) {
-        if ((vk & 0x8000) == 0) {
-            allWith0x8000 = false;
-            break;
-        }
-    }
-    if (allWith0x8000) {
-        vkey.back() &= 0x7FFF;
-    }
-    return vkey;
+    return mapStringToImGuiKey(s);
 }
 
 }

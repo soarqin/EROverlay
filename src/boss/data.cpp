@@ -5,6 +5,7 @@
 
 #include <nlohmann/json.hpp>
 #include <ini.h>
+#include <imgui.h>
 
 #include <fstream>
 
@@ -17,7 +18,7 @@ static std::vector<bool> deadSwapTmp;
 static std::vector<int> deadByRegionSwapTmp;
 
 void BossDataSet::load(bool hasDLC) {
-    nlohmann::ordered_json j;
+    toggleFullModeKey_ = api->configGetImGuiKey("boss.toggle_full_mode", ImGuiKey_Equal);
     std::wstring name = api->configGetString("boss.data_file", L"bosses.json");
     std::wstring lang = api->configGetString("common.language", L"");
     if (lang.empty()) {
@@ -35,7 +36,7 @@ void BossDataSet::load(bool hasDLC) {
             return;
         }
     }
-    j = nlohmann::ordered_json::parse(ifs);
+    auto j = nlohmann::ordered_json::parse(ifs);
     ifs.close();
     for (auto &p: j.items()) {
         if (!hasDLC && p.value()["dlc"] == 1) {

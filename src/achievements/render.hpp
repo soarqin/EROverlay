@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <cstdint>
-
 namespace er::achievements {
 
 class Renderer {

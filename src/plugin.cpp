@@ -70,10 +70,4 @@ bool pluginsRender() {
     return showCursor;
 }
 
-void pluginsToggleFullMode() {
-    for (const auto &pl: plugins) {
-        if (pl.second.toggleFullMode) pl.second.toggleFullMode();
-    }
-}
-
 }

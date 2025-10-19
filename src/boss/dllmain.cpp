@@ -41,18 +41,13 @@ void uninit() {
     destroyRenderer();
 }
 
-void toggleFullMode() {
-    renderer->toggleFullMode();
-}
-
 static PluginExports exports = {
     init,
     uninit,
     update,
     createRenderer,
     destroyRenderer,
-    render,
-    toggleFullMode
+    render
 };
 
 PLUGIN_DEFINE(exports)

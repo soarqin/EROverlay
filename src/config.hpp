@@ -2,7 +2,6 @@
 
 #include <string>
 #include <map>
-#include <vector>
 #include <type_traits>
 
 namespace er {
@@ -35,7 +34,7 @@ public:
         }
         return static_cast<T>(std::stod(it->second));
     }
-    [[nodiscard]] std::vector<int> getVirtualKey(const std::string &key, const std::vector<int> &defaultValue) const;
+    [[nodiscard]] int getImGuiKey(const std::string &key, int defaultValue) const;
 
 private:
     void loadSingleFile(const std::wstring &filename, const std::string &modname = "");

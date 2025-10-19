@@ -5,7 +5,6 @@
 #include "plugin.hpp"
 #include "util/steam.hpp"
 
-#include <chrono>
 #include <thread>
 #include <shlwapi.h>
 
@@ -112,36 +111,18 @@ void init() {
 }
 
 void mainThread() {
-    auto unloadKey = er::gConfig.getVirtualKey("input.unload", {});
-    auto toggleFullKey = er::gConfig.getVirtualKey("input.toggle_full_mode", {VK_OEM_PLUS});
+    auto unloadKey = er::gConfig.getImGuiKey("input.unload", 0);
 
     er::gShowMenu = false;
 
     er::pluginsUpdate();
     while (er::gRunning) {
-        if (er::gD3DRenderer->isForeground()) {
-            if (!toggleFullKey.empty()) {
-                for (auto &vk: toggleFullKey) {
-                    if (!(GetAsyncKeyState(vk & 0x7FFF) & ((vk & 0x8000) != 0 ? 0x8000 : 1))) {
-                        goto noToggleFull;
-                    }
-                }
-                er::pluginsToggleFullMode();
-            }
-            noToggleFull:
-            if (!unloadKey.empty()) {
-                for (auto &vk: unloadKey) {
-                    if (!(GetAsyncKeyState(vk & 0x7FFF) & ((vk & 0x8000) != 0 ? 0x8000 : 1))) {
-                        goto noUnload;
-                    }
-                }
-                er::gShowMenu = false;
-                er::gRunning = false;
-                er::gHooking->showMouseCursor(false);
-            }
+        if (unloadKey != 0 && ImGui::IsKeyChordPressed(unloadKey)) {
+            er::gShowMenu = false;
+            er::gRunning = false;
+            er::gHooking->showMouseCursor(false);
+            break;
         }
-        noUnload:
-
         std::this_thread::yield();
         using namespace std::chrono_literals;
         static auto tick = 1000000us / 60;

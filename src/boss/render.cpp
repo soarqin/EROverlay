@@ -71,6 +71,10 @@ inline static float calculatePos(float w, float n) {
 }
 
 bool Renderer::render() {
+    auto toggleFullModeKey = gBossDataSet.toggleFullModeKey();
+    if (toggleFullModeKey != 0 && ImGui::IsKeyChordPressed(toggleFullModeKey)) {
+        showFull_ = !showFull_;
+    }
     auto challengeMode = gBossDataSet.challengeMode();
     {
         std::unique_lock lock(gBossDataSet.mutex());
@@ -186,10 +190,6 @@ bool Renderer::render() {
     }
     ImGui::End();
     return showFull_;
-}
-
-void Renderer::toggleFullMode() {
-    showFull_ = !showFull_;
 }
 
 }

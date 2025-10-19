@@ -45,7 +45,9 @@ public:
         [](const char *name) {
             return er::gConfig.enabled(name);
         },
-
+        [](const char *name, int defValue) {
+            return er::gConfig.getImGuiKey(name, defValue);
+        },
         [] {
             return GameAddresses {er::gHooking->csMenuManImp_, er::gHooking->gameDataMan_, er::gHooking->eventFlagMan_, er::gHooking->fieldArea_};
         },

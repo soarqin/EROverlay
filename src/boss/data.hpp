@@ -33,6 +33,7 @@ public:
     void loadConfig();
     void saveConfig() const;
 
+    [[nodiscard]] inline int toggleFullModeKey() const { return toggleFullModeKey_; }
     [[nodiscard]] inline const std::vector<BossData> &bosses() const { return bosses_; }
     [[nodiscard]] inline const std::vector<RegionData> &regions() const { return regions_; }
     [[nodiscard]] inline const std::vector<int> &regionCounts() const { return regionCounts_; }
@@ -59,6 +60,7 @@ private:
     [[nodiscard]] int readDeathCount() const;
 
 private:
+    int toggleFullModeKey_ = 0;
     std::vector<BossData> bosses_;
     std::vector<RegionData> regions_;
     std::vector<int> regionCounts_;

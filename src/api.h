@@ -63,6 +63,7 @@ typedef struct {
     int (*configGetInt)(const char *name, int defValue);
     float (*configGetFloat)(const char *name, float defValue);
     bool (*configEnabled)(const char *name);
+    int (*configGetImGuiKey)(const char *name, int defValue);
 
     // Game addresses
     GameAddresses (*getGameAddresses)();
@@ -90,8 +91,6 @@ typedef struct {
     void (*destroyRenderer)();
     /* render() is called to render things, return true if the plugin wants to show the cursor. */
     bool (*render)();
-    /* toggleFullMode() is called to toggle full mode on pressing keys defined in config file. */
-    void (*toggleFullMode)();
 } PluginExports;
 
 #pragma pack(pop)

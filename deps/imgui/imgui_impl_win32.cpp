@@ -439,7 +439,6 @@ ImGuiKey ImGui_ImplWin32_KeyEventToImGuiKey(WPARAM wParam, LPARAM lParam)
     if ((wParam == VK_RETURN) && (HIWORD(lParam) & KF_EXTENDED))
         return ImGuiKey_KeypadEnter;
 
-    const int scancode = (int)LOBYTE(HIWORD(lParam));
     //IMGUI_DEBUG_LOG("scancode %3d, keycode = 0x%02X\n", scancode, wParam);
     switch (wParam)
     {
@@ -563,6 +562,7 @@ ImGuiKey ImGui_ImplWin32_KeyEventToImGuiKey(WPARAM wParam, LPARAM lParam)
         default: break;
     }
 
+    const int scancode = (int)LOBYTE(HIWORD(lParam));
     // Fallback to scancode
     // https://handmade.network/forums/t/2011-keyboard_inputs_-_scancodes,_raw_input,_text_input,_key_names
     switch (scancode)

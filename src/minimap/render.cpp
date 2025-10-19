@@ -3,8 +3,6 @@
 #define _USE_MATH_DEFINES
 #include "data.hpp"
 
-#include "util/string.hpp"
-
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <windows.h>
@@ -120,7 +118,7 @@ bool Renderer::render() {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
-            auto bonfireSize = 30.f * mapScale_;
+            auto bonfireSize = 39.f * mapScale_;
             auto bonfireOffset = -bonfireSize * .5f;
             for (auto y = y0; y <= y1; y++, ny += texSize) {
                 auto index0 = layer * 100 + y * 10 + x0;
