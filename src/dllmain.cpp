@@ -4,6 +4,7 @@
 #include "hooking.hpp"
 #include "plugin.hpp"
 #include "util/steam.hpp"
+#include "proxy/winhttp.h"
 
 #include <chrono>
 #include <thread>
@@ -23,6 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         case DLL_PROCESS_ATTACH:
             if (FindAtomW(OVERLAY_ATOM_NAME))
                 return FALSE;
+            load_winhttp_proxy();
             processAtom = AddAtomW(OVERLAY_ATOM_NAME);
             if (!::er::gModule) {
                 ::er::gModule = hModule;

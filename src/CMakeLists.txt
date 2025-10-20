@@ -28,7 +28,10 @@ add_project(EROverlayDLL SHARED
     util/sysfont.cpp util/sysfont.hpp
     util/string.hpp util/vector.hpp
 
-    LANGUAGES CXX
+    # proxy
+    proxy/winhttp.c proxy/winhttp.h proxy/winhttp.def
+
+    LANGUAGES C CXX
     FOLDER app
     OUTPUT_NAME EROverlay
 )

@@ -53,6 +53,7 @@
 ## USAGE
 * Modify .ini's inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
+  + Rename `EROverlay.dll` to `winhttp.dll` and put it aside `eldenring.exe` (don't forget folders `configs` and `data`).
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117), [ModEngine2](https://github.com/soulsmods/ModEngine2) or [me3](https://github.com/garyttierney/me3)).
   + Run `injector.exe` to inject (not recommended, because that this method is not very stable and is blocked by some security softwares).
 * Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode.
