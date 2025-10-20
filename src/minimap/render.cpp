@@ -255,6 +255,11 @@ void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
         wchar_t path[256];
         wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
         t = api->loadTexture(path);
+        if (t.texture == nullptr) {
+            // Fallback to JPG if PNG is not found
+            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
+            t = api->loadTexture(path);
+        }
     }
     if (t.texture == nullptr) {
         return;

@@ -1,15 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
-* 2025-10-20: `Overlay Loader` v1.0.0
+* 2025-10-20: `Overlay Loader` v1.0.0 + `Boss Overlay` v1.5.0
   + Refactorying: overlay functions are separated into modules with individual dlls in `overlays` folder.
     + `Boss` is an overlay module now.
-    + New module: `Achievements` to tracking progression of Steam achievements.
-    + New module: `Minimap` to show an in-game minimap.
-  + Overlays have their individual versions now:
-    + `Boss`: v1.5.0
-    + `Achievements`: v0.1.0
-    + `Minimap`: v0.1.0
   + Separate `EROverlay.ini` into individual `.ini`'s in `configs` folder, to flexibly support overlay modules.
   + Try to fix startup crashes, thanks to [samjviana](https://github.com/samjviana) for hinting in [#8](https://github.com/soarqin/EROverlay/issues/8).
 * 2024-10-15: `Boss Overlay` v1.4.0
@@ -62,10 +56,6 @@
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117), [ModEngine2](https://github.com/soulsmods/ModEngine2) or [me3](https://github.com/garyttierney/me3)).
   + Run `injector.exe` to inject (not recommended, because that this method is not very stable and is blocked by some security softwares).
 * Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode.
-
-## WRITE AN OVERLAY PLUGIN
-* Read code comments in [src/api.h](src/api.h) for details.
-* Read codes in [src/bosses/dllmain.cpp](src/bosses/dllmain.cpp) as an example.
 
 ## [LICENSE](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

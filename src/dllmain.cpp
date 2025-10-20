@@ -5,6 +5,7 @@
 #include "plugin.hpp"
 #include "util/steam.hpp"
 
+#include <chrono>
 #include <thread>
 #include <shlwapi.h>
 

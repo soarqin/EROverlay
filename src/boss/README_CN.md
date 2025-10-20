@@ -1,15 +1,9 @@
 # ELDEN RING Overlay Hook
 
 ## 更新记录
-* 2025-10-20: `覆盖层加载器` v1.0.0
+* 2025-10-20: `覆盖层加载器` v1.0.0 + `Boss覆盖层` v1.5.0
   + 重构：覆盖层功能被拆分为`overlays`文件夹中的独立dll模块
     + `Boss`现在是一个覆盖层模块
-    + 新模块：`Achievements`用于追踪Steam成就进度
-    + 新模块：`Minimap`用于显示游戏内小地图
-  + 覆盖层现在各自有独立的版本号:
-    + `Boss`: v1.5.0
-    + `Achievements`: v0.1.0
-    + `Minimap`: v0.1.0
   + 将`EROverlay.ini`拆分为`configs`文件夹中的多个独立`.ini`文件，以灵活支持覆盖层模块
   + 尝试修复启动崩溃，感谢[samjviana](https://github.com/samjviana)在[#8](https://github.com/soarqin/EROverlay/issues/8)中的建议
 * 2024-10-15: `Boss覆盖层` v1.4.0
@@ -62,10 +56,6 @@
   + 使用Mod加载器(你可以选择[EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) 或 [ModEngine2](https://github.com/soulsmods/ModEngine2) 或 [me3](https://github.com/garyttierney/me3))
   + 运行Mod附带的 `injector.exe` 注入 (不推荐，因为这种方法不太稳定且被一些安全软件阻止)
 * 等待数秒等Mod加载完成后，可以按 `=` 切换迷你/完全模式
-
-## 编写Overlay插件
-* 请阅读 [src/api.h](src/api.h) 中的代码注释
-* 请参考 [src/bosses/dllmain.cpp](src/bosses/dllmain.cpp) 中的代码作为示例
 
 ## [代码许可证](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 
