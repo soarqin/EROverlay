@@ -32,7 +32,7 @@ static constexpr float textureArrowOriginX = 34.f;
 static constexpr float textureArrowOriginY = 86.f;
 static constexpr float texturePlayerOriginX = 34.f;
 static constexpr float texturePlayerOriginY = 34.f;
-static constexpr float texturePlayerScale = 0.33f;
+static constexpr float texturePlayerScale = 0.44f;
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
@@ -41,16 +41,57 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 
     toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
     scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
-    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,40%"));
-    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,40%"));
-    scales_ = util::strSplitToFloatVec(api->configGetString("minimap.scale", L"0.75,1"));
-    auto maxCount = std::max(widthRatios_.size(), std::max(heightRatios_.size(), scales_.size()));
+    gracesKey_ = api->configGetImGuiKey("minimap.graces_key", ImGuiKey_N);
+    showGraces_ = api->configGetInt("minimap.graces", 1) != 0;
+    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,90%"));
+    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,90%"));
+    auto sl = util::splitString(std::wstring(api->configGetString("minimap.scale", L"0.75,+1.5")), L',');
+    scales_.clear();
+    isCentered_.clear();
+    for (auto &s: sl) {
+        if (s.empty()) {
+            scales_.push_back(0.f);
+            isCentered_.push_back(false);
+            continue;
+        }
+        if (s.front() == '+') {
+            s.erase(0, 1);
+            isCentered_.push_back(true);
+        } else {
+            isCentered_.push_back(false);
+        }
+        if (s.empty()) {
+            scales_.push_back(0.f);
+            continue;
+        }
+        if (s.back() == '%') {
+            s.pop_back();
+            scales_.push_back(std::stof(s) / 100.f);
+        } else {
+            scales_.push_back(std::stof(s));
+        }
+    }
+    alphas_ = util::strSplitToFloatVec(api->configGetString("minimap.alpha", L"0.8,0.6"));
+    auto maxCount = std::max({widthRatios_.size(), heightRatios_.size(), scales_.size(), alphas_.size()});
     if (maxCount == 0) {
         maxCount = 1;
         widthRatios_.push_back(0.3f);
         heightRatios_.push_back(0.3f);
         scales_.push_back(0.75f);
+        alphas_.push_back(0.8f);
     } else {
+        if (widthRatios_.empty()) {
+            widthRatios_.push_back(0.3f);
+        }
+        if (heightRatios_.empty()) {
+            heightRatios_.push_back(0.3f);
+        }
+        if (scales_.empty()) {
+            scales_.push_back(0.75f);
+        }
+        if (alphas_.empty()) {
+            alphas_.push_back(0.8f);
+        }
         while (widthRatios_.size() < maxCount) {
             widthRatios_.push_back(widthRatios_.back());
         }
@@ -59,6 +100,9 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         }
         while (scales_.size() < maxCount) {
             scales_.push_back(scales_.back());
+        }
+        while (alphas_.size() < maxCount) {
+            alphas_.push_back(alphas_.back());
         }
     }
     if (toggleKey_ == scaleKey_) {
@@ -69,7 +113,8 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     currentWidthRatio_ = widthRatios_[0];
     currentHeightRatio_ = heightRatios_[0];
     currentScale_ = scales_[0];
-    alpha_ = api->configGetFloat("minimap.alpha", 0.8f);
+    currentAlpha_ = alphas_[0];
+    currentIsCentered_ = isCentered_[0];
 }
 
 bool Renderer::render() {
@@ -79,12 +124,17 @@ bool Renderer::render() {
     }
     if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
         currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-        currentScale_ = scales_[currentScaleIndex_];
         currentWidthRatio_ = widthRatios_[currentScaleIndex_];
         currentHeightRatio_ = heightRatios_[currentScaleIndex_];
+        currentScale_ = scales_[currentScaleIndex_];
+        currentAlpha_ = alphas_[currentScaleIndex_];
+        currentIsCentered_ = isCentered_[currentScaleIndex_];
     }
     if (!show_ || currentScale_ < 0.0001f) {
         return false;
+    }
+    if (gracesKey_ != 0 && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(gracesKey_))) {
+        showGraces_ = !showGraces_;
     }
 
     const auto &location = gData.location();
@@ -96,8 +146,13 @@ bool Renderer::render() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec2 originalPadding = style.WindowPadding;
     style.WindowPadding = ImVec2(0, 0);
-    ImGui::SetNextWindowPos(ImVec2(vp->Size.x - minimapWidth_, 0), ImGuiCond_Always, ImVec2(0.f, 0.f));
-    ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
+    if (currentIsCentered_) {
+        ImGui::SetNextWindowPos(ImVec2((vp->Size.x - minimapWidth_) * .5f, (vp->Size.y - minimapHeight_) * .5f), ImGuiCond_Always, ImVec2(0.f, 0.f));
+        ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
+    } else {
+        ImGui::SetNextWindowPos(ImVec2(vp->Size.x - minimapWidth_, 0), ImGuiCond_Always, ImVec2(0.f, 0.f));
+        ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
+    }
     if (ImGui::Begin("##minimap_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse |
                      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings)) {
@@ -157,7 +212,7 @@ bool Renderer::render() {
             wsprintfW(path, L"%ls\\data\\map\\bonfire.png", api->getModulePath());
             bonfireTexture_ = api->loadTexture(path);
         }
-        if (gData.paramsLoaded()) {
+        if (showGraces_ && gData.paramsLoaded()) {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
@@ -177,7 +232,7 @@ bool Renderer::render() {
                         auto ry = bonfire->localY * currentScale_ + ny;
                         if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
                             ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
+                            ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
                         }
                     }
                 }
@@ -185,7 +240,7 @@ bool Renderer::render() {
         }
         if (drawRoundTable && roundTableTexture_.texture != nullptr) {
             ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableTexture_.width * .25f, minimapHeight_ * .5f - roundTableTexture_.height * .25f));
-            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
+            ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
         }
         renderPlayer();
     }
@@ -227,7 +282,7 @@ void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
         height = minimapHeight_ - posY;
     }
     ImGui::SetCursorPos(ImVec2(posX, posY));
-    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
+    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
 }
 
 void Renderer::renderPlayer() {
@@ -236,17 +291,17 @@ void Renderer::renderPlayer() {
     }
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
-    ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * texturePlayerScale, halfHeight - texturePlayerOriginY * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * texturePlayerScale, playerTexture_.height * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, alpha_));
+    ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * currentScale_ * texturePlayerScale, halfHeight - texturePlayerOriginY * currentScale_ * texturePlayerScale));
+    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * currentScale_ * texturePlayerScale, playerTexture_.height * currentScale_ * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
     if (arrowTexture_.texture == nullptr) {
         return;
     }
     auto *drawList = ImGui::GetWindowDrawList();
     auto cursorPos = ImGui::GetWindowPos() + ImVec2(halfWidth, halfHeight);
-    auto xRel0 = -textureArrowOriginX * texturePlayerScale;
-    auto yRel0 = -textureArrowOriginY * texturePlayerScale;
-    auto xRel1 = (arrowTexture_.width - textureArrowOriginX) * texturePlayerScale;
-    auto yRel1 = (arrowTexture_.height - textureArrowOriginY) * texturePlayerScale;
+    auto xRel0 = -textureArrowOriginX * currentScale_ * texturePlayerScale;
+    auto yRel0 = -textureArrowOriginY * currentScale_ * texturePlayerScale;
+    auto xRel1 = (arrowTexture_.width - textureArrowOriginX) * currentScale_ * texturePlayerScale;
+    auto yRel1 = (arrowTexture_.height - textureArrowOriginY) * currentScale_ * texturePlayerScale;
     auto rad = gData.location().rad * (float)M_PI / 180.f;
     auto cosRad = std::cos(rad);
     auto sinRad = std::sin(rad);
@@ -256,7 +311,7 @@ void Renderer::renderPlayer() {
     auto p4 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
     drawList->PushTexture((ImTextureID)arrowTexture_.gpuHandle);
     drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(alpha_ * 255.f)));
+    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
     drawList->PopTexture();
 }
 

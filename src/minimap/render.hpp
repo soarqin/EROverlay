@@ -28,15 +28,20 @@ private:
     bool show_ = true;
     int toggleKey_ = 0;
     int scaleKey_ = 0;
+    int gracesKey_ = 0;
+    bool showGraces_ = true;
     std::vector<float> widthRatios_ = { 0.3f, 0.4f };
     std::vector<float> heightRatios_ = { 0.3f, 0.4f };
     std::vector<float> scales_ = { 0.75f, 1.f };
+    std::vector<float> alphas_ = { 0.8f, 0.6f };
+    std::vector<bool> isCentered_ = { false, true };
     size_t currentScaleIndex_ = 0;
 
     float currentWidthRatio_ = 0.3f;
     float currentHeightRatio_ = 0.3f;
     float currentScale_ = 0.75f;
-    float alpha_ = 0.8f;
+    float currentAlpha_ = 0.8f;
+    bool currentIsCentered_ = false;
 };
 
 }
