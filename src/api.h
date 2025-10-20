@@ -44,6 +44,8 @@ typedef struct {
     bool loaded;
 } TextureContext;
 
+#pragma pack(pop)
+
 typedef struct {
     // Global variable
     uint64_t (*getGameVersion)();
@@ -80,29 +82,27 @@ typedef struct {
 typedef struct {
     /* ==== Version 0 ==== */
     /* init() is called on plugin loaded, return the plugin version. */
-    int (*init)();
+    int (*init)(EROverlayAPI *api);
     /* uninit() is called on plugin uninit. */
     void (*uninit)();
     /* update() is called on each 1/60s, in an individual thread, which can be used to do heavy works. */
     void (*update)();
-    /* createRenderer() is called to create the renderer, passing important imgui arguments which should be used for ImGui::SetCurrentContext() and ImGui::SetAllocatorFunctions(). */
-    void (*createRenderer)(void *imguiContext, void *allocFunc, void *freeFunc, void *allocUserData);
+    /* createRenderer() is called to create the renderer, passing important imgui arguments which should be used for ImGui::SetCurrentContext() and ImGui::SetAllocatorFunctions().
+     * return priority of the renderer, the lower the priority, the earlier the renderer is called(which means the imgui layer is lower). */
+    int (*createRenderer)(void *imguiContext, void *allocFunc, void *freeFunc, void *allocUserData);
     /* destroyRenderer() is called to destroy the renderer. */
     void (*destroyRenderer)();
     /* render() is called to render things, return true if the plugin wants to show the cursor. */
     bool (*render)();
 } PluginExports;
 
-#pragma pack(pop)
+extern EROverlayAPI *getEROverlayAPI();
 
 #if defined(_WIN32)
 #define PLUGIN_EXPORT EXTERN_C __declspec(dllexport)
 #else
 #define PLUGIN_EXPORT EXTERN_C
 #endif
-
-API_EXPORT EROverlayAPI *getEROverlayAPI();
-
 #define PLUGIN_DEFINE(pexp) \
     PLUGIN_EXPORT PluginExports *getExports() { return &pexp; }
 

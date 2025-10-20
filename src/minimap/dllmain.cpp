@@ -5,8 +5,8 @@
 
 EROverlayAPI *api;
 
-int init() {
-    api = getEROverlayAPI();
+int init(EROverlayAPI *erOverlayAPI) {
+    api = erOverlayAPI;
 
     er::minimap::gData.load();
 
@@ -19,9 +19,10 @@ void update() {
 
 static er::minimap::Renderer *renderer = nullptr;
 
-void createRenderer(void *context, void *allocFunc, void *freeFunc, void *userData) {
+int createRenderer(void *context, void *allocFunc, void *freeFunc, void *userData) {
     renderer = new er::minimap::Renderer();
     renderer->init(context, allocFunc, freeFunc, userData);
+    return 0;
 }
 
 void destroyRenderer() {

@@ -93,9 +93,10 @@ bool Renderer::render() {
     ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
                             ImGuiCond_Always,
                             ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
+    ImGui::SetNextWindowFocus();
     if (!showFull_) {
         if (ImGui::Begin("##bosses_window", nullptr,
-                         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+                         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             if (challengeMode) {
                 auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);

@@ -77,7 +77,7 @@ void init() {
 
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(1000ms);
-    er::gIsDLC01Installed = er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590);
+    er::gIsDLC01Installed = er::gGameVersion >= 0x0002000200000000ULL && (er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590));
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
     er::gHooking = std::make_unique<er::Hooking>();
 

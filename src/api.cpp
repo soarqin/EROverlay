@@ -141,6 +141,7 @@ public:
         return &api;
     }
 };
+
 }
 
 EROverlayAPI *getEROverlayAPI() {

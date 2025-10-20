@@ -5,8 +5,8 @@
 
 EROverlayAPI *api;
 
-int init() {
-    api = getEROverlayAPI();
+int init(EROverlayAPI *erOverlayAPI) {
+    api = erOverlayAPI;
 
     er::bosses::gBossDataSet.load(api->isDLC01Installed());
     er::bosses::gBossDataSet.loadConfig();
@@ -23,9 +23,10 @@ void update() {
 
 static er::bosses::Renderer *renderer = nullptr;
 
-void createRenderer(void *context, void *allocFunc, void *freeFunc, void *userData) {
+int createRenderer(void *context, void *allocFunc, void *freeFunc, void *userData) {
     renderer = new er::bosses::Renderer();
     renderer->init(context, allocFunc, freeFunc, userData);
+    return 100;
 }
 
 void destroyRenderer() {

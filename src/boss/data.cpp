@@ -136,6 +136,9 @@ void BossDataSet::revive(int index) {
         return;
     }
     auto &b = bosses_[index];
+    if (b.offset == 0) {
+        return;
+    }
     *(uint8_t *)(b.offset) &= ~b.bits;
 }
 
@@ -143,9 +146,6 @@ void BossDataSet::updateBosses() {
     if (!flagResolved_) {
         for (auto &b: bosses_) {
             b.offset = api->resolveFlagAddress(b.flagId, &b.bits);
-            if (b.offset == 0) {
-                return;
-            }
         }
         flagResolved_ = true;
     }
@@ -154,6 +154,9 @@ void BossDataSet::updateBosses() {
     size_t sz = bosses_.size();
     for (size_t i = 0; i < sz; i++) {
         auto &b = bosses_[i];
+        if (b.offset == 0) {
+            continue;
+        }
         bool al = (*(uint8_t *)(b.offset) & b.bits) != 0;
         deadSwapTmp[i] = al;
         if (al) {
