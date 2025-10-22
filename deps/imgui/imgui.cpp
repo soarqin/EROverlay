@@ -1,4 +1,4 @@
-// dear imgui, v1.92.4 WIP
+// dear imgui, v1.92.5 WIP
 // (main code and documentation)
 
 // Help:
@@ -392,6 +392,10 @@ IMPLEMENTING SUPPORT for ImGuiBackendFlags_RendererHasTextures:
  When you are not sure about an old symbol or function name, try using the Search/Find function of your IDE to look for comments or references in all imgui files.
  You can read releases logs https://github.com/ocornut/imgui/releases for more details.
 
+ - 2025/10/14 (1.92.4) - TreeNode, Selectable, Clipper: commented out legacy names which were obsoleted in 1.89.7 (July 2023) and 1.89.9 (Sept 2023);
+                         - ImGuiTreeNodeFlags_AllowItemOverlap       --> ImGuiTreeNodeFlags_AllowOverlap
+                         - ImGuiSelectableFlags_AllowItemOverlap     --> ImGuiSelectableFlags_AllowOverlap
+                         - ImGuiListClipper::IncludeRangeByIndices() --> ImGuiListClipper::IncludeItemsByIndex()
  - 2025/08/08 (1.92.2) - Backends: SDL_GPU3: Changed ImTextureID type from SDL_GPUTextureSamplerBinding* to SDL_GPUTexture*, which is more natural and easier for user to manage. If you need to change the current sampler, you can access the ImGui_ImplSDLGPU3_RenderState struct. (#8866, #8163, #7998, #7988)
  - 2025/07/31 (1.92.2) - Tabs: Renamed ImGuiTabBarFlags_FittingPolicyResizeDown to ImGuiTabBarFlags_FittingPolicyShrink. Kept inline redirection enum (will obsolete).
  - 2025/06/25 (1.92.0) - Layout: commented out legacy ErrorCheckUsingSetCursorPosToExtendParentBoundaries() fallback obsoleted in 1.89 (August 2022) which allowed a SetCursorPos()/SetCursorScreenPos() call WITHOUT AN ITEM
@@ -4639,7 +4643,8 @@ void ImGui::MarkItemEdited(ImGuiID id)
 
     // We accept a MarkItemEdited() on drag and drop targets (see https://github.com/ocornut/imgui/issues/1875#issuecomment-978243343)
     // We accept 'ActiveIdPreviousFrame == id' for InputText() returning an edit after it has been taken ActiveId away (#4714)
-    IM_ASSERT(g.DragDropActive || g.ActiveId == id || g.ActiveId == 0 || g.ActiveIdPreviousFrame == id || (g.CurrentMultiSelect != NULL && g.BoxSelectState.IsActive));
+    // FIXME: This assert is getting a bit meaningless over time. It helped detect some unusual use cases but eventually it is becoming an unnecessary restriction.
+    IM_ASSERT(g.DragDropActive || g.ActiveId == id || g.ActiveId == 0 || g.ActiveIdPreviousFrame == id || g.NavJustMovedToId || (g.CurrentMultiSelect != NULL && g.BoxSelectState.IsActive));
 
     //IM_ASSERT(g.CurrentWindow->DC.LastItemId == id);
     g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_Edited;
@@ -9378,7 +9383,7 @@ static void ImGui::UpdateKeyRoutingTable(ImGuiKeyRoutingTable* rt)
             routing_entry->RoutingCurrScore = routing_entry->RoutingNextScore;
             routing_entry->RoutingCurr = routing_entry->RoutingNext; // Update entry
             routing_entry->RoutingNext = ImGuiKeyOwner_NoOwner;
-            routing_entry->RoutingNextScore = 255;
+            routing_entry->RoutingNextScore = 0;
             if (routing_entry->RoutingCurr == ImGuiKeyOwner_NoOwner)
                 continue;
             rt->EntriesNext.push_back(*routing_entry); // Write alive ones into new buffer
@@ -9447,23 +9452,24 @@ ImGuiKeyRoutingData* ImGui::GetShortcutRoutingData(ImGuiKeyChord key_chord)
     return routing_data;
 }
 
-// Current score encoding (lower is highest priority):
-//  -   0: ImGuiInputFlags_RouteGlobal | ImGuiInputFlags_RouteOverActive
-//  -   1: ImGuiInputFlags_ActiveItem or ImGuiInputFlags_RouteFocused (if item active)
-//  -   2: ImGuiInputFlags_RouteGlobal | ImGuiInputFlags_RouteOverFocused
-//  -  3+: ImGuiInputFlags_RouteFocused (if window in focus-stack)
-//  - 254: ImGuiInputFlags_RouteGlobal
-//  - 255: never route
+// Current score encoding
+//  -        0: Never route
+//  -        1: ImGuiInputFlags_RouteGlobal    (lower priority)
+//  - 100..199: ImGuiInputFlags_RouteFocused   (if window in focus-stack)
+//         200: ImGuiInputFlags_RouteGlobal  | ImGuiInputFlags_RouteOverFocused
+//         300: ImGuiInputFlags_RouteActive or ImGuiInputFlags_RouteFocused (if item active)
+//         400: ImGuiInputFlags_RouteGlobal  | ImGuiInputFlags_RouteOverActive
+//  - 500..599: ImGuiInputFlags_RouteFocused | ImGuiInputFlags_RouteOverActive (if window in focus-stack) (higher priority)
 // 'flags' should include an explicit routing policy
 static int CalcRoutingScore(ImGuiID focus_scope_id, ImGuiID owner_id, ImGuiInputFlags flags)
 {
     ImGuiContext& g = *GImGui;
     if (flags & ImGuiInputFlags_RouteFocused)
     {
-        // ActiveID gets top priority
+        // ActiveID gets high priority
         // (we don't check g.ActiveIdUsingAllKeys here. Routing is applied but if input ownership is tested later it may discard it)
         if (owner_id != 0 && g.ActiveId == owner_id)
-            return 1;
+            return 300;
 
         // Score based on distance to focused window (lower is better)
         // Assuming both windows are submitting a routing request,
@@ -9473,25 +9479,32 @@ static int CalcRoutingScore(ImGuiID focus_scope_id, ImGuiID owner_id, ImGuiInput
         // - When Window/ChildB is focused -> Window scores 4 (best), Window/ChildB doesn't have a score.
         // This essentially follow the window->ParentWindowForFocusRoute chain.
         if (focus_scope_id == 0)
-            return 255;
+            return 0;
         for (int index_in_focus_path = 0; index_in_focus_path < g.NavFocusRoute.Size; index_in_focus_path++)
             if (g.NavFocusRoute.Data[index_in_focus_path].ID == focus_scope_id)
-                return 3 + index_in_focus_path;
-        return 255;
+            {
+                if (flags & ImGuiInputFlags_RouteOverActive) // && g.ActiveId != 0 && g.ActiveId != owner_id)
+                    return 599 - index_in_focus_path;
+                else
+                    return 199 - index_in_focus_path;
+            }
+        return 0;
     }
     else if (flags & ImGuiInputFlags_RouteActive)
     {
         if (owner_id != 0 && g.ActiveId == owner_id)
-            return 1;
-        return 255;
+            return 300;
+        return 0;
     }
     else if (flags & ImGuiInputFlags_RouteGlobal)
     {
         if (flags & ImGuiInputFlags_RouteOverActive)
-            return 0;
+            return 400;
+        if (owner_id != 0 && g.ActiveId == owner_id)
+            return 300;
         if (flags & ImGuiInputFlags_RouteOverFocused)
-            return 2;
-        return 254;
+            return 200;
+        return 1;
     }
     IM_ASSERT(0);
     return 0;
@@ -9531,8 +9544,10 @@ bool ImGui::SetShortcutRouting(ImGuiKeyChord key_chord, ImGuiInputFlags flags, I
     else
         IM_ASSERT(ImIsPowerOfTwo(flags & ImGuiInputFlags_RouteTypeMask_)); // Check that only 1 routing flag is used
     IM_ASSERT(owner_id != ImGuiKeyOwner_Any && owner_id != ImGuiKeyOwner_NoOwner);
-    if (flags & (ImGuiInputFlags_RouteOverFocused | ImGuiInputFlags_RouteOverActive | ImGuiInputFlags_RouteUnlessBgFocused))
+    if (flags & (ImGuiInputFlags_RouteOverFocused | ImGuiInputFlags_RouteUnlessBgFocused))
         IM_ASSERT(flags & ImGuiInputFlags_RouteGlobal);
+    if (flags & ImGuiInputFlags_RouteOverActive)
+        IM_ASSERT(flags & (ImGuiInputFlags_RouteGlobal | ImGuiInputFlags_RouteFocused));
 
     // Add ImGuiMod_XXXX when a corresponding ImGuiKey_LeftXXX/ImGuiKey_RightXXX is specified.
     key_chord = FixupKeyChord(key_chord);
@@ -9587,17 +9602,17 @@ bool ImGui::SetShortcutRouting(ImGuiKeyChord key_chord, ImGuiInputFlags flags, I
 
     const int score = CalcRoutingScore(focus_scope_id, owner_id, flags);
     IMGUI_DEBUG_LOG_INPUTROUTING("SetShortcutRouting(%s, flags=%04X, owner_id=0x%08X) -> score %d\n", GetKeyChordName(key_chord), flags, owner_id, score);
-    if (score == 255)
+    if (score == 0)
         return false;
 
     // Submit routing for NEXT frame (assuming score is sufficient)
-    // FIXME: Could expose a way to use a "serve last" policy for same score resolution (using <= instead of <).
+    // FIXME: Could expose a way to use a "serve last" policy for same score resolution (using >= instead of >).
     ImGuiKeyRoutingData* routing_data = GetShortcutRoutingData(key_chord);
-    //const bool set_route = (flags & ImGuiInputFlags_ServeLast) ? (score <= routing_data->RoutingNextScore) : (score < routing_data->RoutingNextScore);
-    if (score < routing_data->RoutingNextScore)
+    //const bool set_route = (flags & ImGuiInputFlags_ServeLast) ? (score >= routing_data->RoutingNextScore) : (score > routing_data->RoutingNextScore);
+    if (score > routing_data->RoutingNextScore)
     {
         routing_data->RoutingNext = owner_id;
-        routing_data->RoutingNextScore = (ImU8)score;
+        routing_data->RoutingNextScore = (ImU16)score;
     }
 
     // Return routing state for CURRENT frame

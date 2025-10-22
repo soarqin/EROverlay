@@ -1,4 +1,4 @@
-// dear imgui, v1.92.4 WIP
+// dear imgui, v1.92.5 WIP
 // (headers)
 
 // Help:
@@ -28,8 +28,8 @@
 
 // Library Version
 // (Integer encoded as XYYZZ for use in #if preprocessor conditionals, e.g. '#if IMGUI_VERSION_NUM >= 12345')
-#define IMGUI_VERSION       "1.92.4 WIP"
-#define IMGUI_VERSION_NUM   19235
+#define IMGUI_VERSION       "1.92.5 WIP"
+#define IMGUI_VERSION_NUM   19241
 #define IMGUI_HAS_TABLE             // Added BeginTable() - from IMGUI_VERSION_NUM >= 18000
 #define IMGUI_HAS_TEXTURES          // Added ImGuiBackendFlags_RendererHasTextures - from IMGUI_VERSION_NUM >= 19198
 
@@ -1311,7 +1311,7 @@ enum ImGuiTreeNodeFlags_
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
     ImGuiTreeNodeFlags_NavLeftJumpsBackHere = ImGuiTreeNodeFlags_NavLeftJumpsToParent,  // Renamed in 1.92.0
     ImGuiTreeNodeFlags_SpanTextWidth        = ImGuiTreeNodeFlags_SpanLabelWidth,        // Renamed in 1.90.7
-    ImGuiTreeNodeFlags_AllowItemOverlap     = ImGuiTreeNodeFlags_AllowOverlap,          // Renamed in 1.89.7
+    //ImGuiTreeNodeFlags_AllowItemOverlap   = ImGuiTreeNodeFlags_AllowOverlap,          // Renamed in 1.89.7
 #endif
 };
 
@@ -1354,7 +1354,7 @@ enum ImGuiSelectableFlags_
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
     ImGuiSelectableFlags_DontClosePopups    = ImGuiSelectableFlags_NoAutoClosePopups,   // Renamed in 1.91.0
-    ImGuiSelectableFlags_AllowItemOverlap   = ImGuiSelectableFlags_AllowOverlap,        // Renamed in 1.89.7
+    //ImGuiSelectableFlags_AllowItemOverlap = ImGuiSelectableFlags_AllowOverlap,        // Renamed in 1.89.7
 #endif
 };
 
@@ -2855,7 +2855,7 @@ struct ImGuiListClipper
     IMGUI_API void  SeekCursorForItem(int item_index);
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-    inline void IncludeRangeByIndices(int item_begin, int item_end)      { IncludeItemsByIndex(item_begin, item_end); } // [renamed in 1.89.9]
+    //inline void IncludeRangeByIndices(int item_begin, int item_end)      { IncludeItemsByIndex(item_begin, item_end); } // [renamed in 1.89.9]
     //inline void ForceDisplayRangeByIndices(int item_begin, int item_end) { IncludeItemsByIndex(item_begin, item_end); } // [renamed in 1.89.6]
     //inline ImGuiListClipper(int items_count, float items_height = -1.0f) { memset(this, 0, sizeof(*this)); ItemsCount = -1; Begin(items_count, items_height); } // [removed in 1.79]
 #endif
@@ -3003,6 +3003,7 @@ enum ImGuiMultiSelectFlags_
     ImGuiMultiSelectFlags_SelectOnClickRelease  = 1 << 14,  // Apply selection on mouse release when clicking an unselected item. Allow dragging an unselected item without altering selection.
     //ImGuiMultiSelectFlags_RangeSelect2d       = 1 << 15,  // Shift+Selection uses 2d geometry instead of linear sequence, so possible to use Shift+up/down to select vertically in grid. Analogous to what BoxSelect does.
     ImGuiMultiSelectFlags_NavWrapX              = 1 << 16,  // [Temporary] Enable navigation wrapping on X axis. Provided as a convenience because we don't have a design for the general Nav API for this yet. When the more general feature be public we may obsolete this flag in favor of new one.
+    ImGuiMultiSelectFlags_NoSelectOnRightClick  = 1 << 17,  // Disable default right-click processing, which selects item on mouse down, and is designed for context-menus.
 };
 
 // Main IO structure returned by BeginMultiSelect()/EndMultiSelect().
@@ -3978,8 +3979,8 @@ struct ImGuiPlatformIO
     // Functions
     //------------------------------------------------------------------
 
-    void    ClearPlatformHandlers();    // Clear all Platform_XXX fields. Typically called on Platform Backend shutdown.
-    void    ClearRendererHandlers();    // Clear all Renderer_XXX fields. Typically called on Renderer Backend shutdown.
+    IMGUI_API void ClearPlatformHandlers();    // Clear all Platform_XXX fields. Typically called on Platform Backend shutdown.
+    IMGUI_API void ClearRendererHandlers();    // Clear all Renderer_XXX fields. Typically called on Renderer Backend shutdown.
 };
 
 // (Optional) Support for IME (Input Method Editor) via the platform_io.Platform_SetImeDataFn() function. Handler is called during EndFrame().

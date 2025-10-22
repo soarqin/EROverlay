@@ -155,7 +155,7 @@ bool Renderer::render() {
     }
     if (ImGui::Begin("##minimap_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse |
-                     ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings)) {
+                     ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
         float dx, dy;
         bool drawRoundTable = false;
         int layer;

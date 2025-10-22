@@ -1,4 +1,4 @@
-// dear imgui, v1.92.4 WIP
+// dear imgui, v1.92.5 WIP
 // (widgets code)
 
 /*
@@ -4820,7 +4820,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     {
         // Declare some inputs, the other are registered and polled via Shortcut() routing system.
         // FIXME: The reason we don't use Shortcut() is we would need a routing flag to specify multiple mods, or to all mods combination into individual shortcuts.
-        const ImGuiKey always_owned_keys[] = { ImGuiKey_LeftArrow, ImGuiKey_RightArrow, ImGuiKey_Enter, ImGuiKey_KeypadEnter, ImGuiKey_Delete, ImGuiKey_Backspace, ImGuiKey_Home, ImGuiKey_End };
+        const ImGuiKey always_owned_keys[] = { ImGuiKey_LeftArrow, ImGuiKey_RightArrow, ImGuiKey_Delete, ImGuiKey_Backspace, ImGuiKey_Home, ImGuiKey_End };
         for (ImGuiKey key : always_owned_keys)
             SetKeyOwner(key, id);
         if (user_clicked)
@@ -5028,7 +5028,8 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
 
         // We allow validate/cancel with Nav source (gamepad) to makes it easier to undo an accidental NavInput press with no keyboard wired, but otherwise it isn't very useful.
         const bool nav_gamepad_active = (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) != 0 && (io.BackendFlags & ImGuiBackendFlags_HasGamepad) != 0;
-        const bool is_enter_pressed = IsKeyPressed(ImGuiKey_Enter, true) || IsKeyPressed(ImGuiKey_KeypadEnter, true);
+        const bool is_enter = Shortcut(ImGuiKey_Enter, f_repeat, id) || Shortcut(ImGuiKey_KeypadEnter, f_repeat, id);
+        const bool is_ctrl_enter = Shortcut(ImGuiMod_Ctrl | ImGuiKey_Enter, f_repeat, id) || Shortcut(ImGuiMod_Ctrl | ImGuiKey_KeypadEnter, f_repeat, id);
         const bool is_gamepad_validate = nav_gamepad_active && (IsKeyPressed(ImGuiKey_NavGamepadActivate, false) || IsKeyPressed(ImGuiKey_NavGamepadInput, false));
         const bool is_cancel = Shortcut(ImGuiKey_Escape, f_repeat, id) || (nav_gamepad_active && Shortcut(ImGuiKey_NavGamepadCancel, f_repeat, id));
 
@@ -5063,11 +5064,11 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             }
             state->OnKeyPressed(STB_TEXTEDIT_K_BACKSPACE | k_mask);
         }
-        else if (is_enter_pressed || is_gamepad_validate)
+        else if (is_enter || is_ctrl_enter || is_gamepad_validate)
         {
             // Determine if we turn Enter into a \n character
             bool ctrl_enter_for_new_line = (flags & ImGuiInputTextFlags_CtrlEnterForNewLine) != 0;
-            if (!is_multiline || is_gamepad_validate || (ctrl_enter_for_new_line != io.KeyCtrl))
+            if (!is_multiline || is_gamepad_validate || (ctrl_enter_for_new_line != is_ctrl_enter))
             {
                 validated = true;
                 if (io.ConfigInputTextEnterKeepActive && !is_multiline)
@@ -5077,7 +5078,8 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             }
             else if (!is_readonly)
             {
-                unsigned int c = '\n'; // Insert new line
+                // Insert new line
+                unsigned int c = '\n';
                 if (InputTextFilterCharacter(&g, &c, flags, callback, callback_user_data))
                     state->OnCharPressed(c);
             }
@@ -5401,7 +5403,12 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     line_index->Offsets.resize(0);
     int line_count = 1;
     if (is_multiline)
-        line_count = InputTextLineIndexBuild(flags, line_index, buf_display, buf_display_end, wrap_width, (render_cursor && state && state->CursorFollow) ? INT_MAX : line_visible_n1 + 1, buf_display_end ? NULL : &buf_display_end);
+    {
+        // If scrolling is expected to change build full index.
+        // FIXME-OPT: Could append to index when new value of line_visible_n1 becomes bigger, see second call to CalcClipRectVisibleItemsY() below.
+        bool will_scroll_y = state && ((state->CursorFollow && render_cursor) || (state->CursorCenterY && (render_cursor || render_selection)));
+        line_count = InputTextLineIndexBuild(flags, line_index, buf_display, buf_display_end, wrap_width, will_scroll_y ? INT_MAX : line_visible_n1 + 1, buf_display_end ? NULL : &buf_display_end);
+    }
     line_index->EndOffset = (int)(buf_display_end - buf_display);
     line_visible_n1 = ImMin(line_visible_n1, line_count);
 
@@ -8206,8 +8213,8 @@ void ImGui::MultiSelectItemFooter(ImGuiID id, bool* p_selected, bool* p_pressed)
         }
 
     // Right-click handling.
-    // FIXME-MULTISELECT: Currently filtered out by ImGuiMultiSelectFlags_NoAutoSelect but maybe should be moved to Selectable(). See https://github.com/ocornut/imgui/pull/5816
-    if (hovered && IsMouseClicked(1) && (flags & ImGuiMultiSelectFlags_NoAutoSelect) == 0)
+    // FIXME-MULTISELECT: Maybe should be moved to Selectable()? Also see #5816, #8200, #9015
+    if (hovered && IsMouseClicked(1) && (flags & (ImGuiMultiSelectFlags_NoAutoSelect | ImGuiMultiSelectFlags_NoSelectOnRightClick)) == 0)
     {
         if (g.ActiveId != 0 && g.ActiveId != id)
             ClearActiveID();

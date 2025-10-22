@@ -1,4 +1,4 @@
-// dear imgui, v1.92.4 WIP
+// dear imgui, v1.92.5 WIP
 // (internal structures/api)
 
 // You may use this file to debug, understand or extend Dear ImGui features but we don't provide any guarantee of forward compatibility.
@@ -1556,12 +1556,12 @@ struct ImGuiKeyRoutingData
 {
     ImGuiKeyRoutingIndex            NextEntryIndex;
     ImU16                           Mods;               // Technically we'd only need 4-bits but for simplify we store ImGuiMod_ values which need 16-bits.
-    ImU8                            RoutingCurrScore;   // [DEBUG] For debug display
-    ImU8                            RoutingNextScore;   // Lower is better (0: perfect score)
+    ImU16                           RoutingCurrScore;   // [DEBUG] For debug display
+    ImU16                           RoutingNextScore;   // Lower is better (0: perfect score)
     ImGuiID                         RoutingCurr;
     ImGuiID                         RoutingNext;
 
-    ImGuiKeyRoutingData()           { NextEntryIndex = -1; Mods = 0; RoutingCurrScore = RoutingNextScore = 255; RoutingCurr = RoutingNext = ImGuiKeyOwner_NoOwner; }
+    ImGuiKeyRoutingData()           { NextEntryIndex = -1; Mods = 0; RoutingCurrScore = RoutingNextScore = 0; RoutingCurr = RoutingNext = ImGuiKeyOwner_NoOwner; }
 };
 
 // Routing table: maintain a desired owner for each possible key-chord (key + mods), and setup owner in NewFrame() when mods are matching.
@@ -3045,6 +3045,7 @@ struct IMGUI_API ImGuiTable
 // sizeof() ~ 136 bytes.
 struct IMGUI_API ImGuiTableTempData
 {
+    ImGuiID                     WindowID;                   // Shortcut to g.Tables[TableIndex]->OuterWindow->ID.
     int                         TableIndex;                 // Index in g.Tables.Buf[] pool
     float                       LastTimeActive;             // Last timestamp this structure was used
     float                       AngledHeadersExtraWidth;    // Used in EndTable()

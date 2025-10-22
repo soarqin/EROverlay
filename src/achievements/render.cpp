@@ -46,7 +46,7 @@ bool Renderer::render() {
 
     if (ImGui::Begin("##achievements_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_AlwaysAutoResize |
-                     ImGuiWindowFlags_NoSavedSettings)) {
+                     ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
         const auto &achievements = gData.achievements();
         std::lock_guard lock(gData.mutex());
         const auto &locked = gData.locked();
