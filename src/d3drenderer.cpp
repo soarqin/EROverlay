@@ -465,9 +465,83 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 }
 
 LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (ImGui::GetCurrentContext())
-        ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+    ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+    auto &io = ImGui::GetIO();
+    if (io.WantCaptureMouse) {
+        switch (msg) {
+            case WM_MOUSEMOVE:
+            case WM_MOUSELEAVE:
+            case WM_MOUSEHOVER:
 
+            case WM_NCMOUSELEAVE:
+            case WM_NCMOUSEHOVER:
+            case WM_NCMOUSEMOVE:
+
+            case WM_MOUSEWHEEL:
+            case WM_MOUSEHWHEEL:
+
+            case WM_LBUTTONDOWN:
+            case WM_LBUTTONUP:
+            case WM_LBUTTONDBLCLK:
+
+            case WM_RBUTTONDOWN:
+            case WM_RBUTTONUP:
+            case WM_RBUTTONDBLCLK:
+
+            case WM_MBUTTONDOWN:
+            case WM_MBUTTONUP:
+            case WM_MBUTTONDBLCLK:
+
+            case WM_XBUTTONDOWN:
+            case WM_XBUTTONUP:
+            case WM_XBUTTONDBLCLK:
+
+            case WM_NCHITTEST:
+
+            case WM_NCLBUTTONDOWN:
+            case WM_NCLBUTTONUP:
+            case WM_NCLBUTTONDBLCLK:
+
+            case WM_NCRBUTTONDOWN:
+            case WM_NCRBUTTONUP:
+            case WM_NCRBUTTONDBLCLK:
+
+            case WM_NCMBUTTONDOWN:
+            case WM_NCMBUTTONUP:
+            case WM_NCMBUTTONDBLCLK:
+
+            case WM_NCXBUTTONDOWN:
+            case WM_NCXBUTTONUP:
+            case WM_NCXBUTTONDBLCLK:
+
+            case WM_POINTERDOWN:
+            case WM_POINTERUP:
+            case WM_POINTERUPDATE:
+
+            case WM_POINTERWHEEL:
+            case WM_POINTERHWHEEL:
+                return 0L;
+        }
+    }
+    if (io.WantCaptureKeyboard) {
+        switch (msg) {
+            case WM_KEYDOWN:
+            case WM_KEYUP:
+            case WM_SYSKEYDOWN:
+            case WM_SYSKEYUP:
+                return 0L;
+        }
+    }
+    if (io.WantTextInput) {
+        switch (msg) {
+            case WM_CHAR:
+            case WM_DEADCHAR:
+            case WM_SYSCHAR:
+            case WM_SYSDEADCHAR:
+            case WM_IME_CHAR:
+                return 0L;
+        }
+    }
     return CallWindowProcW(reinterpret_cast<WNDPROC>(gD3DRenderer->oldWndProc_), hWnd, msg, wParam, lParam);
 }
 
