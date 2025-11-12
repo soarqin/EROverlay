@@ -49,7 +49,13 @@ public:
             return er::gConfig.getImGuiKey(name, defValue);
         },
         [] {
-            return GameAddresses {er::gHooking->csMenuManImp_, er::gHooking->gameDataMan_, er::gHooking->eventFlagMan_, er::gHooking->fieldArea_};
+            return GameAddresses {
+                er::gHooking->csMenuManImp_,
+                er::gHooking->gameDataMan_,
+                er::gHooking->eventFlagMan_,
+                er::gHooking->fieldArea_,
+                er::util::Module(nullptr).base().as<uintptr_t>(),
+            };
         },
         [](uint32_t flagId, uint8_t *bits) {
             auto eventFlagMan = er::gHooking->eventFlagMan_;

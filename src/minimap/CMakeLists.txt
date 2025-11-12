@@ -6,11 +6,10 @@ add_project(minimap SHARED
     defs/WorldMapLegacyConvParam.h
 
     LANGUAGES CXX
+    NO_PREFIX
     FOLDER overlays
     OUTPUT_SUBDIR overlays
     OUTPUT_NAME Minimap
 )
 
 target_link_libraries(${PROJECT_NAME} EROverlayDLL)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")

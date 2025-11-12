@@ -31,6 +31,7 @@ typedef struct {
     uintptr_t gameDataMan;
     uintptr_t eventFlagMan;
     uintptr_t fieldArea;
+    uintptr_t gameBase;
 } GameAddresses;
 
 typedef struct {
@@ -79,6 +80,10 @@ typedef struct {
     void (*destroyTexture)(TextureContext *texture);
 } EROverlayAPI;
 
+/*
+ * Plugin exports returned by getExports(), or struct in PLUGIN_DEFINE() macro.
+ * Note: init() must not be null. Other functions are optional and will be called if they are not null.
+ */
 typedef struct {
     /* ==== Version 0 ==== */
     /* init() is called on plugin loaded, return the plugin version. */

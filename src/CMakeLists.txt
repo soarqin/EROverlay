@@ -32,6 +32,7 @@ add_project(EROverlayDLL SHARED
     proxy/winhttp.c proxy/winhttp.h proxy/winhttp.def
 
     LANGUAGES C CXX
+    NO_PREFIX
     FOLDER app
     OUTPUT_NAME EROverlay
 )
@@ -57,8 +58,8 @@ target_link_libraries(${PROJECT_NAME}
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
-set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
 add_subdirectory(boss)
 add_subdirectory(achievements)
 add_subdirectory(minimap)
+add_subdirectory(flagtest)

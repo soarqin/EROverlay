@@ -4,11 +4,10 @@ add_project(achievements SHARED
     render.cpp render.hpp
 
     LANGUAGES CXX
+    NO_PREFIX
     FOLDER overlays
     OUTPUT_SUBDIR overlays
     OUTPUT_NAME Achievements
 )
 
 target_link_libraries(${PROJECT_NAME} EROverlayDLL minhook steam_api64)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")

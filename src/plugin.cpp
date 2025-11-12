@@ -29,6 +29,11 @@ void pluginsInit() {
                     continue;
                 }
                 auto *exports = getExports();
+                if (!exports || !exports->init) {
+                    fmt::print(" library entry not valid.\n");
+                    FreeLibrary(lib);
+                    continue;
+                }
                 auto ver = exports->init(api);
                 plugins.emplace_back(ver, 0, exports);
                 fmt::print(" successful. (API Version {})\n", ver);
@@ -41,21 +46,30 @@ void pluginsInit() {
 
 void pluginsUninit() {
     for (const auto &pl: plugins) {
-        std::get<2>(pl)->uninit();
+        auto *p = std::get<2>(pl);
+        if (p->uninit) {
+            p->uninit();
+        }
     }
     plugins.clear();
 }
 
 void pluginsUpdate() {
     for (const auto &pl: plugins) {
-        std::get<2>(pl)->update();
+        auto *p = std::get<2>(pl);
+        if (p->update) {
+            p->update();
+        }
     }
 }
 
 void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *userData) {
     for (auto &pl: plugins) {
-        auto priority = std::get<2>(pl)->createRenderer(context, allocFunc, freeFunc, userData);
-        std::get<1>(pl) = priority;
+        auto *p = std::get<2>(pl);
+        if (p->createRenderer) {
+            auto priority = p->createRenderer(context, allocFunc, freeFunc, userData);
+            std::get<1>(pl) = priority;
+        }
     }
     std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) {
         return std::get<1>(a) < std::get<1>(b);
@@ -64,15 +78,21 @@ void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *
 
 void pluginsDestroyRenderers() {
     for (const auto &pl: plugins) {
-        std::get<2>(pl)->destroyRenderer();
+        auto *p = std::get<2>(pl);
+        if (p->destroyRenderer) {
+            p->destroyRenderer();
+        }
     }
 }
 
 bool pluginsRender() {
     bool showCursor = false;
     for (const auto &pl: plugins) {
-        auto r = std::get<2>(pl)->render();
-        showCursor = showCursor || r;
+        auto *p = std::get<2>(pl);
+        if (p->render) {
+            auto r = p->render();
+            showCursor = showCursor || r;
+        }
     }
     return showCursor;
 }

@@ -520,7 +520,7 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
             case WM_POINTERWHEEL:
             case WM_POINTERHWHEEL:
-                return 0L;
+                return 1L;
         }
     }
     if (io.WantCaptureKeyboard) {
@@ -529,7 +529,7 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             case WM_KEYUP:
             case WM_SYSKEYDOWN:
             case WM_SYSKEYUP:
-                return 0L;
+                return 1L;
         }
     }
     if (io.WantTextInput) {
@@ -539,7 +539,7 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
             case WM_SYSCHAR:
             case WM_SYSDEADCHAR:
             case WM_IME_CHAR:
-                return 0L;
+                return 1L;
         }
     }
     return CallWindowProcW(reinterpret_cast<WNDPROC>(gD3DRenderer->oldWndProc_), hWnd, msg, wParam, lParam);
