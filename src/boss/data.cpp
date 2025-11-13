@@ -125,10 +125,16 @@ void BossDataSet::update() {
         return;
     }
     auto igt = readInGameTime();
-    if (igt == 0) return;
+    if (igt <= 0) return;
     updateBosses();
-    if (!challengeMode_ || igt < 0) return;
-    updateChallengeMode();
+    if (challengeMode_)
+        updateChallengeMode();
+    else
+        updateNormalMode();
+}
+
+void BossDataSet::updateNormalMode() {
+    playerDeaths_ = readDeathCount();
 }
 
 void BossDataSet::revive(int index) {

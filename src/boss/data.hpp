@@ -55,6 +55,7 @@ public:
 
 private:
     void updateBosses();
+    void updateNormalMode();
     void updateChallengeMode();
     void checkForConfigChange();
     [[nodiscard]] int readDeathCount() const;

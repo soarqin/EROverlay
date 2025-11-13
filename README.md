@@ -1,6 +1,8 @@
 # ELDEN RING Overlay Hook
 
 ## Release Notes
+* 2025-11-13: `Boss Overlay` v1.5.1
+  + Fixed an issue that `Death Count` is always shown zero while `challenge_mode` is not enabled.
 * 2025-10-20: `Overlay Loader` v1.0.0
   + Refactorying: overlay functions are separated into modules with individual dlls in `overlays` folder.
     + `Boss` is an overlay module now.
