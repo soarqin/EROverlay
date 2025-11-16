@@ -177,7 +177,7 @@ void Data::update() {
         onGUI_ = true;
         return;
     }
-    onGUI_ = api->screenState() != 0 || (*reinterpret_cast<uint8_t*>(addr + 0xAC) & 1u) == 1u || (*reinterpret_cast<uint8_t*>(addr + 0xCD) & 1u) == 1u;
+    onGUI_ = api->screenState() != 0 || *reinterpret_cast<uint32_t*>(addr + 0x1C) != 0;
 
     addr = *(uintptr_t*)(addr + 0x80);
     if (addr == 0) return;
