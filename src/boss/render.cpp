@@ -28,17 +28,11 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     const std::string from = "$n";
     const std::string to = "\n";
     const std::string from2 = "{igt}";
-    const std::string to2 = "{igt:.0%M:%S}";
-    const std::string from3 = "{igt}";
-    const std::string to3 = "{igt:.0%H:%M:%S}";
+    const std::string to2 = "$igt";
     util::replaceAll(killText_, from, to);
     util::replaceAll(challengeText_, from, to);
-    killTextHour_ = killText_;
-    challengeTextHour_ = challengeText_;
     util::replaceAll(killText_, from2, to2);
     util::replaceAll(challengeText_, from2, to2);
-    util::replaceAll(killTextHour_, from3, to3);
-    util::replaceAll(challengeTextHour_, from3, to3);
     allowRevive_ = api->configEnabled("boss.allow_revive");
     const auto &pos = api->configGet("boss.panel_pos");
     auto posVec = util::strSplitToFloatVec(pos);
@@ -54,7 +48,6 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     args_.push_back(fmt::arg("deaths", std::cref(deaths_)));
     args_.push_back(fmt::arg("pb", std::cref(pb_)));
     args_.push_back(fmt::arg("tries", std::cref(tries_)));
-    args_.push_back(fmt::arg("igt", std::cref(igt_)));
 }
 
 inline static float calculatePos(float w, float n) {
@@ -99,10 +92,12 @@ bool Renderer::render() {
                          ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             if (challengeMode) {
-                auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
+                auto text = fmt::vformat(challengeText_, args_);
+                util::replaceAll(text, std::string("$igt"), format_time());
                 ImGui::TextUnformatted(text.c_str());
             } else {
-                auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
+                auto text = fmt::vformat(killText_, args_);
+                util::replaceAll(text, std::string("$igt"), format_time());
                 ImGui::TextUnformatted(text.c_str());
             }
             ImGui::SameLine();
@@ -122,10 +117,12 @@ bool Renderer::render() {
                 regionIndex = -1;
             }
             if (gBossDataSet.challengeMode()) {
-                auto text = fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
+                auto text = fmt::vformat(challengeText_, args_);
+                util::replaceAll(text, std::string("$igt"), format_time());
                 ImGui::TextUnformatted(text.c_str());
             } else {
-                auto text = fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
+                auto text = fmt::vformat(killText_, args_);
+                util::replaceAll(text, std::string("$igt"), format_time());
                 ImGui::TextUnformatted(text.c_str());
             }
             auto &style = ImGui::GetStyle();
@@ -193,4 +190,17 @@ bool Renderer::render() {
     return showFull_;
 }
 
+std::string Renderer::format_time() const {
+    using namespace std::chrono;
+
+    const auto total_seconds = duration_cast<seconds>(igt_).count();
+    auto hours = total_seconds / 3600;
+    auto minutes = (total_seconds / 60) % 60;
+    auto seconds = total_seconds % 60;
+
+    if (hours > 0) {
+        return fmt::format("{:02}:{:02}:{:02}", hours, minutes, seconds);
+    }
+    return fmt::format("{:02}:{:02}", minutes, seconds);
+}
 }
