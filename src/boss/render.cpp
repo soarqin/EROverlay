@@ -193,4 +193,17 @@ bool Renderer::render() {
     return showFull_;
 }
 
+std::string Renderer::format_time() const {
+    using namespace std::chrono;
+
+    const auto total_seconds = duration_cast<seconds>(igt_).count();
+    auto hours   = total_seconds / 3600;
+    auto minutes = (total_seconds / 60) % 60;
+    auto seconds = total_seconds % 60;
+
+    if (hours > 0) {
+        return fmt::format("{:02}:{:02}:{:02}", hours, minutes, seconds);
+    }
+    return fmt::format("{:02}:{:02}", minutes, seconds);
+}
 }
