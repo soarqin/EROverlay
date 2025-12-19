@@ -34,8 +34,8 @@ private:
     float height_ = 0.9f;
 
     /* dynamic format args */
-    std::string killText_, killTextHour_;
-    std::string challengeText_, challengeTextHour_;
+    std::string killText_;
+    std::string challengeText_;
     fmt::dynamic_format_arg_store<fmt::format_context> args_;
 
     std::chrono::milliseconds igt_;
