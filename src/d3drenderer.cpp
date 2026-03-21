@@ -76,23 +76,31 @@ void D3DRenderer::unhook() {
         oldWndProc_ = 0;
     }
     if (ImGui::GetCurrentContext()) {
-        if (ImGui::GetIO().BackendRendererUserData) {
-            ImGui_ImplDX12_Shutdown();
-            ImGui_ImplWin32_Shutdown();
+        if (!deviceLost_) {
+            if (ImGui::GetIO().BackendRendererUserData) {
+                ImGui_ImplDX12_Shutdown();
+                ImGui_ImplWin32_Shutdown();
+            }
+            ImGui::DestroyContext();
+            descriptorHeap_->Release();
+            descriptorHeap_ = nullptr;
+            for (UINT i = 0; i < buffersCounts_; ++i) {
+                commandAllocator_[i]->Release();
+                backBuffer_[i]->Release();
+            }
+            rtvDescriptorHeap_->Release();
+            rtvDescriptorHeap_ = nullptr;
+            delete[] commandAllocator_;
+            commandAllocator_ = nullptr;
+            delete[] backBuffer_;
+            backBuffer_ = nullptr;
+        } else {
+            ImGui::DestroyContext();
+            delete[] commandAllocator_;
+            commandAllocator_ = nullptr;
+            delete[] backBuffer_;
+            backBuffer_ = nullptr;
         }
-        ImGui::DestroyContext();
-        descriptorHeap_->Release();
-        descriptorHeap_ = nullptr;
-        for (UINT i = 0; i < buffersCounts_; ++i) {
-            commandAllocator_[i]->Release();
-            backBuffer_[i]->Release();
-        }
-        rtvDescriptorHeap_->Release();
-        rtvDescriptorHeap_ = nullptr;
-        delete[] commandAllocator_;
-        commandAllocator_ = nullptr;
-        delete[] backBuffer_;
-        backBuffer_ = nullptr;
     }
 }
 
@@ -311,6 +319,18 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
     if (commandQueue_ == nullptr)
         return;
 
+    if (deviceLost_)
+        return;
+
+    if (device_) {
+        HRESULT hr = device_->GetDeviceRemovedReason();
+        if (hr != S_OK) {
+            fwprintf(stderr, L"[EROverlay] D3D12 device lost (reason: 0x%08lX), disabling overlay\n", hr);
+            deviceLost_ = true;
+            return;
+        }
+    }
+
     DXGI_SWAP_CHAIN_DESC sd;
     pSwapChain->GetDesc(&sd);
 
@@ -448,7 +468,11 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 
         UINT bufferIndex = pSwapChain->GetCurrentBackBufferIndex();
         ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
-        commandAllocator->Reset();
+        if (FAILED(commandAllocator->Reset())) {
+            fwprintf(stderr, L"[EROverlay] CommandAllocator::Reset failed, device likely lost\n");
+            deviceLost_ = true;
+            return;
+        }
 
         D3D12_RESOURCE_BARRIER barrier = {};
         barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -458,7 +482,11 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-        commandList_->Reset(commandAllocator, nullptr);
+        if (FAILED(commandList_->Reset(commandAllocator, nullptr))) {
+            fwprintf(stderr, L"[EROverlay] CommandList::Reset failed, device likely lost\n");
+            deviceLost_ = true;
+            return;
+        }
         commandList_->ResourceBarrier(1, &barrier);
         commandList_->OMSetRenderTargets(1, &renderTargets_[bufferIndex], FALSE, nullptr);
         commandList_->SetDescriptorHeaps(1, &descriptorHeap_);
@@ -469,7 +497,11 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
         commandList_->ResourceBarrier(1, &barrier);
-        commandList_->Close();
+        if (FAILED(commandList_->Close())) {
+            fwprintf(stderr, L"[EROverlay] CommandList::Close failed, device likely lost\n");
+            deviceLost_ = true;
+            return;
+        }
 
         commandQueue_->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList **>(&commandList_));
     }
@@ -764,10 +796,12 @@ void D3DRenderer::initStyle() {
 
 void D3DRenderer::CleanupRenderTarget() {
     if (!backBuffer_) return;
-    for (UINT i = 0; i < buffersCounts_; ++i) {
-        if (backBuffer_[i]) {
-            backBuffer_[i]->Release();
-            backBuffer_[i] = nullptr;
+    if (!deviceLost_) {
+        for (UINT i = 0; i < buffersCounts_; ++i) {
+            if (backBuffer_[i]) {
+                backBuffer_[i]->Release();
+                backBuffer_[i] = nullptr;
+            }
         }
     }
     delete[] backBuffer_;
@@ -776,7 +810,12 @@ void D3DRenderer::CleanupRenderTarget() {
 
 HRESULT WINAPI D3DRenderer::hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags) {
     gD3DRenderer->overlay(pSwapChain);
-    return gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
+    HRESULT hr = gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
+    if ((hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) && !gD3DRenderer->deviceLost_) {
+        fwprintf(stderr, L"[EROverlay] Present returned device-lost HRESULT: 0x%08lX\n", hr);
+        gD3DRenderer->deviceLost_ = true;
+    }
+    return hr;
 }
 
 HRESULT WINAPI D3DRenderer::hkPresent1(IDXGISwapChain3 *pSwapChain,
@@ -784,7 +823,12 @@ HRESULT WINAPI D3DRenderer::hkPresent1(IDXGISwapChain3 *pSwapChain,
                                        UINT PresentFlags,
                                        const DXGI_PRESENT_PARAMETERS *pPresentParameters) {
     gD3DRenderer->overlay(pSwapChain);
-    return gD3DRenderer->oPresent1_(pSwapChain, SyncInterval, PresentFlags, pPresentParameters);
+    HRESULT hr = gD3DRenderer->oPresent1_(pSwapChain, SyncInterval, PresentFlags, pPresentParameters);
+    if ((hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) && !gD3DRenderer->deviceLost_) {
+        fwprintf(stderr, L"[EROverlay] Present1 returned device-lost HRESULT: 0x%08lX\n", hr);
+        gD3DRenderer->deviceLost_ = true;
+    }
+    return hr;
 }
 
 HRESULT WINAPI D3DRenderer::hkResizeBuffers(IDXGISwapChain *pSwapChain,

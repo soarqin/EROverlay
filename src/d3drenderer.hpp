@@ -37,6 +37,8 @@ public:
         return GetForegroundWindow() == gameWindow_;
     }
 
+    [[nodiscard]] bool isDeviceLost() const { return deviceLost_; }
+
     bool createDevice();
     bool hook();
     void unhook();
@@ -173,6 +175,7 @@ private:
 */
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
+    bool deviceLost_ = false;
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;
