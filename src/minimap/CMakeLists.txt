@@ -4,6 +4,7 @@ add_project(minimap SHARED
     render.cpp render.hpp
     defs/BonfireWarpParam.h
     defs/WorldMapLegacyConvParam.h
+    defs/WorldMapPointParam.h
 
     LANGUAGES CXX
     NO_PREFIX

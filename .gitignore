@@ -15,4 +15,6 @@
 # Generator
 /src/boss/data/gen/text/
 /src/boss/data/gen/msg/*/
+/msg/
+/data/
 __pycache__/

@@ -147,8 +147,8 @@ bool D3DRenderer::createDevice() {
     IDXGIFactory4* dxgiFactory = nullptr;
     IDXGISwapChain3* swapChain = nullptr;
 
-    const HMODULE D3D12Module = GetModuleHandle("d3d12.dll");
-    const HMODULE DXGIModule = GetModuleHandle("dxgi.dll");
+    const HMODULE D3D12Module = GetModuleHandleW(L"d3d12.dll");
+    const HMODULE DXGIModule = GetModuleHandleW(L"dxgi.dll");
     void *CreateDXGIFactory1;
     IDXGIAdapter *Adapter = nullptr;
     void *D3D12CreateDevice;

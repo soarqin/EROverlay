@@ -1,5 +1,7 @@
 #pragma once
 
+#include "data.hpp"
+
 #include "api.h"
 
 #include <vector>
@@ -21,10 +23,10 @@ private:
     [[nodiscard]] bool isPointInShape(float x, float y) const;
 
 private:
-    TextureContext playerTexture_ = {};
-    TextureContext arrowTexture_ = {};
-    TextureContext roundTableTexture_ = {};
-    TextureContext bonfireTexture_ = {};
+    const SpriteInfo *playerSprite_ = nullptr;
+    const SpriteInfo *arrowSprite_ = nullptr;
+    const SpriteInfo *roundTableSprite_ = nullptr;
+    std::vector<const SpriteInfo*> sprites_;
     std::vector<TextureContext> textures_;
 
     float minimapWidth_ = 0.f;

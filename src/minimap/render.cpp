@@ -4,8 +4,6 @@
 #endif
 #include "render.hpp"
 
-#include "data.hpp"
-
 #include "util/string.hpp"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
@@ -29,15 +27,12 @@ static constexpr float dlcMapOffsetX = 3035.f;
 static constexpr float dlcMapOffsetY = 1864.f;
 static constexpr int textureSizeInt = 1024;
 static constexpr float textureSize = (float)textureSizeInt;
-static constexpr float textureArrowOriginX = 34.f;
-static constexpr float textureArrowOriginY = 86.f;
-static constexpr float texturePlayerOriginX = 34.f;
-static constexpr float texturePlayerOriginY = 34.f;
 static constexpr float texturePlayerScale = 0.44f;
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
+
     textures_.resize(300);
 
     toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
@@ -271,74 +266,94 @@ bool Renderer::render() {
                 }
             }
         }
-        if (!playerTexture_.loaded) {
-            wchar_t path[256];
-            wsprintfW(path, L"%ls\\data\\map\\player.png", api->getModulePath());
-            playerTexture_ = api->loadTexture(path);
-            wsprintfW(path, L"%ls\\data\\map\\arrow.png", api->getModulePath());
-            arrowTexture_ = api->loadTexture(path);
-            wsprintfW(path, L"%ls\\data\\map\\roundtable.png", api->getModulePath());
-            roundTableTexture_ = api->loadTexture(path);
-            wsprintfW(path, L"%ls\\data\\map\\bonfire.png", api->getModulePath());
-            bonfireTexture_ = api->loadTexture(path);
+        if (playerSprite_ == nullptr) {
+            gAtlas.loadTextures();
+            playerSprite_ = gAtlas.findSprite("Player");
+            arrowSprite_ = gAtlas.findSprite("Arrow");
+            roundTableSprite_ = gAtlas.findSprite("RoundTable");
         }
         if (showGraces_ && gData.paramsLoaded()) {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
-            auto bonfireSize = 39.f * currentScale_;
-            auto bonfireOffset = -bonfireSize * .5f;
+            auto decorationScale = 0.2f * currentScale_;
             for (auto y = y0; y <= y1; y++, ny += texSize) {
                 auto index0 = layer * 100 + y * 10 + x0;
                 auto nx = cx;
                 for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                    auto p = gData.bonfiresAround(layer, x, y);
+                    auto p = gData.decorationsAround(layer, x, y);
                     auto *begin = std::get<0>(p);
                     if (begin == nullptr) continue;
                     auto *end = std::get<1>(p);
-                    for (auto *bonfire = begin; bonfire < end; bonfire++) {
-                         if (!bonfire->isUnlocked()) continue;
-                         auto rx = bonfire->localX * currentScale_ + nx;
-                         auto ry = bonfire->localY * currentScale_ + ny;
-                         if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
-                             if (currentShape_ != Shape::Rect) {
-                                 auto iconCenter = rx + bonfireSize * 0.5f;
-                                 auto iconCenterY = ry + bonfireSize * 0.5f;
-                                 if (!isPointInShape(iconCenter, iconCenterY)) continue;
-                             }
-                             ImGui::SetCursorPos(ImVec2(rx + bonfireOffset, ry + bonfireOffset));
-                             ImGui::ImageWithBg((ImTextureID)bonfireTexture_.gpuHandle, ImVec2(bonfireSize, bonfireSize), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-                         }
-                     }
+                    for (auto *decoration = begin; decoration < end; decoration++) {
+                        if (!decoration->isUnlocked()) continue;
+                        auto *sprite = decoration->sprite;
+                        auto rx = decoration->localX * currentScale_ + nx;
+                        auto ry = decoration->localY * currentScale_ + ny;
+                        if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
+                            auto width = sprite->width * decorationScale;
+                            auto height = sprite->height * decorationScale;
+                            auto centerX = sprite->centerX * decorationScale;
+                            auto centerY = sprite->centerY * decorationScale;
+                            if (currentShape_ != Shape::Rect) {
+                                if (!isPointInShape(rx + centerX, ry + centerY)) continue;
+                            }
+                            auto rad = decoration->rotationRad;
+                            if (rad == 0.f) {
+                                ImGui::SetCursorPos(ImVec2(rx - centerX, ry - centerY));
+                                ImGui::ImageWithBg((ImTextureID)sprite->texture->gpuHandle, ImVec2(width, height), ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+                            } else {
+                                auto *drawList = ImGui::GetWindowDrawList();
+                                auto xRel0 = -centerX;
+                                auto yRel0 = -centerY;
+                                auto xRel1 = (sprite->width - sprite->centerX) * decorationScale;
+                                auto yRel1 = (sprite->height - sprite->centerY) * decorationScale;
+                                auto cosRad = std::cos(rad);
+                                auto sinRad = std::sin(rad);
+                                auto pos = ImGui::GetWindowPos();
+                                rx += pos.x;
+                                ry += pos.y;
+                                // PrimQuadUV expects the same order as PrimRectUV: TL, TR, BR, BL (triangles TL-TR-BR and TL-BR-BL).
+                                auto p1 = ImVec2(rx + xRel0 * cosRad - yRel0 * sinRad, ry + xRel0 * sinRad + yRel0 * cosRad);
+                                auto p2 = ImVec2(rx + xRel1 * cosRad - yRel0 * sinRad, ry + xRel1 * sinRad + yRel0 * cosRad);
+                                auto p3 = ImVec2(rx + xRel1 * cosRad - yRel1 * sinRad, ry + xRel1 * sinRad + yRel1 * cosRad);
+                                auto p4 = ImVec2(rx + xRel0 * cosRad - yRel1 * sinRad, ry + xRel0 * sinRad + yRel1 * cosRad);
+                                drawList->PushTexture((ImTextureID)sprite->texture->gpuHandle);
+                                drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
+                                drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec2(sprite->u0, sprite->v1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
+                                drawList->PopTexture();
+                            }
+                        }
+                    }
                 }
             }
         }
-        if (drawRoundTable && roundTableTexture_.texture != nullptr) {
-             if (currentShape_ == Shape::Rect || isPointInShape(minimapWidth_ * 0.5f, minimapHeight_ * 0.5f)) {
-                 ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableTexture_.width * .25f, minimapHeight_ * .5f - roundTableTexture_.height * .25f));
-                 ImGui::ImageWithBg((ImTextureID)roundTableTexture_.gpuHandle, ImVec2(roundTableTexture_.width * .5f, roundTableTexture_.height * .5f), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-             }
-         }
-         renderPlayer();
-         // Draw shape border
-         if (borderWidth_ > 0.f) {
-             auto *drawList = ImGui::GetWindowDrawList();
-             auto winPos = ImGui::GetWindowPos();
-             ImVec2 shapeMin = winPos;
-             ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
-             if (currentShape_ == Shape::Circle) {
-                 float radius = minimapWidth_ * 0.5f;
-                 ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
-                 drawList->AddCircle(center, radius, borderColor_, 0, borderWidth_);
-             } else if (currentShape_ == Shape::Rounded) {
-                 float rounding = currentRoundingIsPercent_
-                     ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
-                     : currentRounding_;
-                 drawList->AddRect(shapeMin, shapeMax, borderColor_, rounding, 0, borderWidth_);
-             } else {
-                 drawList->AddRect(shapeMin, shapeMax, borderColor_, 0.f, 0, borderWidth_);
-             }
-         }
+        if (drawRoundTable && roundTableSprite_ != nullptr) {
+            if (currentShape_ == Shape::Rect || isPointInShape(minimapWidth_ * 0.5f, minimapHeight_ * 0.5f)) {
+                ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableSprite_->width * .25f, minimapHeight_ * .5f - roundTableSprite_->height * .25f));
+                ImGui::ImageWithBg((ImTextureID)roundTableSprite_->texture->gpuHandle, ImVec2(roundTableSprite_->width * .5f, roundTableSprite_->height * .5f), ImVec2(roundTableSprite_->u0, roundTableSprite_->v0), ImVec2(roundTableSprite_->u1, roundTableSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+            }
+        }
+        renderPlayer();
+        // Draw shape border
+        if (borderWidth_ > 0.f) {
+            auto *drawList = ImGui::GetWindowDrawList();
+            auto winPos = ImGui::GetWindowPos();
+            ImVec2 shapeMin = winPos;
+            ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
+            if (currentShape_ == Shape::Circle) {
+                float radius = minimapWidth_ * 0.5f;
+                ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
+                drawList->AddCircle(center, radius, borderColor_, 0, borderWidth_);
+            } else if (currentShape_ == Shape::Rounded) {
+                float rounding = currentRoundingIsPercent_
+                    ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
+                    : currentRounding_;
+                drawList->AddRect(shapeMin, shapeMax, borderColor_, rounding, 0, borderWidth_);
+            } else {
+                drawList->AddRect(shapeMin, shapeMax, borderColor_, 0.f, 0, borderWidth_);
+            }
+        }
      }
      ImGui::End();
      style.WindowPadding = originalPadding;
@@ -465,32 +480,33 @@ void Renderer::renderShapedMinimap(int index, float posX, float posY, float scal
 }
 
 void Renderer::renderPlayer() {
-    if (playerTexture_.texture == nullptr) {
+    if (playerSprite_ == nullptr) {
         return;
     }
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
-    ImGui::SetCursorPos(ImVec2(halfWidth - texturePlayerOriginX * currentScale_ * texturePlayerScale, halfHeight - texturePlayerOriginY * currentScale_ * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerTexture_.gpuHandle, ImVec2(playerTexture_.width * currentScale_ * texturePlayerScale, playerTexture_.height * currentScale_ * texturePlayerScale), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-    if (arrowTexture_.texture == nullptr) {
+    ImGui::SetCursorPos(ImVec2(halfWidth - playerSprite_->centerX * currentScale_ * texturePlayerScale, halfHeight - playerSprite_->centerY * currentScale_ * texturePlayerScale));
+    ImGui::ImageWithBg((ImTextureID)playerSprite_->texture->gpuHandle, ImVec2(playerSprite_->width * currentScale_ * texturePlayerScale, playerSprite_->height * currentScale_ * texturePlayerScale), ImVec2(playerSprite_->u0, playerSprite_->v0), ImVec2(playerSprite_->u1, playerSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+    if (arrowSprite_ == nullptr) {
         return;
     }
     auto *drawList = ImGui::GetWindowDrawList();
     auto cursorPos = ImGui::GetWindowPos() + ImVec2(halfWidth, halfHeight);
-    auto xRel0 = -textureArrowOriginX * currentScale_ * texturePlayerScale;
-    auto yRel0 = -textureArrowOriginY * currentScale_ * texturePlayerScale;
-    auto xRel1 = (arrowTexture_.width - textureArrowOriginX) * currentScale_ * texturePlayerScale;
-    auto yRel1 = (arrowTexture_.height - textureArrowOriginY) * currentScale_ * texturePlayerScale;
+    auto xRel0 = -arrowSprite_->centerX * currentScale_ * texturePlayerScale;
+    auto yRel0 = -arrowSprite_->centerY * currentScale_ * texturePlayerScale;
+    auto xRel1 = (arrowSprite_->width - arrowSprite_->centerX) * currentScale_ * texturePlayerScale;
+    auto yRel1 = (arrowSprite_->height - arrowSprite_->centerY) * currentScale_ * texturePlayerScale;
     auto rad = gData.location().rad * (float)M_PI / 180.f;
     auto cosRad = std::cos(rad);
     auto sinRad = std::sin(rad);
+    // PrimQuadUV: TL, TR, BR, BL (matches PrimRectUV / AddImage winding).
     auto p1 = cursorPos + ImVec2(xRel0 * cosRad - yRel0 * sinRad, xRel0 * sinRad + yRel0 * cosRad);
     auto p2 = cursorPos + ImVec2(xRel1 * cosRad - yRel0 * sinRad, xRel1 * sinRad + yRel0 * cosRad);
-    auto p3 = cursorPos + ImVec2(xRel0 * cosRad - yRel1 * sinRad, xRel0 * sinRad + yRel1 * cosRad);
-    auto p4 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
-    drawList->PushTexture((ImTextureID)arrowTexture_.gpuHandle);
+    auto p3 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
+    auto p4 = cursorPos + ImVec2(xRel0 * cosRad - yRel1 * sinRad, xRel0 * sinRad + yRel1 * cosRad);
+    drawList->PushTexture((ImTextureID)arrowSprite_->texture->gpuHandle);
     drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(0, 0), ImVec2(1, 0), ImVec2(0, 1), ImVec2(1, 1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
+    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(arrowSprite_->u0, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v1), ImVec2(arrowSprite_->u0, arrowSprite_->v1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
     drawList->PopTexture();
 }
 

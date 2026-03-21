@@ -8,6 +8,7 @@ EROverlayAPI *api;
 int init(EROverlayAPI *erOverlayAPI) {
     api = erOverlayAPI;
 
+    er::minimap::gAtlas.load(api->getModulePath());
     er::minimap::gData.load();
 
     return 0;
