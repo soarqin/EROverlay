@@ -24,7 +24,7 @@ void pluginsInit() {
             if (auto lib = LoadLibraryW(filename.c_str())) {
                 auto getExports = reinterpret_cast<PluginExports *(*)()>(GetProcAddress(lib, "getExports"));
                 if (!getExports) {
-                    fmt::print(" library enty not found.\n");
+                    fmt::print(" library entry not found.\n");
                     FreeLibrary(lib);
                     continue;
                 }
