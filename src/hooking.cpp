@@ -89,7 +89,7 @@ bool Hooking::menuLoaded() const {
 int Hooking::screenState() const {
     if (csMenuManImp_ == 0) return 1;
     auto addr = *reinterpret_cast<uintptr_t*>(csMenuManImp_);
-    if (addr == 0) return false;
+    if (addr == 0) return 1;
     return *reinterpret_cast<int*>(addr + menuInfoOffset_ + 0x10);
 }
 
