@@ -142,7 +142,7 @@ bool D3DRenderer::createDevice() {
     const HMODULE D3D12Module = GetModuleHandle("d3d12.dll");
     const HMODULE DXGIModule = GetModuleHandle("dxgi.dll");
     void *CreateDXGIFactory1;
-    IDXGIAdapter *Adapter;
+    IDXGIAdapter *Adapter = nullptr;
     void *D3D12CreateDevice;
     if (D3D12Module == nullptr || DXGIModule == nullptr) {
         goto failed;
@@ -170,6 +170,8 @@ bool D3DRenderer::createDevice() {
         Adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice)) != S_OK) {
         goto failed;
     }
+    Adapter->Release();
+    Adapter = nullptr;
 
     {
         D3D12_COMMAND_QUEUE_DESC QueueDesc;
@@ -195,6 +197,7 @@ bool D3DRenderer::createDevice() {
             goto failed;
         }
         if (SwapChain->QueryInterface(IID_PPV_ARGS(&swapChain)) != S_OK) {
+            SwapChain->Release();
             goto failed;
         }
         SwapChain->Release();
@@ -233,6 +236,9 @@ bool D3DRenderer::createDevice() {
 failed:
     DestroyWindow(hwnd);
     UnregisterClassW(cls.lpszClassName, cls.hInstance);
+    if (Adapter) {
+        Adapter->Release();
+    }
     if (swapChain) {
         swapChain->Release();
     }
@@ -279,6 +285,11 @@ void D3DRenderer::SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DES
 }
 
 void D3DRenderer::HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
+    if (freeDescriptors_.empty()) {
+        pOutCpuDescHandle->ptr = 0;
+        pOutGpuDescHandle->ptr = 0;
+        return;
+    }
     auto cpu_handle = descriptorHeap_->GetCPUDescriptorHandleForHeapStart();
     auto gpu_handle = descriptorHeap_->GetGPUDescriptorHandleForHeapStart();
     auto idx = freeDescriptors_.back();
@@ -399,7 +410,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         ID3D12Device* device;
         if (pSwapChain->GetDevice(IID_PPV_ARGS(&device)) != S_OK)
             return;
-        backBuffer_ = new ID3D12Resource *[buffersCounts_];
+        backBuffer_ = new ID3D12Resource *[buffersCounts_]();
         for (UINT i = 0; i < buffersCounts_; i++) {
             ID3D12Resource *buffer;
             if (pSwapChain->GetBuffer(i, IID_PPV_ARGS(&buffer)) != S_OK) {
@@ -1006,8 +1017,10 @@ bool D3DRenderer::LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIP
     if (file == INVALID_HANDLE_VALUE)
         return false;
     DWORD file_size = GetFileSize(file, NULL);
-    if (file_size == INVALID_FILE_SIZE)
+    if (file_size == INVALID_FILE_SIZE) {
+        CloseHandle(file);
         return false;
+    }
     void *file_data = IM_ALLOC(file_size);
     DWORD bytes_read = 0;
     ReadFile(file, file_data, file_size, &bytes_read, NULL);
