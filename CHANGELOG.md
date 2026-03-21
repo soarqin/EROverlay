@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Overlay Loader
 
+### [1.1.0] - 2026-03-21
+
+#### Fixed
+- Fixed `backBuffer_` not being zero-initialized, which could cause crashes when a swap chain buffer fails to acquire.
+- Fixed a file handle leak in `LoadTextureFromFile` when the file size query fails.
+- Fixed COM object leaks in `createDevice` (adapter and intermediate swap chain not released on all error paths).
+- Added a guard in `HeapDescriptorAlloc` to prevent out-of-bounds access when the descriptor pool is exhausted.
+- Fixed a thread-safety issue in the plugin config API: value buffers are now `thread_local` to prevent data races.
+- Fixed `screenState` returning an inconsistent value when the game address is null.
+- Fixed a typo in a plugin loader log message.
+- Added TIER 1 device-loss defensive checks for NVIDIA Optimus (hybrid GPU) graceful degradation: the overlay now silently disables itself instead of crashing the game when a D3D12 device-removed event is detected.
+
 ### [1.0.0] - 2025-10-20
 
 #### Added
@@ -120,3 +132,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Added
 - Initial release.
+
+---
+
+## Minimap Overlay
+
+### [1.0.0] - 2026-03-21
+
+#### Added
+- Configurable minimap shape: `rect` (default), `rounded`, or `circle`, set per scale state via `shape=` in `minimap.ini`.
+- Configurable rounding radius for the `rounded` shape: supports percentage (e.g. `20%` of the shorter side) or absolute pixel values (e.g. `30`).
+- Configurable shape border: `border_color` (R,G,B,A, 0–255 each) and `border_width_x10` (width × 10, e.g. `15` = 1.5 px). Set `border_width_x10=0` to disable.
+- In `circle` mode, the minimap is automatically constrained to a square (the smaller of width and height).
+- Bonfire/grace icons and the Roundtable Hold marker are now clipped to the minimap shape boundary in non-rect modes.
+
+#### Fixed
+- Fixed tile texture stretching in shaped (`rounded`/`circle`) rendering caused by incorrect UV clamping in `ShadeVertsLinearUV`.
+- Fixed a null pointer dereference when `csMenuManImp_` address is zero.
+- Removed leftover debug CSV dump from data loading.
