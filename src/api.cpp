@@ -27,12 +27,12 @@ public:
         },
 
         [](const char *name) {
-            static std::string value;
+            thread_local std::string value;
             value = er::gConfig[name];
             return value.c_str();
         },
         [](const char *name, const wchar_t *defValue) {
-            static std::wstring value;
+            thread_local std::wstring value;
             value = er::gConfig.getw(name, defValue);
             return value.c_str();
         },
