@@ -3,8 +3,11 @@
 #include "api.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace er::minimap {
+
+enum class Shape { Rect, Rounded, Circle };
 
 class Renderer {
 public:
@@ -13,7 +16,9 @@ public:
 
 private:
     void renderMinimap(int index, float posX, float posY, float scale = 1.0f);
+    void renderShapedMinimap(int index, float posX, float posY, float scale = 1.0f);
     void renderPlayer();
+    [[nodiscard]] bool isPointInShape(float x, float y) const;
 
 private:
     TextureContext playerTexture_ = {};
@@ -35,6 +40,7 @@ private:
     std::vector<float> scales_ = { 0.75f, 1.f };
     std::vector<float> alphas_ = { 0.8f, 0.6f };
     std::vector<bool> isCentered_ = { false, true };
+    std::vector<Shape> shapes_;
     size_t currentScaleIndex_ = 0;
 
     float currentWidthRatio_ = 0.3f;
@@ -42,6 +48,15 @@ private:
     float currentScale_ = 0.75f;
     float currentAlpha_ = 0.8f;
     bool currentIsCentered_ = false;
+    Shape currentShape_ = Shape::Rect;
+
+    std::vector<float> roundings_;
+    std::vector<bool> roundingIsPercent_;
+    float currentRounding_ = 0.f;
+    bool currentRoundingIsPercent_ = true;
+
+    uint32_t borderColor_ = 0x64FFFFFF;  // RGBA: 255,255,255,100
+    float borderWidth_ = 1.5f;
 };
 
 }
