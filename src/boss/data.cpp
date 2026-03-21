@@ -119,6 +119,13 @@ void BossDataSet::initMemoryAddresses() {
     fieldArea_ = addr.fieldArea;
 }
 
+BossDataSet::~BossDataSet() noexcept {
+    if (changeEvent_ != INVALID_HANDLE_VALUE) {
+        FindCloseChangeNotification(changeEvent_);
+        changeEvent_ = INVALID_HANDLE_VALUE;
+    }
+}
+
 void BossDataSet::update() {
     checkForConfigChange();
     if (api->screenState() != 0) {
@@ -175,6 +182,7 @@ void BossDataSet::updateBosses() {
         regionCounts_.swap(deadByRegionSwapTmp);
         dead_.swap(deadSwapTmp);
         count_ = cnt;
+        if (fieldArea_ == 0) return;
         auto addr1 = *(uintptr_t *)fieldArea_;
         if (addr1 == 0) {
             return;
@@ -198,6 +206,7 @@ void BossDataSet::updateChallengeMode() {
         // Flag 101: Reached Stranded Graveyard
         reachStrandedGraveyardFlagOffset_ = api->resolveFlagAddress(101, &reachStrandedGraveyardFlagBits_);
     }
+    if (reachStrandedGraveyardFlagOffset_ == 0) return;
     auto deathCount = readDeathCount();
     auto reached = (*(uint8_t *)reachStrandedGraveyardFlagOffset_ & reachStrandedGraveyardFlagBits_) != 0;
     bool needSave = false;
@@ -234,6 +243,7 @@ void BossDataSet::checkForConfigChange() {
 }
 
 int BossDataSet::readInGameTime() const {
+    if (gameDataMan_ == 0) return -1;
     auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return -1;
@@ -242,6 +252,7 @@ int BossDataSet::readInGameTime() const {
 }
 
 int BossDataSet::readDeathCount() const {
+    if (gameDataMan_ == 0) return 0;
     auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
     if (addr == 0) {
         return 0;

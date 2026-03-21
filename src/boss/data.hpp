@@ -29,6 +29,8 @@ struct RegionData {
 
 class BossDataSet {
 public:
+    ~BossDataSet() noexcept;
+
     void load(bool hasDLC);
     void loadConfig();
     void saveConfig() const;
