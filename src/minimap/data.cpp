@@ -127,14 +127,14 @@ void Data::load() {
             g.localY = g.y - areaY * 1024;
             g.sortKey = areaY * 10 + areaX;
         } paramTableIterateEnd();
-        for (auto i = 0; i < 3; ++i) {
-            auto &l = bonfires_[i];
-            std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
-                if (a.sortKey == b.sortKey) {
-                    return a.id < b.id;
-                }
-                return a.sortKey < b.sortKey;
-            });
+         for (auto i = 0; i < 3; ++i) {
+             auto &l = bonfires_[i];
+             std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
+                 if (a.sortKey == b.sortKey) {
+                     return a.id < b.id;
+                 }
+                 return a.sortKey < b.sortKey;
+             });
             auto sz = l.size();
             auto lastSortKey = -1;
             const auto *lastBonfire = &l.front();
@@ -156,9 +156,9 @@ void Data::load() {
                     garound.resize((size_t)(lastSortKey + 1));
                 }
                 garound[lastSortKey] = { lastBonfire, &l.front() + sz };
-            }
-        }
-        paramsLoaded_ = true;
+             }
+         }
+         paramsLoaded_ = true;
     });
     th.detach();
     csMenuManImp_ = api->getGameAddresses().csMenuManImp;
@@ -172,11 +172,12 @@ void Data::load() {
 }
 
 void Data::update() {
-    auto addr = *(uintptr_t*)csMenuManImp_;
-    if (addr == 0) {
-        onGUI_ = true;
-        return;
-    }
+     if (csMenuManImp_ == 0) { onGUI_ = true; return; }
+     auto addr = *(uintptr_t*)csMenuManImp_;
+     if (addr == 0) {
+         onGUI_ = true;
+         return;
+     }
     onGUI_ = api->screenState() != 0 || *reinterpret_cast<uint32_t*>(addr + 0x1C) != 0;
 
     addr = *(uintptr_t*)(addr + 0x80);
