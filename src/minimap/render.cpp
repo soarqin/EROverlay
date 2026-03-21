@@ -458,7 +458,7 @@ void Renderer::renderShapedMinimap(int index, float posX, float posY, float scal
 
     // Map tile texture UVs: texOriginScreen is the screen position of UV (0,0) of this tile
     ImVec2 texOriginScreen = {winPos.x + posX - rx, winPos.y + posY - ry};
-    ImGui::ShadeVertsLinearUV(drawList, vs, ve, texOriginScreen, {texOriginScreen.x + texWidth, texOriginScreen.y + texHeight}, ImVec2(0, 0), ImVec2(1, 1), true);
+    ImGui::ShadeVertsLinearUV(drawList, vs, ve, texOriginScreen, {texOriginScreen.x + texWidth, texOriginScreen.y + texHeight}, ImVec2(0, 0), ImVec2(1, 1), false);
 
     drawList->PopTexture();
     drawList->PopClipRect();
