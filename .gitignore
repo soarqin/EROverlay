@@ -4,6 +4,9 @@
 # Visual Studio Code
 /.vscode/
 
+# Agents
+/.sisyphus*/
+
 # Build
 /cmake-build-*/
 /build/
