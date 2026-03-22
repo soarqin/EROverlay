@@ -11,6 +11,8 @@
 
 namespace er::minimap {
 
+enum class DecorationSource : uint8_t { Grace, Landmark };
+
 struct Location {
     int32_t mapId;
     float x;
@@ -33,6 +35,7 @@ struct DecorationInfo {
     int32_t sortKey = 0;
     mutable uintptr_t eventFlagAddress = 0;
     mutable uint8_t eventFlagBits = 0;
+    DecorationSource source = DecorationSource::Grace;
     const SpriteInfo *sprite = nullptr;
 
     [[nodiscard]] bool isUnlocked() const;

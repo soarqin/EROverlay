@@ -26,7 +26,8 @@ static constexpr float dlcMapOffsetX = 3035.f;
 static constexpr float dlcMapOffsetY = 1864.f;
 static constexpr int textureSizeInt = 1024;
 static constexpr float textureSize = (float)textureSizeInt;
-static constexpr float texturePlayerScale = 0.44f;
+static constexpr float texturePlayerScale = 0.45f;
+static constexpr float textureDecorationScale = 0.25f;
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
@@ -38,6 +39,8 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
     gracesKey_ = api->configGetImGuiKey("minimap.graces_key", ImGuiKey_N);
     showGraces_ = api->configGetInt("minimap.graces", 1) != 0;
+    landmarksKey_ = api->configGetImGuiKey("minimap.landmarks_key", ImGuiKey_N);
+    showLandmarks_ = api->configGetInt("minimap.landmarks", 1) != 0;
     widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,90%"));
     heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,90%"));
     auto sl = util::splitString(std::wstring(api->configGetString("minimap.scale", L"0.75,+1.5")), L',');
@@ -203,13 +206,16 @@ bool Renderer::render() {
     if (gracesKey_ != 0 && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(gracesKey_))) {
         showGraces_ = !showGraces_;
     }
+    if (landmarksKey_ != 0 && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(landmarksKey_))) {
+        showLandmarks_ = !showLandmarks_;
+    }
 
     const auto &location = gData.location();
     if (location.x == 0.f) return false;
     auto *vp = ImGui::GetMainViewport();
     auto realHeight = vp->Size.x * .5625f >= vp->Size.y ? vp->Size.y : vp->Size.x * .5625f;
-    minimapWidth_ = realHeight * currentWidthRatio_;
-    minimapHeight_ = realHeight * currentHeightRatio_;
+    minimapWidth_ = std::floor(realHeight * currentWidthRatio_);
+    minimapHeight_ = std::floor(realHeight * currentHeightRatio_);
     if (currentShape_ == Shape::Circle) {
         float side = std::min(minimapWidth_, minimapHeight_);
         minimapWidth_ = side;
@@ -223,7 +229,7 @@ bool Renderer::render() {
     ImVec2 originalPadding = style.WindowPadding;
     style.WindowPadding = ImVec2(0, 0);
     if (currentIsCentered_) {
-        ImGui::SetNextWindowPos(ImVec2((vp->Size.x - minimapWidth_) * .5f, (vp->Size.y - minimapHeight_) * .5f), ImGuiCond_Always, ImVec2(0.f, 0.f));
+        ImGui::SetNextWindowPos(ImVec2(std::floor((vp->Size.x - minimapWidth_) * .5f), std::floor((vp->Size.y - minimapHeight_) * .5f)), ImGuiCond_Always, ImVec2(0.f, 0.f));
         ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
     } else {
         ImGui::SetNextWindowPos(ImVec2(vp->Size.x - minimapWidth_, 0), ImGuiCond_Always, ImVec2(0.f, 0.f));
@@ -263,8 +269,8 @@ bool Renderer::render() {
         auto v = minimapHeight_ / texSize;
         dx -= u * 0.5f;
         dy -= v * 0.5f;
-        auto cx = (std::floor(dx) - dx) * texSize;
-        auto cy = (std::floor(dy) - dy) * texSize;
+        auto cx = std::floor((std::floor(dx) - dx) * texSize);
+        auto cy = std::floor((std::floor(dy) - dy) * texSize);
         auto x0 = (int)dx;
         auto y0 = (int)dy;
         auto x1 = (int)(dx + u);
@@ -287,11 +293,11 @@ bool Renderer::render() {
             arrowSprite_ = gAtlas.findSprite("Arrow");
             roundTableSprite_ = gAtlas.findSprite("RoundTable");
         }
-        if (showGraces_ && gData.paramsLoaded()) {
+        if ((showGraces_ || showLandmarks_) && gData.paramsLoaded()) {
             auto boundMaxX = minimapWidth_ + 100.f;
             auto boundMaxY = minimapHeight_ + 100.f;
             ny = cy;
-            auto decorationScale = 0.2f * currentScale_;
+            auto decorationScale = textureDecorationScale * currentScale_;
             for (auto y = y0; y <= y1; y++, ny += texSize) {
                 auto index0 = layer * 100 + y * 10 + x0;
                 auto nx = cx;
@@ -301,6 +307,14 @@ bool Renderer::render() {
                     if (begin == nullptr) continue;
                     auto *end = std::get<1>(p);
                     for (auto *decoration = begin; decoration < end; decoration++) {
+                        switch (decoration->source) {
+                            case DecorationSource::Grace:
+                                if (!showGraces_) continue;
+                                break;
+                            case DecorationSource::Landmark:
+                                if (!showLandmarks_) continue;
+                                break;
+                        }
                         if (!decoration->isUnlocked()) continue;
                         auto *sprite = decoration->sprite;
                         auto rx = decoration->localX * currentScale_ + nx;

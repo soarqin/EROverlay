@@ -43,6 +43,8 @@ private:
     int scaleKey_ = 0;
     int gracesKey_ = 0;
     bool showGraces_ = true;
+    int landmarksKey_ = 0;
+    bool showLandmarks_ = true;
     std::vector<float> widthRatios_ = { 0.3f, 0.4f };
     std::vector<float> heightRatios_ = { 0.3f, 0.4f };
     std::vector<float> scales_ = { 0.75f, 1.f };

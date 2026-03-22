@@ -157,7 +157,7 @@ void Data::load() {
             decorationsAround_[i].clear();
             decorationsAround_[i].resize(100);
         }
-        auto addDecoration = [&](uint64_t id, int32_t layer, uint16_t iconId, uint32_t eventFlagId, uint8_t areaNo, uint8_t gridXNo, uint8_t gridZNo, float posX, float posY, float posZ, float rotationDeg) {
+        auto addDecoration = [&](uint64_t id, int32_t layer, uint16_t iconId, uint32_t eventFlagId, uint8_t areaNo, uint8_t gridXNo, uint8_t gridZNo, float posX, float posY, float posZ, float rotationDeg, DecorationSource source) {
             if (layer == -1) return;
             if (iconId == 0) return;
             char iconIdStr[16];
@@ -193,6 +193,7 @@ void Data::load() {
             g.id = id;
             g.eventFlagId = eventFlagId;
             g.layer = layer;
+            g.source = source;
             int areaX = (int32_t)std::floor(g.x) / 1024;
             int areaY = (int32_t)std::floor(g.y) / 1024;
             g.localX = g.x - areaX * 1024;
@@ -208,7 +209,7 @@ void Data::load() {
         }
         paramTableIterateBegin(t, BonfireWarpParam, bwp) {
             int32_t layer = bwp->dispMask00 ? 0 : bwp->dispMask01 ? 1 : bwp->dispMask02 ? 2 : -1;
-            addDecoration(entry->paramId, layer, bwp->iconId, bwp->eventflagId, bwp->areaNo, bwp->gridXNo, bwp->gridZNo, bwp->posX, bwp->posY, bwp->posZ, 0.f);
+            addDecoration(entry->paramId, layer, bwp->iconId, bwp->eventflagId, bwp->areaNo, bwp->gridXNo, bwp->gridZNo, bwp->posX, bwp->posY, bwp->posZ, 0.f, DecorationSource::Grace);
         } paramTableIterateEnd();
         t = api->paramFindTable(L"WorldMapPointParam");
         if (t == nullptr) {
@@ -216,15 +217,17 @@ void Data::load() {
             return;
         }
         paramTableIterateBegin(t, WorldMapPointParam, wmpp) {
+            /* 80 is the icon id for the NPCs, I don't want to show them as now, because its condition fields are a bit silly */
+            if (wmpp->iconId == 80) continue;
             int32_t layer = wmpp->dispMask00 ? 0 : wmpp->dispMask01 ? 1 : wmpp->dispMask02 ? 2 : -1;
-            addDecoration(entry->paramId, layer, wmpp->iconId, wmpp->eventFlagId, wmpp->areaNo, wmpp->gridXNo, wmpp->gridZNo, wmpp->posX, wmpp->posY, wmpp->posZ, wmpp->angle);
+            addDecoration(entry->paramId, layer, wmpp->iconId, wmpp->eventFlagId, wmpp->areaNo, wmpp->gridXNo, wmpp->gridZNo, wmpp->posX, wmpp->posY, wmpp->posZ, wmpp->angle, DecorationSource::Landmark);
         } paramTableIterateEnd();
         for (auto i = 0; i < 3; ++i) {
             auto &l = decorations_[i];
             if (l.empty()) continue;
             std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
                 if (a.sortKey == b.sortKey) {
-                    return a.id < b.id;
+                    return a.id > b.id;
                 }
                 return a.sortKey < b.sortKey;
             });
