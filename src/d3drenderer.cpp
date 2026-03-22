@@ -285,11 +285,11 @@ void D3DRenderer::initOverlay() {
 }
 
 void D3DRenderer::SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
-    ((D3DRenderer*)info->UserData)->HeapDescriptorAlloc(pOutCpuDescHandle, pOutGpuDescHandle);
+    static_cast<D3DRenderer*>(info->UserData)->HeapDescriptorAlloc(pOutCpuDescHandle, pOutGpuDescHandle);
 }
 
 void D3DRenderer::SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle) {
-    ((D3DRenderer*)info->UserData)->HeapDescriptorFree(hCpuDescHandle, hGpuDescHandle);
+    static_cast<D3DRenderer*>(info->UserData)->HeapDescriptorFree(hCpuDescHandle, hGpuDescHandle);
 }
 
 void D3DRenderer::HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
@@ -312,7 +312,7 @@ void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle,
     auto cpuIdx = (hCpuDescHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
     auto gpuIdx = (hGpuDescHandle.ptr - descriptorHeap_->GetGPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
     assert(cpuIdx == gpuIdx);
-    freeDescriptors_.push_back((int)cpuIdx);
+    freeDescriptors_.push_back(static_cast<uint32_t>(cpuIdx));
 }
 
 void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
@@ -651,22 +651,24 @@ void D3DRenderer::loadFont() {
     }
     if (useSysFont) {
         auto *pathList = util::systemFontFileList(L"Segoe UI");
-        bool first = true;
-        for (auto *p = pathList; *p; p++) {
-            fwprintf(stdout, L"Trying to add font file: %ls... ", *p);
-            data = util::getFileContent(*p, fontSize, ImGui::MemAlloc);
-            if (data == nullptr) {
-                fwprintf(stdout, L"not found\n");
-                continue;
+        if (pathList) {
+            bool first = true;
+            for (auto *p = pathList; *p; p++) {
+                fwprintf(stdout, L"Trying to add font file: %ls... ", *p);
+                data = util::getFileContent(*p, fontSize, ImGui::MemAlloc);
+                if (data == nullptr) {
+                    fwprintf(stdout, L"not found\n");
+                    continue;
+                }
+                ImFontConfig cfg;
+                cfg.MergeMode = !first;
+                io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, &cfg, charsetRange_);
+                fwprintf(stdout, L"done\n");
+                if (first) first = false;
             }
-            ImFontConfig cfg;
-            cfg.MergeMode = !first;
-            io.Fonts->AddFontFromMemoryTTF(data, static_cast<int>(fontSize), fontSize_, &cfg, charsetRange_);
-            fwprintf(stdout, L"done\n");
-            if (first) first = false;
+            util::freeSystemFontFileList(pathList);
+            if (!first) return;
         }
-        util::freeSystemFontFileList(pathList);
-        if (!first) return;
     }
     ImFontConfig cfg;
     cfg.FontDataOwnedByAtlas = false;

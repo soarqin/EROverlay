@@ -155,7 +155,7 @@ void Data::unlock(const char *name) {
     auto it = indexMap_.find(n);
     if (it == indexMap_.end()) return;
     uint32_t index = it->second;
-    auto findit = std::find_if(lockedPrev_.begin(), lockedPrev_.end(), [index](const auto &n) { return n.index == index; });
+    auto findit = std::find_if(lockedPrev_.begin(), lockedPrev_.end(), [index](const auto &item) { return item.index == index; });
     if (findit == lockedPrev_.end()) return;
     lockedPrev_.erase(findit);
     fmt::print("Unlocking {} and adding notification\n", n);

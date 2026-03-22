@@ -38,7 +38,7 @@ void pluginsInit() {
                 plugins.emplace_back(ver, 0, exports);
                 fmt::print(" successful. (API Version {})\n", ver);
             } else {
-                fmt::print(" unabled to load.\n");
+                fmt::print(" unable to load.\n");
             }
         }
     }

@@ -28,12 +28,12 @@ inline void trimString(T &str) {
 
 template<typename T>
 inline std::vector<T> splitString(const T &str, typename T::value_type c) {
-    typename std::string::size_type pos = 0;
+    typename T::size_type pos = 0;
     std::vector<T> result;
     while (true) {
         auto epos = str.find(c, pos);
         result.emplace_back(str.substr(pos, epos - pos));
-        if (epos == std::string::npos) {
+        if (epos == T::npos) {
             break;
         }
         pos = epos + 1;
@@ -79,6 +79,7 @@ inline std::vector<float> strSplitToFloatVec(const std::wstring &s) {
 }
 
 inline float strToFloat(const std::string &s) {
+    if (s.empty()) return 0.f;
     if (s.back() == '%') {
         return std::stof(s.substr(0, s.size() - 1)) / 100.f;
     }

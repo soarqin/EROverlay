@@ -99,7 +99,7 @@ void BossDataSet::saveConfig() const {
     auto filename = std::wstring(api->getModulePath()) + L"\\Challenge.txt";
     auto *f = _wfopen(filename.c_str(), L"wt");
     if (f == nullptr) {
-        fprintf(stderr, "Unable to open %ls for writing\n", filename.c_str());
+        fwprintf(stderr, L"Unable to open %ls for writing\n", filename.c_str());
         fflush(stderr);
         return;
     }

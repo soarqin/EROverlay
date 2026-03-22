@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <thread>
+#include <vector>
 #include <shlwapi.h>
 
 void init();
@@ -47,17 +48,15 @@ void checkGameVersion() {
     GetModuleFileNameW(nullptr, exepath, MAX_PATH);
     DWORD len = GetFileVersionInfoSizeW(exepath, nullptr);
     if (len == 0) return;
-    BYTE *pVersionResource = new BYTE[len];
-    if (!GetFileVersionInfoW(exepath, 0, len, pVersionResource)) {
-        delete[] pVersionResource;
+    std::vector<BYTE> versionResource(len);
+    if (!GetFileVersionInfoW(exepath, 0, len, versionResource.data())) {
         return;
     }
     UINT uLen;
     VS_FIXEDFILEINFO *ptFixedFileInfo;
-    if (VerQueryValueW(pVersionResource, L"\\", reinterpret_cast<LPVOID *>(&ptFixedFileInfo), &uLen) && uLen > 0) {
+    if (VerQueryValueW(versionResource.data(), L"\\", reinterpret_cast<LPVOID *>(&ptFixedFileInfo), &uLen) && uLen > 0) {
         er::gGameVersion = (uint64_t(ptFixedFileInfo->dwFileVersionMS) << 32) | uint64_t(ptFixedFileInfo->dwFileVersionLS);
     }
-    delete[] pVersionResource;
 }
 
 void init() {
