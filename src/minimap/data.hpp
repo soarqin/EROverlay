@@ -2,6 +2,7 @@
 
 #include "api.h"
 
+#include <atomic>
 #include <cstdint>
 #include <string>
 #include <tuple>
@@ -53,7 +54,7 @@ private:
     size_t locationOffset_ = 0;
     Location location_ = {};
     bool onGUI_ = false;
-    bool paramsLoaded_ = false;
+    std::atomic_bool paramsLoaded_ = false;
 
     std::vector<DecorationInfo> decorations_[3];
     std::vector<std::tuple<const DecorationInfo *, const DecorationInfo *>> decorationsAround_[3];

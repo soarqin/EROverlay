@@ -17,6 +17,13 @@ public:
     bool render();
 
 private:
+    struct TileInfo {
+        TextureContext *texture;
+        float posX, posY, width, height;
+        float texWidth, texHeight;
+        float clipU, clipV;  // texture offset from clipping
+    };
+    [[nodiscard]] bool prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out);
     void renderMinimap(int index, float posX, float posY, float scale = 1.0f);
     void renderShapedMinimap(int index, float posX, float posY, float scale = 1.0f);
     void renderPlayer();
@@ -26,7 +33,6 @@ private:
     const SpriteInfo *playerSprite_ = nullptr;
     const SpriteInfo *arrowSprite_ = nullptr;
     const SpriteInfo *roundTableSprite_ = nullptr;
-    std::vector<const SpriteInfo*> sprites_;
     std::vector<TextureContext> textures_;
 
     float minimapWidth_ = 0.f;
@@ -57,7 +63,9 @@ private:
     float currentRounding_ = 0.f;
     bool currentRoundingIsPercent_ = true;
 
-    uint32_t borderColor_ = 0x64FFFFFF;  // RGBA: 255,255,255,100
+    float cachedRounding_ = 0.f;
+
+    uint32_t borderColor_ = 0x64FFFFFF;  // ABGR (ImGui IM_COL32 format): white, alpha=100
     float borderWidth_ = 1.5f;
 };
 

@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -10,7 +9,7 @@
 #include <imgui_internal.h>
 #include <windows.h>
 #include <cmath>
-#undef _USE_MATH_DEFINES
+#include <numbers>
 
 extern EROverlayAPI *api;
 
@@ -44,7 +43,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     auto sl = util::splitString(std::wstring(api->configGetString("minimap.scale", L"0.75,+1.5")), L',');
     scales_.clear();
     isCentered_.clear();
-    for (auto &s: sl) {
+    for (auto &s : sl) {
         if (s.empty()) {
             scales_.push_back(0.f);
             isCentered_.push_back(false);
@@ -70,7 +69,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     alphas_ = util::strSplitToFloatVec(api->configGetString("minimap.alpha", L"0.8,0.6"));
     auto shapeStrs = util::splitString(std::wstring(api->configGetString("minimap.shape", L"rect")), L',');
     shapes_.clear();
-    for (auto &s: shapeStrs) {
+    for (auto &s : shapeStrs) {
         if (s == L"rounded") shapes_.push_back(Shape::Rounded);
         else if (s == L"circle") shapes_.push_back(Shape::Circle);
         else shapes_.push_back(Shape::Rect);
@@ -78,7 +77,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     auto roundingStrs = util::splitString(std::wstring(api->configGetString("minimap.rounding", L"20%")), L',');
     roundings_.clear();
     roundingIsPercent_.clear();
-    for (auto &s: roundingStrs) {
+    for (auto &s : roundingStrs) {
         if (s.empty()) {
             roundings_.push_back(0.f);
             roundingIsPercent_.push_back(true);
@@ -93,7 +92,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
             roundingIsPercent_.push_back(false);
         }
     }
-    // Parse border_color: "R,G,B,A" format (0-255 each)
+    // Parse border_color: "R,G,B,A" format (0-255 each), stored as ABGR (ImGui IM_COL32 format)
     {
         auto colorStr = std::wstring(api->configGetString("minimap.border_color", L"255,255,255,100"));
         auto parts = util::splitString(colorStr, L',');
@@ -112,6 +111,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         heightRatios_.push_back(0.3f);
         scales_.push_back(0.75f);
         alphas_.push_back(0.8f);
+        isCentered_.push_back(false);
+        shapes_.push_back(Shape::Rect);
+        roundings_.push_back(0.2f);
+        roundingIsPercent_.push_back(true);
     } else {
         if (widthRatios_.empty()) {
             widthRatios_.push_back(0.3f);
@@ -125,8 +128,15 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         if (alphas_.empty()) {
             alphas_.push_back(0.8f);
         }
+        if (isCentered_.empty()) {
+            isCentered_.push_back(false);
+        }
         if (shapes_.empty()) {
             shapes_.push_back(Shape::Rect);
+        }
+        if (roundings_.empty()) {
+            roundings_.push_back(0.2f);
+            roundingIsPercent_.push_back(true);
         }
         while (widthRatios_.size() < maxCount) {
             widthRatios_.push_back(widthRatios_.back());
@@ -140,34 +150,35 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         while (alphas_.size() < maxCount) {
             alphas_.push_back(alphas_.back());
         }
-         while (shapes_.size() < maxCount) {
-             shapes_.push_back(shapes_.back());
-         }
-         if (roundings_.empty()) {
-             roundings_.push_back(0.2f);
-             roundingIsPercent_.push_back(true);
-         }
-         while (roundings_.size() < maxCount) {
-             roundings_.push_back(roundings_.back());
-             roundingIsPercent_.push_back(roundingIsPercent_.back());
-         }
-     }
-     if (toggleKey_ == scaleKey_) {
-         scales_.push_back(0.f);
-         widthRatios_.push_back(widthRatios_.back());
-         heightRatios_.push_back(heightRatios_.back());
-         shapes_.push_back(shapes_.back());
-         roundings_.push_back(roundings_.back());
-         roundingIsPercent_.push_back(roundingIsPercent_.back());
-     }
-     currentWidthRatio_ = widthRatios_[0];
-     currentHeightRatio_ = heightRatios_[0];
-     currentScale_ = scales_[0];
-     currentAlpha_ = alphas_[0];
-     currentIsCentered_ = isCentered_[0];
-     currentShape_ = shapes_[0];
-     currentRounding_ = roundings_[0];
-     currentRoundingIsPercent_ = roundingIsPercent_[0];
+        while (isCentered_.size() < maxCount) {
+            isCentered_.push_back(isCentered_.back());
+        }
+        while (shapes_.size() < maxCount) {
+            shapes_.push_back(shapes_.back());
+        }
+        while (roundings_.size() < maxCount) {
+            roundings_.push_back(roundings_.back());
+            roundingIsPercent_.push_back(roundingIsPercent_.back());
+        }
+    }
+    if (toggleKey_ == scaleKey_) {
+        scales_.push_back(0.f);
+        widthRatios_.push_back(widthRatios_.back());
+        heightRatios_.push_back(heightRatios_.back());
+        alphas_.push_back(alphas_.back());
+        isCentered_.push_back(isCentered_.back());
+        shapes_.push_back(shapes_.back());
+        roundings_.push_back(roundings_.back());
+        roundingIsPercent_.push_back(roundingIsPercent_.back());
+    }
+    currentWidthRatio_ = widthRatios_[0];
+    currentHeightRatio_ = heightRatios_[0];
+    currentScale_ = scales_[0];
+    currentAlpha_ = alphas_[0];
+    currentIsCentered_ = isCentered_[0];
+    currentShape_ = shapes_[0];
+    currentRounding_ = roundings_[0];
+    currentRoundingIsPercent_ = roundingIsPercent_[0];
 }
 
 bool Renderer::render() {
@@ -175,17 +186,17 @@ bool Renderer::render() {
     if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
         show_ = !show_;
     }
-     if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
-         currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-         currentWidthRatio_ = widthRatios_[currentScaleIndex_];
-         currentHeightRatio_ = heightRatios_[currentScaleIndex_];
-         currentScale_ = scales_[currentScaleIndex_];
-         currentAlpha_ = alphas_[currentScaleIndex_];
-         currentIsCentered_ = isCentered_[currentScaleIndex_];
-         currentShape_ = shapes_[currentScaleIndex_];
-         currentRounding_ = roundings_[currentScaleIndex_];
-         currentRoundingIsPercent_ = roundingIsPercent_[currentScaleIndex_];
-     }
+    if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
+        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
+        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
+        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
+        currentScale_ = scales_[currentScaleIndex_];
+        currentAlpha_ = alphas_[currentScaleIndex_];
+        currentIsCentered_ = isCentered_[currentScaleIndex_];
+        currentShape_ = shapes_[currentScaleIndex_];
+        currentRounding_ = roundings_[currentScaleIndex_];
+        currentRoundingIsPercent_ = roundingIsPercent_[currentScaleIndex_];
+    }
     if (!show_ || currentScale_ < 0.0001f) {
         return false;
     }
@@ -204,7 +215,11 @@ bool Renderer::render() {
         minimapWidth_ = side;
         minimapHeight_ = side;
     }
-    ImGuiStyle& style = ImGui::GetStyle();
+    // Cache rounding value for this frame (used by renderShapedMinimap, border drawing, isPointInShape)
+    cachedRounding_ = currentRoundingIsPercent_
+        ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
+        : currentRounding_;
+    ImGuiStyle &style = ImGui::GetStyle();
     ImVec2 originalPadding = style.WindowPadding;
     style.WindowPadding = ImVec2(0, 0);
     if (currentIsCentered_) {
@@ -346,101 +361,76 @@ bool Renderer::render() {
                 ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
                 drawList->AddCircle(center, radius, borderColor_, 0, borderWidth_);
             } else if (currentShape_ == Shape::Rounded) {
-                float rounding = currentRoundingIsPercent_
-                    ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
-                    : currentRounding_;
-                drawList->AddRect(shapeMin, shapeMax, borderColor_, rounding, 0, borderWidth_);
+                drawList->AddRect(shapeMin, shapeMax, borderColor_, cachedRounding_, 0, borderWidth_);
             } else {
                 drawList->AddRect(shapeMin, shapeMax, borderColor_, 0.f, 0, borderWidth_);
             }
         }
-     }
-     ImGui::End();
-     style.WindowPadding = originalPadding;
-     return false;
+    }
+    ImGui::End();
+    style.WindowPadding = originalPadding;
+    return false;
+}
+
+bool Renderer::prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out) {
+    auto &t = textures_[index];
+    if (!t.loaded) {
+        wchar_t path[256];
+        wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
+        t = api->loadTexture(path);
+        if (t.texture == nullptr) {
+            // Fallback to JPG if PNG is not found
+            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
+            t = api->loadTexture(path);
+        }
+    }
+    if (t.texture == nullptr) {
+        return false;
+    }
+    auto width = (float)t.width * scale;
+    auto height = (float)t.height * scale;
+    out.texWidth = width;
+    out.texHeight = height;
+    out.clipU = 0.f;
+    out.clipV = 0.f;
+    if (posX < 0) {
+        out.clipU = -posX;
+        width += posX;
+        posX = 0.f;
+    }
+    if (posY < 0) {
+        out.clipV = -posY;
+        height += posY;
+        posY = 0.f;
+    }
+    if (posX + width > minimapWidth_) {
+        width = minimapWidth_ - posX;
+    }
+    if (posY + height > minimapHeight_) {
+        height = minimapHeight_ - posY;
+    }
+    if (width <= 0.f || height <= 0.f) return false;
+    out.texture = &t;
+    out.posX = posX;
+    out.posY = posY;
+    out.width = width;
+    out.height = height;
+    return true;
 }
 
 void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
-    auto &t = textures_[index];
-    if (!t.loaded) {
-        wchar_t path[256];
-        wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-        t = api->loadTexture(path);
-        if (t.texture == nullptr) {
-            // Fallback to JPG if PNG is not found
-            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-            t = api->loadTexture(path);
-        }
-    }
-    if (t.texture == nullptr) {
-        return;
-    }
-    auto width = (float)t.width * scale;
-    auto height = (float)t.height * scale;
-    auto texWidth = width;
-    auto texHeight = height;
-    auto rx = 0.f;
-    auto ry = 0.f;
-    if (posX < 0) {
-        rx -= posX;
-        width += posX;
-        posX = 0.f;
-    }
-    if (posY < 0) {
-        ry -= posY;
-        height += posY;
-        posY = 0.f;
-    }
-    if (posX + width > minimapWidth_) {
-        width = minimapWidth_ - posX;
-    }
-    if (posY + height > minimapHeight_) {
-        height = minimapHeight_ - posY;
-    }
-    ImGui::SetCursorPos(ImVec2(posX, posY));
-    ImGui::ImageWithBg((ImTextureID)t.gpuHandle, ImVec2(width, height), ImVec2(rx / texWidth, ry / texHeight), ImVec2((rx + width) / texWidth, (ry + height) / texHeight), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+    TileInfo tile;
+    if (!prepareTile(index, posX, posY, scale, tile)) return;
+    ImGui::SetCursorPos(ImVec2(tile.posX, tile.posY));
+    ImGui::ImageWithBg((ImTextureID)tile.texture->gpuHandle, ImVec2(tile.width, tile.height),
+        ImVec2(tile.clipU / tile.texWidth, tile.clipV / tile.texHeight),
+        ImVec2((tile.clipU + tile.width) / tile.texWidth, (tile.clipV + tile.height) / tile.texHeight),
+        ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
 }
 
 void Renderer::renderShapedMinimap(int index, float posX, float posY, float scale) {
-    auto &t = textures_[index];
-    if (!t.loaded) {
-        wchar_t path[256];
-        wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-        t = api->loadTexture(path);
-        if (t.texture == nullptr) {
-            // Fallback to JPG if PNG is not found
-            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-            t = api->loadTexture(path);
-        }
-    }
-    if (t.texture == nullptr) {
-        return;
-    }
-    auto width = (float)t.width * scale;
-    auto height = (float)t.height * scale;
-    auto texWidth = width;
-    auto texHeight = height;
-    auto rx = 0.f;
-    auto ry = 0.f;
-    if (posX < 0) {
-        rx -= posX;
-        width += posX;
-        posX = 0.f;
-    }
-    if (posY < 0) {
-        ry -= posY;
-        height += posY;
-        posY = 0.f;
-    }
-    if (posX + width > minimapWidth_) {
-        width = minimapWidth_ - posX;
-    }
-    if (posY + height > minimapHeight_) {
-        height = minimapHeight_ - posY;
-    }
-    if (width <= 0.f || height <= 0.f) return;
-
-    float rounding = currentRoundingIsPercent_ ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f : currentRounding_;
+    TileInfo tile;
+    if (!prepareTile(index, posX, posY, scale, tile)) return;
 
     auto *drawList = ImGui::GetWindowDrawList();
     auto winPos = ImGui::GetWindowPos();
@@ -450,8 +440,8 @@ void Renderer::renderShapedMinimap(int index, float posX, float posY, float scal
     ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
 
     // Tile screen coordinates
-    ImVec2 tileScreenMin = {winPos.x + posX, winPos.y + posY};
-    ImVec2 tileScreenMax = {tileScreenMin.x + width, tileScreenMin.y + height};
+    ImVec2 tileScreenMin = {winPos.x + tile.posX, winPos.y + tile.posY};
+    ImVec2 tileScreenMax = {tileScreenMin.x + tile.width, tileScreenMin.y + tile.height};
 
     // PushClipRect to tile area intersected with minimap bounds
     drawList->PushClipRect(
@@ -459,21 +449,21 @@ void Renderer::renderShapedMinimap(int index, float posX, float posY, float scal
         ImVec2(std::min(tileScreenMax.x, shapeMax.x), std::min(tileScreenMax.y, shapeMax.y)),
         true);
 
-    drawList->PushTexture((ImTextureID)t.gpuHandle);
+    drawList->PushTexture((ImTextureID)tile.texture->gpuHandle);
     int vs = drawList->VtxBuffer.Size;
     if (currentShape_ == Shape::Circle) {
         float radius = minimapWidth_ * 0.5f;
         ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
         drawList->PathArcTo(center, radius, 0.0f, IM_PI * 2.0f, 0);
     } else {
-        drawList->PathRect(shapeMin, shapeMax, rounding);
+        drawList->PathRect(shapeMin, shapeMax, cachedRounding_);
     }
     drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
     int ve = drawList->VtxBuffer.Size;
 
     // Map tile texture UVs: texOriginScreen is the screen position of UV (0,0) of this tile
-    ImVec2 texOriginScreen = {winPos.x + posX - rx, winPos.y + posY - ry};
-    ImGui::ShadeVertsLinearUV(drawList, vs, ve, texOriginScreen, {texOriginScreen.x + texWidth, texOriginScreen.y + texHeight}, ImVec2(0, 0), ImVec2(1, 1), false);
+    ImVec2 texOriginScreen = {winPos.x + tile.posX - tile.clipU, winPos.y + tile.posY - tile.clipV};
+    ImGui::ShadeVertsLinearUV(drawList, vs, ve, texOriginScreen, {texOriginScreen.x + tile.texWidth, texOriginScreen.y + tile.texHeight}, ImVec2(0, 0), ImVec2(1, 1), false);
 
     drawList->PopTexture();
     drawList->PopClipRect();
@@ -496,7 +486,7 @@ void Renderer::renderPlayer() {
     auto yRel0 = -arrowSprite_->centerY * currentScale_ * texturePlayerScale;
     auto xRel1 = (arrowSprite_->width - arrowSprite_->centerX) * currentScale_ * texturePlayerScale;
     auto yRel1 = (arrowSprite_->height - arrowSprite_->centerY) * currentScale_ * texturePlayerScale;
-    auto rad = gData.location().rad * (float)M_PI / 180.f;
+    auto rad = gData.location().rad * std::numbers::pi_v<float> / 180.f;
     auto cosRad = std::cos(rad);
     auto sinRad = std::sin(rad);
     // PrimQuadUV: TL, TR, BR, BL (matches PrimRectUV / AddImage winding).
@@ -515,33 +505,29 @@ bool Renderer::isPointInShape(float x, float y) const {
     float cx = minimapWidth_ * 0.5f;
     float cy = minimapHeight_ * 0.5f;
     if (currentShape_ == Shape::Circle) {
-        float radius = cx;  // 已强制正方形，cx == cy == radius
+        float radius = cx;  // Circle forces square, so cx == cy == radius
         float dx = x - cx;
         float dy = y - cy;
         return dx * dx + dy * dy <= radius * radius;
     }
-    // Shape::Rounded
-    float rounding = currentRoundingIsPercent_
-        ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
-        : currentRounding_;
-    // 点在圆角矩形内：先检查内矩形，再检查角弧
-    float left = rounding;
-    float right = minimapWidth_ - rounding;
-    float top = rounding;
-    float bottom = minimapHeight_ - rounding;
-    // 在内矩形内（无需检查角）
+    // Shape::Rounded — use cached rounding value
+    float left = cachedRounding_;
+    float right = minimapWidth_ - cachedRounding_;
+    float top = cachedRounding_;
+    float bottom = minimapHeight_ - cachedRounding_;
+    // Inside the inner cross (no corner check needed)
     if (x >= left && x <= right && y >= 0.f && y <= minimapHeight_) return true;
     if (y >= top && y <= bottom && x >= 0.f && x <= minimapWidth_) return true;
-    // 检查四个角弧
+    // Check the four corner arcs
     auto checkCorner = [](float px, float py, float cornerX, float cornerY, float r) {
         float dx = px - cornerX;
         float dy = py - cornerY;
         return dx * dx + dy * dy <= r * r;
     };
-    if (x < left && y < top) return checkCorner(x, y, left, top, rounding);
-    if (x > right && y < top) return checkCorner(x, y, right, top, rounding);
-    if (x < left && y > bottom) return checkCorner(x, y, left, bottom, rounding);
-    if (x > right && y > bottom) return checkCorner(x, y, right, bottom, rounding);
+    if (x < left && y < top) return checkCorner(x, y, left, top, cachedRounding_);
+    if (x > right && y < top) return checkCorner(x, y, right, top, cachedRounding_);
+    if (x < left && y > bottom) return checkCorner(x, y, left, bottom, cachedRounding_);
+    if (x > right && y > bottom) return checkCorner(x, y, right, bottom, cachedRounding_);
     return false;
 }
 

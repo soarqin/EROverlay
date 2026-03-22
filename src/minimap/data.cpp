@@ -1,7 +1,5 @@
 #include "data.hpp"
 
-#define _USE_MATH_DEFINES
-
 #include "defs/BonfireWarpParam.h"
 #include "defs/WorldMapLegacyConvParam.h"
 #include "defs/WorldMapPointParam.h"
@@ -14,12 +12,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <numbers>
 #include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
-
-#undef _USE_MATH_DEFINES
 
 extern EROverlayAPI *api;
 
@@ -142,17 +139,15 @@ void Data::load() {
             if (u0 != 60 && u0 != 61 && u1 != 60 && u1 != 61) {
                 auto key = buildKey(u0, wmlcp->srcGridXNo, wmlcp->srcGridZNo);
                 auto key2 = buildKey(u1, wmlcp->dstGridXNo, wmlcp->dstGridZNo);
-                if (convTable.find(key) == convTable.end()) {
-                    if (convTable.find(key2) != convTable.end()) {
-                        auto &c = convTable[key2];
-                        convTable[key] = { c.u, c.v, c.w, c.x + wmlcp->dstPosX - wmlcp->srcPosX, c.y + wmlcp->dstPosY - wmlcp->srcPosY, c.z + wmlcp->dstPosZ - wmlcp->srcPosZ };
-                    }
+                auto it1 = convTable.find(key);
+                auto it2 = convTable.find(key2);
+                if (it1 == convTable.end() && it2 != convTable.end()) {
+                    auto &c = it2->second;
+                    convTable[key] = {c.u, c.v, c.w, c.x + wmlcp->dstPosX - wmlcp->srcPosX, c.y + wmlcp->dstPosY - wmlcp->srcPosY, c.z + wmlcp->dstPosZ - wmlcp->srcPosZ};
                 }
-                if (convTable.find(key2) == convTable.end()) {
-                    if (convTable.find(key) != convTable.end()) {
-                        auto &c = convTable[key];
-                        convTable[key2] = { c.u, c.v, c.w, c.x + wmlcp->srcPosX - wmlcp->dstPosX, c.y + wmlcp->srcPosY - wmlcp->dstPosY, c.z + wmlcp->srcPosZ - wmlcp->dstPosZ };
-                    }
+                if (it2 == convTable.end() && it1 != convTable.end()) {
+                    auto &c = it1->second;
+                    convTable[key2] = {c.u, c.v, c.w, c.x + wmlcp->srcPosX - wmlcp->dstPosX, c.y + wmlcp->srcPosY - wmlcp->dstPosY, c.z + wmlcp->srcPosZ - wmlcp->dstPosZ};
                 }
             }
         } paramTableIterateEnd();
@@ -179,8 +174,9 @@ void Data::load() {
                 }
             } else {
                 auto key = buildKey(areaNo, gridXNo, gridZNo);
-                if (convTable.find(key) != convTable.end()) {
-                    auto &c = convTable[key];
+                auto convIt = convTable.find(key);
+                if (convIt != convTable.end()) {
+                    auto &c = convIt->second;
                     worldX = (c.v - 28) * 256.0f + 128.0f + posX + c.x;
                     worldZ = (64 - c.w) * 256.0f + 128.0f - posZ - c.z;
                     if (layer == 2) {
@@ -201,7 +197,7 @@ void Data::load() {
             int areaY = (int32_t)std::floor(g.y) / 1024;
             g.localX = g.x - areaX * 1024;
             g.localY = g.y - areaY * 1024;
-            g.rotationRad = rotationDeg == 0.f ? 0.f : (float)((rotationDeg + 180.0) * M_PI / 180.0);
+            g.rotationRad = rotationDeg == 0.f ? 0.f : static_cast<float>((rotationDeg + 180.0) * std::numbers::pi / 180.0);
             g.sortKey = areaY * 10 + areaX;
             g.sprite = sprite;
         };
@@ -225,6 +221,7 @@ void Data::load() {
         } paramTableIterateEnd();
         for (auto i = 0; i < 3; ++i) {
             auto &l = decorations_[i];
+            if (l.empty()) continue;
             std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
                 if (a.sortKey == b.sortKey) {
                     return a.id < b.id;
@@ -235,13 +232,13 @@ void Data::load() {
             auto lastSortKey = -1;
             const auto *lastDecoration = &l.front();
             auto &garound = decorationsAround_[i];
-            for (auto &g: l) {
+            for (auto &g : l) {
                 if (g.sortKey != lastSortKey) {
                     if (lastSortKey != -1) {
                         if ((size_t)lastSortKey >= garound.size()) {
                             garound.resize((size_t)(lastSortKey + 1));
                         }
-                        garound[lastSortKey] = { lastDecoration, &g };
+                        garound[lastSortKey] = {lastDecoration, &g};
                     }
                     lastSortKey = g.sortKey;
                     lastDecoration = &g;
@@ -251,7 +248,7 @@ void Data::load() {
                 if ((size_t)lastSortKey >= garound.size()) {
                     garound.resize((size_t)(lastSortKey + 1));
                 }
-                garound[lastSortKey] = { lastDecoration, &l.front() + sz };
+                garound[lastSortKey] = {lastDecoration, l.data() + sz};
             }
         }
         paramsLoaded_ = true;
