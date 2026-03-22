@@ -26,13 +26,15 @@ private:
     [[nodiscard]] bool prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out);
     void renderMinimap(int index, float posX, float posY, float scale = 1.0f);
     void renderShapedMinimap(int index, float posX, float posY, float scale = 1.0f);
-    void renderPlayer();
+    void renderRotatedTile(int index, float tileOffsetX, float tileOffsetY, float cosRot, float sinRot);
+    void renderPlayer(float deltaRad);
     [[nodiscard]] bool isPointInShape(float x, float y) const;
 
 private:
     const SpriteInfo *playerSprite_ = nullptr;
     const SpriteInfo *arrowSprite_ = nullptr;
     const SpriteInfo *roundTableSprite_ = nullptr;
+    const SpriteInfo *bearingSprite_ = nullptr;
     std::vector<TextureContext> textures_;
 
     float minimapWidth_ = 0.f;
@@ -62,8 +64,10 @@ private:
 
     std::vector<float> roundings_;
     std::vector<bool> roundingIsPercent_;
+    std::vector<bool> rotates_;
     float currentRounding_ = 0.f;
     bool currentRoundingIsPercent_ = true;
+    bool currentRotate_ = false;
 
     float cachedRounding_ = 0.f;
 

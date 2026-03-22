@@ -18,7 +18,14 @@ struct Location {
     float x;
     float y;
     int32_t underground;
-    float rad;
+    float oriDeg;
+};
+
+struct Camera {
+    float yawCos;
+    int32_t dummy0;
+    float yawSin;
+    int32_t dummy1;
 };
 
 struct SpriteInfo;
@@ -49,13 +56,16 @@ public:
     [[nodiscard]] inline bool onGUI() const { return onGUI_; }
     [[nodiscard]] inline bool paramsLoaded() const { return paramsLoaded_; }
     [[nodiscard]] inline const Location &location() const { return location_; }
+    [[nodiscard]] inline const Camera &camera() const { return camera_; }
     [[nodiscard]] inline const std::vector<DecorationInfo> &decorations(int32_t layer) const { return decorations_[layer]; }
     [[nodiscard]] std::tuple<const DecorationInfo *, const DecorationInfo *> decorationsAround(int32_t layer, int u, int v) const;
 
 private:
     uintptr_t csMenuManImp_ = 0;
+    uintptr_t fieldArea_ = 0;
     size_t locationOffset_ = 0;
     Location location_ = {};
+    Camera camera_ = {};
     bool onGUI_ = false;
     std::atomic_bool paramsLoaded_ = false;
 

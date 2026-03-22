@@ -260,7 +260,9 @@ void Data::load() {
         paramsLoaded_ = true;
     });
     th.detach();
-    csMenuManImp_ = api->getGameAddresses().csMenuManImp;
+    auto gameAddresses = api->getGameAddresses();
+    csMenuManImp_ = gameAddresses.csMenuManImp;
+    fieldArea_ = gameAddresses.fieldArea;
     if (api->getGameVersion() < 0x0002000100000000ULL) {
         // 1.02 ~ 1.10.1
         locationOffset_ = 0x248;
@@ -271,19 +273,31 @@ void Data::load() {
 }
 
 void Data::update() {
-     if (csMenuManImp_ == 0) { onGUI_ = true; return; }
-     auto addr = *(uintptr_t*)csMenuManImp_;
-     if (addr == 0) {
-         onGUI_ = true;
-         return;
-     }
+    if (csMenuManImp_ == 0) { onGUI_ = true; return; }
+    auto addr = *(uintptr_t*)csMenuManImp_;
+    if (addr == 0) {
+        onGUI_ = true;
+        return;
+    }
     onGUI_ = api->screenState() != 0 || *reinterpret_cast<uint32_t*>(addr + 0x1C) != 0;
 
     addr = *(uintptr_t*)(addr + 0x80);
-    if (addr == 0) return;
-    addr = *(uintptr_t*)(addr + locationOffset_);
-    if (addr == 0) return;
-    location_ = *(Location*)(addr + 0x24);
+    if (addr != 0) {
+        addr = *(uintptr_t*)(addr + locationOffset_);
+        if (addr != 0) {
+            location_ = *(Location*)(addr + 0x24);
+        }
+    }
+    addr = *(uintptr_t*)(fieldArea_);
+    if (addr != 0) {
+        addr = *(uintptr_t*)(addr + 0x20);
+        if (addr != 0) {
+            addr = *(uintptr_t*)(addr + 0x18);
+            if (addr != 0) {
+                camera_ = *(Camera*)(addr + 0x10);
+            }
+        }
+    }
 }
 
 std::tuple<const DecorationInfo *, const DecorationInfo *> Data::decorationsAround(int32_t layer, int u, int v) const {

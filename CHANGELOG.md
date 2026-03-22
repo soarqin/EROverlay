@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Minimap Overlay
 
 #### Added
+- Rotation mode: set `rotate=1` to rotate the minimap so the player's forward direction always points up. When enabled, the shape is forced to circle. Configurable per scale state (comma-separated).
+- A bearing compass indicator is shown in the top-right corner of the minimap when rotation mode is active.
+- Camera yaw is now read from game memory for accurate map rotation.
 - Landmark markers now appear on the minimap, with rotation support for directional icons.
 - `landmarks_key` config option to set the key for toggling landmark marker visibility (default: `N`).
 - `landmarks` config option to show/hide landmark markers by default (default: `1`).
