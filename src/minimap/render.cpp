@@ -33,6 +33,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
 
+    offscreen_ = api->createOffscreen();
     textures_.resize(300);
 
     toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
@@ -238,6 +239,14 @@ bool Renderer::render() {
     if (ImGui::Begin("##minimap_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse |
                      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
+        // Begin offscreen rendering: all content renders at alpha=1.0 to avoid double-alpha blending.
+        // Save actual alpha for compositing, temporarily set to 1.0 so all sub-methods render opaque.
+        bool useOffscreen = offscreen_ != nullptr && currentAlpha_ < 1.0f;
+        float savedAlpha = currentAlpha_;
+        if (useOffscreen) {
+            api->beginOffscreen(offscreen_);
+            currentAlpha_ = 1.f;
+        }
         float dx, dy;
         bool drawRoundTable = false;
         int layer;
@@ -259,6 +268,7 @@ bool Renderer::render() {
                 dy = location.y - dlcMapOffsetY;
                 break;
             default:
+                if (useOffscreen) currentAlpha_ = savedAlpha;
                 ImGui::End();
                 return false;
         }
@@ -364,6 +374,21 @@ bool Renderer::render() {
             }
         }
         renderPlayer();
+        // End offscreen rendering and composite the result with the actual alpha
+        if (useOffscreen) {
+            currentAlpha_ = savedAlpha;
+            auto *gpuHandle = api->endOffscreen(offscreen_);
+            if (gpuHandle) {
+                auto winPos = ImGui::GetWindowPos();
+                auto *vp = ImGui::GetMainViewport();
+                float u0 = winPos.x / vp->Size.x;
+                float v0 = winPos.y / vp->Size.y;
+                float u1 = (winPos.x + minimapWidth_) / vp->Size.x;
+                float v1 = (winPos.y + minimapHeight_) / vp->Size.y;
+                ImGui::SetCursorPos(ImVec2(0, 0));
+                ImGui::ImageWithBg((ImTextureID)gpuHandle, ImVec2(minimapWidth_, minimapHeight_), ImVec2(u0, v0), ImVec2(u1, v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+            }
+        }
         // Draw shape border
         if (borderWidth_ > 0.f) {
             auto *drawList = ImGui::GetWindowDrawList();

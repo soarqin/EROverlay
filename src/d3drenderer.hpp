@@ -13,8 +13,19 @@
 #include <cstdint>
 
 struct ImGui_ImplDX12_InitInfo;
+struct ImDrawList;
+struct ImDrawCmd;
 
 namespace er {
+
+struct OffscreenContext {
+    ID3D12Resource *texture = nullptr;
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = {};
+    D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle = {};
+    D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = {};
+    int width = 0;
+    int height = 0;
+};
 
 class D3DRenderer {
 /*
@@ -60,6 +71,18 @@ public:
     bool LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
     bool LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
     void DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle);
+
+    // Offscreen rendering
+    OffscreenContext *CreateOffscreen();
+    void DestroyOffscreen(OffscreenContext *ctx);
+    void BeginOffscreen(OffscreenContext *ctx);
+    void *EndOffscreen(OffscreenContext *ctx);
+
+    static void BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd);
+    static void EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd);
+
+private:
+    void ensureOffscreenSize(OffscreenContext *ctx, int w, int h);
 
 private:
     void CleanupRenderTarget();
@@ -176,6 +199,7 @@ private:
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
+    D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;

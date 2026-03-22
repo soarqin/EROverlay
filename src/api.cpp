@@ -142,6 +142,18 @@ public:
             cpuHandle.ptr = (uintptr_t)texture->cpuHandle;
             gpuHandle.ptr = (uintptr_t)texture->gpuHandle;
             er::gD3DRenderer->DestroyTexture((ID3D12Resource **)&texture->texture, cpuHandle, gpuHandle);
+        },
+        []() -> void * {
+            return er::gD3DRenderer->CreateOffscreen();
+        },
+        [](void *offscreen) {
+            er::gD3DRenderer->DestroyOffscreen((er::OffscreenContext *)offscreen);
+        },
+        [](void *offscreen) {
+            er::gD3DRenderer->BeginOffscreen((er::OffscreenContext *)offscreen);
+        },
+        [](void *offscreen) -> void * {
+            return er::gD3DRenderer->EndOffscreen((er::OffscreenContext *)offscreen);
         }
         };
         return &api;

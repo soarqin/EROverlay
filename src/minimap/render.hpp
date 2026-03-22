@@ -69,6 +69,8 @@ private:
 
     uint32_t borderColor_ = 0x64FFFFFF;  // ABGR (ImGui IM_COL32 format): white, alpha=100
     float borderWidth_ = 1.5f;
+
+    void *offscreen_ = nullptr;
 };
 
 }

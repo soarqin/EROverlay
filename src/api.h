@@ -78,6 +78,19 @@ typedef struct {
     // Rendering functions
     TextureContext (*loadTexture)(const wchar_t *filename);
     void (*destroyTexture)(TextureContext *texture);
+
+    // Offscreen rendering for compositing (avoids double-alpha blending).
+    // createOffscreen: creates an offscreen render target matching the backbuffer size.
+    // destroyOffscreen: destroys the offscreen render target.
+    // beginOffscreen: inserts a draw callback to switch rendering to the offscreen target and clear it.
+    //   Must be called between ImGui::Begin()/End() so that GetWindowDrawList() is valid.
+    // endOffscreen: inserts a draw callback to switch back to the main render target.
+    //   Returns the GPU descriptor handle (cast to void*) for use as an ImTextureID.
+    //   The caller can then draw the offscreen texture via ImGui::ImageWithBg() with desired alpha/UVs.
+    void *(*createOffscreen)();
+    void (*destroyOffscreen)(void *offscreen);
+    void (*beginOffscreen)(void *offscreen);
+    void *(*endOffscreen)(void *offscreen);
 } EROverlayAPI;
 
 /*

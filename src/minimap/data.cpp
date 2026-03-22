@@ -227,7 +227,10 @@ void Data::load() {
             if (l.empty()) continue;
             std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
                 if (a.sortKey == b.sortKey) {
-                    return a.id > b.id;
+                    if (a.source == b.source) {
+                        return a.id > b.id;
+                    }
+                    return a.source > b.source;
                 }
                 return a.sortKey < b.sortKey;
             });

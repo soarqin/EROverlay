@@ -467,6 +467,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         ImGui::EndFrame();
 
         UINT bufferIndex = pSwapChain->GetCurrentBackBufferIndex();
+        currentRTV_ = renderTargets_[bufferIndex];
         ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
         if (FAILED(commandAllocator->Reset())) {
             fwprintf(stderr, L"[EROverlay] CommandAllocator::Reset failed, device likely lost\n");
@@ -898,6 +899,158 @@ HRESULT WINAPI D3DRenderer::hkCreateSwapChainForComposition(IDXGIFactory *pFacto
     gD3DRenderer->CleanupRenderTarget();
     return gD3DRenderer->oCreateSwapChainForComposition_(pFactory, pDevice, pDesc, pRestrictToOutput, ppSwapChain);
 }
+
+// ---- Offscreen rendering ----
+
+OffscreenContext *D3DRenderer::CreateOffscreen() {
+    auto *ctx = new OffscreenContext();
+    return ctx;
+}
+
+void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
+    if (!ctx) return;
+    if (ctx->texture) {
+        ctx->texture->Release();
+        ctx->texture = nullptr;
+    }
+    if (ctx->srvCpuHandle.ptr) {
+        HeapDescriptorFree(ctx->srvCpuHandle, ctx->srvGpuHandle);
+        ctx->srvCpuHandle.ptr = 0;
+        ctx->srvGpuHandle.ptr = 0;
+    }
+    delete ctx;
+}
+
+void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
+    if (ctx->texture && ctx->width == w && ctx->height == h) return;
+
+    // Release old resources
+    if (ctx->texture) {
+        ctx->texture->Release();
+        ctx->texture = nullptr;
+    }
+    if (ctx->srvCpuHandle.ptr) {
+        HeapDescriptorFree(ctx->srvCpuHandle, ctx->srvGpuHandle);
+        ctx->srvCpuHandle.ptr = 0;
+        ctx->srvGpuHandle.ptr = 0;
+    }
+
+    ctx->width = w;
+    ctx->height = h;
+
+    // Create texture
+    D3D12_HEAP_PROPERTIES heapProps = {};
+    heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+    D3D12_RESOURCE_DESC texDesc = {};
+    texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    texDesc.Width = w;
+    texDesc.Height = h;
+    texDesc.DepthOrArraySize = 1;
+    texDesc.MipLevels = 1;
+    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.SampleDesc.Count = 1;
+    texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+    if (FAILED(device_->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &texDesc,
+                                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue,
+                                                IID_PPV_ARGS(&ctx->texture)))) {
+        ctx->texture = nullptr;
+        return;
+    }
+
+    // Create RTV
+    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+    rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+    device_->CreateRenderTargetView(ctx->texture, &rtvDesc, ctx->rtvCpuHandle);
+
+    // Create SRV
+    HeapDescriptorAlloc(&ctx->srvCpuHandle, &ctx->srvGpuHandle);
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    device_->CreateShaderResourceView(ctx->texture, &srvDesc, ctx->srvCpuHandle);
+}
+
+void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
+    UNREFERENCED_PARAMETER(list);
+    auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
+    if (!ctx || !ctx->texture) return;
+    auto *cl = gD3DRenderer->commandList_;
+    if (!cl) return;
+
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Transition.pResource = ctx->texture;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    cl->ResourceBarrier(1, &barrier);
+
+    float clearColor[4] = {0.f, 0.f, 0.f, 0.f};
+    cl->ClearRenderTargetView(ctx->rtvCpuHandle, clearColor, 0, nullptr);
+    cl->OMSetRenderTargets(1, &ctx->rtvCpuHandle, FALSE, nullptr);
+}
+
+void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
+    UNREFERENCED_PARAMETER(list);
+    auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
+    if (!ctx || !ctx->texture) return;
+    auto *cl = gD3DRenderer->commandList_;
+    if (!cl) return;
+
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Transition.pResource = ctx->texture;
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    cl->ResourceBarrier(1, &barrier);
+
+    cl->OMSetRenderTargets(1, &gD3DRenderer->currentRTV_, FALSE, nullptr);
+}
+
+void D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
+    if (!ctx || !device_ || !rtvDescriptorHeap_) return;
+
+    auto *vp = ImGui::GetMainViewport();
+    int w = (int)vp->Size.x;
+    int h = (int)vp->Size.y;
+    if (w <= 0 || h <= 0) return;
+
+    // Ensure an RTV handle exists (allocated once, reused).
+    // Use the first slot after backbuffer RTVs in the RTV descriptor heap.
+    // These slots are referenced by freeDescriptors_ but used with the SRV heap,
+    // so they are effectively unused in the RTV heap.
+    if (ctx->rtvCpuHandle.ptr == 0) {
+        auto rtvStart = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+        rtvStart.ptr += rtvDescriptorSize_ * buffersCounts_;
+        ctx->rtvCpuHandle = rtvStart;
+    }
+
+    ensureOffscreenSize(ctx, w, h);
+    if (!ctx->texture) return;
+
+    auto *drawList = ImGui::GetWindowDrawList();
+    drawList->AddCallback(BeginOffscreenCallback, ctx);
+}
+
+void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
+    if (!ctx || !ctx->texture) return nullptr;
+
+    auto *drawList = ImGui::GetWindowDrawList();
+    drawList->AddCallback(EndOffscreenCallback, ctx);
+    drawList->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
+
+    return (void *)ctx->srvGpuHandle.ptr;
+}
+
+// ---- Texture loading ----
 
 bool D3DRenderer::LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource,
                            int *outWidth, int *outHeight) {
