@@ -76,10 +76,13 @@ All configuration files are located in the `configs/` folder. Edit them with any
 | `scale_key` | `M` | Key to cycle through scale/ratio/alpha presets. If equal to `toggle_key`, an extra hidden state is added to the cycle. |
 | `graces_key` | `N` | Key to toggle grace markers on the minimap. |
 | `graces` | `1` | Show grace markers by default (`1` = yes, `0` = no). |
+| `landmarks_key` | `N` | Key to toggle landmark markers on the minimap. |
+| `landmarks` | `1` | Show landmark markers by default (`1` = yes, `0` = no). |
 | `width_ratio` | `30%,90%` | Comma-separated list of minimap width ratios (relative to screen height) for each scale state. |
 | `height_ratio` | `30%,90%` | Comma-separated list of minimap height ratios for each scale state. |
 | `scale` | `0.75,+1.5` | Comma-separated scale values. A leading `+` centers the minimap on screen; `0` hides it. |
 | `alpha` | `0.8,0.6` | Comma-separated opacity values (0.0–1.0) for each scale state. |
+| `rotate` | `0` | Set `1` to rotate the minimap to match the player's facing direction (forces circle shape). Comma-separated per scale state. |
 | `shape` | `rect` | Minimap shape per state: `rect`, `rounded`, or `circle`. |
 | `rounding` | `20%` | Corner radius for `rounded` shape (percentage of half the shorter side, or pixels). |
 | `border_color` | `255,255,255,100` | Border color as `R,G,B,A` (0–255 each). |
