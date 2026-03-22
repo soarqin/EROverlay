@@ -8,6 +8,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Overlay Loader
+
+#### Added
+- Offscreen rendering API in plugin interface (`createOffscreen`, `destroyOffscreen`, `beginOffscreen`, `endOffscreen`), enabling plugins to composite content with a single alpha pass.
+
+#### Changed
+- Updated dependencies: fmt v12.1.0, ImGui v1.92.6, inih latest HEAD, MinHook latest HEAD.
+
+### Minimap Overlay
+
+#### Added
+- Landmark markers now appear on the minimap, with rotation support for directional icons.
+- `landmarks_key` config option to set the key for toggling landmark marker visibility (default: `N`).
+- `landmarks` config option to show/hide landmark markers by default (default: `1`).
+
+#### Fixed
+- Fixed translucent minimap elements (markers, tiles) appearing washed out due to double-alpha blending.
+- Fixed crash when cycling minimap presets with mismatched config list lengths.
+- Fixed pixel-snapping issues that could cause sub-pixel jitter on minimap edges.
+- Various internal code fixes and optimizations.
+
 ---
 
 ## Overlay Loader
