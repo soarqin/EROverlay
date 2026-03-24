@@ -42,7 +42,9 @@ inline static float calculatePos(float w, float n) {
 bool Renderer::render() {
     auto *vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)), ImGuiCond_Always, ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
-    ImGui::SetNextWindowSizeConstraints(ImVec2(-1, -1), ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))));
+    float maxW = width_ != 0.f ? calculatePos(vp->Size.x, std::abs(width_)) : FLT_MAX;
+    float maxH = height_ != 0.f ? calculatePos(vp->Size.y, std::abs(height_)) : FLT_MAX;
+    ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(maxW, maxH));
 
     if (ImGui::Begin("##achievements_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_AlwaysAutoResize |
