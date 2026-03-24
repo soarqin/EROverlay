@@ -4,7 +4,6 @@
 #include "util/memory.hpp"
 
 #include <nlohmann/json.hpp>
-#include <ini.h>
 #include <imgui.h>
 
 #include <fstream>
@@ -14,8 +13,72 @@ extern EROverlayAPI *api;
 namespace er::bosses {
 
 BossDataSet gBossDataSet;
-static std::vector<bool> deadSwapTmp;
-static std::vector<int> deadByRegionSwapTmp;
+
+// --- ChallengeState ---
+
+void ChallengeState::loadConfig(const wchar_t *modulePath) {
+    if (!enabled) return;
+    auto filename = std::wstring(modulePath) + L"\\Challenge.txt";
+    std::ifstream ifs(filename.c_str());
+    if (!ifs) return;
+
+    std::string line;
+    while (std::getline(ifs, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        auto eq = line.find('=');
+        if (eq == std::string::npos) continue;
+        auto key = line.substr(0, eq);
+        auto val = line.substr(eq + 1);
+        if (key == "tries") {
+            tries = std::strtol(val.c_str(), nullptr, 10);
+        } else if (key == "deaths_on_start") {
+            deathsOnStart = std::strtol(val.c_str(), nullptr, 10);
+        } else if (key == "best") {
+            best = std::strtol(val.c_str(), nullptr, 10);
+        }
+    }
+    // Only create change notification once (avoid handle leak on reload)
+    if (changeEvent == INVALID_HANDLE_VALUE) {
+        changeEvent = FindFirstChangeNotificationW(modulePath, FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE);
+    }
+}
+
+void ChallengeState::saveConfig(const wchar_t *modulePath) {
+    auto filename = std::wstring(modulePath) + L"\\Challenge.txt";
+    std::ofstream ofs(filename.c_str());
+    if (!ofs) {
+        fwprintf(stderr, L"Unable to open %ls for writing\n", filename.c_str());
+        return;
+    }
+    ofs << "# Total tries\ntries=" << tries << "\n";
+    ofs << "# Personal Best\nbest=" << best << "\n";
+    ofs << "\n# !!!DO NOT EDIT THIS!!!\ndeaths_on_start=" << deathsOnStart << "\n";
+    ofs.flush();
+
+    // Drain pending file change notifications to avoid self-triggered reload
+    while (WaitForSingleObject(changeEvent, 0) == WAIT_OBJECT_0) {
+        FindNextChangeNotification(changeEvent);
+    }
+}
+
+void ChallengeState::checkForChange(const wchar_t *modulePath) {
+    if (changeEvent == INVALID_HANDLE_VALUE) return;
+    bool needReload = false;
+    while (WaitForSingleObject(changeEvent, 0) == WAIT_OBJECT_0) {
+        needReload = true;
+        FindNextChangeNotification(changeEvent);
+    }
+    if (needReload) loadConfig(modulePath);
+}
+
+void ChallengeState::cleanup() noexcept {
+    if (changeEvent != INVALID_HANDLE_VALUE) {
+        FindCloseChangeNotification(changeEvent);
+        changeEvent = INVALID_HANDLE_VALUE;
+    }
+}
+
+// --- BossDataSet ---
 
 void BossDataSet::load(bool hasDLC) {
     toggleFullModeKey_ = api->configGetImGuiKey("boss.toggle_full_mode", ImGuiKey_Equal);
@@ -38,79 +101,40 @@ void BossDataSet::load(bool hasDLC) {
     }
     auto j = nlohmann::ordered_json::parse(ifs);
     ifs.close();
-    for (auto &p: j.items()) {
+    for (auto &p : j.items()) {
         if (!hasDLC && p.value()["dlc"] == 1) {
             continue;
         }
         auto regionIndex = regions_.size();
         auto &rd = regions_.emplace_back();
         rd.name = p.value()["region_name"];
-        for (auto &n: p.value()["regions"]) {
-            regionMap_[n.get<uint32_t>()] = (int)regionIndex;
+        for (auto &n : p.value()["regions"]) {
+            regionMap_[n.get<uint32_t>()] = static_cast<int>(regionIndex);
         }
-        for (auto &n: p.value()["bosses"]) {
+        for (auto &n : p.value()["bosses"]) {
             auto index = bosses_.size();
             auto &bd = bosses_.emplace_back();
             bd.boss = n["boss"];
             bd.place = n["place"];
             bd.flagId = n["flag_id"].get<uint32_t>();
             bd.index = index;
-            bd.tip = bd.boss + ": " + bd.place;
             rd.bosses.push_back(index);
             bd.regionIndex = regionIndex;
         }
     }
     regionCounts_.resize(regions_.size());
     dead_.resize(bosses_.size());
-    deadSwapTmp.resize(bosses_.size());
-    deadByRegionSwapTmp.resize(regions_.size());
+    deadSwapBuf_.resize(bosses_.size());
+    regionCountSwapBuf_.resize(regions_.size());
 
-    challengeMode_ = api->configEnabled("boss.challenge_mode");
-    if (!challengeMode_) return;
-    challengeDeathCount_ = api->configGetInt("boss.challenge_death_count", 0);
+    challenge_.enabled = api->configEnabled("boss.challenge_mode");
+    if (!challenge_.enabled) return;
+    challenge_.maxDeaths = api->configGetInt("boss.challenge_death_count", 0);
+    challenge_.loadConfig(api->getModulePath());
 }
 
-void BossDataSet::loadConfig() {
-    if (!challengeMode_) return;
-    auto filename = std::wstring(api->getModulePath()) + L"\\Challenge.txt";
-    auto *f = _wfopen(filename.c_str(), L"rt");
-    if (f == nullptr) {
-        return;
-    }
-    ini_parse_file(f, [](void *user, const char *section, const char *name, const char *value) {
-        if (section != nullptr && section[0] != 0) {
-            return 0;
-        }
-        auto *bds = static_cast<BossDataSet *>(user);
-        if (lstrcmpA(name, "tries") == 0) {
-            bds->challengeTries_ = std::strtol(value, nullptr, 10);
-        } else if (lstrcmpA(name, "deaths_on_start") == 0) {
-            bds->challengeDeathsOnStart_ = std::strtol(value, nullptr, 10);
-        } else if (lstrcmpA(name, "best") == 0) {
-            bds->challengeBest_ = std::strtol(value, nullptr, 10);
-        }
-        return 1;
-    }, this);
-    fclose(f);
-    changeEvent_ = FindFirstChangeNotificationW(api->getModulePath(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE);
-}
-
-void BossDataSet::saveConfig() const {
-    auto filename = std::wstring(api->getModulePath()) + L"\\Challenge.txt";
-    auto *f = _wfopen(filename.c_str(), L"wt");
-    if (f == nullptr) {
-        fwprintf(stderr, L"Unable to open %ls for writing\n", filename.c_str());
-        fflush(stderr);
-        return;
-    }
-    fprintf(f, "# Total tries\ntries=%d\n", challengeTries_);
-    fprintf(f, "# Personal Best\nbest=%d\n", challengeBest_);
-    fprintf(f, "\n# !!!DO NOT EDIT THIS!!!\ndeaths_on_start=%d\n", challengeDeathsOnStart_);
-    fflush(f);
-    fclose(f);
-    while (WaitForSingleObject(changeEvent_, 0) == WAIT_OBJECT_0) {
-        FindNextChangeNotification(changeEvent_);
-    }
+BossDataSet::~BossDataSet() noexcept {
+    challenge_.cleanup();
 }
 
 void BossDataSet::initMemoryAddresses() {
@@ -119,29 +143,23 @@ void BossDataSet::initMemoryAddresses() {
     fieldArea_ = addr.fieldArea;
 }
 
-BossDataSet::~BossDataSet() noexcept {
-    if (changeEvent_ != INVALID_HANDLE_VALUE) {
-        FindCloseChangeNotification(changeEvent_);
-        changeEvent_ = INVALID_HANDLE_VALUE;
-    }
-}
-
 void BossDataSet::update() {
-    checkForConfigChange();
+    challenge_.checkForChange(api->getModulePath());
     if (api->screenState() != 0) {
         return;
     }
     auto igt = readInGameTime();
     if (igt <= 0) return;
     updateBosses();
-    if (challengeMode_)
+    if (challenge_.enabled)
         updateChallengeMode();
     else
         updateNormalMode();
 }
 
 void BossDataSet::updateNormalMode() {
-    playerDeaths_ = readDeathCount();
+    std::lock_guard lock(mutex_);
+    challenge_.playerDeaths = readDeathCount();
 }
 
 void BossDataSet::revive(int index) {
@@ -157,13 +175,13 @@ void BossDataSet::revive(int index) {
 
 void BossDataSet::updateBosses() {
     if (!flagResolved_) {
-        for (auto &b: bosses_) {
+        for (auto &b : bosses_) {
             b.offset = api->resolveFlagAddress(b.flagId, &b.bits);
         }
         flagResolved_ = true;
     }
     int cnt = 0;
-    std::fill(deadByRegionSwapTmp.begin(), deadByRegionSwapTmp.end(), 0);
+    std::fill(regionCountSwapBuf_.begin(), regionCountSwapBuf_.end(), 0);
     size_t sz = bosses_.size();
     for (size_t i = 0; i < sz; i++) {
         auto &b = bosses_[i];
@@ -171,93 +189,100 @@ void BossDataSet::updateBosses() {
             continue;
         }
         bool al = (*(uint8_t *)(b.offset) & b.bits) != 0;
-        deadSwapTmp[i] = al;
+        deadSwapBuf_[i] = al ? 1 : 0;
         if (al) {
             cnt++;
-            deadByRegionSwapTmp[b.regionIndex]++;
+            regionCountSwapBuf_[b.regionIndex]++;
         }
-    }
-    {
-        std::unique_lock lock(mutex_);
-        regionCounts_.swap(deadByRegionSwapTmp);
-        dead_.swap(deadSwapTmp);
-        count_ = cnt;
-        if (fieldArea_ == 0) return;
-        auto addr1 = *(uintptr_t *)fieldArea_;
-        if (addr1 == 0) {
-            return;
-        }
-        auto mapId = *(uint32_t *)(addr1 + (api->getGameVersion() < 0x0002000200000000ULL ? 0xE4 : 0xE8));
-        if (mapId == 0 || mapId == mapId_) return;
-        mapId_ = mapId;
-        auto ite = regionMap_.find(mapId / 1000);
-        if (ite == regionMap_.end()) return;
-        regionIndex_ = ite->second;
     }
 
-    if (challengeMode_ && cnt > challengeBest_ && deaths() <= challengeDeathCount_) {
-        challengeBest_ = cnt;
-        saveConfig();
+    bool needSave = false;
+    {
+        std::lock_guard lock(mutex_);
+        regionCounts_.swap(regionCountSwapBuf_);
+        dead_.swap(deadSwapBuf_);
+        count_ = cnt;
+        if (fieldArea_ != 0) {
+            auto addr1 = *(uintptr_t *)fieldArea_;
+            if (addr1 != 0) {
+                auto mapIdOffset = api->getGameVersion() < offsets::kVersionThreshold1_12 ? offsets::kMapIdPre1_12 : offsets::kMapIdPost1_12;
+                auto mapId = *(uint32_t *)(addr1 + mapIdOffset);
+                if (mapId != 0 && mapId != mapId_) {
+                    mapId_ = mapId;
+                    auto ite = regionMap_.find(mapId / 1000);
+                    if (ite != regionMap_.end()) {
+                        regionIndex_ = ite->second;
+                    }
+                }
+            }
+        }
+        if (challenge_.enabled && cnt > challenge_.best && challenge_.deaths() <= challenge_.maxDeaths) {
+            challenge_.best = cnt;
+            needSave = true;
+        }
+    }
+    if (needSave) {
+        challenge_.saveConfig(api->getModulePath());
     }
 }
 
 void BossDataSet::updateChallengeMode() {
-    if (reachStrandedGraveyardFlagOffset_ == 0) {
-        // Flag 101: Reached Stranded Graveyard
-        reachStrandedGraveyardFlagOffset_ = api->resolveFlagAddress(101, &reachStrandedGraveyardFlagBits_);
+    if (challenge_.reachFlagOffset == 0) {
+        challenge_.reachFlagOffset = api->resolveFlagAddress(kStrandedGraveyardFlagId, &challenge_.reachFlagBits);
     }
-    if (reachStrandedGraveyardFlagOffset_ == 0) return;
+    if (challenge_.reachFlagOffset == 0) return;
     auto deathCount = readDeathCount();
-    auto reached = (*(uint8_t *)reachStrandedGraveyardFlagOffset_ & reachStrandedGraveyardFlagBits_) != 0;
+    auto reached = (*(uint8_t *)challenge_.reachFlagOffset & challenge_.reachFlagBits) != 0;
     bool needSave = false;
-    std::unique_lock lock(mutex_);
-    if (reached != reachedStrandedGraveyard_) {
-        reachedStrandedGraveyard_ = reached;
-        if (reached) {
-            challengeDeathsOnStart_ = deathCount;
+    {
+        std::lock_guard lock(mutex_);
+        if (reached != challenge_.reachedGraveyard) {
+            challenge_.reachedGraveyard = reached;
+            if (reached) {
+                challenge_.deathsOnStart = deathCount;
+            } else {
+                challenge_.playerDeaths = 0;
+                challenge_.deathsOnStart = 0;
+            }
             needSave = true;
-        } else {
-            playerDeaths_ = 0;
-            challengeDeathsOnStart_ = 0;
+        }
+        if (deathCount != challenge_.playerDeaths) {
+            challenge_.playerDeaths = deathCount;
+            if (challenge_.deaths() == challenge_.maxDeaths + 1) {
+                challenge_.tries++;
+            }
             needSave = true;
         }
     }
-    if (deathCount != playerDeaths_) {
-        playerDeaths_ = deathCount;
-        if (deaths() == challengeDeathCount_ + 1) {
-            challengeTries_++;
-        }
-        needSave = true;
-    }
-    if (needSave) saveConfig();
+    if (needSave) challenge_.saveConfig(api->getModulePath());
 }
 
-void BossDataSet::checkForConfigChange() {
-    if (changeEvent_ == INVALID_HANDLE_VALUE) return;
-    bool needReload = false;
-    while (WaitForSingleObject(changeEvent_, 0) == WAIT_OBJECT_0) {
-        needReload = true;
-        FindNextChangeNotification(changeEvent_);
-    }
-    if (needReload) loadConfig();
+void BossDataSet::fillRenderState(RenderState &out) {
+    // IGT reads game memory directly (not our state), no mutex needed
+    out.inGameTime = readInGameTime();
+    std::lock_guard lock(mutex_);
+    out.count = count_;
+    out.deaths = challenge_.deaths();
+    out.regionIndex = regionIndex_;
+    out.challengeMode = challenge_.enabled;
+    out.challengeBest = challenge_.best;
+    out.challengeTries = challenge_.tries;
+    out.dead = dead_;
+    out.regionCounts = regionCounts_;
 }
 
 int BossDataSet::readInGameTime() const {
     if (gameDataMan_ == 0) return -1;
     auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
-    if (addr == 0) {
-        return -1;
-    }
-    return util::MemoryHandle(addr + 0xA0).as<int&>();
+    if (addr == 0) return -1;
+    return util::MemoryHandle(addr + offsets::kInGameTime).as<int &>();
 }
 
 int BossDataSet::readDeathCount() const {
     if (gameDataMan_ == 0) return 0;
     auto addr = util::MemoryHandle(gameDataMan_).as<uintptr_t &>();
-    if (addr == 0) {
-        return 0;
-    }
-    return util::MemoryHandle(addr + 0x94).as<int&>();
+    if (addr == 0) return 0;
+    return util::MemoryHandle(addr + offsets::kDeathCount).as<int &>();
 }
 
 }

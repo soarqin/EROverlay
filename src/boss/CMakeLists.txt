@@ -10,4 +10,4 @@ add_project(boss SHARED
     OUTPUT_NAME Boss
 )
 
-target_link_libraries(${PROJECT_NAME} EROverlayDLL nlohmann_json::nlohmann_json inih)
+target_link_libraries(${PROJECT_NAME} EROverlayDLL nlohmann_json::nlohmann_json)
