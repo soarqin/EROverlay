@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 namespace er::achievements {
 
 class Renderer {
@@ -8,7 +10,7 @@ public:
     bool render();
 
 private:
-    int maxAchievements_ = 0;
+    size_t maxAchievements_ = 0;
     float posX_ = 0.0f;
     float posY_ = 0.05f;
     float width_ = 0.0f;

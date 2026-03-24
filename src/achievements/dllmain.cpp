@@ -3,6 +3,8 @@
 
 #include "api.h"
 
+#include <memory>
+
 EROverlayAPI *api;
 
 int init(EROverlayAPI *erOverlayAPI) {
@@ -15,25 +17,25 @@ int init(EROverlayAPI *erOverlayAPI) {
 
 void update() {
     static int counter = 0;
-    if ((counter++ & 0x1F) == 0) {
+    if ((counter++ & er::achievements::kUpdateTickMask) == 0) {
         er::achievements::gData.update();
     }
 }
 
-static er::achievements::Renderer *renderer = nullptr;
+static std::unique_ptr<er::achievements::Renderer> renderer;
 
 int createRenderer(void *context, void *allocFunc, void *freeFunc, void *userData) {
-    renderer = new er::achievements::Renderer();
+    renderer = std::make_unique<er::achievements::Renderer>();
     renderer->init(context, allocFunc, freeFunc, userData);
     return 100;
 }
 
 void destroyRenderer() {
-    delete renderer;
-    renderer = nullptr;
+    renderer.reset();
 }
 
 bool render() {
+    if (!renderer) return false;
     return renderer->render();
 }
 

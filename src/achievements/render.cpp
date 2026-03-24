@@ -11,11 +11,15 @@ extern EROverlayAPI *api;
 
 namespace er::achievements {
 
+// UI color constants
+static constexpr ImVec4 kProgressTextColor{0.8f, 0.8f, 0.8f, 1.0f};
+static constexpr ImVec4 kUnlockBaseColor{0.3f, 1.0f, 0.5f, 1.0f};
+
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
 
-    maxAchievements_ = api->configGetInt("achievements.max_achievements", 20);
+    maxAchievements_ = size_t(api->configGetInt("achievements.max_achievements", 20));
     const auto &pos = api->configGet("achievements.panel_pos");
     auto posVec = util::strSplitToFloatVec(pos);
     if (posVec.size() >= 4) {
@@ -26,16 +30,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     }
 }
 
-inline static float calculatePos(float w, float n) {
-    if (n >= 1.f) {
-        return n;
-    }
-    if (n >= 0.f) {
-        return w * n;
-    }
-    if (n <= -1.f) {
-        return w + n;
-    }
+static float calculatePos(float w, float n) {
+    if (n >= 1.f) return n;
+    if (n >= 0.f) return w * n;
+    if (n <= -1.f) return w + n;
     return w + w * n;
 }
 
@@ -55,17 +53,19 @@ bool Renderer::render() {
         const auto &unlocking = gData.unlocking();
         auto total = achievements.size();
         auto sz = locked.size();
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_Text, kProgressTextColor);
         ImGui::Text("%zu/%zu", total - sz, total);
         ImGui::PopStyleColor();
         ImGui::Spacing();
-        if (sz > maxAchievements_) sz = size_t(maxAchievements_);
+        if (sz > maxAchievements_) sz = maxAchievements_;
         if (!unlocking.empty()) {
             gData.updateUnlockingStatus();
-            for (const auto &p: unlocking) {
-                const auto &ach = achievements[std::get<0>(p)];
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 1, 0.5f, std::get<2>(p)));
-                ImGui::Text("☑ %s", ach.displayName);
+            for (const auto &n : unlocking) {
+                const auto &ach = achievements[n.index];
+                ImVec4 color = kUnlockBaseColor;
+                color.w = n.alpha;
+                ImGui::PushStyleColor(ImGuiCol_Text, color);
+                ImGui::Text("\xe2\x98\x91 %s", ach.displayName);
                 ImGui::PopStyleColor();
             }
         }

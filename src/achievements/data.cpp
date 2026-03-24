@@ -16,7 +16,16 @@ namespace er::achievements {
 
 Data gData;
 
-using SetAchievementHookFunc = bool(*)(ISteamUserStats*, const char*);
+// Notification animation timing constants
+namespace timing {
+    constexpr auto kNotificationDuration = std::chrono::seconds(8);
+    constexpr float kMinAlpha = 0.1f;
+    constexpr float kFadeInEnd = 7.0f;    // seconds remaining when fade-in completes
+    constexpr float kFadeOutStart = 1.5f;  // seconds remaining when fade-out begins
+    constexpr float kFadeOutSlope = 0.6f;  // alpha gain per second during fade-out
+} // namespace timing
+
+using SetAchievementHookFunc = bool (*)(ISteamUserStats *, const char *);
 SetAchievementHookFunc originalSetAchievementHook = nullptr;
 
 static bool SetAchievementHook(ISteamUserStats *stats, const char *pchName) {
@@ -27,14 +36,26 @@ static bool SetAchievementHook(ISteamUserStats *stats, const char *pchName) {
     return false;
 }
 
+// Build a data file path relative to the module directory.
+static std::wstring buildDataPath(const wchar_t *filename) {
+    return std::wstring(api->getModulePath()) + L"\\data\\" + filename;
+}
+
+// Strip comments and whitespace from a line. Returns true if the line has content.
+static bool parseLine(std::string &line) {
+    auto pos = line.find('#');
+    if (pos != std::string::npos) line.erase(pos);
+    util::trimString(line);
+    return !line.empty();
+}
+
 void Data::load() {
     auto *stats = SteamAPI_SteamUserStats();
     MH_Initialize();
     void **statsVTable = *(void ***)stats;
-    MH_CreateHook(statsVTable[7], (void*)&SetAchievementHook, (void**)&originalSetAchievementHook);
+    MH_CreateHook(statsVTable[7], (void *)&SetAchievementHook, (void **)&originalSetAchievementHook);
     MH_EnableHook(statsVTable[7]);
 
-    // SteamAPI_ISteamUserStats_RequestCurrentStats(stats);
     uint32_t sz = SteamAPI_ISteamUserStats_GetNumAchievements(stats);
     achievements_.resize(sz);
     std::map<std::string, uint32_t> indexMap;
@@ -51,24 +72,19 @@ void Data::load() {
     }
     locked_.resize(sz);
 
-    std::ifstream ifs((std::wstring(api->getModulePath()) + L"\\data\\ach_order.txt").c_str());
+    std::ifstream ifs(buildDataPath(L"ach_order.txt").c_str());
     uint32_t i = 0;
     std::string line;
     if (ifs.is_open()) {
         while (std::getline(ifs, line)) {
-            auto pos = line.find('#');
-            if (pos != std::string::npos) line.erase(pos);
-            util::trimString(line);
-            if (line.empty()) continue;
+            if (!parseLine(line)) continue;
 
             util::toLower(line);
             auto it = indexMap.find(line);
-            if (it == indexMap.end()) {
-                continue;
-            }
+            if (it == indexMap.end()) continue;
             bool b;
             if (SteamAPI_ISteamUserStats_GetAchievement(stats, it->first.c_str(), &b) && !b) {
-                locked_[i++] = Locked { it->second, 0, 0 };
+                locked_[i++] = Locked{it->second, 0, 0};
             }
             indexMap.erase(it);
         }
@@ -77,43 +93,36 @@ void Data::load() {
     for (auto &pair : indexMap) {
         bool b;
         if (SteamAPI_ISteamUserStats_GetAchievement(stats, pair.first.c_str(), &b) && !b) {
-            locked_[i++] = Locked { pair.second, 0, 0 };
+            locked_[i++] = Locked{pair.second, 0, 0};
         }
     }
     locked_.resize(i);
     lockedPrev_ = locked_;
 
-    ifs.open((std::wstring(api->getModulePath()) + L"\\data\\ach_cols.txt").c_str());
+    ifs.open(buildDataPath(L"ach_cols.txt").c_str());
     if (!ifs.is_open()) return;
     while (std::getline(ifs, line)) {
-        auto pos = line.find('#');
-        if (pos != std::string::npos) line.erase(pos);
-        util::trimString(line);
-        if (line.empty()) continue;
+        if (!parseLine(line)) continue;
         auto sl = util::splitString(line, ',');
         if (sl.size() < 2) continue;
         util::toLower(sl[0]);
         auto it = indexMap_.find(sl[0]);
         if (it == indexMap_.end()) continue;
         auto &vec = achievements_[it->second].collectionFlags;
-        vec.emplace_back(uint32_t(std::strtoul(sl[1].c_str(), nullptr, 10)), 0, 0);
+        vec.push_back(CollectionFlag{uint32_t(std::strtoul(sl[1].c_str(), nullptr, 10)), 0, 0});
     }
 }
 
 void Data::update() {
     if (!flagResolved_) {
-        for (auto &l: lockedPrev_) {
+        for (auto &l : lockedPrev_) {
             auto &ach = achievements_[l.index];
             auto flag = 1u;
-            for (auto &p: ach.collectionFlags) {
-                uint8_t bits;
-                auto offset = api->resolveFlagAddress(std::get<0>(p), &bits);
-                if (offset == 0) {
-                    return;
-                }
-                std::get<1>(p) = offset;
-                std::get<2>(p) = bits;
-                if ((*(uint8_t *)(offset) & bits) != 0) {
+            for (auto &cf : ach.collectionFlags) {
+                auto offset = api->resolveFlagAddress(cf.flagId, &cf.bits);
+                if (offset == 0) return;
+                cf.offset = offset;
+                if ((*(uint8_t *)(cf.offset) & cf.bits) != 0) {
                     l.flags |= flag;
                     l.flagCount++;
                 }
@@ -123,18 +132,16 @@ void Data::update() {
         flagResolved_ = true;
     }
     bool changed = false;
-    for (auto &l: lockedPrev_) {
+    for (auto &l : lockedPrev_) {
         auto &ach = achievements_[l.index];
         if (ach.collectionFlags.empty()) continue;
         auto flag = 1u;
-        for (auto &p: ach.collectionFlags) {
+        for (auto &cf : ach.collectionFlags) {
             if (l.flags & flag) {
                 flag <<= 1;
                 continue;
             }
-            auto offset = std::get<1>(p);
-            auto bits = std::get<2>(p);
-            if ((*(uint8_t *)(offset) & bits) != 0) {
+            if ((*(uint8_t *)(cf.offset) & cf.bits) != 0) {
                 l.flags |= flag;
                 l.flagCount++;
                 changed = true;
@@ -149,7 +156,6 @@ void Data::update() {
 }
 
 void Data::unlock(const char *name) {
-    using namespace std::chrono_literals;
     std::string n = name;
     util::toLower(n);
     auto it = indexMap_.find(n);
@@ -161,26 +167,27 @@ void Data::unlock(const char *name) {
     fmt::print("Unlocking {} and adding notification\n", n);
     std::lock_guard lock(mutex_);
     locked_ = lockedPrev_;
-    unlocking_.emplace_back(index, std::chrono::steady_clock::now() + 8s, 0.1f);
+    unlocking_.push_back(UnlockNotification{index, std::chrono::steady_clock::now() + timing::kNotificationDuration, timing::kMinAlpha});
 }
 
 void Data::updateUnlockingStatus() {
     auto now = std::chrono::steady_clock::now();
-    for (int i = int(unlocking_.size() - 1); i >= 0; i--) {
-        auto &p = unlocking_[i];
-        auto &deadline = std::get<1>(p);
-        if (now >= deadline) {
-            unlocking_.erase(unlocking_.begin() + i);
-            fmt::print("Removing notification {}\n", achievements_[std::get<0>(p)].name);
-            continue;
+    std::erase_if(unlocking_, [&](UnlockNotification &n) {
+        if (now >= n.deadline) {
+            fmt::print("Removing notification {}\n", achievements_[n.index].name);
+            return true;
         }
-        // to double seconds
-        auto seconds = std::chrono::duration<float>(deadline - now).count();
-        if (seconds <= 0.0f) std::get<2>(unlocking_[i]) = 0.1f;
-        else if (seconds <= 1.5f) std::get<2>(unlocking_[i]) = 0.1f + 0.6f * seconds;
-        else if (seconds <= 7.0f) std::get<2>(unlocking_[i]) = 1.0f;
-        else std::get<2>(unlocking_[i]) = 1.0f - (seconds - 7.0f);
-    }
+        auto seconds = std::chrono::duration<float>(n.deadline - now).count();
+        if (seconds <= 0.0f)
+            n.alpha = timing::kMinAlpha;
+        else if (seconds <= timing::kFadeOutStart)
+            n.alpha = timing::kMinAlpha + timing::kFadeOutSlope * seconds;
+        else if (seconds <= timing::kFadeInEnd)
+            n.alpha = 1.0f;
+        else
+            n.alpha = 1.0f - (seconds - timing::kFadeInEnd);
+        return false;
+    });
 }
 
 }
