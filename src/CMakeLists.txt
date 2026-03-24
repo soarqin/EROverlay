@@ -26,6 +26,7 @@ add_project(EROverlayDLL SHARED
     util/memory.hpp util/signature.hpp
     util/steam.cpp util/steam.hpp
     util/sysfont.cpp util/sysfont.hpp
+    util/ini.hpp
     util/string.hpp util/vector.hpp
 
     # proxy
