@@ -114,7 +114,12 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         borderColor_ = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)g << 8) | (uint32_t)r;
     }
     borderWidth_ = (float)api->configGetInt("minimap.border_width_x10", 15) / 10.f;
-    auto maxCount = std::max({widthRatios_.size(), heightRatios_.size(), scales_.size(), alphas_.size(), shapes_.size(), roundings_.size(), rotates_.size()});
+    extraTileScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_tile_scale", L"1"));
+    extraDecorationScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_decoration_scale", L"1"));
+    extraPlayerScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_player_scale", L"1"));
+    extraBearingScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_bearing_scale", L"1"));
+    auto maxCount = std::max({widthRatios_.size(), heightRatios_.size(), scales_.size(), alphas_.size(), shapes_.size(), roundings_.size(), rotates_.size(),
+                              extraTileScales_.size(), extraDecorationScales_.size(), extraPlayerScales_.size(), extraBearingScales_.size()});
     if (maxCount == 0) {
         maxCount = 1;
         widthRatios_.push_back(0.3f);
@@ -126,6 +131,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         roundings_.push_back(0.2f);
         roundingIsPercent_.push_back(true);
         rotates_.push_back(false);
+        extraTileScales_.push_back(1.f);
+        extraDecorationScales_.push_back(1.f);
+        extraPlayerScales_.push_back(1.f);
+        extraBearingScales_.push_back(1.f);
     } else {
         if (widthRatios_.empty()) {
             widthRatios_.push_back(0.3f);
@@ -152,6 +161,18 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         if (rotates_.empty()) {
             rotates_.push_back(false);
         }
+        if (extraTileScales_.empty()) {
+            extraTileScales_.push_back(1.f);
+        }
+        if (extraDecorationScales_.empty()) {
+            extraDecorationScales_.push_back(1.f);
+        }
+        if (extraPlayerScales_.empty()) {
+            extraPlayerScales_.push_back(1.f);
+        }
+        if (extraBearingScales_.empty()) {
+            extraBearingScales_.push_back(1.f);
+        }
         while (widthRatios_.size() < maxCount) {
             widthRatios_.push_back(widthRatios_.back());
         }
@@ -177,6 +198,18 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         while (rotates_.size() < maxCount) {
             rotates_.push_back(rotates_.back());
         }
+        while (extraTileScales_.size() < maxCount) {
+            extraTileScales_.push_back(extraTileScales_.back());
+        }
+        while (extraDecorationScales_.size() < maxCount) {
+            extraDecorationScales_.push_back(extraDecorationScales_.back());
+        }
+        while (extraPlayerScales_.size() < maxCount) {
+            extraPlayerScales_.push_back(extraPlayerScales_.back());
+        }
+        while (extraBearingScales_.size() < maxCount) {
+            extraBearingScales_.push_back(extraBearingScales_.back());
+        }
     }
     if (toggleKey_ == scaleKey_) {
         scales_.push_back(0.f);
@@ -188,6 +221,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         roundings_.push_back(roundings_.back());
         roundingIsPercent_.push_back(roundingIsPercent_.back());
         rotates_.push_back(rotates_.back());
+        extraTileScales_.push_back(extraTileScales_.back());
+        extraDecorationScales_.push_back(extraDecorationScales_.back());
+        extraPlayerScales_.push_back(extraPlayerScales_.back());
+        extraBearingScales_.push_back(extraBearingScales_.back());
     }
     currentWidthRatio_ = widthRatios_[0];
     currentHeightRatio_ = heightRatios_[0];
@@ -198,6 +235,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     currentRounding_ = roundings_[0];
     currentRoundingIsPercent_ = roundingIsPercent_[0];
     currentRotate_ = rotates_[0];
+    currentExtraTileScale_ = extraTileScales_[0];
+    currentExtraDecorationScale_ = extraDecorationScales_[0];
+    currentExtraPlayerScale_ = extraPlayerScales_[0];
+    currentExtraBearingScale_ = extraBearingScales_[0];
 }
 
 bool Renderer::render() {
@@ -216,6 +257,10 @@ bool Renderer::render() {
         currentRounding_ = roundings_[currentScaleIndex_];
         currentRoundingIsPercent_ = roundingIsPercent_[currentScaleIndex_];
         currentRotate_ = rotates_[currentScaleIndex_];
+        currentExtraTileScale_ = extraTileScales_[currentScaleIndex_];
+        currentExtraDecorationScale_ = extraDecorationScales_[currentScaleIndex_];
+        currentExtraPlayerScale_ = extraPlayerScales_[currentScaleIndex_];
+        currentExtraBearingScale_ = extraBearingScales_[currentScaleIndex_];
     }
     if (!show_ || currentScale_ < 0.0001f) {
         return false;
@@ -293,6 +338,12 @@ bool Renderer::render() {
                 ImGui::End();
                 return false;
         }
+        // Compute per-frame effective scale values based on current state
+        effectiveScale_ = currentScale_ * currentExtraTileScale_;
+        effectivePlayerScale_ = texturePlayerScale * currentExtraPlayerScale_;
+        effectiveDecorationScale_ = textureDecorationScale * currentExtraDecorationScale_;
+        effectiveBearingRatio_ = textureBearingRatio * currentExtraBearingScale_;
+
         // Save player world position before converting to tile units
         float playerWorldX = dx;
         float playerWorldY = dy;
@@ -309,7 +360,7 @@ bool Renderer::render() {
 
         dx /= textureSize;
         dy /= textureSize;
-        auto texSize = textureSize * currentScale_;
+        auto texSize = textureSize * effectiveScale_;
         auto halfWidth = minimapWidth_ * 0.5f;
         auto halfHeight = minimapHeight_ * 0.5f;
 
@@ -325,8 +376,8 @@ bool Renderer::render() {
                 for (auto x = x0; x <= x1; x++) {
                     if (x < 0 || x > 9 || y < 0 || y > 9) continue;
                     auto index = layer * 100 + y * 10 + x;
-                    float tileOffsetX = (x * textureSize - playerWorldX) * currentScale_;
-                    float tileOffsetY = (y * textureSize - playerWorldY) * currentScale_;
+                    float tileOffsetX = (x * textureSize - playerWorldX) * effectiveScale_;
+                    float tileOffsetY = (y * textureSize - playerWorldY) * effectiveScale_;
                     renderRotatedTile(index, tileOffsetX, tileOffsetY, cosMapRot, sinMapRot);
                 }
             }
@@ -343,7 +394,7 @@ bool Renderer::render() {
             if ((showGraces_ || showLandmarks_) && gData.paramsLoaded()) {
                 auto boundMaxX = minimapWidth_ + 100.f;
                 auto boundMaxY = minimapHeight_ + 100.f;
-                auto decorationScale = textureDecorationScale * currentScale_;
+                auto decorationScale = effectiveDecorationScale_ * effectiveScale_;
                 for (auto y = y0; y <= y1; y++) {
                     for (auto x = x0; x <= x1; x++) {
                         if (x < 0 || x > 9 || y < 0 || y > 9) continue;
@@ -363,8 +414,8 @@ bool Renderer::render() {
                             if (!decoration->isUnlocked()) continue;
                             auto *sprite = decoration->sprite;
                             // Position: world-relative to player, then rotate, then offset to center
-                            float decoRelX = (decoration->x - playerWorldX) * currentScale_;
-                            float decoRelY = (decoration->y - playerWorldY) * currentScale_;
+                            float decoRelX = (decoration->x - playerWorldX) * effectiveScale_;
+                            float decoRelY = (decoration->y - playerWorldY) * effectiveScale_;
                             auto rx = decoRelX * cosMapRot - decoRelY * sinMapRot + halfWidth;
                             auto ry = decoRelX * sinMapRot + decoRelY * cosMapRot + halfHeight;
                             if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
@@ -423,9 +474,9 @@ bool Renderer::render() {
                 auto nx = cx;
                 for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
                     if (currentShape_ == Shape::Rect) {
-                        renderMinimap(index0, nx, ny, currentScale_);
+                        renderMinimap(index0, nx, ny, effectiveScale_);
                     } else {
-                        renderShapedMinimap(index0, nx, ny, currentScale_);
+                        renderShapedMinimap(index0, nx, ny, effectiveScale_);
                     }
                 }
             }
@@ -440,7 +491,7 @@ bool Renderer::render() {
                 auto boundMaxX = minimapWidth_ + 100.f;
                 auto boundMaxY = minimapHeight_ + 100.f;
                 ny = cy;
-                auto decorationScale = textureDecorationScale * currentScale_;
+                auto decorationScale = effectiveDecorationScale_ * effectiveScale_;
                 for (auto y = y0; y <= y1; y++, ny += texSize) {
                     auto index0 = layer * 100 + y * 10 + x0;
                     auto nx = cx;
@@ -460,8 +511,8 @@ bool Renderer::render() {
                             }
                             if (!decoration->isUnlocked()) continue;
                             auto *sprite = decoration->sprite;
-                            auto rx = decoration->localX * currentScale_ + nx;
-                            auto ry = decoration->localY * currentScale_ + ny;
+                            auto rx = decoration->localX * effectiveScale_ + nx;
+                            auto ry = decoration->localY * effectiveScale_ + ny;
                             if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
                                 auto width = sprite->width * decorationScale;
                                 auto height = sprite->height * decorationScale;
@@ -559,7 +610,7 @@ bool Renderer::render() {
         if (currentRotate_ && bearingSprite_ != nullptr && bearingSprite_->texture != nullptr) {
             auto *drawList = ImGui::GetWindowDrawList();
             auto winPos = ImGui::GetWindowPos();
-            float bearingScale = minimapWidth_ * textureBearingRatio / (float)bearingSprite_->width;
+            float bearingScale = minimapWidth_ * effectiveBearingRatio_ / (float)bearingSprite_->width;
             float bw = bearingSprite_->width * bearingScale;
             float bh = bearingSprite_->height * bearingScale;
             float bcx = bearingSprite_->centerX * bearingScale;
@@ -702,8 +753,8 @@ void Renderer::renderRotatedTile(int index, float tileOffsetX, float tileOffsetY
     }
     if (t.texture == nullptr) return;
 
-    float texPixelW = (float)t.width * currentScale_;
-    float texPixelH = (float)t.height * currentScale_;
+    float texPixelW = (float)t.width * effectiveScale_;
+    float texPixelH = (float)t.height * effectiveScale_;
 
     auto *drawList = ImGui::GetWindowDrawList();
     auto winPos = ImGui::GetWindowPos();
@@ -750,22 +801,22 @@ void Renderer::renderPlayer(float deltaRad) {
     }
     auto halfWidth = minimapWidth_ * .5f;
     auto halfHeight = minimapHeight_ * .5f;
-    ImGui::SetCursorPos(ImVec2(halfWidth - playerSprite_->centerX * currentScale_ * texturePlayerScale, halfHeight - playerSprite_->centerY * currentScale_ * texturePlayerScale));
-    ImGui::ImageWithBg((ImTextureID)playerSprite_->texture->gpuHandle, ImVec2(playerSprite_->width * currentScale_ * texturePlayerScale, playerSprite_->height * currentScale_ * texturePlayerScale), ImVec2(playerSprite_->u0, playerSprite_->v0), ImVec2(playerSprite_->u1, playerSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+    ImGui::SetCursorPos(ImVec2(halfWidth - playerSprite_->centerX * effectiveScale_ * effectivePlayerScale_, halfHeight - playerSprite_->centerY * effectiveScale_ * effectivePlayerScale_));
+    ImGui::ImageWithBg((ImTextureID)playerSprite_->texture->gpuHandle, ImVec2(playerSprite_->width * effectiveScale_ * effectivePlayerScale_, playerSprite_->height * effectiveScale_ * effectivePlayerScale_), ImVec2(playerSprite_->u0, playerSprite_->v0), ImVec2(playerSprite_->u1, playerSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
     if (arrowSprite_ == nullptr) {
         return;
     }
     if (deltaRad == 0.f) {
         // In rotation mode the map already faces the player direction — arrow points up (no rotation)
-        ImGui::SetCursorPos(ImVec2(halfWidth - arrowSprite_->centerX * currentScale_ * texturePlayerScale, halfHeight - arrowSprite_->centerY * currentScale_ * texturePlayerScale));
-        ImGui::ImageWithBg((ImTextureID)arrowSprite_->texture->gpuHandle, ImVec2(arrowSprite_->width * currentScale_ * texturePlayerScale, arrowSprite_->height * currentScale_ * texturePlayerScale), ImVec2(arrowSprite_->u0, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
+        ImGui::SetCursorPos(ImVec2(halfWidth - arrowSprite_->centerX * effectiveScale_ * effectivePlayerScale_, halfHeight - arrowSprite_->centerY * effectiveScale_ * effectivePlayerScale_));
+        ImGui::ImageWithBg((ImTextureID)arrowSprite_->texture->gpuHandle, ImVec2(arrowSprite_->width * effectiveScale_ * effectivePlayerScale_, arrowSprite_->height * effectiveScale_ * effectivePlayerScale_), ImVec2(arrowSprite_->u0, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
     } else {
         auto *drawList = ImGui::GetWindowDrawList();
         auto cursorPos = ImGui::GetWindowPos() + ImVec2(halfWidth, halfHeight);
-        auto xRel0 = -arrowSprite_->centerX * currentScale_ * texturePlayerScale;
-        auto yRel0 = -arrowSprite_->centerY * currentScale_ * texturePlayerScale;
-        auto xRel1 = (arrowSprite_->width - arrowSprite_->centerX) * currentScale_ * texturePlayerScale;
-        auto yRel1 = (arrowSprite_->height - arrowSprite_->centerY) * currentScale_ * texturePlayerScale;
+        auto xRel0 = -arrowSprite_->centerX * effectiveScale_ * effectivePlayerScale_;
+        auto yRel0 = -arrowSprite_->centerY * effectiveScale_ * effectivePlayerScale_;
+        auto xRel1 = (arrowSprite_->width - arrowSprite_->centerX) * effectiveScale_ * effectivePlayerScale_;
+        auto yRel1 = (arrowSprite_->height - arrowSprite_->centerY) * effectiveScale_ * effectivePlayerScale_;
         auto cosRad = std::cos(deltaRad);
         auto sinRad = std::sin(deltaRad);
         // PrimQuadUV: TL, TR, BR, BL (matches PrimRectUV / AddImage winding).

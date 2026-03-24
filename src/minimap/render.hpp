@@ -74,6 +74,23 @@ private:
     uint32_t borderColor_ = 0x64FFFFFF;  // ABGR (ImGui IM_COL32 format): white, alpha=100
     float borderWidth_ = 1.5f;
 
+    // Per-state extra scale multipliers (cycled via scale_key, like scales_/alphas_)
+    std::vector<float> extraTileScales_;
+    std::vector<float> extraDecorationScales_;
+    std::vector<float> extraPlayerScales_;
+    std::vector<float> extraBearingScales_;
+
+    float currentExtraTileScale_ = 1.f;
+    float currentExtraDecorationScale_ = 1.f;
+    float currentExtraPlayerScale_ = 1.f;
+    float currentExtraBearingScale_ = 1.f;
+
+    // Per-frame effective scale values (computed in render())
+    float effectiveScale_ = 1.f;
+    float effectivePlayerScale_ = 1.f;
+    float effectiveDecorationScale_ = 1.f;
+    float effectiveBearingRatio_ = 1.f;
+
     void *offscreen_ = nullptr;
 };
 
