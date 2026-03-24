@@ -4,12 +4,65 @@
 #include "util/string.hpp"
 
 #include <imgui.h>
-#include <ini.h>
-
+#include <cstring>
 #include <filesystem>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cwchar>
+
+namespace {
+
+// Minimal INI parser (replaces inih library).
+// Reads lines from an open FILE*, calls handler(user, section, name, value)
+// for each key-value pair. Returns 0 on success, -1 on read error.
+int parseIniFile(FILE *file, int (*handler)(void *user, const char *section, const char *name, const char *value), void *user) {
+    char line[512];
+    char section[256] = "";
+
+    while (std::fgets(line, sizeof(line), file)) {
+        // Strip leading whitespace
+        char *start = line;
+        while (*start == ' ' || *start == '\t') ++start;
+
+        // Strip trailing whitespace / newline
+        char *end = start + std::strlen(start);
+        while (end > start && (end[-1] == '\n' || end[-1] == '\r' || end[-1] == ' ' || end[-1] == '\t')) --end;
+        *end = '\0';
+
+        // Skip blank lines and comments
+        if (*start == '\0' || *start == ';' || *start == '#') continue;
+
+        // Section header
+        if (*start == '[') {
+            char *close = std::strchr(start + 1, ']');
+            if (close) {
+                *close = '\0';
+                std::strncpy(section, start + 1, sizeof(section) - 1);
+                section[sizeof(section) - 1] = '\0';
+            }
+            continue;
+        }
+
+        // Key = value
+        char *sep = std::strchr(start, '=');
+        if (!sep) sep = std::strchr(start, ':');
+        if (sep) {
+            // Trim key (right side)
+            char *keyEnd = sep;
+            while (keyEnd > start && (keyEnd[-1] == ' ' || keyEnd[-1] == '\t')) --keyEnd;
+            *keyEnd = '\0';
+
+            // Trim value (left side)
+            char *val = sep + 1;
+            while (*val == ' ' || *val == '\t') ++val;
+
+            if (handler(user, section, start, val) == 0) break;
+        }
+    }
+    return 0;
+}
+
+} // namespace
 
 namespace er {
 
@@ -254,7 +307,7 @@ void Config::loadSingleFile(const std::wstring &filename, const std::string &mod
         std::map<std::string, std::string> &entries;
         const std::string &modname;
     } configData = {entries_, modname};
-    ini_parse_file(f, [](void *user, const char *section, const char *name, const char *value) {
+    parseIniFile(f, [](void *user, const char *section, const char *name, const char *value) {
         auto &configData = *static_cast<ConfigData *>(user);
         auto &entries = configData.entries;
         auto modulename = configData.modname;

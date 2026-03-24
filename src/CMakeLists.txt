@@ -52,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         imgui fmt::fmt nlohmann_json::nlohmann_json
     PRIVATE
-        Pattern16 inih steam_api64 imgui_dx12_backend minhook
+        Pattern16 steam_api64 imgui_dx12_backend minhook
     # Windows libraries
         dwmapi shlwapi version)
 if(NOT MSVC)

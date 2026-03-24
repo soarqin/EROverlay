@@ -4,7 +4,7 @@
 
 **EROverlay** is a Windows DLL overlay mod for Elden Ring, written in **C++23**. It hooks into the game's DirectX 12 rendering pipeline via `minhook` and renders ImGui overlays. The project is structured as a loader DLL (`EROverlay.dll`) plus individual overlay plugin DLLs (Boss, Achievements, Minimap) loaded from the `overlays/` folder.
 
-Key libraries: `imgui`, `minhook`, `nlohmann_json`, `fmt`, `inih`, `Pattern16`, `stb`.
+Key libraries: `imgui`, `minhook`, `nlohmann_json`, `fmt`, `Pattern16`, `stb`.
 
 ---
 

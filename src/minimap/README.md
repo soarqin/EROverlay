@@ -23,5 +23,4 @@
 * [imgui](https://github.com/ocornut/imgui)
 * [stb](https://github.com/nothings/stb)
 * [JSON for Modern C++](https://github.com/nlohmann/json)
-* [inih](https://github.com/benhoyt/inih)
 * [Pattern16](https://github.com/Dasaav-dsv/Pattern16)
