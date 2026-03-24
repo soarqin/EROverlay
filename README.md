@@ -7,7 +7,7 @@ A Windows DLL overlay mod for Elden Ring that hooks into the DirectX 12 renderin
 - **Achievements** — tracks Steam achievement progression in real time
 - **Minimap** — renders an in-game minimap with configurable size, scale, and shape
 
-> 📋 [Changelog](CHANGELOG.md) · 🇨🇳 [中文说明](README_CN.md)
+> 📋 Changelogs: [Loader](src/CHANGELOG.md) · [Boss](src/boss/CHANGELOG.md) · [Achievements](src/achievements/CHANGELOG.md) · [Minimap](src/minimap/CHANGELOG.md) · 🇨🇳 [中文说明](README_CN.md)
 
 ---
 

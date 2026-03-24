@@ -7,7 +7,7 @@
 - **Achievements** —— 实时追踪 Steam 成就进度
 - **Minimap** —— 渲染游戏内小地图，支持自定义大小、缩放和形状
 
-> 📋 [更新日志](CHANGELOG_CN.md) · 🌐 [English](README.md)
+> 📋 更新日志：[加载器](src/CHANGELOG_CN.md) · [Boss](src/boss/CHANGELOG_CN.md) · [Achievements](src/achievements/CHANGELOG_CN.md) · [Minimap](src/minimap/CHANGELOG_CN.md) · 🌐 [English](README.md)
 
 ---
 

@@ -5,7 +5,7 @@
 * You can use `EROverlay.dll` to load multiple overlays, I will keep the back compatibility so that you just need to make sure `Overlay Loader` version meets the minimal requirements for certain overlay.
 
 ## USAGE
-* Modify `minimap.ini` inside `configs` folder to your liking.
+* Modify `achievements.ini` inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
   + Rename `EROverlay.dll` to `winhttp.dll` and put it aside `eldenring.exe` (don't forget folders `configs` and `data`).
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117), [ModEngine2](https://github.com/soulsmods/ModEngine2) or [me3](https://github.com/garyttierney/me3)).
