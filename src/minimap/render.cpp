@@ -28,7 +28,7 @@ static constexpr int textureSizeInt = 1024;
 static constexpr float textureSize = (float)textureSizeInt;
 static constexpr float texturePlayerScale = 0.45f;
 static constexpr float textureDecorationScale = 0.25f;
-static constexpr float textureBearingRatio = 0.25f;
+static constexpr float textureBearingRatio = 0.4f;
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
