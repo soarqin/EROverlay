@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 - Fixed decorations (grace icons, landmarks) rendering outside the visible area in `circle` and `rounded` minimap shapes. The offscreen compositing now applies proper shape masking for all non-rect modes.
+- Fixed decorations near the shape boundary being completely hidden instead of partially visible. The strict center-point shape check is removed since offscreen compositing now handles clipping.
 
 ### [1.1.1] - 2026-03-26
 

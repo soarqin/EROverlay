@@ -423,7 +423,6 @@ bool Renderer::render() {
                                 auto height = sprite->height * decorationScale;
                                 auto spriteCenterX = sprite->centerX * decorationScale;
                                 auto spriteCenterY = sprite->centerY * decorationScale;
-                                if (!isPointInShape(rx, ry)) continue;
                                 auto rad = decoration->rotationRad;
                                 if (rad == 0.f) {
                                     // rotationRad==0: position rotates with map, but visual orientation stays fixed on screen
@@ -518,9 +517,6 @@ bool Renderer::render() {
                                 auto height = sprite->height * decorationScale;
                                 auto centerX = sprite->centerX * decorationScale;
                                 auto centerY = sprite->centerY * decorationScale;
-                                if (currentShape_ != Shape::Rect) {
-                                    if (!isPointInShape(rx + centerX, ry + centerY)) continue;
-                                }
                                 auto rad = decoration->rotationRad;
                                 if (rad == 0.f) {
                                     ImGui::SetCursorPos(ImVec2(rx - centerX, ry - centerY));
