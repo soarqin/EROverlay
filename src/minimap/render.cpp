@@ -307,7 +307,7 @@ bool Renderer::render() {
         // Save actual alpha for compositing, temporarily set to 1.0 so all sub-methods render opaque.
         // In rotation mode, offscreen is always required for circular compositing (tiles are drawn as
         // rotated quads and the circle mask is applied during the compositing step).
-        bool useOffscreen = offscreen_ != nullptr && (currentAlpha_ < 1.0f || currentRotate_);
+        bool useOffscreen = offscreen_ != nullptr && (currentAlpha_ < 1.0f || currentRotate_ || currentShape_ != Shape::Rect);
         float savedAlpha = currentAlpha_;
         if (useOffscreen) {
             api->beginOffscreen(offscreen_);
@@ -570,10 +570,9 @@ bool Renderer::render() {
                 float v0 = winPos.y / vp->Size.y;
                 float u1 = (winPos.x + minimapWidth_) / vp->Size.x;
                 float v1 = (winPos.y + minimapHeight_) / vp->Size.y;
-                if (currentRotate_) {
+                if (currentShape_ == Shape::Circle) {
                     // Circular compositing: sample the offscreen texture through a circle shape.
-                    // Tiles were drawn as rotated quads (perfect tiling, no gaps/overlaps),
-                    // and this step masks the result to the circle boundary.
+                    // Handles both rotated mode (tiles drawn as rotated quads) and non-rotated circle mode.
                     auto *drawList = ImGui::GetWindowDrawList();
                     drawList->PushTexture((ImTextureID)gpuHandle);
                     int vs = drawList->VtxBuffer.Size;
@@ -583,6 +582,17 @@ bool Renderer::render() {
                     drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
                     int ve = drawList->VtxBuffer.Size;
                     ImGui::ShadeVertsLinearUV(drawList, vs, ve, winPos, {winPos.x + minimapWidth_, winPos.y + minimapHeight_}, ImVec2(u0, v0), ImVec2(u1, v1), false);
+                    drawList->PopTexture();
+                } else if (currentShape_ == Shape::Rounded) {
+                    // Rounded rect compositing: sample the offscreen texture through a rounded rectangle.
+                    auto *drawList = ImGui::GetWindowDrawList();
+                    drawList->PushTexture((ImTextureID)gpuHandle);
+                    int vs = drawList->VtxBuffer.Size;
+                    ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
+                    drawList->PathRect(winPos, shapeMax, cachedRounding_);
+                    drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
+                    int ve = drawList->VtxBuffer.Size;
+                    ImGui::ShadeVertsLinearUV(drawList, vs, ve, winPos, shapeMax, ImVec2(u0, v0), ImVec2(u1, v1), false);
                     drawList->PopTexture();
                 } else {
                     ImGui::SetCursorPos(ImVec2(0, 0));
