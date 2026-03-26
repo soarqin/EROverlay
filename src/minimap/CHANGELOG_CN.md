@@ -6,6 +6,14 @@
 
 ---
 
+### [1.1.1] - 2026-03-26
+
+#### 新增
+- 新增渲染元素的逐状态额外缩放倍率配置：`extra_tile_scale`、`extra_decoration_scale`、`extra_player_scale` 和 `extra_bearing_scale`。每项支持按缩放状态逗号分隔设置（通过 `scale_key` 切换），与 `scale`/`alpha`/`width_ratio` 用法一致。
+
+#### 变更
+- 增大方位指南针指示器的尺寸比例（从 0.25 调整至 0.4），提升可见度。
+
 ### [1.1.0] - 2026-03-23
 
 #### 新增
