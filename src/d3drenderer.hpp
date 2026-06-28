@@ -87,6 +87,8 @@ private:
 private:
     void releaseDeviceResources(const wchar_t *reason);
     void releaseCommandQueue();
+    bool captureCommandQueue(IUnknown *pDevice);
+    void handleSwapChainCreated(HWND hwnd, IUnknown *pDevice, HRESULT hr);
     bool installExecuteCommandListsHook();
     void releaseExecuteCommandListsHook();
     void resetCommandQueueCapture();
@@ -120,6 +122,17 @@ private:
     static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue,
                                              UINT NumCommandLists,
                                              ID3D12CommandList *const *ppCommandLists);
+    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory,
+                                            IUnknown *pDevice,
+                                            DXGI_SWAP_CHAIN_DESC *pDesc,
+                                            IDXGISwapChain **ppSwapChain);
+    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
+                                                   IUnknown *pDevice,
+                                                   HWND hWnd,
+                                                   const DXGI_SWAP_CHAIN_DESC1 *pDesc,
+                                                   const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
+                                                   IDXGIOutput *pRestrictToOutput,
+                                                   IDXGISwapChain1 **ppSwapChain);
     static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
     static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
     void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
@@ -133,7 +146,18 @@ private:
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain2 *, UINT, UINT)> oSetSourceSize_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
     std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *,
+                                      IUnknown *,
+                                      HWND,
+                                      const DXGI_SWAP_CHAIN_DESC1 *,
+                                      const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *,
+                                      IDXGIOutput *,
+                                      IDXGISwapChain1 **)> oCreateSwapChainForHwnd_;
     uint64_t oldWndProc_ = 0;
+
+    void *fnCreateSwapChain_ = nullptr;
+    void *fnCreateSwapChainForHwndChain_ = nullptr;
 
     void *fnPresent_ = nullptr;
     void *fnPresent1_ = nullptr;

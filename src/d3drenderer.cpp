@@ -60,7 +60,9 @@ bool D3DRenderer::hook() {
         return true;
     };
 
-    if (!createAndEnableHook("Present", fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_)) ||
+    if (!createAndEnableHook("CreateSwapChain", fnCreateSwapChain_, reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_)) ||
+        !createAndEnableHook("CreateSwapChainForHwnd", fnCreateSwapChainForHwndChain_, reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_)) ||
+        !createAndEnableHook("Present", fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_)) ||
         !createAndEnableHook("Present1", fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_)) ||
         !createAndEnableHook("ResizeBuffers", fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_)) ||
         !createAndEnableHook("SetSourceSize", fnSetSourceSize_, reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_)) ||
@@ -97,6 +99,9 @@ void D3DRenderer::disableAll() {
         MH_RemoveHook(target);
     };
 
+    disableAndRemoveHook(fnCreateSwapChain_);
+    disableAndRemoveHook(fnCreateSwapChainForHwndChain_);
+
     disableAndRemoveHook(fnPresent_);
     disableAndRemoveHook(fnPresent1_);
 
@@ -115,7 +120,35 @@ void D3DRenderer::releaseCommandQueue() {
     }
 }
 
+bool D3DRenderer::captureCommandQueue(IUnknown *pDevice) {
+    if (pDevice == nullptr) return false;
+
+    ID3D12CommandQueue *commandQueue = nullptr;
+    if (FAILED(pDevice->QueryInterface(IID_PPV_ARGS(&commandQueue)))) return false;
+
+    D3D12_COMMAND_QUEUE_DESC desc = commandQueue->GetDesc();
+    if (desc.Type != D3D12_COMMAND_LIST_TYPE_DIRECT) {
+        commandQueue->Release();
+        return false;
+    }
+
+    releaseCommandQueue();
+    commandQueue_ = commandQueue;
+    return true;
+}
+
+void D3DRenderer::handleSwapChainCreated(HWND hwnd, IUnknown *pDevice, HRESULT hr) {
+    if (FAILED(hr)) return;
+    if (gameWindow_ != nullptr && hwnd != gameWindow_) return;
+
+    releaseDeviceResources(L"game swap-chain creation");
+    if (captureCommandQueue(pDevice)) {
+        releaseExecuteCommandListsHook();
+    }
+}
+
 bool D3DRenderer::installExecuteCommandListsHook() {
+    if (commandQueue_) return true;
     if (eclHookInstalled_) return true;
     if (fnExecuteCommandLists_ == nullptr) {
         fwprintf(stderr, L"[EROverlay] ExecuteCommandLists hook target is null\n");
@@ -298,6 +331,11 @@ bool D3DRenderer::createDevice() {
     {
         void **swapChainVTable = *reinterpret_cast<void ***>(swapChain);
         void **commandQueueVTable = *reinterpret_cast<void ***>(d3dCommandQueue);
+        void **dxgiFactoryVTable = *reinterpret_cast<void ***>(dxgiFactory);
+
+        fnCreateSwapChain_ = dxgiFactoryVTable[10];
+        fnCreateSwapChainForHwndChain_ = dxgiFactoryVTable[15];
+
         fnPresent_ = swapChainVTable[8];
         fnPresent1_ = swapChainVTable[22];
 
@@ -566,7 +604,9 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
             return;
         }
         ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
-        oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
+        if (!oldWndProc_) {
+            oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
+        }
 
         ImGuiMemAllocFunc allocFunc;
         ImGuiMemFreeFunc freeFunc;
@@ -1029,6 +1069,25 @@ void WINAPI D3DRenderer::hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue
     if (captured) {
         gD3DRenderer->releaseExecuteCommandListsHook();
     }
+}
+
+HRESULT WINAPI D3DRenderer::hkCreateSwapChain(IDXGIFactory *pFactory, IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain) {
+    HRESULT hr = gD3DRenderer->oCreateSwapChain_(pFactory, pDevice, pDesc, ppSwapChain);
+    HWND hwnd = pDesc != nullptr ? pDesc->OutputWindow : nullptr;
+    gD3DRenderer->handleSwapChainCreated(hwnd, pDevice, hr);
+    return hr;
+}
+
+HRESULT WINAPI D3DRenderer::hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
+                                                     IUnknown *pDevice,
+                                                     HWND hWnd,
+                                                     const DXGI_SWAP_CHAIN_DESC1 *pDesc,
+                                                     const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
+                                                     IDXGIOutput *pRestrictToOutput,
+                                                     IDXGISwapChain1 **ppSwapChain) {
+    HRESULT hr = gD3DRenderer->oCreateSwapChainForHwnd_(pFactory, pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
+    gD3DRenderer->handleSwapChainCreated(hWnd, pDevice, hr);
+    return hr;
 }
 
 // ---- Offscreen rendering ----
