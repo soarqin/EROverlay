@@ -56,7 +56,7 @@ public:
 
     void disableAll();
 
-    void initOverlay();
+    bool initOverlay();
     void overlay(IDXGISwapChain3 *pSwapChain);
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -85,6 +85,8 @@ private:
     void ensureOffscreenSize(OffscreenContext *ctx, int w, int h);
 
 private:
+    void releaseDeviceResources(const wchar_t *reason);
+    void handleDeviceLost(const wchar_t *where, HRESULT hr);
     void CleanupRenderTarget();
 
     static HRESULT WINAPI hkPresent(IDXGISwapChain3 *pSwapChain,
@@ -100,7 +102,7 @@ private:
                                           UINT Height,
                                           DXGI_FORMAT NewFormat,
                                           UINT SwapChainFlags);
-    static HRESULT WINAPI hkSetSourceSize(IDXGISwapChain1 *pSwapChain,
+    static HRESULT WINAPI hkSetSourceSize(IDXGISwapChain2 *pSwapChain,
                                           UINT Width,
                                           UINT Height);
     static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,
@@ -113,7 +115,7 @@ private:
                                            IUnknown *const *ppPresentQueue);
     static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue,
                                              UINT NumCommandLists,
-                                             ID3D12CommandList *ppCommandLists);
+                                             ID3D12CommandList *const *ppCommandLists);
     static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory,
                                             IUnknown *pDevice,
                                             DXGI_SWAP_CHAIN_DESC *pDesc,
@@ -147,9 +149,9 @@ private:
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT)> oPresent_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, const DXGI_PRESENT_PARAMETERS *)> oPresent1_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain *, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain1 *, UINT, UINT)> oSetSourceSize_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain2 *, UINT, UINT)> oSetSourceSize_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
-    std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *)> oExecuteCommandLists_;
+    std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
     std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
     std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *,
                                       IUnknown *,
@@ -192,6 +194,7 @@ private:
 
     uint32_t buffersCounts_ = 0;
     size_t rtvDescriptorSize_ = 0;
+    size_t srvDescriptorSize_ = 0;
 
 /*
     FrameContext *frameContext_ = nullptr;
@@ -199,6 +202,7 @@ private:
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
+    bool hooksInstalled_ = false;
     D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
 };
 

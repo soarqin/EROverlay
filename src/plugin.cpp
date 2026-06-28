@@ -6,14 +6,19 @@
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 #include <filesystem>
+#include <mutex>
 #include <tuple>
 
 namespace er {
 
 static std::vector<std::tuple<int, int, PluginExports*>> plugins;
+static bool renderersLoaded = false;
+static std::mutex pluginsMutex;
 
 void pluginsInit() {
+    std::lock_guard lock(pluginsMutex);
     plugins.clear();
+    renderersLoaded = false;
     const std::filesystem::path sandbox{std::wstring(gModulePath)};
     auto *api = getEROverlayAPI();
     for (const auto &dir_entry: std::filesystem::directory_iterator{sandbox / L"overlays"}) {
@@ -45,6 +50,7 @@ void pluginsInit() {
 }
 
 void pluginsUninit() {
+    std::lock_guard lock(pluginsMutex);
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->uninit) {
@@ -55,6 +61,7 @@ void pluginsUninit() {
 }
 
 void pluginsUpdate() {
+    std::lock_guard lock(pluginsMutex);
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->update) {
@@ -64,6 +71,8 @@ void pluginsUpdate() {
 }
 
 void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *userData) {
+    std::lock_guard lock(pluginsMutex);
+    renderersLoaded = false;
     for (auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->createRenderer) {
@@ -74,18 +83,23 @@ void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *
     std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) {
         return std::get<1>(a) < std::get<1>(b);
     });
+    renderersLoaded = true;
 }
 
 void pluginsDestroyRenderers() {
+    std::lock_guard lock(pluginsMutex);
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->destroyRenderer) {
             p->destroyRenderer();
         }
     }
+    renderersLoaded = false;
 }
 
 bool pluginsRender() {
+    std::lock_guard lock(pluginsMutex);
+    if (!renderersLoaded) return false;
     bool showCursor = false;
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);

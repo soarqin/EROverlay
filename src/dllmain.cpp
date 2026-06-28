@@ -13,6 +13,7 @@
 
 void init();
 void mainThread();
+bool waitForRendererHook();
 
 #define OVERLAY_ATOM_NAME L"EROVERLAY_BY_SOARQIN"
 
@@ -82,25 +83,10 @@ void init() {
 
     er::pluginsInit();
 
-    /* wait for menu loaded */
-    while (!er::gHooking->menuLoaded()) {
-        std::this_thread::sleep_for(100ms);
+    if (!waitForRendererHook()) {
+        fwprintf(stderr, L"[EROverlay] D3D hook was not installed; overlay thread exiting\n");
+        return;
     }
-    /* delay for another 1s */
-    std::this_thread::sleep_for(1000ms);
-    /* do not hook on game loading, high risk of crash */
-    while (er::gHooking->screenState() == 1) {
-        std::this_thread::sleep_for(100ms);
-    }
-
-    er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
-    er::Hooking::hook();
-
-    ImGuiMemAllocFunc allocFunc;
-    ImGuiMemFreeFunc freeFunc;
-    void *userData;
-    ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &userData);
-    er::pluginsLoadRenderers(ImGui::GetCurrentContext(), (void*)allocFunc, (void*)freeFunc, userData);
 
     mainThread();
 
@@ -110,6 +96,21 @@ void init() {
         FreeConsole();
     }
     FreeLibraryAndExitThread(er::gModule, 0);
+}
+
+bool waitForRendererHook() {
+    using namespace std::chrono_literals;
+
+    for (int attempt = 1; er::gRunning; ++attempt) {
+        er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
+        if (er::Hooking::hook()) {
+            return true;
+        }
+
+        er::gD3DRenderer.reset();
+        std::this_thread::sleep_for(500ms);
+    }
+    return false;
 }
 
 void mainThread() {

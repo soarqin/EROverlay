@@ -32,92 +32,137 @@ enum :int {
 };
 
 bool D3DRenderer::hook() {
+    if (hooksInstalled_) return true;
+
     if (!createDevice()) {
         return false;
     }
 
-    static MH_STATUS cscStatus = MH_CreateHook(fnCreateSwapChain_, reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_));
-    static MH_STATUS cschStatus = MH_CreateHook(fnCreateSwapChainForHwndChain_, reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_));
-    static MH_STATUS csccwStatus = MH_CreateHook(fnCreateSwapChainForCWindowChain_, reinterpret_cast<void*>(&hkCreateSwapChainForCoreWindow), reinterpret_cast<void**>(&oCreateSwapChainForCoreWindow_));
-    static MH_STATUS csccStatus = MH_CreateHook(fnCreateSwapChainForCompChain_, reinterpret_cast<void*>(&hkCreateSwapChainForComposition), reinterpret_cast<void**>(&oCreateSwapChainForComposition_));
+    if (!initOverlay()) {
+        return false;
+    }
 
-    static MH_STATUS presentStatus = MH_CreateHook(fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_));
-    static MH_STATUS present1Status = MH_CreateHook(fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_));
+    auto createAndEnableHook = [](const char *name, void *target, void *detour, void **original) {
+        if (target == nullptr) {
+            fwprintf(stderr, L"[EROverlay] %hs hook target is null\n", name);
+            return false;
+        }
+        MH_STATUS status = MH_CreateHook(target, detour, original);
+        if (status != MH_OK) {
+            fwprintf(stderr, L"[EROverlay] MH_CreateHook failed for %hs: %d\n", name, status);
+            return false;
+        }
+        status = MH_EnableHook(target);
+        if (status != MH_OK) {
+            fwprintf(stderr, L"[EROverlay] MH_EnableHook failed for %hs: %d\n", name, status);
+            return false;
+        }
+        return true;
+    };
 
-    static MH_STATUS resizeStatus = MH_CreateHook(fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_));
-    static MH_STATUS setSourceSizeStatus = MH_CreateHook(fnSetSourceSize_, reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_));
-    static MH_STATUS resize1Status = MH_CreateHook(fnResizeBuffers1_, reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_));
+    if (!createAndEnableHook("CreateSwapChain", fnCreateSwapChain_, reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_)) ||
+        !createAndEnableHook("CreateSwapChainForHwnd", fnCreateSwapChainForHwndChain_, reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_)) ||
+        !createAndEnableHook("CreateSwapChainForCoreWindow", fnCreateSwapChainForCWindowChain_, reinterpret_cast<void*>(&hkCreateSwapChainForCoreWindow), reinterpret_cast<void**>(&oCreateSwapChainForCoreWindow_)) ||
+        !createAndEnableHook("CreateSwapChainForComposition", fnCreateSwapChainForCompChain_, reinterpret_cast<void*>(&hkCreateSwapChainForComposition), reinterpret_cast<void**>(&oCreateSwapChainForComposition_)) ||
+        !createAndEnableHook("Present", fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_)) ||
+        !createAndEnableHook("Present1", fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_)) ||
+        !createAndEnableHook("ResizeBuffers", fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_)) ||
+        !createAndEnableHook("SetSourceSize", fnSetSourceSize_, reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_)) ||
+        !createAndEnableHook("ResizeBuffers1", fnResizeBuffers1_, reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_)) ||
+        !createAndEnableHook("ExecuteCommandLists", fnExecuteCommandLists_, reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_))) {
+        disableAll();
+        return false;
+    }
 
-    static MH_STATUS eclStatus = MH_CreateHook(fnExecuteCommandLists_, reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_));
-
-    MH_EnableHook(fnCreateSwapChain_);
-    MH_EnableHook(fnCreateSwapChainForHwndChain_);
-    MH_EnableHook(fnCreateSwapChainForCWindowChain_);
-    MH_EnableHook(fnCreateSwapChainForCompChain_);
-
-    MH_EnableHook(fnPresent_);
-    MH_EnableHook(fnPresent1_);
-
-    MH_EnableHook(fnResizeBuffers_);
-    MH_EnableHook(fnSetSourceSize_);
-    MH_EnableHook(fnResizeBuffers1_);
-
-    MH_EnableHook(fnExecuteCommandLists_);
-
-    initOverlay();
-
+    hooksInstalled_ = true;
     return true;
 }
 
 void D3DRenderer::unhook() {
     disableAll();
+    releaseDeviceResources(L"unhook");
     if (oldWndProc_) {
         SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
         oldWndProc_ = 0;
     }
     if (ImGui::GetCurrentContext()) {
-        if (!deviceLost_) {
-            if (ImGui::GetIO().BackendRendererUserData) {
-                ImGui_ImplDX12_Shutdown();
-                ImGui_ImplWin32_Shutdown();
-            }
-            ImGui::DestroyContext();
-            descriptorHeap_->Release();
-            descriptorHeap_ = nullptr;
-            for (UINT i = 0; i < buffersCounts_; ++i) {
-                commandAllocator_[i]->Release();
-                backBuffer_[i]->Release();
-            }
-            rtvDescriptorHeap_->Release();
-            rtvDescriptorHeap_ = nullptr;
-            delete[] commandAllocator_;
-            commandAllocator_ = nullptr;
-            delete[] backBuffer_;
-            backBuffer_ = nullptr;
-        } else {
-            ImGui::DestroyContext();
-            delete[] commandAllocator_;
-            commandAllocator_ = nullptr;
-            delete[] backBuffer_;
-            backBuffer_ = nullptr;
+        if (ImGui::GetIO().BackendPlatformUserData) {
+            ImGui_ImplWin32_Shutdown();
         }
+        ImGui::DestroyContext();
     }
 }
 
 void D3DRenderer::disableAll() {
-    MH_DisableHook(fnCreateSwapChain_);
-    MH_DisableHook(fnCreateSwapChainForHwndChain_);
-    MH_DisableHook(fnCreateSwapChainForCWindowChain_);
-    MH_DisableHook(fnCreateSwapChainForCompChain_);
+    auto disableAndRemoveHook = [](void *target) {
+        if (target == nullptr) return;
+        MH_DisableHook(target);
+        MH_RemoveHook(target);
+    };
 
-    MH_DisableHook(fnPresent_);
-    MH_DisableHook(fnPresent1_);
+    disableAndRemoveHook(fnCreateSwapChain_);
+    disableAndRemoveHook(fnCreateSwapChainForHwndChain_);
+    disableAndRemoveHook(fnCreateSwapChainForCWindowChain_);
+    disableAndRemoveHook(fnCreateSwapChainForCompChain_);
 
-    MH_DisableHook(fnResizeBuffers_);
-    MH_DisableHook(fnSetSourceSize_);
-    MH_DisableHook(fnResizeBuffers1_);
+    disableAndRemoveHook(fnPresent_);
+    disableAndRemoveHook(fnPresent1_);
 
-    MH_DisableHook(fnExecuteCommandLists_);
+    disableAndRemoveHook(fnResizeBuffers_);
+    disableAndRemoveHook(fnSetSourceSize_);
+    disableAndRemoveHook(fnResizeBuffers1_);
+
+    disableAndRemoveHook(fnExecuteCommandLists_);
+    hooksInstalled_ = false;
+}
+
+void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
+    (void)reason;
+    pluginsDestroyRenderers();
+
+    if (ImGui::GetCurrentContext() && ImGui::GetIO().BackendRendererUserData) {
+        ImGui_ImplDX12_Shutdown();
+    }
+
+    CleanupRenderTarget();
+
+    if (commandList_) {
+        commandList_->Release();
+        commandList_ = nullptr;
+    }
+    if (commandAllocator_) {
+        for (UINT i = 0; i < buffersCounts_; ++i) {
+            if (commandAllocator_[i]) commandAllocator_[i]->Release();
+        }
+        delete[] commandAllocator_;
+        commandAllocator_ = nullptr;
+    }
+    if (rtvDescriptorHeap_) {
+        rtvDescriptorHeap_->Release();
+        rtvDescriptorHeap_ = nullptr;
+    }
+    if (descriptorHeap_) {
+        descriptorHeap_->Release();
+        descriptorHeap_ = nullptr;
+    }
+    if (device_) {
+        device_->Release();
+        device_ = nullptr;
+    }
+
+    commandQueue_ = nullptr;
+    renderTargets_.clear();
+    freeDescriptors_.clear();
+    buffersCounts_ = 0;
+    rtvDescriptorSize_ = 0;
+    srvDescriptorSize_ = 0;
+    currentRTV_ = {};
+    deviceLost_ = false;
+}
+
+void D3DRenderer::handleDeviceLost(const wchar_t *where, HRESULT hr) {
+    fwprintf(stderr, L"[EROverlay] D3D12 device lost at %ls: 0x%08lX; waiting for a new device\n", where, hr);
+    releaseDeviceResources(L"device loss");
 }
 
 bool D3DRenderer::createDevice() {
@@ -272,16 +317,25 @@ static inline int GetCorrectDXGIFormat(int eCurrentFormat) {
     }
 }
 
-void D3DRenderer::initOverlay() {
-    if (ImGui::GetCurrentContext()) return;
+bool D3DRenderer::initOverlay() {
+    if (ImGui::GetCurrentContext()) return true;
+
+    gameWindow_ = FindWindowW(L"ELDEN RING™", nullptr);
+    if (gameWindow_ == nullptr) {
+        fwprintf(stderr, L"[EROverlay] Elden Ring window not found\n");
+        return false;
+    }
 
     ImGui::CreateContext();
     initStyle();
     ImGuiIO &io = ImGui::GetIO();
     io.IniFilename = nullptr;
 
-    gameWindow_ = FindWindowW(L"ELDEN RING™", nullptr);
-    ImGui_ImplWin32_Init(gameWindow_);
+    if (!ImGui_ImplWin32_Init(gameWindow_)) {
+        ImGui::DestroyContext();
+        return false;
+    }
+    return true;
 }
 
 void D3DRenderer::SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
@@ -293,7 +347,7 @@ void D3DRenderer::SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DES
 }
 
 void D3DRenderer::HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle) {
-    if (freeDescriptors_.empty()) {
+    if (freeDescriptors_.empty() || descriptorHeap_ == nullptr || srvDescriptorSize_ == 0) {
         pOutCpuDescHandle->ptr = 0;
         pOutGpuDescHandle->ptr = 0;
         return;
@@ -302,15 +356,16 @@ void D3DRenderer::HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHa
     auto gpu_handle = descriptorHeap_->GetGPUDescriptorHandleForHeapStart();
     auto idx = freeDescriptors_.back();
     freeDescriptors_.pop_back();
-    cpu_handle.ptr += rtvDescriptorSize_ * idx;
-    gpu_handle.ptr += rtvDescriptorSize_ * idx;
+    cpu_handle.ptr += srvDescriptorSize_ * idx;
+    gpu_handle.ptr += srvDescriptorSize_ * idx;
     *pOutCpuDescHandle = cpu_handle;
     *pOutGpuDescHandle = gpu_handle;
 }
 
 void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle) {
-    auto cpuIdx = (hCpuDescHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
-    auto gpuIdx = (hGpuDescHandle.ptr - descriptorHeap_->GetGPUDescriptorHandleForHeapStart().ptr) / rtvDescriptorSize_;
+    if (descriptorHeap_ == nullptr || srvDescriptorSize_ == 0 || hCpuDescHandle.ptr == 0 || hGpuDescHandle.ptr == 0) return;
+    auto cpuIdx = (hCpuDescHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / srvDescriptorSize_;
+    auto gpuIdx = (hGpuDescHandle.ptr - descriptorHeap_->GetGPUDescriptorHandleForHeapStart().ptr) / srvDescriptorSize_;
     assert(cpuIdx == gpuIdx);
     freeDescriptors_.push_back(static_cast<uint32_t>(cpuIdx));
 }
@@ -319,14 +374,13 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
     if (commandQueue_ == nullptr)
         return;
 
-    if (deviceLost_)
+    if (!ImGui::GetCurrentContext())
         return;
 
     if (device_) {
         HRESULT hr = device_->GetDeviceRemovedReason();
         if (hr != S_OK) {
-            fwprintf(stderr, L"[EROverlay] D3D12 device lost (reason: 0x%08lX), disabling overlay\n", hr);
-            deviceLost_ = true;
+            handleDeviceLost(L"GetDeviceRemovedReason", hr);
             return;
         }
     }
@@ -336,49 +390,55 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 
     if (!ImGui::GetIO().BackendRendererUserData) {
         ID3D12Device* device;
-        if (pSwapChain->GetDevice(IID_PPV_ARGS(&device)) != S_OK)
+        HRESULT hr = pSwapChain->GetDevice(IID_PPV_ARGS(&device));
+        if (FAILED(hr)) {
+            if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+                handleDeviceLost(L"IDXGISwapChain::GetDevice", hr);
+            }
             return;
+        }
 
         device_ = device;
         buffersCounts_ = sd.BufferCount;
 
         renderTargets_.clear();
 
+        enum {
+            DESCRIPTOR_COUNT = 1024,
+        };
+
         {
             D3D12_DESCRIPTOR_HEAP_DESC desc = {};
             desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            desc.NumDescriptors = 1;
+            desc.NumDescriptors = DESCRIPTOR_COUNT;
             desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap_)) != S_OK) {
-                device->Release();
+                releaseDeviceResources(L"SRV descriptor heap creation failure");
                 return;
             }
+            srvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         }
 
         freeDescriptors_.clear();
         {
-            enum {
-                DESCRIPTOR_COUNT = 996,
-            };
             D3D12_DESCRIPTOR_HEAP_DESC desc = {};
             desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
             desc.NumDescriptors = buffersCounts_ + DESCRIPTOR_COUNT;
             desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
             desc.NodeMask = 1;
             if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap_)) != S_OK) {
-                descriptorHeap_->Release();
-                device->Release();
+                releaseDeviceResources(L"RTV descriptor heap creation failure");
                 return;
-            }
-            freeDescriptors_.resize(DESCRIPTOR_COUNT);
-            for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
-                freeDescriptors_[DESCRIPTOR_COUNT - i] = buffersCounts_ + i - 1;
             }
 
             rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
             D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
             commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_];
+            freeDescriptors_.resize(DESCRIPTOR_COUNT);
+            for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
+                freeDescriptors_[DESCRIPTOR_COUNT - i] = i - 1;
+            }
             for (uint32_t i = 0; i < buffersCounts_; ++i) {
                 renderTargets_.push_back(rtvHandle);
                 rtvHandle.ptr += rtvDescriptorSize_;
@@ -388,26 +448,15 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         for (UINT i = 0; i < sd.BufferCount; ++i) {
             if (device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
                                                 IID_PPV_ARGS(&commandAllocator_[i])) != S_OK) {
-                descriptorHeap_->Release();
-                for (UINT j = 0; j < i; ++j) {
-                    commandAllocator_[j]->Release();
-                }
-                rtvDescriptorHeap_->Release();
-                delete[] commandAllocator_;
-                device->Release();
+                releaseDeviceResources(L"command allocator creation failure");
                 return;
             }
         }
 
         if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_[0], nullptr,
-                                       IID_PPV_ARGS(&commandList_)) != S_OK ||
+                                        IID_PPV_ARGS(&commandList_)) != S_OK ||
             commandList_->Close() != S_OK) {
-            descriptorHeap_->Release();
-            for (UINT i = 0; i < buffersCounts_; ++i)
-                commandAllocator_[i]->Release();
-            rtvDescriptorHeap_->Release();
-            delete[] commandAllocator_;
-            device->Release();
+            releaseDeviceResources(L"command list creation failure");
             return;
         }
 
@@ -421,14 +470,21 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         init_info.SrvDescriptorAllocFn = SrvDescriptorAlloc;
         init_info.SrvDescriptorFreeFn = SrvDescriptorFree;
         init_info.UserData = this;
-        ImGui_ImplDX12_Init(&init_info);
+        if (!ImGui_ImplDX12_Init(&init_info)) {
+            releaseDeviceResources(L"ImGui DX12 initialization failure");
+            return;
+        }
         ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
         oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
-        device->Release();
+
+        ImGuiMemAllocFunc allocFunc;
+        ImGuiMemFreeFunc freeFunc;
+        void *userData;
+        ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &userData);
+        pluginsLoadRenderers(ImGui::GetCurrentContext(), (void*)allocFunc, (void*)freeFunc, userData);
     }
     if (!backBuffer_) {
-        ID3D12Device* device;
-        if (pSwapChain->GetDevice(IID_PPV_ARGS(&device)) != S_OK)
+        if (device_ == nullptr)
             return;
         backBuffer_ = new ID3D12Resource *[buffersCounts_]();
         for (UINT i = 0; i < buffersCounts_; i++) {
@@ -439,7 +495,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
             D3D12_RENDER_TARGET_VIEW_DESC desc = {};
             desc.Format = static_cast<DXGI_FORMAT>(GetCorrectDXGIFormat(sd.BufferDesc.Format));
             desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            device->CreateRenderTargetView(buffer, &desc, renderTargets_[i]);
+            device_->CreateRenderTargetView(buffer, &desc, renderTargets_[i]);
             backBuffer_[i] = buffer;
         }
         if (backBuffer_[0] == nullptr) {
@@ -450,7 +506,6 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
             delete[] backBuffer_;
             backBuffer_ = nullptr;
         }
-        device->Release();
     }
 
     if (ImGui::GetCurrentContext()) {
@@ -470,8 +525,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         currentRTV_ = renderTargets_[bufferIndex];
         ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
         if (FAILED(commandAllocator->Reset())) {
-            fwprintf(stderr, L"[EROverlay] CommandAllocator::Reset failed, device likely lost\n");
-            deviceLost_ = true;
+            handleDeviceLost(L"ID3D12CommandAllocator::Reset", DXGI_ERROR_DEVICE_REMOVED);
             return;
         }
 
@@ -484,8 +538,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
         if (FAILED(commandList_->Reset(commandAllocator, nullptr))) {
-            fwprintf(stderr, L"[EROverlay] CommandList::Reset failed, device likely lost\n");
-            deviceLost_ = true;
+            handleDeviceLost(L"ID3D12GraphicsCommandList::Reset", DXGI_ERROR_DEVICE_REMOVED);
             return;
         }
         commandList_->ResourceBarrier(1, &barrier);
@@ -499,12 +552,12 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
         commandList_->ResourceBarrier(1, &barrier);
         if (FAILED(commandList_->Close())) {
-            fwprintf(stderr, L"[EROverlay] CommandList::Close failed, device likely lost\n");
-            deviceLost_ = true;
+            handleDeviceLost(L"ID3D12GraphicsCommandList::Close", DXGI_ERROR_DEVICE_REMOVED);
             return;
         }
 
-        commandQueue_->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList **>(&commandList_));
+        ID3D12CommandList *commandLists[] = { commandList_ };
+        commandQueue_->ExecuteCommandLists(1, commandLists);
     }
 }
 
@@ -799,12 +852,10 @@ void D3DRenderer::initStyle() {
 
 void D3DRenderer::CleanupRenderTarget() {
     if (!backBuffer_) return;
-    if (!deviceLost_) {
-        for (UINT i = 0; i < buffersCounts_; ++i) {
-            if (backBuffer_[i]) {
-                backBuffer_[i]->Release();
-                backBuffer_[i] = nullptr;
-            }
+    for (UINT i = 0; i < buffersCounts_; ++i) {
+        if (backBuffer_[i]) {
+            backBuffer_[i]->Release();
+            backBuffer_[i] = nullptr;
         }
     }
     delete[] backBuffer_;
@@ -814,9 +865,8 @@ void D3DRenderer::CleanupRenderTarget() {
 HRESULT WINAPI D3DRenderer::hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags) {
     gD3DRenderer->overlay(pSwapChain);
     HRESULT hr = gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
-    if ((hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) && !gD3DRenderer->deviceLost_) {
-        fwprintf(stderr, L"[EROverlay] Present returned device-lost HRESULT: 0x%08lX\n", hr);
-        gD3DRenderer->deviceLost_ = true;
+    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+        gD3DRenderer->handleDeviceLost(L"IDXGISwapChain::Present", hr);
     }
     return hr;
 }
@@ -827,9 +877,8 @@ HRESULT WINAPI D3DRenderer::hkPresent1(IDXGISwapChain3 *pSwapChain,
                                        const DXGI_PRESENT_PARAMETERS *pPresentParameters) {
     gD3DRenderer->overlay(pSwapChain);
     HRESULT hr = gD3DRenderer->oPresent1_(pSwapChain, SyncInterval, PresentFlags, pPresentParameters);
-    if ((hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) && !gD3DRenderer->deviceLost_) {
-        fwprintf(stderr, L"[EROverlay] Present1 returned device-lost HRESULT: 0x%08lX\n", hr);
-        gD3DRenderer->deviceLost_ = true;
+    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+        gD3DRenderer->handleDeviceLost(L"IDXGISwapChain1::Present1", hr);
     }
     return hr;
 }
@@ -840,11 +889,11 @@ HRESULT WINAPI D3DRenderer::hkResizeBuffers(IDXGISwapChain *pSwapChain,
                                             UINT Height,
                                             DXGI_FORMAT NewFormat,
                                             UINT SwapChainFlags) {
-    gD3DRenderer->CleanupRenderTarget();
+    gD3DRenderer->releaseDeviceResources(L"swap-chain ResizeBuffers");
     return gD3DRenderer->oResizeBuffers_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 }
 
-HRESULT WINAPI D3DRenderer::hkSetSourceSize(IDXGISwapChain1 *pSwapChain, UINT Width, UINT Height) {
+HRESULT WINAPI D3DRenderer::hkSetSourceSize(IDXGISwapChain2 *pSwapChain, UINT Width, UINT Height) {
     gD3DRenderer->CleanupRenderTarget();
     return gD3DRenderer->oSetSourceSize_(pSwapChain, Width, Height);
 }
@@ -853,22 +902,26 @@ HRESULT WINAPI D3DRenderer::hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,
                                              UINT BufferCount,
                                              UINT Width,
                                              UINT Height,
-                                             DXGI_FORMAT NewFormat,
-                                             UINT SwapChainFlags,
-                                             const UINT *pCreationNodeMask,
-                                             IUnknown *const *ppPresentQueue) {
-    gD3DRenderer->CleanupRenderTarget();
+                                              DXGI_FORMAT NewFormat,
+                                              UINT SwapChainFlags,
+                                              const UINT *pCreationNodeMask,
+                                              IUnknown *const *ppPresentQueue) {
+    gD3DRenderer->releaseDeviceResources(L"swap-chain ResizeBuffers1");
     return gD3DRenderer->oResizeBuffers1_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags, pCreationNodeMask, ppPresentQueue);
 }
 
-void WINAPI D3DRenderer::hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *ppCommandLists) {
-    if (!gD3DRenderer->commandQueue_)
-        gD3DRenderer->commandQueue_ = pCommandQueue;
+void WINAPI D3DRenderer::hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *const *ppCommandLists) {
+    if (!gD3DRenderer->commandQueue_) {
+        D3D12_COMMAND_QUEUE_DESC desc = pCommandQueue->GetDesc();
+        if (desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) {
+            gD3DRenderer->commandQueue_ = pCommandQueue;
+        }
+    }
     return gD3DRenderer->oExecuteCommandLists_(pCommandQueue, NumCommandLists, ppCommandLists);
 }
 
 HRESULT WINAPI D3DRenderer::hkCreateSwapChain(IDXGIFactory *pFactory, IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain) {
-    gD3DRenderer->CleanupRenderTarget();
+    gD3DRenderer->releaseDeviceResources(L"swap-chain creation");
     return gD3DRenderer->oCreateSwapChain_(pFactory, pDevice, pDesc, ppSwapChain);
 }
 
@@ -876,29 +929,29 @@ HRESULT WINAPI D3DRenderer::hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
                                                      IUnknown *pDevice,
                                                      HWND hWnd,
                                                      const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                     const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
-                                                     IDXGIOutput *pRestrictToOutput,
-                                                     IDXGISwapChain1 **ppSwapChain) {
-    gD3DRenderer->CleanupRenderTarget();
+                                                      const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
+                                                      IDXGIOutput *pRestrictToOutput,
+                                                      IDXGISwapChain1 **ppSwapChain) {
+    gD3DRenderer->releaseDeviceResources(L"swap-chain creation for hwnd");
     return gD3DRenderer->oCreateSwapChainForHwnd_(pFactory, pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
 }
 
 HRESULT WINAPI D3DRenderer::hkCreateSwapChainForCoreWindow(IDXGIFactory *pFactory,
                                                            IUnknown *pDevice,
-                                                           IUnknown *pWindow,
-                                                           const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                           IDXGIOutput *pRestrictToOutput,
-                                                           IDXGISwapChain1 **ppSwapChain) {
-    gD3DRenderer->CleanupRenderTarget();
+                                                            IUnknown *pWindow,
+                                                            const DXGI_SWAP_CHAIN_DESC1 *pDesc,
+                                                            IDXGIOutput *pRestrictToOutput,
+                                                            IDXGISwapChain1 **ppSwapChain) {
+    gD3DRenderer->releaseDeviceResources(L"swap-chain creation for core window");
     return gD3DRenderer->oCreateSwapChainForCoreWindow_(pFactory, pDevice, pWindow, pDesc, pRestrictToOutput, ppSwapChain);
 }
 
 HRESULT WINAPI D3DRenderer::hkCreateSwapChainForComposition(IDXGIFactory *pFactory,
-                                                            IUnknown *pDevice,
-                                                            const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                            IDXGIOutput *pRestrictToOutput,
-                                                            IDXGISwapChain1 **ppSwapChain) {
-    gD3DRenderer->CleanupRenderTarget();
+                                                             IUnknown *pDevice,
+                                                             const DXGI_SWAP_CHAIN_DESC1 *pDesc,
+                                                             IDXGIOutput *pRestrictToOutput,
+                                                             IDXGISwapChain1 **ppSwapChain) {
+    gD3DRenderer->releaseDeviceResources(L"swap-chain creation for composition");
     return gD3DRenderer->oCreateSwapChainForComposition_(pFactory, pDevice, pDesc, pRestrictToOutput, ppSwapChain);
 }
 

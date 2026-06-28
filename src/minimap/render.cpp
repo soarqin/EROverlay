@@ -30,6 +30,20 @@ static constexpr float texturePlayerScale = 0.45f;
 static constexpr float textureDecorationScale = 0.25f;
 static constexpr float textureBearingRatio = 0.4f;
 
+Renderer::~Renderer() {
+    for (auto &texture : textures_) {
+        if (texture.texture != nullptr) {
+            api->destroyTexture(&texture);
+        }
+    }
+    textures_.clear();
+    gAtlas.unloadTextures();
+    if (offscreen_ != nullptr) {
+        api->destroyOffscreen(offscreen_);
+        offscreen_ = nullptr;
+    }
+}
+
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
@@ -242,7 +256,9 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 }
 
 bool Renderer::render() {
-    if (gData.onGUI()) return false;
+    if (gData.onGUI()) {
+        return false;
+    }
     if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
         show_ = !show_;
     }
@@ -273,7 +289,9 @@ bool Renderer::render() {
     }
 
     const auto &location = gData.location();
-    if (location.x == 0.f) return false;
+    if (location.x == 0.f) {
+        return false;
+    }
     auto *vp = ImGui::GetMainViewport();
     auto realHeight = vp->Size.x * .5625f >= vp->Size.y ? vp->Size.y : vp->Size.x * .5625f;
     minimapWidth_ = std::floor(realHeight * currentWidthRatio_);
@@ -649,6 +667,9 @@ bool Renderer::render() {
 }
 
 bool Renderer::prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out) {
+    if (index < 0 || index >= (int)textures_.size()) {
+        return false;
+    }
     auto &t = textures_[index];
     if (!t.loaded) {
         wchar_t path[256];

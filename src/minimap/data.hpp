@@ -103,6 +103,7 @@ class Atlas {
 public:
     void load(const wchar_t *basePath);
     void loadTextures();
+    void unloadTextures();
     [[nodiscard]] inline bool texturesLoaded() const { return texturesLoaded_; }
     [[nodiscard]] const SpriteInfo *findSprite(const std::string &name) const;
     [[nodiscard]] const std::vector<AtlasInfo> &atlases() const { return atlases_; }

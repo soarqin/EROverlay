@@ -14,7 +14,7 @@ public:
     Hooking &operator=(Hooking const &) = delete;
     Hooking &operator=(Hooking &&) = delete;
 
-    static void hook();
+    static bool hook();
     static void unhook();
     void findHooks();
 

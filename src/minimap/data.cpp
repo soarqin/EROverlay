@@ -83,6 +83,19 @@ void Atlas::loadTextures() {
     }
 }
 
+void Atlas::unloadTextures() {
+    for (auto &atlas : atlases_) {
+        if (atlas.texture.texture != nullptr) {
+            api->destroyTexture(&atlas.texture);
+        }
+        atlas.texture = {};
+        for (auto &sprite : atlas.sprites) {
+            sprite.texture = nullptr;
+        }
+    }
+    texturesLoaded_ = false;
+}
+
 const SpriteInfo *Atlas::findSprite(const std::string &name) const {
     for (auto &atlas : atlases_) {
         auto it = atlas.spriteIndex.find(name);
@@ -273,7 +286,16 @@ void Data::load() {
 }
 
 void Data::update() {
-    if (csMenuManImp_ == 0) { onGUI_ = true; return; }
+    if (csMenuManImp_ == 0 || fieldArea_ == 0) {
+        auto gameAddresses = api->getGameAddresses();
+        if (csMenuManImp_ == 0) csMenuManImp_ = gameAddresses.csMenuManImp;
+        if (fieldArea_ == 0) fieldArea_ = gameAddresses.fieldArea;
+    }
+
+    if (csMenuManImp_ == 0) {
+        onGUI_ = true;
+        return;
+    }
     auto addr = *(uintptr_t*)csMenuManImp_;
     if (addr == 0) {
         onGUI_ = true;
@@ -288,8 +310,7 @@ void Data::update() {
             location_ = *(Location*)(addr + 0x24);
         }
     }
-    addr = *(uintptr_t*)(fieldArea_);
-    if (addr != 0) {
+    if (fieldArea_ != 0 && (addr = *(uintptr_t*)(fieldArea_)) != 0) {
         addr = *(uintptr_t*)(addr + 0x20);
         if (addr != 0) {
             addr = *(uintptr_t*)(addr + 0x18);

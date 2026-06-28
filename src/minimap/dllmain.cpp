@@ -32,6 +32,7 @@ void destroyRenderer() {
 }
 
 bool render() {
+    if (!renderer) return false;
     return renderer->render();
 }
 

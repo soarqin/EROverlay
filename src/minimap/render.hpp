@@ -13,6 +13,7 @@ enum class Shape { Rect, Rounded, Circle };
 
 class Renderer {
 public:
+    ~Renderer();
     void init(void *context, void *allocFunc, void *freeFunc, void *userData);
     bool render();
 

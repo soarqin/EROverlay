@@ -60,12 +60,12 @@ Hooking::~Hooking() noexcept {
     MH_Uninitialize();
 }
 
-void Hooking::hook() {
-    gD3DRenderer->hook();
+bool Hooking::hook() {
+    return gD3DRenderer && gD3DRenderer->hook();
 }
 
 void Hooking::unhook() {
-    gD3DRenderer->unhook();
+    if (gD3DRenderer) gD3DRenderer->unhook();
 }
 
 void Hooking::showMouseCursor(bool show) const {
@@ -90,7 +90,8 @@ int Hooking::screenState() const {
     if (csMenuManImp_ == 0) return 1;
     auto addr = *reinterpret_cast<uintptr_t*>(csMenuManImp_);
     if (addr == 0) return 1;
-    return *reinterpret_cast<int*>(addr + menuInfoOffset_ + 0x10);
+    auto *statePtr = reinterpret_cast<uint16_t*>(addr + menuInfoOffset_ + 0x10);
+    return *statePtr;
 }
 
 }
