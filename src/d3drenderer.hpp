@@ -86,6 +86,10 @@ private:
 
 private:
     void releaseDeviceResources(const wchar_t *reason);
+    void releaseCommandQueue();
+    bool installExecuteCommandListsHook();
+    void releaseExecuteCommandListsHook();
+    void resetCommandQueueCapture();
     void handleDeviceLost(const wchar_t *where, HRESULT hr);
     void CleanupRenderTarget();
 
@@ -116,29 +120,6 @@ private:
     static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue,
                                              UINT NumCommandLists,
                                              ID3D12CommandList *const *ppCommandLists);
-    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory,
-                                            IUnknown *pDevice,
-                                            DXGI_SWAP_CHAIN_DESC *pDesc,
-                                            IDXGISwapChain **ppSwapChain);
-    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
-                                                   IUnknown *pDevice,
-                                                   HWND hWnd,
-                                                   const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                   const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
-                                                   IDXGIOutput *pRestrictToOutput,
-                                                   IDXGISwapChain1 **ppSwapChain);
-    static HRESULT WINAPI hkCreateSwapChainForCoreWindow(IDXGIFactory *pFactory,
-                                                         IUnknown *pDevice,
-                                                         IUnknown *pWindow,
-                                                         const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                         IDXGIOutput *pRestrictToOutput,
-                                                         IDXGISwapChain1 **ppSwapChain);
-    static HRESULT WINAPI hkCreateSwapChainForComposition(IDXGIFactory *pFactory,
-                                                          IUnknown *pDevice,
-                                                          const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                          IDXGIOutput *pRestrictToOutput,
-                                                          IDXGISwapChain1 **ppSwapChain);
-
     static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
     static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
     void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
@@ -152,25 +133,7 @@ private:
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain2 *, UINT, UINT)> oSetSourceSize_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
     std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *,
-                                      IUnknown *,
-                                      HWND,
-                                      const DXGI_SWAP_CHAIN_DESC1 *,
-                                      const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *,
-                                      IDXGIOutput *,
-                                      IDXGISwapChain1 **)> oCreateSwapChainForHwnd_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, IUnknown *, const DXGI_SWAP_CHAIN_DESC1 *, IDXGIOutput *, IDXGISwapChain1 **)>
-        oCreateSwapChainForCoreWindow_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, const DXGI_SWAP_CHAIN_DESC1 *, IDXGIOutput *, IDXGISwapChain1 **)>
-        oCreateSwapChainForComposition_;
-
     uint64_t oldWndProc_ = 0;
-
-    void *fnCreateSwapChain_ = nullptr;
-    void *fnCreateSwapChainForHwndChain_ = nullptr;
-    void *fnCreateSwapChainForCWindowChain_ = nullptr;
-    void *fnCreateSwapChainForCompChain_ = nullptr;
 
     void *fnPresent_ = nullptr;
     void *fnPresent1_ = nullptr;
@@ -183,6 +146,8 @@ private:
 
     HWND gameWindow_ = nullptr;
 
+    IUnknown *swapChainIdentity_ = nullptr;
+    IUnknown *deviceIdentity_ = nullptr;
     ID3D12Device *device_ = nullptr;
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
@@ -203,6 +168,7 @@ private:
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
     bool hooksInstalled_ = false;
+    bool eclHookInstalled_ = false;
     D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
 };
 
