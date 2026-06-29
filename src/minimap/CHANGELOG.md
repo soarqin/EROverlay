@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [1.1.3] - 2026-06-30
+
+#### Fixed
+- Minimap GPU resources (textures, atlas sprites, offscreen target) are now properly destroyed and recreated during D3D12 device recovery and renderer resets. A new `Atlas::unloadTextures()` and a `Renderer` destructor clean up resources, and `prepareTile()` now bounds-checks the tile index to avoid crashes when the texture list is reset.
+- Game memory addresses (`csMenuManImp`, `fieldArea`) are now re-queried during `update()` if they were unresolved at init time, so the minimap works even when signature scanning runs before the game code is fully loaded.
+- Added a null-renderer guard in the plugin `render()` entry point.
+
 ### [1.1.2] - 2026-03-27
 
 #### Fixed

@@ -3,7 +3,7 @@
 setlocal enabledelayedexpansion
 
 del /q build\CMakeCache.txt
-cmake -B build -G "Visual Studio 17 2022" -A x64 -T v142 -DRELEASE_USE_STATIC_CRT=OFF -DRELEASE_USE_LTO=ON .
+cmake -B build -G "Visual Studio 18 2026" -A x64 -T v142 -DRELEASE_USE_STATIC_CRT=OFF -DRELEASE_USE_LTO=ON .
 cmake --build build --config Release
 
 IF NOT EXIST dist mkdir dist

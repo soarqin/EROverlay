@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [1.5.2] - 2026-06-30
+
+#### Fixed
+- Boss data now re-queries game memory addresses (`gameDataMan`, `fieldArea`) during `update()` if they were not yet resolved at init time. This fixes boss tracking failing to work when signature scanning runs before the game has fully loaded its code, mirroring the minimap fix.
+
 ### [1.5.1] - 2025-11-13
 
 #### Fixed

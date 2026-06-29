@@ -6,6 +6,17 @@
 
 ---
 
+### [1.3.0] - 2026-06-30
+
+#### 修复
+- 改进 D3D12 设备丢失恢复：渲染器现可从 `Present`、`Present1`、`GetDeviceRemovedReason` 及命令分配器/列表失败中检测设备移除/重置事件，释放所有设备资源（含通过 `pluginsDestroyRenderers()` 释放插件渲染器），并等待新设备而非永久禁用覆盖层。
+- 稳定 DX12 命令队列捕获：仅捕获直接命令列表类型队列，`ExecuteCommandLists` 钩子现独立安装/移除，以便在队列捕获重置后重新挂载。交换链创建钩子在设备存在时从设备捕获队列。
+- 修复 SRV 描述符堆分配使用了错误的描述符大小（误用 `rtvDescriptorSize_` 而非 `srvDescriptorSize_`），并将 SRV 堆扩容至 1024 个描述符。
+- 强化钩子安装，增加逐钩子错误日志并在禁用时通过 `MH_RemoveHook` 清理；`hook()` 现返回 `bool`，加载器会重试直至成功。
+- `screenState()` 现读取稳定的 16 位屏幕状态值。
+- 为插件的加载/更新/渲染调用增加互斥锁，并新增 `renderersLoaded` 标志，使 `pluginsRender()` 在渲染器（重新）加载期间直接返回。
+- 修正 `SetSourceSize` 钩子签名，使用 `IDXGISwapChain2`。
+
 ### [1.2.0] - 2026-03-23
 
 #### 新增
