@@ -144,6 +144,12 @@ void BossDataSet::initMemoryAddresses() {
 }
 
 void BossDataSet::update() {
+    if (gameDataMan_ == 0 || fieldArea_ == 0) {
+        auto gameAddresses = api->getGameAddresses();
+        if (gameDataMan_ == 0) gameDataMan_ = gameAddresses.gameDataMan;
+        if (fieldArea_ == 0) fieldArea_ = gameAddresses.fieldArea;
+    }
+
     challenge_.checkForChange(api->getModulePath());
     if (api->screenState() != 0) {
         return;
