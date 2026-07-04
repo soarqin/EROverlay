@@ -232,6 +232,7 @@ void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
     rtvDescriptorSize_ = 0;
     srvDescriptorSize_ = 0;
     currentRTV_ = {};
+    currentBackBufferIndex_ = 0;
     deviceLost_ = false;
 }
 
@@ -648,6 +649,8 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
     }
 
     if (ImGui::GetCurrentContext()) {
+        currentBackBufferIndex_ = pSwapChain->GetCurrentBackBufferIndex();
+
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
@@ -660,7 +663,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 
         ImGui::EndFrame();
 
-        UINT bufferIndex = pSwapChain->GetCurrentBackBufferIndex();
+        UINT bufferIndex = currentBackBufferIndex_;
         currentRTV_ = renderTargets_[bufferIndex];
         ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
         if (FAILED(commandAllocator->Reset())) {
@@ -1099,34 +1102,38 @@ OffscreenContext *D3DRenderer::CreateOffscreen() {
 
 void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
     if (!ctx) return;
-    if (ctx->texture) {
-        ctx->texture->Release();
-        ctx->texture = nullptr;
-    }
-    if (ctx->srvCpuHandle.ptr) {
-        HeapDescriptorFree(ctx->srvCpuHandle, ctx->srvGpuHandle);
-        ctx->srvCpuHandle.ptr = 0;
-        ctx->srvGpuHandle.ptr = 0;
+    for (auto &target : ctx->targets) {
+        if (target.texture) {
+            target.texture->Release();
+            target.texture = nullptr;
+        }
+        if (target.srvCpuHandle.ptr) {
+            HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
+            target.srvCpuHandle.ptr = 0;
+            target.srvGpuHandle.ptr = 0;
+        }
     }
     delete ctx;
 }
 
 void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
-    if (ctx->texture && ctx->width == w && ctx->height == h) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    auto &target = ctx->targets[ctx->currentIndex];
+    if (target.texture && target.width == w && target.height == h) return;
 
     // Release old resources
-    if (ctx->texture) {
-        ctx->texture->Release();
-        ctx->texture = nullptr;
+    if (target.texture) {
+        target.texture->Release();
+        target.texture = nullptr;
     }
-    if (ctx->srvCpuHandle.ptr) {
-        HeapDescriptorFree(ctx->srvCpuHandle, ctx->srvGpuHandle);
-        ctx->srvCpuHandle.ptr = 0;
-        ctx->srvGpuHandle.ptr = 0;
+    if (target.srvCpuHandle.ptr) {
+        HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
+        target.srvCpuHandle.ptr = 0;
+        target.srvGpuHandle.ptr = 0;
     }
 
-    ctx->width = w;
-    ctx->height = h;
+    target.width = w;
+    target.height = h;
 
     // Create texture
     D3D12_HEAP_PROPERTIES heapProps = {};
@@ -1146,8 +1153,8 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
 
     if (FAILED(device_->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &texDesc,
                                                 D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue,
-                                                IID_PPV_ARGS(&ctx->texture)))) {
-        ctx->texture = nullptr;
+                                                IID_PPV_ARGS(&target.texture)))) {
+        target.texture = nullptr;
         return;
     }
 
@@ -1155,48 +1162,52 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-    device_->CreateRenderTargetView(ctx->texture, &rtvDesc, ctx->rtvCpuHandle);
+    device_->CreateRenderTargetView(target.texture, &rtvDesc, target.rtvCpuHandle);
 
     // Create SRV
-    HeapDescriptorAlloc(&ctx->srvCpuHandle, &ctx->srvGpuHandle);
+    HeapDescriptorAlloc(&target.srvCpuHandle, &target.srvGpuHandle);
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = 1;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    device_->CreateShaderResourceView(ctx->texture, &srvDesc, ctx->srvCpuHandle);
+    device_->CreateShaderResourceView(target.texture, &srvDesc, target.srvCpuHandle);
 }
 
 void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || !ctx->texture) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    auto &target = ctx->targets[ctx->currentIndex];
+    if (!target.texture) return;
     auto *cl = gD3DRenderer->commandList_;
     if (!cl) return;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Transition.pResource = ctx->texture;
+    barrier.Transition.pResource = target.texture;
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     cl->ResourceBarrier(1, &barrier);
 
     float clearColor[4] = {0.f, 0.f, 0.f, 0.f};
-    cl->ClearRenderTargetView(ctx->rtvCpuHandle, clearColor, 0, nullptr);
-    cl->OMSetRenderTargets(1, &ctx->rtvCpuHandle, FALSE, nullptr);
+    cl->ClearRenderTargetView(target.rtvCpuHandle, clearColor, 0, nullptr);
+    cl->OMSetRenderTargets(1, &target.rtvCpuHandle, FALSE, nullptr);
 }
 
 void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || !ctx->texture) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    auto &target = ctx->targets[ctx->currentIndex];
+    if (!target.texture) return;
     auto *cl = gD3DRenderer->commandList_;
     if (!cl) return;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Transition.pResource = ctx->texture;
+    barrier.Transition.pResource = target.texture;
     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
@@ -1206,38 +1217,45 @@ void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *
 }
 
 void D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
-    if (!ctx || !device_ || !rtvDescriptorHeap_) return;
+    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0) return;
 
     auto *vp = ImGui::GetMainViewport();
     int w = (int)vp->Size.x;
     int h = (int)vp->Size.y;
     if (w <= 0 || h <= 0) return;
 
-    // Ensure an RTV handle exists (allocated once, reused).
-    // Use the first slot after backbuffer RTVs in the RTV descriptor heap.
-    // These slots are referenced by freeDescriptors_ but used with the SRV heap,
-    // so they are effectively unused in the RTV heap.
-    if (ctx->rtvCpuHandle.ptr == 0) {
+    if (ctx->targets.size() != buffersCounts_) {
+        ctx->targets.resize(buffersCounts_);
+    }
+    ctx->currentIndex = currentBackBufferIndex_ % buffersCounts_;
+    auto &target = ctx->targets[ctx->currentIndex];
+
+    // Use one offscreen render target per swap-chain back buffer. Reusing a single offscreen
+    // texture across frames can race with the previous frame still sampling it, which shows up
+    // as ghosted minimap decorations from other frames.
+    if (target.rtvCpuHandle.ptr == 0) {
         auto rtvStart = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-        rtvStart.ptr += rtvDescriptorSize_ * buffersCounts_;
-        ctx->rtvCpuHandle = rtvStart;
+        rtvStart.ptr += rtvDescriptorSize_ * (buffersCounts_ + ctx->currentIndex);
+        target.rtvCpuHandle = rtvStart;
     }
 
     ensureOffscreenSize(ctx, w, h);
-    if (!ctx->texture) return;
+    if (!target.texture) return;
 
     auto *drawList = ImGui::GetWindowDrawList();
     drawList->AddCallback(BeginOffscreenCallback, ctx);
 }
 
 void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
-    if (!ctx || !ctx->texture) return nullptr;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return nullptr;
+    auto &target = ctx->targets[ctx->currentIndex];
+    if (!target.texture) return nullptr;
 
     auto *drawList = ImGui::GetWindowDrawList();
     drawList->AddCallback(EndOffscreenCallback, ctx);
     drawList->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 
-    return (void *)ctx->srvGpuHandle.ptr;
+    return (void *)target.srvGpuHandle.ptr;
 }
 
 // ---- Texture loading ----

@@ -18,13 +18,18 @@ struct ImDrawCmd;
 
 namespace er {
 
-struct OffscreenContext {
+struct OffscreenTarget {
     ID3D12Resource *texture = nullptr;
     D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = {};
     D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle = {};
     D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = {};
     int width = 0;
     int height = 0;
+};
+
+struct OffscreenContext {
+    std::vector<OffscreenTarget> targets;
+    UINT currentIndex = 0;
 };
 
 class D3DRenderer {
@@ -194,6 +199,7 @@ private:
     bool hooksInstalled_ = false;
     bool eclHookInstalled_ = false;
     D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
+    UINT currentBackBufferIndex_ = 0;
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;
