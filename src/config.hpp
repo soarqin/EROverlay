@@ -34,7 +34,7 @@ public:
         }
         return static_cast<T>(std::stod(it->second));
     }
-    [[nodiscard]] int getImGuiKey(const std::string &key, int defaultValue) const;
+    [[nodiscard]] int getVirtualKey(const std::string &key, int defaultValue) const;
 
 private:
     void loadSingleFile(const std::wstring &filename, const std::string &modname = "");

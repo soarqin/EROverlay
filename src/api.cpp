@@ -4,6 +4,7 @@
 #include "global.hpp"
 #include "hooking.hpp"
 #include "d3drenderer.hpp"
+#include "input.hpp"
 #include "params/paraminternal.hpp"
 #include "util/memory.hpp"
 #include "util/steam.hpp"
@@ -46,7 +47,7 @@ public:
             return er::gConfig.enabled(name);
         },
         [](const char *name, int defValue) {
-            return er::gConfig.getImGuiKey(name, defValue);
+            return er::gConfig.getVirtualKey(name, defValue);
         },
         [] {
             return GameAddresses {
@@ -154,6 +155,12 @@ public:
         },
         [](void *offscreen) -> void * {
             return er::gD3DRenderer->EndOffscreen((er::OffscreenContext *)offscreen);
+        },
+        [](int keyChord) {
+            return er::input::isKeyChordDown(keyChord);
+        },
+        [](int keyChord) {
+            return er::input::isKeyChordPressed(keyChord);
         }
         };
         return &api;

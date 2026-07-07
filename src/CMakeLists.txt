@@ -5,6 +5,7 @@ add_project(EROverlayDLL SHARED
     d3drenderer.cpp d3drenderer.hpp
     hooking.cpp hooking.hpp
     global.cpp global.hpp
+    input.cpp input.hpp
 
     # plugin functions
     plugin.cpp plugin.hpp

@@ -168,7 +168,7 @@ void Renderer::renderRevivePopup() {
 
 bool Renderer::render() {
     auto toggleFullModeKey = gBossDataSet.toggleFullModeKey();
-    if (toggleFullModeKey != 0 && ImGui::IsKeyChordPressed(toggleFullModeKey)) {
+    if (toggleFullModeKey != 0 && api->inputIsKeyPressed(toggleFullModeKey)) {
         showFull_ = !showFull_;
     }
 

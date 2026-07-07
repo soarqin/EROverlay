@@ -2,6 +2,7 @@
 #include "d3drenderer.hpp"
 #include "global.hpp"
 #include "hooking.hpp"
+#include "input.hpp"
 #include "plugin.hpp"
 #include "util/steam.hpp"
 #include "proxy/winhttp.h"
@@ -114,13 +115,13 @@ bool waitForRendererHook() {
 }
 
 void mainThread() {
-    auto unloadKey = er::gConfig.getImGuiKey("input.unload", 0);
+    auto unloadKey = er::gConfig.getVirtualKey("input.unload", 0);
 
     er::gShowMenu = false;
 
     er::pluginsUpdate();
     while (er::gRunning) {
-        if (unloadKey != 0 && ImGui::IsKeyChordPressed(unloadKey)) {
+        if (unloadKey != 0 && er::input::isKeyChordPressed(unloadKey)) {
             er::gShowMenu = false;
             er::gRunning = false;
             er::gHooking->showMouseCursor(false);

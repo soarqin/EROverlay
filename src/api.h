@@ -66,7 +66,7 @@ typedef struct {
     int (*configGetInt)(const char *name, int defValue);
     float (*configGetFloat)(const char *name, float defValue);
     bool (*configEnabled)(const char *name);
-    int (*configGetImGuiKey)(const char *name, int defValue);
+    int (*configGetVirtualKey)(const char *name, int defValue);
 
     // Game addresses
     GameAddresses (*getGameAddresses)();
@@ -91,6 +91,11 @@ typedef struct {
     void (*destroyOffscreen)(void *offscreen);
     void (*beginOffscreen)(void *offscreen);
     void *(*endOffscreen)(void *offscreen);
+
+    // Input helpers. Key chords use the value returned by configGetVirtualKey().
+    // inputIsKeyPressed() is non-consuming within a frame, so multiple plugins can react to the same key press.
+    bool (*inputIsKeyDown)(int keyChord);
+    bool (*inputIsKeyPressed)(int keyChord);
 } EROverlayAPI;
 
 /*

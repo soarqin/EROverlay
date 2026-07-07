@@ -4,7 +4,6 @@
 #include "util/memory.hpp"
 
 #include <nlohmann/json.hpp>
-#include <imgui.h>
 
 #include <fstream>
 
@@ -81,7 +80,7 @@ void ChallengeState::cleanup() noexcept {
 // --- BossDataSet ---
 
 void BossDataSet::load(bool hasDLC) {
-    toggleFullModeKey_ = api->configGetImGuiKey("boss.toggle_full_mode", ImGuiKey_Equal);
+    toggleFullModeKey_ = api->configGetVirtualKey("boss.toggle_full_mode", VK_OEM_PLUS);
     std::wstring name = api->configGetString("boss.data_file", L"bosses.json");
     std::wstring lang = api->configGetString("common.language", L"");
     if (lang.empty()) {

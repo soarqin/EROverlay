@@ -7,6 +7,9 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <cmath>
 #include <numbers>
@@ -51,11 +54,11 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     offscreen_ = api->createOffscreen();
     textures_.resize(300);
 
-    toggleKey_ = api->configGetImGuiKey("minimap.toggle_key", ImGuiKey_M);
-    scaleKey_ = api->configGetImGuiKey("minimap.scale_key", ImGuiKey_N);
-    gracesKey_ = api->configGetImGuiKey("minimap.graces_key", ImGuiKey_N);
+    toggleKey_ = api->configGetVirtualKey("minimap.toggle_key", 'M');
+    scaleKey_ = api->configGetVirtualKey("minimap.scale_key", 'N');
+    gracesKey_ = api->configGetVirtualKey("minimap.graces_key", 'N');
     showGraces_ = api->configGetInt("minimap.graces", 1) != 0;
-    landmarksKey_ = api->configGetImGuiKey("minimap.landmarks_key", ImGuiKey_N);
+    landmarksKey_ = api->configGetVirtualKey("minimap.landmarks_key", 'N');
     showLandmarks_ = api->configGetInt("minimap.landmarks", 1) != 0;
     widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,90%"));
     heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,90%"));
@@ -259,10 +262,11 @@ bool Renderer::render() {
     if (gData.onGUI()) {
         return false;
     }
-    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(toggleKey_))) {
+    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && api->inputIsKeyPressed(toggleKey_)) {
         show_ = !show_;
     }
-    if (scaleKey_ != 0 && show_ && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(scaleKey_))) {
+    const bool scaleKeyPressed = scaleKey_ != 0 && api->inputIsKeyPressed(scaleKey_);
+    if (show_ && scaleKeyPressed) {
         currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
         currentWidthRatio_ = widthRatios_[currentScaleIndex_];
         currentHeightRatio_ = heightRatios_[currentScaleIndex_];
@@ -281,10 +285,10 @@ bool Renderer::render() {
     if (!show_ || currentScale_ < 0.0001f) {
         return false;
     }
-    if (gracesKey_ != 0 && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(gracesKey_))) {
+    if (gracesKey_ != 0 && api->inputIsKeyPressed(gracesKey_)) {
         showGraces_ = !showGraces_;
     }
-    if (landmarksKey_ != 0 && ImGui::IsKeyChordPressed(static_cast<ImGuiKey>(landmarksKey_))) {
+    if (landmarksKey_ != 0 && api->inputIsKeyPressed(landmarksKey_)) {
         showLandmarks_ = !showLandmarks_;
     }
 

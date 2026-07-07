@@ -2,6 +2,7 @@
 #include "d3drenderer.hpp"
 #include "global.hpp"
 #include "hooking.hpp"
+#include "input.hpp"
 #include "plugin.hpp"
 
 #include "util/file.hpp"
@@ -77,6 +78,7 @@ bool D3DRenderer::hook() {
 }
 
 void D3DRenderer::unhook() {
+    input::resetKeyChordStates();
     disableAll();
     releaseDeviceResources(L"unhook");
     releaseCommandQueue();
@@ -655,6 +657,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        er::input::beginFrame();
         bool oldShowMenu = gShowMenu;
         gShowMenu = pluginsRender();
         if (gShowMenu != oldShowMenu) {
