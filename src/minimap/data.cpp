@@ -230,6 +230,9 @@ void Data::load() {
             return;
         }
         paramTableIterateBegin(t, WorldMapPointParam, wmpp) {
+            // Map for Goblins injects synthetic rows into unused IDs below the first vanilla row.
+            // Its markers reuse vanilla icon IDs, so atlas lookup alone cannot distinguish them.
+            if (entry->paramId < 78500) continue;
             /* 80 is the icon id for the NPCs, I don't want to show them as now, because its condition fields are a bit silly */
             if (wmpp->iconId == 80) continue;
             int32_t layer = wmpp->dispMask00 ? 0 : wmpp->dispMask01 ? 1 : wmpp->dispMask02 ? 2 : -1;
