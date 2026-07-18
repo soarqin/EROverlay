@@ -387,7 +387,7 @@ static inline int GetCorrectDXGIFormat(int eCurrentFormat) {
 bool D3DRenderer::initOverlay() {
     if (ImGui::GetCurrentContext()) return true;
 
-    gameWindow_ = FindWindowW(L"ELDEN RING™", nullptr);
+    gameWindow_ = FindWindowW(nullptr, L"ELDEN RING™");
     if (gameWindow_ == nullptr) {
         fwprintf(stderr, L"[EROverlay] Elden Ring window not found\n");
         return false;
