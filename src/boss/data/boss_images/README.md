@@ -116,7 +116,7 @@ instead, because the wiki's names for them do not distinguish the encounters cle
 | File | Boss | Location |
 |---|---|---|
 | `32070800.jpg` | Magma Wyrm (Caelid) | Gael Tunnel |
-| `30140800.jpg` | Erdtree Burial Watchdog (Gelmir) | Minor Erdtree Catacombs |
+| `30140800.jpg` | Erdtree Burial Watchdog (Caelid) | Minor Erdtree Catacombs |
 | `31210800.jpg` | Frenzied Duelist (Caelid) | Gaol Cave |
 | `30150800.jpg` | Cemetery Shade (Caelid) | Caelid Catacombs |
 | `32080800.jpg` | Fallingstar Beast (Caelid) | Sellia Crystal Tunnel |
@@ -158,7 +158,7 @@ instead, because the wiki's names for them do not distinguish the encounters cle
 | `30080800.jpg` | Ancient Hero of Zamor (Altus) | Sainted Hero's Grave |
 | `31180800.jpg` | Omenkiller / Miranda | Perfumer's Grotto |
 | `30120800.jpg` | Perfumer Tricia / Misbegotten Warrior | Unsightly Catacombs |
-| `30070800.jpg` | Erdtree Burial Watchdog (Caelid) | Wyndham Catacombs |
+| `30070800.jpg` | Erdtree Burial Watchdog (Gelmir) | Wyndham Catacombs |
 | `1041520800.jpg` | Ancient Dragon Lansseax | Rampartside Path |
 | `1038510800.jpg` | Demi-Human Queen Gilika | Lux Ruins |
 | `1040530800.jpg` | Sanguine Noble | Writheblood Ruins |
@@ -216,7 +216,7 @@ instead, because the wiki's names for them do not distinguish the encounters cle
 
 | File | Boss | Location |
 |---|---|---|
-| `1048510800.jpg` | Night's Cavalry (Consecrated) |  |
+| `1048510800.jpg` | Night's Cavalry (Forbidden Lands) |  |
 | `1049520800.jpg` | Black Blade Kindred (Forbidden Lands) |  |
 
 ### Mountaintops of the Giants
@@ -251,7 +251,7 @@ instead, because the wiki's names for them do not distinguish the encounters cle
 | `31120800.jpg` | Misbegotten Crusader | Cave of the Forlorn |
 | `1050560800.jpg` | Great Wyrm Theodorix |  |
 | `1050570850.jpg` | Putrid Avatar (Consecrated) | Minor Erdtree |
-| `1248550800.jpg` | Night's Cavalry (Forbidden Lands) | Inner Consecrated Snowfield |
+| `1248550800.jpg` | Night's Cavalry Duo (Consecrated Snowfield) | Inner Consecrated Snowfield |
 | `1048570800.jpg` | Death Rite Bird (Consecrated) |  |
 
 ### Miquella's Haligtree

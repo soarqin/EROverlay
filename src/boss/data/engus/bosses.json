@@ -394,7 +394,7 @@
         "flag_id": 32070800
       },
       {
-        "boss": "Erdtree Burial Watchdog (Gelmir)",
+        "boss": "Erdtree Burial Watchdog (Caelid)",
         "place": "Minor Erdtree Catacombs",
         "flag_id": 30140800
       },
@@ -582,7 +582,7 @@
         "flag_id": 30120800
       },
       {
-        "boss": "Erdtree Burial Watchdog (Caelid)",
+        "boss": "Erdtree Burial Watchdog (Gelmir)",
         "place": "Wyndham Catacombs",
         "flag_id": 30070800
       },
@@ -798,7 +798,7 @@
     ],
     "bosses": [
       {
-        "boss": "Night's Cavalry (Consecrated)",
+        "boss": "Night's Cavalry (Forbidden Lands)",
         "place": "",
         "flag_id": 1048510800
       },
@@ -933,7 +933,7 @@
         "flag_id": 1050570850
       },
       {
-        "boss": "Night's Cavalry (Forbidden Lands)",
+        "boss": "Night's Cavalry Duo (Consecrated Snowfield)",
         "place": "Inner Consecrated Snowfield",
         "flag_id": 1248550800
       },
