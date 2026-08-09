@@ -1,3 +1,7 @@
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include "render.hpp"
 
 #include "data.hpp"
@@ -6,6 +10,10 @@
 #include "util/string.hpp"
 
 #include <imgui.h>
+
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 
 extern EROverlayAPI *api;
 
@@ -19,6 +27,73 @@ struct formatter<er::bosses::IntProxy> : formatter<int> {
 } // namespace fmt
 
 namespace er::bosses {
+
+namespace {
+
+constexpr ImVec4 kTintNormal = ImVec4(1.f, 1.f, 1.f, 1.f);
+constexpr ImVec4 kTintKilled = ImVec4(1.f, 1.f, 1.f, 0.4f);
+
+// Restrict the seed box to digits so both players always type the same thing.
+int seedCharFilter(ImGuiInputTextCallbackData *data) {
+    if (data->EventChar < '0' || data->EventChar > '9') return 1;
+    return 0;
+}
+
+// Never returns 0: std::clamp() is undefined when the low bound exceeds the high one, which
+// would happen here if the boss data failed to load.
+int maxRandomCount() {
+    auto poolSize = gBossDataSet.randomPoolSize();
+    return poolSize > 0 ? poolSize : 1;
+}
+
+// Draws a check mark over a killed boss portrait, sized to the image rect.
+void drawKilledMark(const ImVec2 &min, const ImVec2 &max) {
+    auto *drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(min, max, IM_COL32(0, 0, 0, 110));
+    auto width = max.x - min.x;
+    auto height = max.y - min.y;
+    auto size = (width < height ? width : height) * 0.5f;
+    ImVec2 center((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f);
+    ImVec2 a(center.x - size * 0.5f, center.y);
+    ImVec2 b(center.x - size * 0.15f, center.y + size * 0.35f);
+    ImVec2 c(center.x + size * 0.5f, center.y - size * 0.4f);
+    auto color = ImGui::GetColorU32(ImGuiCol_CheckMark);
+    auto thickness = size * 0.18f;
+    drawList->AddLine(a, b, color, thickness);
+    drawList->AddLine(b, c, color, thickness);
+}
+
+}
+
+Renderer::~Renderer() {
+    unloadImages();
+}
+
+void Renderer::unloadImages() {
+    for (auto &pair : images_) {
+        if (pair.second.texture.texture != nullptr) {
+            api->destroyTexture(&pair.second.texture);
+        }
+    }
+    images_.clear();
+}
+
+TextureContext *Renderer::bossImage(uint32_t flagId) {
+    auto &image = images_[flagId];
+    if (!image.attempted) {
+        image.attempted = true;
+        wchar_t path[MAX_PATH];
+        // _TRUNCATE rather than swprintf_s: an over-long module path should drop the image,
+        // not trip the invalid parameter handler and take the game down.
+        _snwprintf_s(path, MAX_PATH, _TRUNCATE, L"%ls\\data\\boss_images\\%u.png", api->getModulePath(), flagId);
+        image.texture = api->loadTexture(path);
+        if (image.texture.texture == nullptr) {
+            _snwprintf_s(path, MAX_PATH, _TRUNCATE, L"%ls\\data\\boss_images\\%u.jpg", api->getModulePath(), flagId);
+            image.texture = api->loadTexture(path);
+        }
+    }
+    return image.texture.texture != nullptr ? &image.texture : nullptr;
+}
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
     ImGui::SetCurrentContext((ImGuiContext *)context);
@@ -40,6 +115,20 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     util::replaceAll(killTextHour_, igtPlaceholder, igtHourMinSec);
     util::replaceAll(challengeTextHour_, igtPlaceholder, igtHourMinSec);
     allowRevive_ = api->configEnabled("boss.allow_revive");
+
+    std::string layout = api->configGet("boss.random_layout");
+    util::toLower(layout);
+    if (layout == "text") {
+        randomLayout_ = RandomLayout::Text;
+    } else if (layout == "grid") {
+        randomLayout_ = RandomLayout::Grid;
+    } else {
+        randomLayout_ = RandomLayout::List;
+    }
+    randomColumns_ = std::clamp(api->configGetInt("boss.random_grid_columns", 3), 1, 8);
+    randomImageSize_ = std::max(api->configGetFloat("boss.random_image_size", 48.f), 8.f);
+    countInput_ = std::clamp(api->configGetInt("boss.random_count", 10), 1, maxRandomCount());
+
     const auto &pos = api->configGet("boss.panel_pos");
     auto posVec = util::strSplitToFloatVec(pos);
     if (posVec.size() >= 4) {
@@ -75,7 +164,7 @@ void Renderer::renderMini(const RenderState &state) {
     if (ImGui::Begin("##bosses_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav |
                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
-        auto text = formatStatusText(state.inGameTime, state.challengeMode);
+        auto text = formatStatusText(effectiveIgt_, state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         ImGui::SameLine();
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {
@@ -92,14 +181,7 @@ void Renderer::renderFull(const RenderState &state) {
     if (ImGui::Begin("##bosses_window", nullptr,
                      (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoSavedSettings)) {
-        // Auto-expand the tree node for the current region (only on region change)
-        int autoExpandRegion = -1;
-        if (state.regionIndex != lastRegionIndex_) {
-            autoExpandRegion = state.regionIndex;
-            lastRegionIndex_ = state.regionIndex;
-        }
-
-        auto text = formatStatusText(state.inGameTime, state.challengeMode);
+        auto text = formatStatusText(effectiveIgt_, state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         auto &style = ImGui::GetStyle();
         ImGui::SameLine(
@@ -108,31 +190,23 @@ void Renderer::renderFull(const RenderState &state) {
             showFull_ = false;
         }
 
-        const auto &bosses = gBossDataSet.bosses();
+        // Challenge mode owns the whole list, so the random run controls stay out of its way.
+        if (!state.challengeMode) {
+            renderRandomPanel(state);
+        }
+
         bool popup = false;
         if (ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail())) {
-            const auto &regions = gBossDataSet.regions();
-            int sz = static_cast<int>(regions.size());
-            for (int i = 0; i < sz; i++) {
-                const auto &region = regions[i];
-                auto bossCount = static_cast<int>(region.bosses.size());
-                if (autoExpandRegion >= 0) {
-                    ImGui::SetNextItemOpen(i == autoExpandRegion);
-                }
-                if (ImGui::TreeNode(&region, "%d/%d %s", state.regionCounts[i], bossCount, region.name.c_str())) {
-                    for (int j = 0; j < bossCount; j++) {
-                        auto &bd = bosses[region.bosses[j]];
-                        bool on = state.dead[bd.index] != 0;
-                        if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && state.dead[bd.index] && allowRevive_) {
-                            popupBossIndex_ = static_cast<int>(bd.index);
-                            popup = true;
-                        }
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
-                        }
-                    }
-                    ImGui::TreePop();
-                }
+            switch (state.runState) {
+                case RunState::Idle:
+                    renderRegionTree(state, popup);
+                    break;
+                case RunState::Armed:
+                    ImGui::TextWrapped("The boss list stays hidden until both players reveal it.");
+                    break;
+                default:
+                    renderRandomBosses(state, popup);
+                    break;
             }
         }
         ImGui::EndChild();
@@ -143,6 +217,230 @@ void Renderer::renderFull(const RenderState &state) {
                                     ImGuiCond_Appearing, ImVec2(.5f, .5f));
         }
         renderRevivePopup();
+        renderConfirmPopup();
+    }
+}
+
+void Renderer::renderRegionTree(const RenderState &state, bool &popup) {
+    // Auto-expand the tree node for the current region (only on region change)
+    int autoExpandRegion = -1;
+    if (state.regionIndex != lastRegionIndex_) {
+        autoExpandRegion = state.regionIndex;
+        lastRegionIndex_ = state.regionIndex;
+    }
+
+    const auto &bosses = gBossDataSet.bosses();
+    const auto &regions = gBossDataSet.regions();
+    int sz = static_cast<int>(regions.size());
+    for (int i = 0; i < sz; i++) {
+        const auto &region = regions[i];
+        auto bossCount = static_cast<int>(region.bosses.size());
+        if (autoExpandRegion >= 0) {
+            ImGui::SetNextItemOpen(i == autoExpandRegion);
+        }
+        if (ImGui::TreeNode(&region, "%d/%d %s", state.regionCounts[i], bossCount, region.name.c_str())) {
+            for (int j = 0; j < bossCount; j++) {
+                auto &bd = bosses[region.bosses[j]];
+                bool on = state.dead[bd.index] != 0;
+                if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && state.dead[bd.index] && allowRevive_) {
+                    popupBossIndex_ = static_cast<int>(bd.index);
+                    popup = true;
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
+                }
+            }
+            ImGui::TreePop();
+        }
+    }
+}
+
+void Renderer::renderRandomPanel(const RenderState &state) {
+    ImGui::SeparatorText("Random Run");
+    switch (state.runState) {
+        case RunState::Idle: {
+            ImGui::TextUnformatted("Seed");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            ImGui::InputText("##random_seed", seedInput_, sizeof(seedInput_),
+                             ImGuiInputTextFlags_CallbackCharFilter, seedCharFilter);
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Digits only. Leave empty to generate a new seed.");
+            }
+            ImGui::TextUnformatted("Bosses");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            if (ImGui::InputInt("##random_count", &countInput_)) {
+                countInput_ = std::clamp(countInput_, 1, maxRandomCount());
+            }
+            if (ImGui::Button("Randomize", ImVec2(-FLT_MIN, 0.f))) {
+                applyRandomize();
+            }
+            break;
+        }
+        case RunState::Armed:
+            ImGui::TextWrapped("Randomized - Seed: %llu - Bosses: %d", state.runSeed, state.runCount);
+            if (ImGui::Button("Reveal bosses", ImVec2(-FLT_MIN, 0.f))) {
+                gBossDataSet.revealRandomRun();
+            }
+            break;
+        case RunState::Running:
+            ImGui::TextWrapped("Seed: %llu - Bosses: %d/%d", state.runSeed, state.runKilled, state.runCount);
+            break;
+        default:
+            ImGui::TextWrapped("Finished - Seed: %llu - Bosses: %d", state.runSeed, state.runCount);
+            break;
+    }
+    if (state.runState != RunState::Idle) {
+        // Ending a run returns to the seed box, which still holds the last seed used. Entering
+        // the same seed again redraws the same bosses by design; clear it to get a fresh one.
+        if (ImGui::Button("End run", ImVec2(-FLT_MIN, 0.f))) {
+            ImGui::OpenPopup("##bosses_run_confirm");
+        }
+    }
+    ImGui::Separator();
+}
+
+void Renderer::applyRandomize() {
+    uint64_t seed = 0;
+    if (seedInput_[0] != '\0') {
+        seed = std::strtoull(seedInput_, nullptr, 10);
+    }
+    if (seed == 0) {
+        seed = BossDataSet::generateSeed();
+    }
+    countInput_ = std::clamp(countInput_, 1, maxRandomCount());
+    gBossDataSet.startRandomRun(seed, countInput_);
+    // Echo the seed back into the box so a generated one can be read off and shared.
+    std::snprintf(seedInput_, sizeof(seedInput_), "%llu", seed);
+}
+
+void Renderer::renderRandomBosses(const RenderState &state, bool &popup) {
+    switch (randomLayout_) {
+        case RandomLayout::Text:
+            renderRandomText(state, popup);
+            break;
+        case RandomLayout::Grid:
+            renderRandomGrid(state);
+            break;
+        default:
+            renderRandomList(state, popup);
+            break;
+    }
+}
+
+void Renderer::renderRandomText(const RenderState &state, bool &popup) {
+    const auto &bosses = gBossDataSet.bosses();
+    for (auto index : state.runSelected) {
+        const auto &bd = bosses[index];
+        bool on = state.dead[index] != 0;
+        // Several bosses share a name across regions, so the label alone is not a unique id.
+        ImGui::PushID(static_cast<int>(index));
+        if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && state.dead[index] && allowRevive_) {
+            popupBossIndex_ = static_cast<int>(index);
+            popup = true;
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
+        }
+        ImGui::PopID();
+    }
+}
+
+void Renderer::renderRandomList(const RenderState &state, bool &popup) {
+    const auto &bosses = gBossDataSet.bosses();
+    for (auto index : state.runSelected) {
+        const auto &bd = bosses[index];
+        bool on = state.dead[index] != 0;
+        ImGui::PushID(static_cast<int>(index));
+        ImGui::BeginGroup();
+        if (ImGui::Checkbox("##kill", &on, on) && state.dead[index] && allowRevive_) {
+            popupBossIndex_ = static_cast<int>(index);
+            popup = true;
+        }
+        ImGui::SameLine();
+        auto *texture = bossImage(bd.flagId);
+        if (texture != nullptr) {
+            auto width = randomImageSize_;
+            if (texture->height > 0) {
+                width = randomImageSize_ * static_cast<float>(texture->width) / static_cast<float>(texture->height);
+            }
+            auto min = ImGui::GetCursorScreenPos();
+            ImGui::ImageWithBg((ImTextureID)texture->gpuHandle, ImVec2(width, randomImageSize_), ImVec2(0.f, 0.f),
+                               ImVec2(1.f, 1.f), ImVec4(0.f, 0.f, 0.f, 0.f), on ? kTintKilled : kTintNormal);
+            if (on) {
+                drawKilledMark(min, ImVec2(min.x + width, min.y + randomImageSize_));
+            }
+            ImGui::SameLine();
+        }
+        ImGui::BeginGroup();
+        if (on) {
+            ImGui::TextDisabled("%s", bd.boss.c_str());
+        } else {
+            ImGui::TextUnformatted(bd.boss.c_str());
+        }
+        ImGui::TextDisabled("%s", bd.place.c_str());
+        ImGui::EndGroup();
+        ImGui::EndGroup();
+        ImGui::PopID();
+    }
+}
+
+void Renderer::renderRandomGrid(const RenderState &state) {
+    const auto &bosses = gBossDataSet.bosses();
+    if (!ImGui::BeginTable("##random_grid", randomColumns_, ImGuiTableFlags_SizingStretchSame)) {
+        return;
+    }
+    for (auto index : state.runSelected) {
+        ImGui::TableNextColumn();
+        const auto &bd = bosses[index];
+        bool killed = state.dead[index] != 0;
+        auto cellWidth = ImGui::GetContentRegionAvail().x;
+        ImGui::PushID(static_cast<int>(index));
+        auto *texture = bossImage(bd.flagId);
+        if (texture != nullptr) {
+            auto height = cellWidth;
+            if (texture->width > 0) {
+                height = cellWidth * static_cast<float>(texture->height) / static_cast<float>(texture->width);
+            }
+            auto min = ImGui::GetCursorScreenPos();
+            ImGui::ImageWithBg((ImTextureID)texture->gpuHandle, ImVec2(cellWidth, height), ImVec2(0.f, 0.f),
+                               ImVec2(1.f, 1.f), ImVec4(0.f, 0.f, 0.f, 0.f), killed ? kTintKilled : kTintNormal);
+            if (killed) {
+                drawKilledMark(min, ImVec2(min.x + cellWidth, min.y + height));
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
+            }
+        }
+        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + cellWidth);
+        if (killed) {
+            ImGui::TextDisabled("%s", bd.boss.c_str());
+        } else {
+            ImGui::TextUnformatted(bd.boss.c_str());
+        }
+        ImGui::PopTextWrapPos();
+        if (texture == nullptr && ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
+        }
+        ImGui::PopID();
+    }
+    ImGui::EndTable();
+}
+
+void Renderer::renderConfirmPopup() {
+    if (ImGui::BeginPopupModal("##bosses_run_confirm", nullptr,
+                               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextUnformatted("End the current run?");
+        if (ImGui::Button("Yes")) {
+            gBossDataSet.endRandomRun();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("No")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 }
 
@@ -174,14 +472,22 @@ bool Renderer::render() {
 
     // Take a thread-safe snapshot of all mutable state (single mutex acquisition)
     gBossDataSet.fillRenderState(renderState_);
-    kills_ = renderState_.count;
-    total_ = gBossDataSet.total();
+    if (renderState_.runState != RunState::Idle) {
+        // During a run the status line tracks the run, not the full boss roster.
+        kills_ = renderState_.runKilled;
+        total_ = renderState_.runCount;
+    } else {
+        kills_ = renderState_.count;
+        total_ = gBossDataSet.total();
+    }
     deaths_ = renderState_.deaths;
     if (renderState_.challengeMode) {
         pb_ = renderState_.challengeBest;
         tries_ = renderState_.challengeTries;
     }
-    igt_ = std::chrono::milliseconds(renderState_.inGameTime);
+    // A finished run freezes the clock at the final kill so players can compare times.
+    effectiveIgt_ = renderState_.runState == RunState::Finished ? renderState_.runFinalIgt : renderState_.inGameTime;
+    igt_ = std::chrono::milliseconds(effectiveIgt_);
 
     auto *vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),

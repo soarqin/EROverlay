@@ -60,6 +60,26 @@ All configuration files are located in the `configs/` folder. Edit them with any
 | `challenge_mode` | `false` | Enable challenge mode — stops recording kills if death count exceeds the allowed value. |
 | `challenge_death_count` | `0` | Maximum allowed deaths in challenge mode. |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | Display format for challenge mode status. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `{pb}`, `{tries}`, `$n`. |
+| `random_count` | `10` | Default number of bosses proposed in the Random Run panel (max 165). |
+| `random_layout` | `list` | How the revealed boss list is drawn: `text` (checkbox and name), `list` (portrait row) or `grid` (card grid). |
+| `random_grid_columns` | `3` | Number of columns used by the `grid` layout. |
+| `random_image_size` | `48` | Portrait height in pixels for the `list` layout. Width follows the image aspect ratio. |
+
+#### Random Run
+
+A seeded race mode for comparing times with other players. Open the full-mode panel and:
+
+1. Enter a **seed** (digits only, leave empty to generate one) and how many **bosses** to draw.
+2. Press **Randomize**. The panel shows `Randomized - Seed: <seed> - Bosses: <count>` but keeps the boss list hidden, so nobody gains planning time by randomizing first.
+3. Share the seed and count with the other players. Everyone enters the same values and randomizes.
+4. Press **Reveal bosses** together. Only the drawn bosses are listed from then on.
+5. Bosses check off automatically as you kill them. When the last one dies the timer freezes at the finishing in-game time so runs can be compared.
+
+Only base game bosses are ever drawn, so the same seed and count give the same list whether or not a player owns the DLC. Run state is saved to `RandomRun.txt` next to the overlay and survives a restart; delete that file or press **End run** to reset. Random Run is hidden while `challenge_mode` is enabled.
+
+Seeded races assume a fresh character: a boss that is already dead when the run starts counts as checked immediately.
+
+Boss portraits are optional. Place them in `data/boss_images/` named `<flag_id>.png` (`.jpg` also works); see [the list of flag ids](src/boss/data/boss_images/README.md). Bosses without an image still display, just without a picture.
 
 ### `achievements.ini` — Achievements Overlay
 
