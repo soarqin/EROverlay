@@ -27,27 +27,27 @@
         "flag_id": 1042360800
       },
       {
-        "boss": "Demi-Human Chief(x2)",
+        "boss": "Demi-Human Chiefs",
         "place": "Coastal Cave",
         "flag_id": 31150800
       },
       {
-        "boss": "Erdtree Burial Watchdog",
+        "boss": "Erdtree Burial Watchdog (Limgrave)",
         "place": "Stormfoot Catacombs",
         "flag_id": 30020800
       },
       {
-        "boss": "Beastman of Farum Azula",
+        "boss": "Beastman of Farum Azula (Solo)",
         "place": "Groveside Cave",
         "flag_id": 31030800
       },
       {
-        "boss": "Stonedigger Troll",
+        "boss": "Stonedigger Troll (Limgrave)",
         "place": "Limgrave Tunnels",
         "flag_id": 32010800
       },
       {
-        "boss": "Mad Pumpkin Head",
+        "boss": "Mad Pumpkin Head (Limgrave)",
         "place": "Waypoint Ruins",
         "flag_id": 1044360800
       },
@@ -62,7 +62,7 @@
         "flag_id": 31000800
       },
       {
-        "boss": "Grave Warden Duelist",
+        "boss": "Grave Warden Duelist (Limgrave)",
         "place": "Murkwater Catacombs",
         "flag_id": 30040800
       },
@@ -72,12 +72,12 @@
         "flag_id": 31170800
       },
       {
-        "boss": "Black Knife Assassin",
+        "boss": "Black Knife Assassin (Limgrave)",
         "place": "Deathtouched Catacombs",
         "flag_id": 30110800
       },
       {
-        "boss": "Ulcerated Tree Spirit",
+        "boss": "Ulcerated Tree Spirit (Limgrave)",
         "place": "Fringefolk Hero's Grave",
         "flag_id": 18000800
       },
@@ -87,27 +87,27 @@
         "flag_id": 1043360800
       },
       {
-        "boss": "Tibia Mariner",
+        "boss": "Tibia Mariner (Limgrave)",
         "place": "Summonwater Village",
         "flag_id": 1045390800
       },
       {
-        "boss": "Crucible Knight",
+        "boss": "Crucible Knight (Limgrave)",
         "place": "Stormhill Evergaol",
         "flag_id": 1042370800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Limgrave)",
         "place": "",
         "flag_id": 1043370800
       },
       {
-        "boss": "Deathbird",
+        "boss": "Deathbird (Limgrave)",
         "place": "",
         "flag_id": 1042380800
       },
       {
-        "boss": "Bell Bearing Hunter",
+        "boss": "Bell Bearing Hunter (Limgrave)",
         "place": "Warmaster's Shack",
         "flag_id": 1042380850
       }
@@ -135,12 +135,12 @@
         "flag_id": 32000800
       },
       {
-        "boss": "Erdtree Burial Watchdog",
+        "boss": "Erdtree Burial Watchdog (Weeping)",
         "place": "Impaler's Catacombs",
         "flag_id": 30010800
       },
       {
-        "boss": "Cemetery Shade",
+        "boss": "Cemetery Shade (Weeping)",
         "place": "Tombsward Catacombs",
         "flag_id": 30000800
       },
@@ -150,22 +150,22 @@
         "flag_id": 31020800
       },
       {
-        "boss": "Erdtree Avatar",
+        "boss": "Erdtree Avatar (Weeping)",
         "place": "Minor Erdtree",
         "flag_id": 1043330800
       },
       {
-        "boss": "Ancient Hero of Zamor",
+        "boss": "Ancient Hero of Zamor (Weeping)",
         "place": "Weeping Evergaol",
         "flag_id": 1042330800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Weeping)",
         "place": "Castle Morne Rampart",
         "flag_id": 1044320850
       },
       {
-        "boss": "Deathbird",
+        "boss": "Deathbird (Weeping)",
         "place": "",
         "flag_id": 1044320800
       },
@@ -213,47 +213,47 @@
     ],
     "bosses": [
       {
-        "boss": "Cleanrot Knight",
+        "boss": "Cleanrot Knight (Liurnia)",
         "place": "Stillwater Cave",
         "flag_id": 31040800
       },
       {
-        "boss": "Bloodhound Knight",
+        "boss": "Bloodhound Knight (Liurnia)",
         "place": "Lakeside Crystal Cave",
         "flag_id": 31050800
       },
       {
-        "boss": "Erdtree Burial Watchdog",
+        "boss": "Erdtree Burial Watchdog (Liurnia)",
         "place": "Cliffbottom Catacombs",
         "flag_id": 30060800
       },
       {
-        "boss": "Crystalian (Staff) & Crystalian (Spear)",
+        "boss": "Crystalian Duo (Academy Crystal Cave)",
         "place": "Academy Crystal Cave",
         "flag_id": 31060800
       },
       {
-        "boss": "Crystalian (Ringblade)",
+        "boss": "Crystalian (Raya Lucaria Crystal Tunnel)",
         "place": "Raya Lucaria Crystal Tunnel",
         "flag_id": 32020800
       },
       {
-        "boss": "Cemetery Shade",
+        "boss": "Cemetery Shade (Liurnia)",
         "place": "Black Knife Catacombs",
         "flag_id": 30050800
       },
       {
-        "boss": "Black Knife Assassin",
+        "boss": "Black Knife Assassin (Liurnia)",
         "place": "Black Knife Catacombs",
         "flag_id": 30050850
       },
       {
-        "boss": "Spiritcaller Snail",
+        "boss": "Spirit-Caller Snail (Liurnia)",
         "place": "Road's End Catacombs",
         "flag_id": 30030800
       },
       {
-        "boss": "Grafted Scion",
+        "boss": "Grafted Scion (Liurnia, Four Belfries)",
         "place": "Chapel of Anticipation",
         "flag_id": 10010800
       },
@@ -273,17 +273,17 @@
         "flag_id": 1034480800
       },
       {
-        "boss": "Tibia Mariner",
+        "boss": "Tibia Mariner (Liurnia)",
         "place": "",
         "flag_id": 1039440800
       },
       {
-        "boss": "Erdtree Avatar",
+        "boss": "Erdtree Avatar (Liurnia, Southwest)",
         "place": "Converted Tower",
         "flag_id": 1033430800
       },
       {
-        "boss": "Erdtree Avatar",
+        "boss": "Erdtree Avatar (Liurnia, Northeast)",
         "place": "Mausoleum Compound",
         "flag_id": 1038480800
       },
@@ -298,32 +298,32 @@
         "flag_id": 1033450800
       },
       {
-        "boss": "Onyx Lord",
+        "boss": "Onyx Lord (Liurnia)",
         "place": "Royal Grave Evergaol",
         "flag_id": 1036500800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Liurnia, South)",
         "place": "Gate Town Bridge",
         "flag_id": 1039430800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Liurnia, North)",
         "place": "Bellum Church",
         "flag_id": 1036480800
       },
       {
-        "boss": "Deathbird",
+        "boss": "Deathbird (Liurnia)",
         "place": "Scenic Isle",
         "flag_id": 1037420800
       },
       {
-        "boss": "Death Rite Bird",
+        "boss": "Death Rite Bird (Liurnia)",
         "place": "Gate Town North",
         "flag_id": 1036450800
       },
       {
-        "boss": "Bell Bearing Hunter",
+        "boss": "Bell Bearing Hunter (Liurnia)",
         "place": "Church of Vows",
         "flag_id": 1037460800
       },
@@ -389,37 +389,37 @@
     ],
     "bosses": [
       {
-        "boss": "Magma Wyrm",
+        "boss": "Magma Wyrm (Caelid)",
         "place": "Gael Tunnel",
         "flag_id": 32070800
       },
       {
-        "boss": "Erdtree Burial Watchdog (Sword) & Erdtree Burial Watchdog (Scepter)",
+        "boss": "Erdtree Burial Watchdog (Gelmir)",
         "place": "Minor Erdtree Catacombs",
         "flag_id": 30140800
       },
       {
-        "boss": "Frenzied Duelist",
+        "boss": "Frenzied Duelist (Caelid)",
         "place": "Gaol Cave",
         "flag_id": 31210800
       },
       {
-        "boss": "Cemetery Shade",
+        "boss": "Cemetery Shade (Caelid)",
         "place": "Caelid Catacombs",
         "flag_id": 30150800
       },
       {
-        "boss": "Fallingstar Beast",
+        "boss": "Fallingstar Beast (Caelid)",
         "place": "Sellia Crystal Tunnel",
         "flag_id": 32080800
       },
       {
-        "boss": "Putrid Crystalian (Ringblade) & Putrid Crystalian (Spear) & Putrid Crystalian (Staff)",
+        "boss": "Putrid Crystalian Trio (Sellia Hideaway)",
         "place": "Sellia Hideaway",
         "flag_id": 31110800
       },
       {
-        "boss": "Mad Pumpkin Head (Hammer) & Mad Pumpkin Head (Flail)",
+        "boss": "Mad Pumpkin Heads (Caelid)",
         "place": "Caelem Ruins",
         "flag_id": 1048400800
       },
@@ -429,7 +429,7 @@
         "flag_id": 1048370800
       },
       {
-        "boss": "Nox Monk & Nox Swordstress",
+        "boss": "Nox Swordstress & Nox Priest",
         "place": "Sellia, Town of Sorcery",
         "flag_id": 1049390800
       },
@@ -439,22 +439,22 @@
         "flag_id": 1049380800
       },
       {
-        "boss": "Putrid Avatar",
+        "boss": "Putrid Avatar (Caelid)",
         "place": "Minor Erdtree",
         "flag_id": 1047400800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Caelid)",
         "place": "Caelid Highway South",
         "flag_id": 1049370800
       },
       {
-        "boss": "Death Rite Bird",
+        "boss": "Death Rite Bird (Caelid)",
         "place": "Southern Aeonia Swamp Bank",
         "flag_id": 1049370850
       },
       {
-        "boss": "Crucible Knight & Misbegotten Warrior",
+        "boss": "Crucible Knight / Misbegotten Warrior",
         "place": "Redmane Castle",
         "flag_id": 1051360800
       },
@@ -477,27 +477,27 @@
     ],
     "bosses": [
       {
-        "boss": "Cleanrot Knight (Spear) & Cleanrot Knight (Sickle)",
+        "boss": "Cleanrot Knight (Caelid)",
         "place": "Abandoned Cave",
         "flag_id": 31200800
       },
       {
-        "boss": "Beastman of Farum Azula (Cleaver) & Beastman of Farum Azula (Throwing Knife)",
+        "boss": "Beastman of Farum Azula (Duo)",
         "place": "Dragonbarrow Cave",
         "flag_id": 31100800
       },
       {
-        "boss": "Putrid Tree Spirit",
+        "boss": "Putrid Tree Spirit (Dragonbarrow)",
         "place": "War-Dead Catacombs",
         "flag_id": 30160800
       },
       {
-        "boss": "Godskin Apostle",
+        "boss": "Godskin Apostle (Dragonbarrow)",
         "place": "Divine Tower of Caelid",
         "flag_id": 34130800
       },
       {
-        "boss": "Black Blade Kindred",
+        "boss": "Black Blade Kindred (Bestial Sanctum)",
         "place": "Bestial Sanctum",
         "flag_id": 1051430800
       },
@@ -507,7 +507,7 @@
         "flag_id": 1052410800
       },
       {
-        "boss": "Putrid Avatar",
+        "boss": "Putrid Avatar (Dragonbarrow)",
         "place": "Minor Erdtree",
         "flag_id": 1051400800
       },
@@ -517,12 +517,12 @@
         "flag_id": 1049390850
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Dragonbarrow)",
         "place": "Lenne's Rise",
         "flag_id": 1052410850
       },
       {
-        "boss": "Bell Bearing Hunter",
+        "boss": "Bell Bearing Hunter (Dragonbarrow)",
         "place": "Isolated Merchant's Shack",
         "flag_id": 1048410800
       }
@@ -547,42 +547,42 @@
         "flag_id": 31190850
       },
       {
-        "boss": "Black Knife Assassin",
+        "boss": "Black Knife Assassin (Sage's Cave)",
         "place": "Sage's Cave",
         "flag_id": 31190800
       },
       {
-        "boss": "Stonedigger Troll",
+        "boss": "Stonedigger Troll (Altus)",
         "place": "Old Altus Tunnel",
         "flag_id": 32040800
       },
       {
-        "boss": "Crystalian (Spear) & Crystalian (Ringblade)",
+        "boss": "Crystalian Duo (Altus Tunnel)",
         "place": "Altus Tunnel",
         "flag_id": 32050800
       },
       {
-        "boss": "Black Knife Assassin",
+        "boss": "Black Knife Assassin (Sainted Hero's Grave)",
         "place": "Sainted Hero's Grave",
         "flag_id": 1040520800
       },
       {
-        "boss": "Ancient Hero of Zamor",
+        "boss": "Ancient Hero of Zamor (Altus)",
         "place": "Sainted Hero's Grave",
         "flag_id": 30080800
       },
       {
-        "boss": "Omenkiller & Miranda the Blighted Bloom",
+        "boss": "Omenkiller / Miranda",
         "place": "Perfumer's Grotto",
         "flag_id": 31180800
       },
       {
-        "boss": "Perfumer Tricia & Misbegotten Warrior",
+        "boss": "Perfumer Tricia / Misbegotten Warrior",
         "place": "Unsightly Catacombs",
         "flag_id": 30120800
       },
       {
-        "boss": "Erdtree Burial Watchdog",
+        "boss": "Erdtree Burial Watchdog (Caelid)",
         "place": "Wyndham Catacombs",
         "flag_id": 30070800
       },
@@ -602,22 +602,22 @@
         "flag_id": 1040530800
       },
       {
-        "boss": "Godskin Apostle",
+        "boss": "Godskin Apostle (Altus)",
         "place": "Dominula, Windmill Village",
         "flag_id": 1042550800
       },
       {
-        "boss": "Fallingstar Beast",
+        "boss": "Fallingstar Beast (Altus)",
         "place": "Starfall Crater",
         "flag_id": 1041500800
       },
       {
-        "boss": "Tree Sentinel(x2)",
+        "boss": "Tree Sentinel (Duo)",
         "place": "",
         "flag_id": 1041510800
       },
       {
-        "boss": "Tibia Mariner",
+        "boss": "Tibia Mariner (Altus)",
         "place": "Wyndham Ruins",
         "flag_id": 1038520800
       },
@@ -632,7 +632,7 @@
         "flag_id": 1039500800
       },
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Altus)",
         "place": "Altus Highway Junction",
         "flag_id": 1039510800
       },
@@ -653,17 +653,17 @@
     ],
     "bosses": [
       {
-        "boss": "Onyx Lord",
+        "boss": "Onyx Lord (Leyndell)",
         "place": "Sealed Tunnel",
         "flag_id": 34120800
       },
       {
-        "boss": "Grave Warden Duelist",
+        "boss": "Grave Warden Duelist (Leyndell)",
         "place": "Auriza Side Tomb",
         "flag_id": 30130800
       },
       {
-        "boss": "Crucible Knight & Crucible Knight Ordovis",
+        "boss": "Crucible Knight Ordovis",
         "place": "Auriza Hero's Grave",
         "flag_id": 30100800
       },
@@ -673,12 +673,12 @@
         "flag_id": 1045520800
       },
       {
-        "boss": "Deathbird",
+        "boss": "Deathbird (Leyndell)",
         "place": "",
         "flag_id": 1044530800
       },
       {
-        "boss": "Bell Bearing Hunter",
+        "boss": "Bell Bearing Hunter (Leyndell)",
         "place": "Hermit Merchant's Shack",
         "flag_id": 1043530800
       }
@@ -699,7 +699,7 @@
         "flag_id": 31090800
       },
       {
-        "boss": "Kindred of Rot(x2)",
+        "boss": "Kindred of Rot (Duo)",
         "place": "Seethewater Cave",
         "flag_id": 31070800
       },
@@ -709,7 +709,7 @@
         "flag_id": 30090800
       },
       {
-        "boss": "Magma Wyrm",
+        "boss": "Magma Wyrm (Gelmir)",
         "place": "Fort Laiedd",
         "flag_id": 1035530800
       },
@@ -724,7 +724,7 @@
         "flag_id": 1037530800
       },
       {
-        "boss": "Ulcerated Tree Spirit",
+        "boss": "Ulcerated Tree Spirit (Gelmir)",
         "place": "Minor Erdtree",
         "flag_id": 1037540810
       }
@@ -737,17 +737,17 @@
     ],
     "bosses": [
       {
-        "boss": "Abductor Virgin (Swinging Sickle) & Abductor Virgin (Wheel)",
+        "boss": "Abductor Virgins (Duo)",
         "place": "Subterranean Inquisition Chamber",
         "flag_id": 16000860
       },
       {
-        "boss": "Godskin Noble",
+        "boss": "Godskin Noble (Gelmir)",
         "place": "Temple of Eiglay",
         "flag_id": 16000850
       },
       {
-        "boss": "God-Devouring Serpent & Rykard, Lord of Blasphemy",
+        "boss": "Rykard, Lord of Blasphemy",
         "place": "Volcano Manor",
         "flag_id": 16000800,
         "rememberance": 5
@@ -769,7 +769,7 @@
         "flag_id": 35000850
       },
       {
-        "boss": "Fell Twin(x2)",
+        "boss": "Fell Twins",
         "place": "Divine Tower of East Altus",
         "flag_id": 34140850
       },
@@ -779,7 +779,7 @@
         "flag_id": 35000800
       },
       {
-        "boss": "Godfrey, First Elden Lord",
+        "boss": "Godfrey, First Elden Lord (Golden Shade)",
         "place": "Erdtree Sanctuary",
         "flag_id": 11000850
       },
@@ -798,12 +798,12 @@
     ],
     "bosses": [
       {
-        "boss": "Night's Cavalry",
+        "boss": "Night's Cavalry (Consecrated)",
         "place": "",
         "flag_id": 1048510800
       },
       {
-        "boss": "Black Blade Kindred",
+        "boss": "Black Blade Kindred (Forbidden Lands)",
         "place": "",
         "flag_id": 1049520800
       }
@@ -820,17 +820,17 @@
     ],
     "bosses": [
       {
-        "boss": "Ancient Hero of Zamor",
+        "boss": "Ancient Hero of Zamor (Mountaintops)",
         "place": "Giant-Conquering Hero's Grave",
         "flag_id": 30170800
       },
       {
-        "boss": "Ulcerated Tree Spirit",
+        "boss": "Ulcerated Tree Spirit (Mountaintops)",
         "place": "Giants' Mountaintop Catacombs",
         "flag_id": 30180800
       },
       {
-        "boss": "Godskin Apostle & Godskin Noble & Spiritcaller Snail",
+        "boss": "Spirit-Caller Snail (Mountaintops)",
         "place": "Spiritcaller Cave",
         "flag_id": 31220800
       },
@@ -840,17 +840,17 @@
         "flag_id": 1254560800
       },
       {
-        "boss": "Erdtree Avatar",
+        "boss": "Erdtree Avatar (Mountaintops)",
         "place": "Minor Erdtree",
         "flag_id": 1052560800
       },
       {
-        "boss": "Roundtable Knight Vyke",
+        "boss": "Vyke, Knight of the Roundtable",
         "place": "Lord Contender's Evergaol",
         "flag_id": 1053560800
       },
       {
-        "boss": "Death Rite Bird",
+        "boss": "Death Rite Bird (Mountaintops)",
         "place": "",
         "flag_id": 1050570800
       },
@@ -885,7 +885,7 @@
         "rememberance": 12
       },
       {
-        "boss": "Maliketh, the Black Blade",
+        "boss": "Beast Clergyman / Maliketh, the Black Blade",
         "place": "",
         "flag_id": 13000800,
         "rememberance": 11
@@ -908,7 +908,7 @@
         "flag_id": 30200800
       },
       {
-        "boss": "Putrid Grave Warden Duelist",
+        "boss": "Putrid Grave Warden Duelist (Consecrated)",
         "place": "Consecrated Snowfield Catacombs",
         "flag_id": 30190800
       },
@@ -928,17 +928,17 @@
         "flag_id": 1050560800
       },
       {
-        "boss": "Putrid Avatar",
+        "boss": "Putrid Avatar (Consecrated)",
         "place": "Minor Erdtree",
         "flag_id": 1050570850
       },
       {
-        "boss": "Night's Cavalry (Glaive) & Night's Cavalry (Flail)",
+        "boss": "Night's Cavalry (Forbidden Lands)",
         "place": "Inner Consecrated Snowfield",
         "flag_id": 1248550800
       },
       {
-        "boss": "Death Rite Bird",
+        "boss": "Death Rite Bird (Consecrated)",
         "place": "",
         "flag_id": 1048570800
       }
@@ -956,7 +956,7 @@
         "flag_id": 15000850
       },
       {
-        "boss": "Malenia, Blade of Miquella & Malenia, Goddess of Rot",
+        "boss": "Malenia, Blade of Miquella",
         "place": "",
         "flag_id": 15000800,
         "rememberance": 13
@@ -971,7 +971,7 @@
     ],
     "bosses": [
       {
-        "boss": "Dragonkin Soldier",
+        "boss": "Dragonkin Soldier (Siofra)",
         "place": "Siofra River Bank",
         "flag_id": 12020830
       },
@@ -992,7 +992,7 @@
         "rememberance": 7
       },
       {
-        "boss": "Valiant Gargoyle & Valiant Gargoyle (Twinblade)",
+        "boss": "Valiant Gargoyles",
         "place": "Siofra Aqueduct",
         "flag_id": 12020800
       }
@@ -1025,7 +1025,7 @@
         "flag_id": 12010800
       },
       {
-        "boss": "Dragonkin Soldier",
+        "boss": "Dragonkin Soldier (Lake of Rot)",
         "place": "",
         "flag_id": 12010850
       },
@@ -1049,7 +1049,7 @@
         "flag_id": 12030390
       },
       {
-        "boss": "Fia's Champion & Sorcerer Rogier & Lionel the Lionhearted",
+        "boss": "Fia's Champions",
         "place": "",
         "flag_id": 12030800
       },
@@ -1074,13 +1074,13 @@
         "flag_id": 11050850
       },
       {
-        "boss": "Godfrey, First Elden Lord",
+        "boss": "Godfrey, First Elden Lord / Hoarah Loux",
         "place": "Elden Throne",
         "flag_id": 11050800,
         "rememberance": 14
       },
       {
-        "boss": "Radagon of the Golden Order & Elden Beast",
+        "boss": "Radagon of the Golden Order",
         "place": "Fractured Marika",
         "flag_id": 19000800,
         "rememberance": 15
