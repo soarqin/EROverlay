@@ -1,7 +1,7 @@
 # Boss portraits
 
 165 base game boss portraits, named after the boss flag id: `<flag_id>.jpg`.
-Only base game bosses can be drawn in a Random Run, so only these 165 files are ever used.
+Only base game bosses can be drawn in Mercenary Melee, so only these 165 files are ever used.
 
 The overlay looks for `<flag_id>.png` first and falls back to `<flag_id>.jpg`, so dropping a
 PNG in here overrides the shipped image for that boss. Any image the overlay cannot find is

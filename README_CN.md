@@ -56,16 +56,16 @@
 | `data_file` | `bosses.json` | Boss 数据文件名，位于 `data/<language>/` 目录下。 |
 | `allow_revive` | `false` | 允许复活已击败的 Boss。 |
 | `panel_pos` | `-10,10,15%,90%` | 面板位置和大小：`x, y, 宽度, 高度`。值可以是像素或百分比；负数 x/y 表示相对于屏幕右侧/底部的偏移。 |
-| `boss_kill_text` | `{kills}/{total}` | Boss 击杀数的显示格式。支持 `{kills}`、`{total}`、`{deaths}`、`{igt}`、`$n`（换行）。 |
+| `boss_kill_text` | `{kills}/{total}, Time: {igt}` | Boss 击杀数的显示格式。支持 `{kills}`、`{total}`、`{deaths}`、`{igt}`、`$n`（换行）。 |
 | `challenge_mode` | `false` | 启用挑战模式——当死亡次数超过允许值时停止记录击杀。 |
 | `challenge_death_count` | `0` | 挑战模式允许的最大死亡次数。 |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | 挑战模式状态的显示格式。支持 `{kills}`、`{total}`、`{deaths}`、`{igt}`、`{pb}`、`{tries}`、`$n`。 |
-| `random_count` | `10` | 随机挑战面板中默认的 Boss 数量（最多 165）。 |
+| `random_count` | `10` | Mercenary Melee 面板中默认的 Boss 数量（最多 165）。 |
 | `random_layout` | `list` | 揭晓后的 Boss 列表布局：`text`（勾选框和名称）、`list`（带头像的行）或 `grid`（卡片网格）。 |
 | `random_grid_columns` | `3` | `grid` 布局使用的列数。 |
 | `random_image_size` | `48` | `list` 布局中头像的高度（像素），宽度按图片比例自动计算。 |
 
-#### 随机挑战（Random Run）
+#### Mercenary Melee
 
 用于和其他玩家比拼用时的种子竞速模式。打开完整模式面板后：
 
@@ -75,7 +75,7 @@
 4. 一起点击 **Reveal bosses**。此后列表只显示抽中的 Boss。
 5. 击杀后 Boss 会自动打勾。最后一个 Boss 被击杀时，计时会冻结在完成时的游戏内时间，便于比较成绩。
 
-抽取范围始终只包含本体 Boss，因此无论玩家是否拥有 DLC，相同的种子和数量都会得到相同的列表。运行状态保存在覆盖层目录下的 `RandomRun.txt` 中，重启后可继续；删除该文件或点击 **End run** 即可重置。启用 `challenge_mode` 时随机挑战面板会被隐藏。
+抽取范围始终只包含本体 Boss，因此无论玩家是否拥有 DLC，相同的种子和数量都会得到相同的列表。运行状态保存在覆盖层目录下的 `RandomRun.txt` 中，重启后可继续；删除该文件或点击 **End run** 即可重置。启用 `challenge_mode` 时 Mercenary Melee 面板会被隐藏。
 
 种子竞速默认基于全新角色：开始时已经击杀的 Boss 会立即计为已完成。
 

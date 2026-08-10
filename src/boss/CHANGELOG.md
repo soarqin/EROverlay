@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### [1.6.0] - 2026-08-09
 
 #### Added
-- Random Run: a seeded race mode. Enter a numeric seed and a boss count in the full-mode panel, press `Randomize`, then press `Reveal bosses` once every player is ready. The selection stays hidden between those two steps so nobody gains planning time by randomizing first.
+- Mercenary Melee: a seeded race mode. Enter a numeric seed and a boss count in the full-mode panel, press `Randomize`, then press `Reveal bosses` once every player is ready. The selection stays hidden between those two steps so nobody gains planning time by randomizing first.
 - Only the drawn bosses are listed while a run is active, and they check off automatically on kill. The in-game time freezes when the last one dies so runs can be compared.
 - The same seed and boss count always draw the same list. Only base game bosses are drawn, so seeds are portable between players regardless of DLC ownership.
 - Three list layouts selected by `random_layout`: `text`, `list` (boss portraits) and `grid` (card grid), with `random_grid_columns` and `random_image_size` to tune them.

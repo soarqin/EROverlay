@@ -56,16 +56,16 @@ All configuration files are located in the `configs/` folder. Edit them with any
 | `data_file` | `bosses.json` | Boss data filename, located in `data/<language>/`. |
 | `allow_revive` | `false` | Allow reviving defeated bosses. |
 | `panel_pos` | `-10,10,15%,90%` | Panel position and size: `x, y, width, height`. Values can be pixels or percentages; negative x/y are relative to the right/bottom edge. |
-| `boss_kill_text` | `{kills}/{total}` | Display format for boss kill count. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `$n` (newline). |
+| `boss_kill_text` | `{kills}/{total}, Time: {igt}` | Display format for boss kill count. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}` (always HH:MM:SS), `$n` (newline). |
 | `challenge_mode` | `false` | Enable challenge mode — stops recording kills if death count exceeds the allowed value. |
 | `challenge_death_count` | `0` | Maximum allowed deaths in challenge mode. |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | Display format for challenge mode status. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `{pb}`, `{tries}`, `$n`. |
-| `random_count` | `10` | Default number of bosses proposed in the Random Run panel (max 165). |
+| `random_count` | `10` | Default number of bosses proposed in the Mercenary Melee panel (max 165). |
 | `random_layout` | `list` | How the revealed boss list is drawn: `text` (checkbox and name), `list` (portrait row) or `grid` (card grid). |
 | `random_grid_columns` | `3` | Number of columns used by the `grid` layout. |
 | `random_image_size` | `48` | Portrait height in pixels for the `list` layout. Width follows the image aspect ratio. |
 
-#### Random Run
+#### Mercenary Melee
 
 A seeded race mode for comparing times with other players. Open the full-mode panel and:
 
@@ -75,7 +75,7 @@ A seeded race mode for comparing times with other players. Open the full-mode pa
 4. Press **Reveal bosses** together. Only the drawn bosses are listed from then on.
 5. Bosses check off automatically as you kill them. When the last one dies the timer freezes at the finishing in-game time so runs can be compared.
 
-Only base game bosses are ever drawn, so the same seed and count give the same list whether or not a player owns the DLC. Run state is saved to `RandomRun.txt` next to the overlay and survives a restart; delete that file or press **End run** to reset. Random Run is hidden while `challenge_mode` is enabled.
+Only base game bosses are ever drawn, so the same seed and count give the same list whether or not a player owns the DLC. Run state is saved to `RandomRun.txt` next to the overlay and survives a restart; delete that file or press **End run** to reset. Mercenary Melee is hidden while `challenge_mode` is enabled.
 
 Seeded races assume a fresh character: a boss that is already dead when the run starts counts as checked immediately.
 

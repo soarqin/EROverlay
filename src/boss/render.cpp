@@ -103,17 +103,13 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     const std::string newlinePlaceholder = "$n";
     const std::string newline = "\n";
     const std::string igtPlaceholder = "{igt}";
-    const std::string igtMinSec = "{igt:.0%M:%S}";
-    const std::string igtHourMinSec = "{igt:.0%H:%M:%S}";
+    // Always hh:mm:ss. The old behaviour switched to mm:ss under an hour, which made the
+    // header jump in width mid-run and gave two runs different-looking finish times.
+    const std::string igtFormat = "{igt:.0%H:%M:%S}";
     util::replaceAll(killText_, newlinePlaceholder, newline);
     util::replaceAll(challengeText_, newlinePlaceholder, newline);
-    // Duplicate before substituting igt format — hour variant uses %H:%M:%S
-    killTextHour_ = killText_;
-    challengeTextHour_ = challengeText_;
-    util::replaceAll(killText_, igtPlaceholder, igtMinSec);
-    util::replaceAll(challengeText_, igtPlaceholder, igtMinSec);
-    util::replaceAll(killTextHour_, igtPlaceholder, igtHourMinSec);
-    util::replaceAll(challengeTextHour_, igtPlaceholder, igtHourMinSec);
+    util::replaceAll(killText_, igtPlaceholder, igtFormat);
+    util::replaceAll(challengeText_, igtPlaceholder, igtFormat);
     allowRevive_ = api->configEnabled("boss.allow_revive");
 
     std::string layout = api->configGet("boss.random_layout");
@@ -153,18 +149,15 @@ static float calculatePos(float w, float n) {
     return w + w * n;
 }
 
-std::string Renderer::formatStatusText(int igt, bool challengeMode) const {
-    if (challengeMode) {
-        return fmt::vformat(igt < 3600000 ? challengeText_ : challengeTextHour_, args_);
-    }
-    return fmt::vformat(igt < 3600000 ? killText_ : killTextHour_, args_);
+std::string Renderer::formatStatusText(bool challengeMode) const {
+    return fmt::vformat(challengeMode ? challengeText_ : killText_, args_);
 }
 
 void Renderer::renderMini(const RenderState &state) {
     if (ImGui::Begin("##bosses_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav |
                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
-        auto text = formatStatusText(effectiveIgt_, state.challengeMode);
+        auto text = formatStatusText(state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         ImGui::SameLine();
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Down)) {
@@ -181,7 +174,7 @@ void Renderer::renderFull(const RenderState &state) {
     if (ImGui::Begin("##bosses_window", nullptr,
                      (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoSavedSettings)) {
-        auto text = formatStatusText(effectiveIgt_, state.challengeMode);
+        auto text = formatStatusText(state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         auto &style = ImGui::GetStyle();
         ImGui::SameLine(
@@ -202,7 +195,9 @@ void Renderer::renderFull(const RenderState &state) {
                     renderRegionTree(state, popup);
                     break;
                 case RunState::Armed:
-                    ImGui::TextWrapped("The boss list stays hidden until both players reveal it.");
+                    // Revealing is per client, not synchronised between players, so this has to
+                    // read as an instruction rather than a promise the mod cannot keep.
+                    ImGui::TextWrapped("Keep this hidden until everyone is ready, then reveal together.");
                     break;
                 default:
                     renderRandomBosses(state, popup);
@@ -256,7 +251,7 @@ void Renderer::renderRegionTree(const RenderState &state, bool &popup) {
 }
 
 void Renderer::renderRandomPanel(const RenderState &state) {
-    ImGui::SeparatorText("Random Run");
+    ImGui::SeparatorText("Mercenary Melee");
     switch (state.runState) {
         case RunState::Idle: {
             ImGui::TextUnformatted("Seed");

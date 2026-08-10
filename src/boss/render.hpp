@@ -45,7 +45,7 @@ public:
     bool render();
 
 private:
-    [[nodiscard]] std::string formatStatusText(int igt, bool challengeMode) const;
+    [[nodiscard]] std::string formatStatusText(bool challengeMode) const;
     void renderMini(const RenderState &state);
     void renderFull(const RenderState &state);
     void renderRevivePopup();
@@ -81,9 +81,7 @@ private:
 
     // Format templates (with $n → \n and {igt} → chrono specifiers already applied)
     std::string killText_;
-    std::string killTextHour_;
     std::string challengeText_;
-    std::string challengeTextHour_;
 
     // Dynamic format args — stable references via IntProxy members
     fmt::dynamic_format_arg_store<fmt::format_context> args_;
