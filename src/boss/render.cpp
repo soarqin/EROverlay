@@ -46,6 +46,50 @@ int maxRandomCount() {
     return poolSize > 0 ? poolSize : 1;
 }
 
+// Finds how much of the text fits on one line without splitting a word.
+// Returns nullptr when even the first word is wider than the available width.
+const char *fitWholeWords(const char *lineStart, float wrapWidth) {
+    const char *lineEnd = nullptr;
+    const char *probe = lineStart;
+    while (true) {
+        const char *wordEnd = probe;
+        while (*wordEnd != '\0' && *wordEnd != ' ') wordEnd++;
+        if (ImGui::CalcTextSize(lineStart, wordEnd).x > wrapWidth) break;
+        lineEnd = wordEnd;
+        if (*wordEnd == '\0') break;
+        probe = wordEnd + 1;
+    }
+    return lineEnd;
+}
+
+// Wraps on spaces rather than mid-word. ImGui's own wrapping splits a word in half as soon as
+// the word alone exceeds the wrap width, which is the common case in a narrow grid cell.
+// A single word too long to fit still falls back to ImGui wrapping, so nothing gets clipped.
+void textWordWrapped(const char *text, float wrapWidth, bool disabled) {
+    if (disabled) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+    }
+    const char *lineStart = text;
+    while (*lineStart != '\0') {
+        const char *lineEnd = fitWholeWords(lineStart, wrapWidth);
+        if (lineEnd == nullptr) {
+            const char *wordEnd = lineStart;
+            while (*wordEnd != '\0' && *wordEnd != ' ') wordEnd++;
+            ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + wrapWidth);
+            ImGui::TextUnformatted(lineStart, wordEnd);
+            ImGui::PopTextWrapPos();
+            lineStart = wordEnd;
+        } else {
+            ImGui::TextUnformatted(lineStart, lineEnd);
+            lineStart = lineEnd;
+        }
+        while (*lineStart == ' ') lineStart++;
+    }
+    if (disabled) {
+        ImGui::PopStyleColor();
+    }
+}
+
 // Draws a check mark over a killed boss portrait, sized to the image rect.
 void drawKilledMark(const ImVec2 &min, const ImVec2 &max) {
     auto *drawList = ImGui::GetWindowDrawList();
@@ -408,13 +452,10 @@ void Renderer::renderRandomGrid(const RenderState &state) {
                 ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
             }
         }
-        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + cellWidth);
-        if (killed) {
-            ImGui::TextDisabled("%s", bd.boss.c_str());
-        } else {
-            ImGui::TextUnformatted(bd.boss.c_str());
-        }
-        ImGui::PopTextWrapPos();
+        // Grouped so the hover test covers every wrapped line, not just the last one.
+        ImGui::BeginGroup();
+        textWordWrapped(bd.boss.c_str(), cellWidth, killed);
+        ImGui::EndGroup();
         if (texture == nullptr && ImGui::IsItemHovered()) {
             ImGui::SetTooltip("%s: %s", bd.boss.c_str(), bd.place.c_str());
         }
