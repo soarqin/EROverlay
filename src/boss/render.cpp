@@ -216,10 +216,13 @@ void Renderer::renderFull(const RenderState &state) {
     // has a list once a run exists, so when idle the panel shows just the controls and a zero
     // height lets it shrink to fit them rather than reserving the configured height for nothing.
     const bool showList = state.challengeMode || state.runState != RunState::Idle;
-    ImGui::SetNextWindowSize(
-        ImVec2(calculatePos(vp->Size.x, std::abs(width_)),
-               showList ? calculatePos(vp->Size.y, std::abs(height_)) : 0.f),
-        ImGuiCond_Always);
+    const float panelWidth = calculatePos(vp->Size.x, std::abs(width_));
+    const float maxHeight = calculatePos(vp->Size.y, std::abs(height_));
+    // Height 0 means fit the content, and the constraint caps that at the configured height,
+    // so panel_pos acts as a ceiling rather than a fixed size: a short boss list gets a short
+    // panel, and only a list taller than the ceiling starts scrolling.
+    ImGui::SetNextWindowSize(ImVec2(panelWidth, 0.f), ImGuiCond_Always);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, 0.f), ImVec2(FLT_MAX, maxHeight));
     if (ImGui::Begin("##bosses_window", nullptr,
                      (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoSavedSettings)) {
@@ -240,7 +243,13 @@ void Renderer::renderFull(const RenderState &state) {
         if (showList) {
             ImGui::Separator();
             bool popup = false;
-            if (ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail())) {
+            // AutoResizeY rather than GetContentRegionAvail(): the window height now follows its
+            // content, so asking for the remaining space would be circular. Capping the child at
+            // whatever is left of the configured height keeps overflow scrolling inside the list,
+            // so the status line and controls above it stay pinned instead of scrolling away.
+            const float childMax = std::max(maxHeight - ImGui::GetCursorPosY() - style.WindowPadding.y, 1.f);
+            ImGui::SetNextWindowSizeConstraints(ImVec2(0.f, 0.f), ImVec2(FLT_MAX, childMax));
+            if (ImGui::BeginChild("##bosses_list", ImVec2(0.f, 0.f), ImGuiChildFlags_AutoResizeY)) {
                 if (state.challengeMode) {
                     renderRegionTree(state, popup);
                 } else if (state.runState == RunState::Armed) {
