@@ -57,7 +57,6 @@ private:
     void renderRandomText(const RenderState &state, bool &popup);
     void renderRandomList(const RenderState &state, bool &popup);
     void renderRandomGrid(const RenderState &state);
-    void renderConfirmPopup();
     void applyRandomize();
     [[nodiscard]] TextureContext *bossImage(uint32_t flagId);
     void unloadImages();

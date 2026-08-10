@@ -256,7 +256,6 @@ void Renderer::renderFull(const RenderState &state) {
                                     ImGuiCond_Appearing, ImVec2(.5f, .5f));
         }
         renderRevivePopup();
-        renderConfirmPopup();
     }
 }
 
@@ -331,10 +330,11 @@ void Renderer::renderRandomPanel(const RenderState &state) {
             break;
     }
     if (state.runState != RunState::Idle) {
-        // Ending a run returns to the seed box, which still holds the last seed used. Entering
-        // the same seed again redraws the same bosses by design; clear it to get a fresh one.
+        // Ends immediately rather than via a confirmation popup: the popup rendered detached
+        // from this panel and was easy to miss. Nothing is lost by ending, since the seed box
+        // still holds the seed and re-entering it redraws the same bosses.
         if (ImGui::Button("End run", ImVec2(-FLT_MIN, 0.f))) {
-            ImGui::OpenPopup("##bosses_run_confirm");
+            gBossDataSet.endRandomRun();
         }
     }
     ImGui::Separator();
@@ -462,22 +462,6 @@ void Renderer::renderRandomGrid(const RenderState &state) {
         ImGui::PopID();
     }
     ImGui::EndTable();
-}
-
-void Renderer::renderConfirmPopup() {
-    if (ImGui::BeginPopupModal("##bosses_run_confirm", nullptr,
-                               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui::TextUnformatted("End the current run?");
-        if (ImGui::Button("Yes")) {
-            gBossDataSet.endRandomRun();
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("No")) {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
 }
 
 void Renderer::renderRevivePopup() {
