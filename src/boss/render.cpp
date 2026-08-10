@@ -212,8 +212,13 @@ void Renderer::renderMini(const RenderState &state) {
 
 void Renderer::renderFull(const RenderState &state) {
     auto *vp = ImGui::GetMainViewport();
+    // Challenge mode is the original tracker and always lists every boss. Mercenary Melee only
+    // has a list once a run exists, so when idle the panel shows just the controls and a zero
+    // height lets it shrink to fit them rather than reserving the configured height for nothing.
+    const bool showList = state.challengeMode || state.runState != RunState::Idle;
     ImGui::SetNextWindowSize(
-        ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))),
+        ImVec2(calculatePos(vp->Size.x, std::abs(width_)),
+               showList ? calculatePos(vp->Size.y, std::abs(height_)) : 0.f),
         ImGuiCond_Always);
     if (ImGui::Begin("##bosses_window", nullptr,
                      (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove |
@@ -232,30 +237,29 @@ void Renderer::renderFull(const RenderState &state) {
             renderRandomPanel(state);
         }
 
-        bool popup = false;
-        if (ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail())) {
-            switch (state.runState) {
-                case RunState::Idle:
+        if (showList) {
+            ImGui::Separator();
+            bool popup = false;
+            if (ImGui::BeginChild("##bosses_list", ImGui::GetContentRegionAvail())) {
+                if (state.challengeMode) {
                     renderRegionTree(state, popup);
-                    break;
-                case RunState::Armed:
+                } else if (state.runState == RunState::Armed) {
                     // Revealing is per client, not synchronised between players, so this has to
                     // read as an instruction rather than a promise the mod cannot keep.
                     ImGui::TextWrapped("Keep this hidden until everyone is ready, then reveal together.");
-                    break;
-                default:
+                } else {
                     renderRandomBosses(state, popup);
-                    break;
+                }
             }
-        }
-        ImGui::EndChild();
+            ImGui::EndChild();
 
-        if (popup) {
-            ImGui::OpenPopup("##bosses_revive_confirm");
-            ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f),
-                                    ImGuiCond_Appearing, ImVec2(.5f, .5f));
+            if (popup) {
+                ImGui::OpenPopup("##bosses_revive_confirm");
+                ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f),
+                                        ImGuiCond_Appearing, ImVec2(.5f, .5f));
+            }
+            renderRevivePopup();
         }
-        renderRevivePopup();
     }
 }
 
@@ -303,13 +307,18 @@ void Renderer::renderRandomPanel(const RenderState &state) {
             ImGui::InputText("##random_seed", seedInput_, sizeof(seedInput_),
                              ImGuiInputTextFlags_CallbackCharFilter, seedCharFilter);
             if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Digits only. Leave empty to generate a new seed.");
+                ImGui::SetTooltip("Digits only. Leave empty and Randomize will roll one first.");
             }
             ImGui::TextUnformatted("Bosses");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(-FLT_MIN);
             if (ImGui::InputInt("##random_count", &countInput_)) {
                 countInput_ = std::clamp(countInput_, 1, maxRandomCount());
+            }
+            // Rolling the seed is separate from drawing the bosses, so a new number can be
+            // agreed on before anyone commits to a selection.
+            if (ImGui::Button("Reroll seed", ImVec2(-FLT_MIN, 0.f))) {
+                setSeedInput(BossDataSet::generateSeed());
             }
             if (ImGui::Button("Randomize", ImVec2(-FLT_MIN, 0.f))) {
                 applyRandomize();
@@ -337,7 +346,10 @@ void Renderer::renderRandomPanel(const RenderState &state) {
             gBossDataSet.endRandomRun();
         }
     }
-    ImGui::Separator();
+}
+
+void Renderer::setSeedInput(uint64_t seed) {
+    std::snprintf(seedInput_, sizeof(seedInput_), "%llu", seed);
 }
 
 void Renderer::applyRandomize() {
@@ -345,13 +357,14 @@ void Renderer::applyRandomize() {
     if (seedInput_[0] != '\0') {
         seed = std::strtoull(seedInput_, nullptr, 10);
     }
+    // An empty box means roll a seed first, then draw with it.
     if (seed == 0) {
         seed = BossDataSet::generateSeed();
     }
     countInput_ = std::clamp(countInput_, 1, maxRandomCount());
     gBossDataSet.startRandomRun(seed, countInput_);
-    // Echo the seed back into the box so a generated one can be read off and shared.
-    std::snprintf(seedInput_, sizeof(seedInput_), "%llu", seed);
+    // Echo the seed back into the box so a rolled one can be read off and shared.
+    setSeedInput(seed);
 }
 
 void Renderer::renderRandomBosses(const RenderState &state, bool &popup) {

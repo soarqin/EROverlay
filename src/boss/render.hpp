@@ -58,6 +58,7 @@ private:
     void renderRandomList(const RenderState &state, bool &popup);
     void renderRandomGrid(const RenderState &state);
     void applyRandomize();
+    void setSeedInput(uint64_t seed);
     [[nodiscard]] TextureContext *bossImage(uint32_t flagId);
     void unloadImages();
 
