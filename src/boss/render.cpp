@@ -318,12 +318,18 @@ void Renderer::renderRandomPanel(const RenderState &state) {
             if (ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("Digits only. Leave empty and Randomize will roll one first.");
             }
+            const int maxCount = maxRandomCount();
             ImGui::TextUnformatted("Bosses");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(-FLT_MIN);
-            if (ImGui::InputInt("##random_count", &countInput_)) {
-                countInput_ = std::clamp(countInput_, 1, maxRandomCount());
-            }
+            ImGui::InputInt("##random_count", &countInput_);
+            ImGui::SetNextItemWidth(-FLT_MIN);
+            // AlwaysClamp so ctrl+click typing into the slider cannot escape the range either.
+            ImGui::SliderInt("##random_count_slider", &countInput_, 1, maxCount, "%d",
+                             ImGuiSliderFlags_AlwaysClamp);
+            // Clamped every frame rather than only on edit, so no path (typing, the +/- step
+            // buttons, a stale config value) can leave the count outside 1..pool size.
+            countInput_ = std::clamp(countInput_, 1, maxCount);
             // Rolling the seed is separate from drawing the bosses, so a new number can be
             // agreed on before anyone commits to a selection.
             if (ImGui::Button("Reroll seed", ImVec2(-FLT_MIN, 0.f))) {
