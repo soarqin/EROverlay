@@ -8,7 +8,8 @@ PNG in here overrides the shipped image for that boss. Any image the overlay can
 simply skipped, so a partial set works fine. Flag ids are language independent, so one set of
 images covers every language.
 
-Images are scaled to 256px on the long edge and saved as baseline JPEG. Baseline matters:
+Images are center cropped to a square and saved as 256x256 baseline JPEG, so every
+portrait has identical dimensions and the grid layout lines up. Baseline matters:
 the overlay decodes with stb_image, which does not support progressive JPEG or WebP.
 
 ## Source
