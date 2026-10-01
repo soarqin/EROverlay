@@ -12,6 +12,8 @@ Dropped runes use the native death marker, enabled by default. Set `death_marker
 
 Numbered beacons placed in the game's world map appear as native downward arrows with digits 1–5. Positions, removal and map layers follow the game; arrows and digits stay upright on a rotating minimap. Set `player_markers=0` to hide them.
 
+Set `full_map=1` to show all map-fragment terrain on the minimap, including the surface, underground and DLC. The default is `0`; omitting the key also follows actual fragment progress. This only changes the minimap display and does not modify the save. Grace and landmark markers still follow in-game discovery. Reload the plugin after changing the configuration.
+
 * Modify `minimap.ini` inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
   + Rename `EROverlay.dll` to `winhttp.dll` and put it beside `eldenring.exe`, along with `configs` and the `overlays` folder containing `Minimap.dll`.

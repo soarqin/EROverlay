@@ -42,6 +42,9 @@ uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data()), fieldPointer =
 uint64_t generation = 1, nextTexture = 100;
 unsigned reads = 0;
 bool valid = true, enabled = true, offscreenUsed = false;
+int fullMapConfig = -1; // Missing key exercises the production default.
+uint32_t progressMasks[3]{};
+std::vector<std::wstring> requestedTiles;
 enum class Invalidation { None, Generation, View, RawMap, Layer };
 Invalidation invalidation = Invalidation::None;
 const wchar_t *shape = L"rect", *rotate = L"0", *alpha = L"1";
@@ -202,7 +205,13 @@ int main(int argc, char **argv) {
     EROverlayAPI legacy{};
     legacy.screenState = [] { return 0; };
     legacy.getGameAddresses = [] { return GameAddresses{reinterpret_cast<uintptr_t>(&menuPointer), 0, 0, reinterpret_cast<uintptr_t>(&fieldPointer), 0}; };
-    legacy.configGetInt = [](const char *key, int fallback) { return !std::strcmp(key, "minimap.player_markers") ? int(enabled) : fallback; };
+    legacy.configGetInt = [](const char *key, int fallback) {
+        if (!std::strcmp(key, "minimap.player_markers"))
+            return int(enabled);
+        if (!std::strcmp(key, "minimap.full_map") && fullMapConfig >= 0)
+            return fullMapConfig;
+        return fallback;
+    };
     legacy.configGetVirtualKey = [](const char *, int) { return 0; };
     legacy.configGetString = [](const char *key, const wchar_t *fallback) {
         if (!std::strcmp(key, "minimap.alpha"))
@@ -226,6 +235,7 @@ int main(int argc, char **argv) {
         out->generation = generation;
         if (!valid || !er::util::readWorldMapView(reinterpret_cast<uintptr_t>(view.data()), *out))
             return false;
+        std::copy(std::begin(progressMasks), std::end(progressMasks), out->activeMasks);
         if (++reads >= 2) {
             if (invalidation == Invalidation::Generation)
                 ++out->generation;
@@ -389,8 +399,56 @@ int main(int argc, char **argv) {
     restoreCapture();
     if (!frame("valid snapshot recovers on next update", {1, 2}, false))
         return 30;
+    // Use the real renderer/configuration and archive metadata to inspect tile
+    // requests. Failed mock reads release immediately so both underground
+    // layers can be checked without the pending-request budget hiding one.
+    auto index = file("build/ida/probes/run-26836-32694765/map-index.bin");
+    auto metadata = file("build/ida/probes/run-26836-32694765/map-masks.bin");
+    if (!er::minimap::gResources.loadDirectory(index, metadata))
+        return 31;
+    native.requestFile = [](const ERFileRequest *request) -> uint64_t {
+        requestedTiles.emplace_back(request->path);
+        return 1000 + requestedTiles.size();
+    };
+    native.pollFile = [](uint64_t, const wchar_t *, ERFileData *) { return ER_FILE_FAILED; };
+    progressMasks[0] = 0x8000;
+    progressMasks[2] = 1;
+    put(view, 0x28, 5248.f);
+    put(view, 0x2C, 5248.f);
+    const auto unchangedView = view;
+    const auto unchangedSave = save;
+    const auto unchangedRecords = records;
+    auto tileFrame = [&](const char *name, int fullMap, int32_t map, uint8_t underground, const std::vector<std::wstring> &expected, bool offscreen = false) {
+        fullMapConfig = fullMap;
+        put(view, 0x24, map);
+        view[0x30] = underground;
+        requestedTiles.clear();
+        if (!frame(name, {}, offscreen) || std::memcmp(er::minimap::gData.snapshot().state.activeMasks, progressMasks, sizeof(progressMasks)))
+            return false;
+        for (const auto &suffix: expected)
+            if (std::none_of(requestedTiles.begin(), requestedTiles.end(), [&](const auto &path) { return path.ends_with(suffix); })) {
+                std::fwprintf(stderr, L"Missing tile request: %ls\n", suffix.c_str());
+                return false;
+            }
+        return save == unchangedSave && std::memcmp(records.data(), unchangedRecords.data(), sizeof(records)) == 0;
+    };
+    if (!tileFrame("full_map omitted follows save", -1, 0, 0, {L"M00_L0_20_20_00008000.tpf.dcx"}) ||
+        !tileFrame("full_map enables fully revealed surface", 1, 0, 0, {L"M00_L0_20_20_00008400.tpf.dcx"}) ||
+        !tileFrame("full_map reveals underground and surface underlay", 1, 0, 1, {L"M00_L0_20_20_00008400.tpf.dcx", L"M01_L0_20_20_00000008.tpf.dcx"}) ||
+        !tileFrame("full_map reveals DLC", 1, 10, 0, {L"M10_L0_20_20_00000003.tpf.dcx"}) ||
+        !tileFrame("full_map disabled restores actual DLC progress", 0, 10, 0, {L"M10_L0_20_20_00000001.tpf.dcx"}) ||
+        !tileFrame("full_map disabled restores actual surface progress", 0, 0, 0, {L"M00_L0_20_20_00008000.tpf.dcx"}))
+        return 32;
+    progressMasks[0] = 0;
+    if (!tileFrame("full_map disabled follows cleared fragments", 0, 0, 0, {L"M00_L0_20_20_00000000.tpf.dcx"}))
+        return 33;
+    rotate = L"1";
+    alpha = L"0.6";
+    if (!tileFrame("full_map on rotated transparent minimap", 1, 0, 0, {L"M00_L0_20_20_00008400.tpf.dcx"}, true) || view != unchangedView)
+        return 34;
     er::minimap::gResources.stop();
     er::minimap::nativeApi = nullptr;
     ImGui::DestroyContext();
     std::puts("PASS: captured game beacons enter the production ImGui draw list with native arrow UVs and digits 1-5; update, layers, rotation, alpha and invalidation verified.");
+    std::puts("PASS: full_map configuration selects native full surface/underground/DLC variants; default/off follow save progress without changing game snapshots or markers.");
 }

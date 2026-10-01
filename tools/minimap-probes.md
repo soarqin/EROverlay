@@ -128,6 +128,8 @@ build/native-checks/minimap_marker_render_verify.exe build/ida/player-marker-liv
 
 绘制验证程序回放这些记录，通过正式 update 快照、GFX/XML/DDS 资源和 ImGui Renderer 核对内部箭头 UV、数字字形及位置。回归再覆盖五个编号、空槽、删除/移动、图层、旋转/透明度和失效清除；这些变化仅发生在验证程序自己的内存，不写回游戏。字体字形使用已有 ImGui 字体，原生软阴影近似为描边，仍需要正常加载新 DLL 后验收画面。
 
+该程序另通过正式 Renderer 的配置读取与归档选图验证 `full_map`：省略或设为 `0` 时使用实际进度，设为 `1` 时使用全开地表、地下两层和 DLC 后缀，再切回真实进度。旋转透明模式使用相同路径；输入快照、view 和保存标记字节保持原样。
+
 bridge_verify.dll 可通过上文加载器在指定脱机 mod 会话运行，它直接使用正式 GameFiles 源码。预期取消请求返回 native status=2，独立请求仍成功，四张目标 DDS 共 7,340,624 字节，stop 在请求回收后返回。DLL 仍保留到进程退出。
 
 正式帧对照和实测范围见[执行记录](../docs/minimap-native-implementation.md)。

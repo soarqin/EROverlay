@@ -34,6 +34,7 @@ private:
 private:
     bool showDeath_ = true;
     bool showPlayerMarkers_ = true;
+    bool fullMap_ = false;
 
     float minimapWidth_ = 0.f;
     float minimapHeight_ = 0.f;

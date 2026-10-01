@@ -30,6 +30,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     offscreen_ = api->createOffscreen();
     showDeath_ = api->configGetInt("minimap.death_marker", 1) != 0;
     showPlayerMarkers_ = api->configGetInt("minimap.player_markers", 1) != 0;
+    fullMap_ = api->configGetInt("minimap.full_map", 0) != 0;
 
     toggleKey_ = api->configGetVirtualKey("minimap.toggle_key", 'M');
     scaleKey_ = api->configGetVirtualKey("minimap.scale_key", 'N');
@@ -438,7 +439,12 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
         static constexpr int counts[] = {41, 31, 9};
         float span = spans[level];
         int count = counts[level];
-        gResources.beginFrame(state.generation, map, state.activeMasks, level);
+        // Override only display progress. Tile metadata still selects the
+        // allowed variant, while the game snapshot and event flags stay intact.
+        uint32_t masks[3];
+        for (size_t i = 0; i < std::size(masks); ++i)
+            masks[i] = fullMap_ ? UINT32_MAX : state.activeMasks[i];
+        gResources.beginFrame(state.generation, map, masks, level);
         float radius = currentRotate_ ? std::hypot(minimapWidth_, minimapHeight_) * .5f : 0.f;
         float halfX = (currentRotate_ ? radius : minimapWidth_ * .5f) / effectiveScale_;
         float halfY = (currentRotate_ ? radius : minimapHeight_ * .5f) / effectiveScale_;
