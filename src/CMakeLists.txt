@@ -5,6 +5,8 @@ add_project(EROverlayDLL SHARED
     d3drenderer.cpp d3drenderer.hpp
     hooking.cpp hooking.hpp
     global.cpp global.hpp
+    gamefiles.cpp gamefiles.hpp nativeapi.h
+    textureupload.cpp
     input.cpp input.hpp
 
     # plugin functions
@@ -24,6 +26,9 @@ add_project(EROverlayDLL SHARED
 
     # util
     util/file.cpp util/file.hpp
+    util/assets.cpp util/assets.hpp
+    util/gameflags.cpp util/gameflags.hpp
+    util/mapstate.cpp util/mapstate.hpp
     util/memory.hpp util/signature.hpp
     util/steam.cpp util/steam.hpp
     util/sysfont.cpp util/sysfont.hpp
@@ -56,7 +61,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Pattern16 steam_api64 imgui_dx12_backend minhook
     # Windows libraries
-        dwmapi shlwapi version)
+        dwmapi shlwapi version bcrypt)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()

@@ -5,9 +5,14 @@
 * You can use `EROverlay.dll` to load multiple overlays, I will keep the back compatibility so that you just need to make sure `Overlay Loader` version meets the minimal requirements for certain overlay.
 
 ## USAGE
+
+The minimap reads tiles and sprites from the game's archives and creates its own textures. External `data/map` files are no longer required. Native loading currently supports the verified Steam 1.17.1 executable; a hash mismatch disables game calls and shows a status message.
+
+Dropped runes use the native death marker, enabled by default. Set `death_marker=0` in `minimap.ini` to hide it.
+
 * Modify `minimap.ini` inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
-  + Rename `EROverlay.dll` to `winhttp.dll` and put it aside `eldenring.exe` (don't forget folders `configs` and `data`).
+  + Rename `EROverlay.dll` to `winhttp.dll` and put it beside `eldenring.exe`, along with `configs` and the `overlays` folder containing `Minimap.dll`.
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117), [ModEngine2](https://github.com/soulsmods/ModEngine2) or [me3](https://github.com/garyttierney/me3)).
   + Run `injector.exe` to inject (not recommended, because that this method is not very stable and is blocked by some security softwares).
 

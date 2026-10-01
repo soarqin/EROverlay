@@ -2,6 +2,9 @@ add_project(minimap SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
+    gfx.cpp gfx.hpp
+    resources.cpp resources.hpp
+    ../util/assets.cpp ../util/assets.hpp
     defs/BonfireWarpParam.h
     defs/WorldMapLegacyConvParam.h
     defs/WorldMapPointParam.h
@@ -13,4 +16,4 @@ add_project(minimap SHARED
     OUTPUT_NAME Minimap
 )
 
-target_link_libraries(${PROJECT_NAME} EROverlayDLL)
+target_link_libraries(${PROJECT_NAME} EROverlayDLL xmllite shlwapi)

@@ -1,50 +1,25 @@
-#ifndef NOMINMAX
 #define NOMINMAX
-#endif
-#include "render.hpp"
-
-#include "util/string.hpp"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 
+#include "render.hpp"
+#include "util/string.hpp"
+
 extern EROverlayAPI *api;
-
 namespace er::minimap {
-
-// constant values for the minimap texture
-static constexpr float roundTableMapX0 = 2740.f;
-static constexpr float roundTableMapY0 = 7510.f;
-static constexpr float roundTableMapX1 = 2940.f;
-static constexpr float roundTableMapY1 = 7710.f;
-static constexpr float roundTableAltPosX = 800.f;
-static constexpr float roundTableAltPosY = 9119.f - 800.f;
-static constexpr float dlcMapOffsetX = 3035.f;
-static constexpr float dlcMapOffsetY = 1864.f;
-static constexpr int textureSizeInt = 1024;
-static constexpr float textureSize = (float)textureSizeInt;
 static constexpr float texturePlayerScale = 0.45f;
 static constexpr float textureDecorationScale = 0.25f;
 static constexpr float textureBearingRatio = 0.4f;
 
-Renderer::~Renderer() {
-    for (auto &texture : textures_) {
-        if (texture.texture != nullptr) {
-            api->destroyTexture(&texture);
-        }
-    }
-    textures_.clear();
-    gAtlas.unloadTextures();
-    if (offscreen_ != nullptr) {
+Renderer::~Renderer() noexcept {
+    gResources.resetTextures();
+    if (offscreen_)
         api->destroyOffscreen(offscreen_);
-        offscreen_ = nullptr;
-    }
 }
 
 void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userData) {
@@ -52,7 +27,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
 
     offscreen_ = api->createOffscreen();
-    textures_.resize(300);
+    showDeath_ = api->configGetInt("minimap.death_marker", 1) != 0;
 
     toggleKey_ = api->configGetVirtualKey("minimap.toggle_key", 'M');
     scaleKey_ = api->configGetVirtualKey("minimap.scale_key", 'N');
@@ -65,7 +40,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     auto sl = util::splitString(std::wstring(api->configGetString("minimap.scale", L"0.75,+1.5")), L',');
     scales_.clear();
     isCentered_.clear();
-    for (auto &s : sl) {
+    for (auto &s: sl) {
         if (s.empty()) {
             scales_.push_back(0.f);
             isCentered_.push_back(false);
@@ -91,20 +66,23 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     alphas_ = util::strSplitToFloatVec(api->configGetString("minimap.alpha", L"0.8,0.6"));
     auto shapeStrs = util::splitString(std::wstring(api->configGetString("minimap.shape", L"rect")), L',');
     shapes_.clear();
-    for (auto &s : shapeStrs) {
-        if (s == L"rounded") shapes_.push_back(Shape::Rounded);
-        else if (s == L"circle") shapes_.push_back(Shape::Circle);
-        else shapes_.push_back(Shape::Rect);
+    for (auto &s: shapeStrs) {
+        if (s == L"rounded")
+            shapes_.push_back(Shape::Rounded);
+        else if (s == L"circle")
+            shapes_.push_back(Shape::Circle);
+        else
+            shapes_.push_back(Shape::Rect);
     }
     auto rotateStrs = util::splitString(std::wstring(api->configGetString("minimap.rotate", L"0")), L',');
     rotates_.clear();
-    for (auto &s : rotateStrs) {
+    for (auto &s: rotateStrs) {
         rotates_.push_back(s == L"1" || s == L"yes" || s == L"true");
     }
     auto roundingStrs = util::splitString(std::wstring(api->configGetString("minimap.rounding", L"20%")), L',');
     roundings_.clear();
     roundingIsPercent_.clear();
-    for (auto &s : roundingStrs) {
+    for (auto &s: roundingStrs) {
         if (s.empty()) {
             roundings_.push_back(0.f);
             roundingIsPercent_.push_back(true);
@@ -124,10 +102,14 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
         auto colorStr = std::wstring(api->configGetString("minimap.border_color", L"255,255,255,100"));
         auto parts = util::splitString(colorStr, L',');
         int r = 255, g = 255, b = 255, a = 100;
-        if (parts.size() >= 1 && !parts[0].empty()) r = std::clamp((int)std::stof(parts[0]), 0, 255);
-        if (parts.size() >= 2 && !parts[1].empty()) g = std::clamp((int)std::stof(parts[1]), 0, 255);
-        if (parts.size() >= 3 && !parts[2].empty()) b = std::clamp((int)std::stof(parts[2]), 0, 255);
-        if (parts.size() >= 4 && !parts[3].empty()) a = std::clamp((int)std::stof(parts[3]), 0, 255);
+        if (parts.size() >= 1 && !parts[0].empty())
+            r = std::clamp((int)std::stof(parts[0]), 0, 255);
+        if (parts.size() >= 2 && !parts[1].empty())
+            g = std::clamp((int)std::stof(parts[1]), 0, 255);
+        if (parts.size() >= 3 && !parts[2].empty())
+            b = std::clamp((int)std::stof(parts[2]), 0, 255);
+        if (parts.size() >= 4 && !parts[3].empty())
+            a = std::clamp((int)std::stof(parts[3]), 0, 255);
         borderColor_ = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)g << 8) | (uint32_t)r;
     }
     borderWidth_ = (float)api->configGetInt("minimap.border_width_x10", 15) / 10.f;
@@ -259,615 +241,244 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 }
 
 bool Renderer::render() {
-    if (gData.onGUI()) {
+    gResources.prepareTextures();
+    auto snapshot = gData.snapshot();
+    if (snapshot.onGUI)
         return false;
-    }
-    if (toggleKey_ != 0 && toggleKey_ != scaleKey_ && api->inputIsKeyPressed(toggleKey_)) {
+    if (toggleKey_ && toggleKey_ != scaleKey_ && api->inputIsKeyPressed(toggleKey_))
         show_ = !show_;
-    }
-    const bool scaleKeyPressed = scaleKey_ != 0 && api->inputIsKeyPressed(scaleKey_);
-    if (show_ && scaleKeyPressed) {
+    if (show_ && scaleKey_ && api->inputIsKeyPressed(scaleKey_)) {
         currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-        currentWidthRatio_ = widthRatios_[currentScaleIndex_];
-        currentHeightRatio_ = heightRatios_[currentScaleIndex_];
-        currentScale_ = scales_[currentScaleIndex_];
-        currentAlpha_ = alphas_[currentScaleIndex_];
-        currentIsCentered_ = isCentered_[currentScaleIndex_];
-        currentShape_ = shapes_[currentScaleIndex_];
-        currentRounding_ = roundings_[currentScaleIndex_];
-        currentRoundingIsPercent_ = roundingIsPercent_[currentScaleIndex_];
-        currentRotate_ = rotates_[currentScaleIndex_];
-        currentExtraTileScale_ = extraTileScales_[currentScaleIndex_];
-        currentExtraDecorationScale_ = extraDecorationScales_[currentScaleIndex_];
-        currentExtraPlayerScale_ = extraPlayerScales_[currentScaleIndex_];
-        currentExtraBearingScale_ = extraBearingScales_[currentScaleIndex_];
+        auto i = currentScaleIndex_;
+        currentWidthRatio_ = widthRatios_[i];
+        currentHeightRatio_ = heightRatios_[i];
+        currentScale_ = scales_[i];
+        currentAlpha_ = alphas_[i];
+        currentIsCentered_ = isCentered_[i];
+        currentShape_ = shapes_[i];
+        currentRounding_ = roundings_[i];
+        currentRoundingIsPercent_ = roundingIsPercent_[i];
+        currentRotate_ = rotates_[i];
+        currentExtraTileScale_ = extraTileScales_[i];
+        currentExtraDecorationScale_ = extraDecorationScales_[i];
+        currentExtraPlayerScale_ = extraPlayerScales_[i];
+        currentExtraBearingScale_ = extraBearingScales_[i];
     }
-    if (!show_ || currentScale_ < 0.0001f) {
+    if (!show_ || currentScale_ < 0.0001f || (!snapshot.valid && !*gResources.status()))
         return false;
-    }
-    if (gracesKey_ != 0 && api->inputIsKeyPressed(gracesKey_)) {
+    if (gracesKey_ && api->inputIsKeyPressed(gracesKey_))
         showGraces_ = !showGraces_;
-    }
-    if (landmarksKey_ != 0 && api->inputIsKeyPressed(landmarksKey_)) {
+    if (landmarksKey_ && api->inputIsKeyPressed(landmarksKey_))
         showLandmarks_ = !showLandmarks_;
-    }
-
-    const auto &location = gData.location();
-    if (location.x == 0.f) {
-        return false;
-    }
     auto *vp = ImGui::GetMainViewport();
-    auto realHeight = vp->Size.x * .5625f >= vp->Size.y ? vp->Size.y : vp->Size.x * .5625f;
-    minimapWidth_ = std::floor(realHeight * currentWidthRatio_);
-    minimapHeight_ = std::floor(realHeight * currentHeightRatio_);
-    if (currentRotate_) {
+    float height = std::min(vp->Size.y, vp->Size.x * .5625f);
+    minimapWidth_ = std::floor(height * currentWidthRatio_);
+    minimapHeight_ = std::floor(height * currentHeightRatio_);
+    if (currentRotate_)
         currentShape_ = Shape::Circle;
-    }
-    if (currentShape_ == Shape::Circle) {
-        float side = std::min(minimapWidth_, minimapHeight_);
-        minimapWidth_ = side;
-        minimapHeight_ = side;
-    }
-    // Cache rounding value for this frame (used by renderShapedMinimap, border drawing, isPointInShape)
-    cachedRounding_ = currentRoundingIsPercent_
-        ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * 0.5f
-        : currentRounding_;
-    ImGuiStyle &style = ImGui::GetStyle();
-    ImVec2 originalPadding = style.WindowPadding;
-    style.WindowPadding = ImVec2(0, 0);
-    if (currentIsCentered_) {
-        ImGui::SetNextWindowPos(ImVec2(std::floor((vp->Size.x - minimapWidth_) * .5f), std::floor((vp->Size.y - minimapHeight_) * .5f)), ImGuiCond_Always, ImVec2(0.f, 0.f));
-        ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
-    } else {
-        ImGui::SetNextWindowPos(ImVec2(vp->Size.x - minimapWidth_, 0), ImGuiCond_Always, ImVec2(0.f, 0.f));
-        ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
-    }
+    if (currentShape_ == Shape::Circle)
+        minimapWidth_ = minimapHeight_ = std::min(minimapWidth_, minimapHeight_);
+    if (minimapWidth_ <= 0 || minimapHeight_ <= 0)
+        return false;
+    cachedRounding_ = currentRoundingIsPercent_ ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * .5f : currentRounding_;
+    cachedRounding_ = std::clamp(cachedRounding_, 0.f, std::min(minimapWidth_, minimapHeight_) * .5f);
+    effectiveScale_ = std::clamp(currentScale_ * currentExtraTileScale_, .01f, 16.f);
+    effectivePlayerScale_ = texturePlayerScale * currentExtraPlayerScale_;
+    effectiveDecorationScale_ = textureDecorationScale * currentExtraDecorationScale_;
+    effectiveBearingRatio_ = textureBearingRatio * currentExtraBearingScale_;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImVec2 position =
+        currentIsCentered_ ? ImVec2(std::floor((vp->Size.x - minimapWidth_) * .5f), std::floor((vp->Size.y - minimapHeight_) * .5f)) : ImVec2(vp->Size.x - minimapWidth_, 0);
+    ImGui::SetNextWindowPos(position, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
     if (ImGui::Begin("##minimap_window", nullptr,
-                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollWithMouse |
-                     ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
-        // Begin offscreen rendering: all content renders at alpha=1.0 to avoid double-alpha blending.
-        // Save actual alpha for compositing, temporarily set to 1.0 so all sub-methods render opaque.
-        // In rotation mode, offscreen is always required for circular compositing (tiles are drawn as
-        // rotated quads and the circle mask is applied during the compositing step).
-        bool useOffscreen = offscreen_ != nullptr && (currentAlpha_ < 1.0f || currentRotate_ || currentShape_ != Shape::Rect);
-        float savedAlpha = currentAlpha_;
-        if (useOffscreen) {
-            api->beginOffscreen(offscreen_);
+                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing |
+                         ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
+        bool offscreen = offscreen_ && (currentAlpha_ < 1.f || currentRotate_ || currentShape_ != Shape::Rect);
+        float alpha = currentAlpha_;
+        if (offscreen) {
+            if (!nativeApi || !nativeApi->beginOffscreen(offscreen_)) {
+                ImGui::End();
+                ImGui::PopStyleVar();
+                return false;
+            }
             currentAlpha_ = 1.f;
         }
-        float dx, dy;
-        bool drawRoundTable = false;
-        int layer;
-        switch (location.mapId) {
-            case 0: {
-                layer = (location.underground & 1) ? 1 : 0;
-                dx = location.x;
-                dy = location.y;
-                if (dx >= roundTableMapX0 && dx < roundTableMapX1 && dy >= roundTableMapY0 && dy < roundTableMapY1) {
-                    drawRoundTable = true;
-                    dx = roundTableAltPosX;
-                    dy = roundTableAltPosY;
-                }
-                break;
-            }
-            case 10:
-                layer = 2;
-                dx = location.x - dlcMapOffsetX;
-                dy = location.y - dlcMapOffsetY;
-                break;
-            default:
-                if (useOffscreen) currentAlpha_ = savedAlpha;
-                ImGui::End();
-                return false;
+        if (snapshot.valid)
+            renderContent(snapshot);
+        currentAlpha_ = alpha;
+        if (offscreen)
+            composite(alpha);
+        auto *draw = ImGui::GetWindowDrawList();
+        auto origin = ImGui::GetWindowPos();
+        ImVec2 far = origin + ImVec2(minimapWidth_, minimapHeight_);
+        if (borderWidth_ > 0) {
+            if (currentShape_ == Shape::Circle)
+                draw->AddCircle(origin + ImVec2(minimapWidth_ * .5f, minimapHeight_ * .5f), minimapWidth_ * .5f, borderColor_, 0, borderWidth_);
+            else
+                draw->AddRect(origin, far, borderColor_, currentShape_ == Shape::Rounded ? cachedRounding_ : 0.f, 0, borderWidth_);
         }
-        // Compute per-frame effective scale values based on current state
-        effectiveScale_ = currentScale_ * currentExtraTileScale_;
-        effectivePlayerScale_ = texturePlayerScale * currentExtraPlayerScale_;
-        effectiveDecorationScale_ = textureDecorationScale * currentExtraDecorationScale_;
-        effectiveBearingRatio_ = textureBearingRatio * currentExtraBearingScale_;
-
-        // Save player world position before converting to tile units
-        float playerWorldX = dx;
-        float playerWorldY = dy;
-
-        // Map rotation parameters (rotation = negative player facing so "forward" points up)
-        float mapRad = 0.f, cosMapRot = 1.f, sinMapRot = 0.f;
-        if (currentRotate_) {
-            const auto &camera = gData.camera();
-            cosMapRot = camera.yawCos;
-            sinMapRot = camera.yawSin;
-            // Calculate map rotation from camera yaw
-            mapRad = std::atan2(sinMapRot, cosMapRot);
-        }
-
-        dx /= textureSize;
-        dy /= textureSize;
-        auto texSize = textureSize * effectiveScale_;
-        auto halfWidth = minimapWidth_ * 0.5f;
-        auto halfHeight = minimapHeight_ * 0.5f;
-
-        if (currentRotate_) {
-            // === ROTATED TILE RENDERING ===
-            // Tile range covers the circle diameter symmetrically around the player
-            auto halfTileRange = halfWidth / texSize + 1.f;
-            auto x0 = (int)std::floor(dx - halfTileRange);
-            auto y0 = (int)std::floor(dy - halfTileRange);
-            auto x1 = (int)std::ceil(dx + halfTileRange);
-            auto y1 = (int)std::ceil(dy + halfTileRange);
-            for (auto y = y0; y <= y1; y++) {
-                for (auto x = x0; x <= x1; x++) {
-                    if (x < 0 || x > 9 || y < 0 || y > 9) continue;
-                    auto index = layer * 100 + y * 10 + x;
-                    float tileOffsetX = (x * textureSize - playerWorldX) * effectiveScale_;
-                    float tileOffsetY = (y * textureSize - playerWorldY) * effectiveScale_;
-                    renderRotatedTile(index, tileOffsetX, tileOffsetY, cosMapRot, sinMapRot);
-                }
-            }
-
-            if (playerSprite_ == nullptr) {
-                gAtlas.loadTextures();
-                playerSprite_ = gAtlas.findSprite("Player");
-                arrowSprite_ = gAtlas.findSprite("Arrow");
-                roundTableSprite_ = gAtlas.findSprite("RoundTable");
-                bearingSprite_ = gAtlas.findSprite("Bearing");
-            }
-
-            // === ROTATED DECORATION RENDERING ===
-            if ((showGraces_ || showLandmarks_) && gData.paramsLoaded()) {
-                auto boundMaxX = minimapWidth_ + 100.f;
-                auto boundMaxY = minimapHeight_ + 100.f;
-                auto decorationScale = effectiveDecorationScale_ * effectiveScale_;
-                for (auto y = y0; y <= y1; y++) {
-                    for (auto x = x0; x <= x1; x++) {
-                        if (x < 0 || x > 9 || y < 0 || y > 9) continue;
-                        auto p = gData.decorationsAround(layer, x, y);
-                        auto *begin = std::get<0>(p);
-                        if (begin == nullptr) continue;
-                        auto *end = std::get<1>(p);
-                        for (auto *decoration = begin; decoration < end; decoration++) {
-                            switch (decoration->source) {
-                                case DecorationSource::Grace:
-                                    if (!showGraces_) continue;
-                                    break;
-                                case DecorationSource::Landmark:
-                                    if (!showLandmarks_) continue;
-                                    break;
-                            }
-                            if (!decoration->isUnlocked()) continue;
-                            auto *sprite = decoration->sprite;
-                            // Position: world-relative to player, then rotate, then offset to center
-                            float decoRelX = (decoration->x - playerWorldX) * effectiveScale_;
-                            float decoRelY = (decoration->y - playerWorldY) * effectiveScale_;
-                            auto rx = decoRelX * cosMapRot - decoRelY * sinMapRot + halfWidth;
-                            auto ry = decoRelX * sinMapRot + decoRelY * cosMapRot + halfHeight;
-                            if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
-                                auto width = sprite->width * decorationScale;
-                                auto height = sprite->height * decorationScale;
-                                auto spriteCenterX = sprite->centerX * decorationScale;
-                                auto spriteCenterY = sprite->centerY * decorationScale;
-                                auto rad = decoration->rotationRad;
-                                if (rad == 0.f) {
-                                    // rotationRad==0: position rotates with map, but visual orientation stays fixed on screen
-                                    ImGui::SetCursorPos(ImVec2(rx - spriteCenterX, ry - spriteCenterY));
-                                    ImGui::ImageWithBg((ImTextureID)sprite->texture->gpuHandle, ImVec2(width, height), ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-                                } else {
-                                    // rotationRad!=0: visual rotation adjusted by map rotation
-                                    rad += mapRad;
-                                    auto *drawList = ImGui::GetWindowDrawList();
-                                    auto xRel0 = -spriteCenterX;
-                                    auto yRel0 = -spriteCenterY;
-                                    auto xRel1 = (sprite->width - sprite->centerX) * decorationScale;
-                                    auto yRel1 = (sprite->height - sprite->centerY) * decorationScale;
-                                    auto cosRad = std::cos(rad);
-                                    auto sinRad = std::sin(rad);
-                                    auto pos = ImGui::GetWindowPos();
-                                    auto absX = rx + pos.x;
-                                    auto absY = ry + pos.y;
-                                    auto p1 = ImVec2(absX + xRel0 * cosRad - yRel0 * sinRad, absY + xRel0 * sinRad + yRel0 * cosRad);
-                                    auto p2 = ImVec2(absX + xRel1 * cosRad - yRel0 * sinRad, absY + xRel1 * sinRad + yRel0 * cosRad);
-                                    auto p3 = ImVec2(absX + xRel1 * cosRad - yRel1 * sinRad, absY + xRel1 * sinRad + yRel1 * cosRad);
-                                    auto p4 = ImVec2(absX + xRel0 * cosRad - yRel1 * sinRad, absY + xRel0 * sinRad + yRel1 * cosRad);
-                                    drawList->PushTexture((ImTextureID)sprite->texture->gpuHandle);
-                                    drawList->PrimReserve(6, 4);
-                                    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec2(sprite->u0, sprite->v1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-                                    drawList->PopTexture();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            // === ORIGINAL (NON-ROTATED) RENDERING ===
-            auto u = minimapWidth_ / texSize;
-            auto v = minimapHeight_ / texSize;
-            dx -= u * 0.5f;
-            dy -= v * 0.5f;
-            auto cx = std::floor((std::floor(dx) - dx) * texSize);
-            auto cy = std::floor((std::floor(dy) - dy) * texSize);
-            auto x0 = (int)dx;
-            auto y0 = (int)dy;
-            auto x1 = (int)(dx + u);
-            auto y1 = (int)(dy + v);
-            auto ny = cy;
-            for (auto y = y0; y <= y1; y++, ny += texSize) {
-                auto index0 = layer * 100 + y * 10 + x0;
-                auto nx = cx;
-                for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                    if (currentShape_ == Shape::Rect) {
-                        renderMinimap(index0, nx, ny, effectiveScale_);
-                    } else {
-                        renderShapedMinimap(index0, nx, ny, effectiveScale_);
-                    }
-                }
-            }
-            if (playerSprite_ == nullptr) {
-                gAtlas.loadTextures();
-                playerSprite_ = gAtlas.findSprite("Player");
-                arrowSprite_ = gAtlas.findSprite("Arrow");
-                roundTableSprite_ = gAtlas.findSprite("RoundTable");
-                bearingSprite_ = gAtlas.findSprite("Bearing");
-            }
-            if ((showGraces_ || showLandmarks_) && gData.paramsLoaded()) {
-                auto boundMaxX = minimapWidth_ + 100.f;
-                auto boundMaxY = minimapHeight_ + 100.f;
-                ny = cy;
-                auto decorationScale = effectiveDecorationScale_ * effectiveScale_;
-                for (auto y = y0; y <= y1; y++, ny += texSize) {
-                    auto index0 = layer * 100 + y * 10 + x0;
-                    auto nx = cx;
-                    for (auto x = x0; x <= x1; x++, nx += texSize, index0++) {
-                        auto p = gData.decorationsAround(layer, x, y);
-                        auto *begin = std::get<0>(p);
-                        if (begin == nullptr) continue;
-                        auto *end = std::get<1>(p);
-                        for (auto *decoration = begin; decoration < end; decoration++) {
-                            switch (decoration->source) {
-                                case DecorationSource::Grace:
-                                    if (!showGraces_) continue;
-                                    break;
-                                case DecorationSource::Landmark:
-                                    if (!showLandmarks_) continue;
-                                    break;
-                            }
-                            if (!decoration->isUnlocked()) continue;
-                            auto *sprite = decoration->sprite;
-                            auto rx = decoration->localX * effectiveScale_ + nx;
-                            auto ry = decoration->localY * effectiveScale_ + ny;
-                            if (rx > -100.f && ry > -100.f && rx < boundMaxX && ry < boundMaxY) {
-                                auto width = sprite->width * decorationScale;
-                                auto height = sprite->height * decorationScale;
-                                auto centerX = sprite->centerX * decorationScale;
-                                auto centerY = sprite->centerY * decorationScale;
-                                auto rad = decoration->rotationRad;
-                                if (rad == 0.f) {
-                                    ImGui::SetCursorPos(ImVec2(rx - centerX, ry - centerY));
-                                    ImGui::ImageWithBg((ImTextureID)sprite->texture->gpuHandle, ImVec2(width, height), ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-                                } else {
-                                    auto *drawList = ImGui::GetWindowDrawList();
-                                    auto xRel0 = -centerX;
-                                    auto yRel0 = -centerY;
-                                    auto xRel1 = (sprite->width - sprite->centerX) * decorationScale;
-                                    auto yRel1 = (sprite->height - sprite->centerY) * decorationScale;
-                                    auto cosRad = std::cos(rad);
-                                    auto sinRad = std::sin(rad);
-                                    auto pos = ImGui::GetWindowPos();
-                                    rx += pos.x;
-                                    ry += pos.y;
-                                    // PrimQuadUV expects the same order as PrimRectUV: TL, TR, BR, BL (triangles TL-TR-BR and TL-BR-BL).
-                                    auto p1 = ImVec2(rx + xRel0 * cosRad - yRel0 * sinRad, ry + xRel0 * sinRad + yRel0 * cosRad);
-                                    auto p2 = ImVec2(rx + xRel1 * cosRad - yRel0 * sinRad, ry + xRel1 * sinRad + yRel0 * cosRad);
-                                    auto p3 = ImVec2(rx + xRel1 * cosRad - yRel1 * sinRad, ry + xRel1 * sinRad + yRel1 * cosRad);
-                                    auto p4 = ImVec2(rx + xRel0 * cosRad - yRel1 * sinRad, ry + xRel0 * sinRad + yRel1 * cosRad);
-                                    drawList->PushTexture((ImTextureID)sprite->texture->gpuHandle);
-                                    drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-                                    drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(sprite->u0, sprite->v0), ImVec2(sprite->u1, sprite->v0), ImVec2(sprite->u1, sprite->v1), ImVec2(sprite->u0, sprite->v1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-                                    drawList->PopTexture();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (drawRoundTable && roundTableSprite_ != nullptr) {
-            if (currentShape_ == Shape::Rect || isPointInShape(minimapWidth_ * 0.5f, minimapHeight_ * 0.5f)) {
-                ImGui::SetCursorPos(ImVec2(minimapWidth_ * .5f - roundTableSprite_->width * .25f, minimapHeight_ * .5f - roundTableSprite_->height * .25f));
-                ImGui::ImageWithBg((ImTextureID)roundTableSprite_->texture->gpuHandle, ImVec2(roundTableSprite_->width * .5f, roundTableSprite_->height * .5f), ImVec2(roundTableSprite_->u0, roundTableSprite_->v0), ImVec2(roundTableSprite_->u1, roundTableSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-            }
-        }
-        renderPlayer(location.oriDeg * std::numbers::pi_v<float> / 180.f + mapRad);
-        // End offscreen rendering and composite the result with the actual alpha
-        if (useOffscreen) {
-            currentAlpha_ = savedAlpha;
-            auto *gpuHandle = api->endOffscreen(offscreen_);
-            if (gpuHandle) {
-                auto winPos = ImGui::GetWindowPos();
-                auto *vp = ImGui::GetMainViewport();
-                float u0 = winPos.x / vp->Size.x;
-                float v0 = winPos.y / vp->Size.y;
-                float u1 = (winPos.x + minimapWidth_) / vp->Size.x;
-                float v1 = (winPos.y + minimapHeight_) / vp->Size.y;
-                if (currentShape_ == Shape::Circle) {
-                    // Circular compositing: sample the offscreen texture through a circle shape.
-                    // Handles both rotated mode (tiles drawn as rotated quads) and non-rotated circle mode.
-                    auto *drawList = ImGui::GetWindowDrawList();
-                    drawList->PushTexture((ImTextureID)gpuHandle);
-                    int vs = drawList->VtxBuffer.Size;
-                    float radius = minimapWidth_ * 0.5f;
-                    ImVec2 center = {winPos.x + radius, winPos.y + radius};
-                    drawList->PathArcTo(center, radius, 0.0f, IM_PI * 2.0f, 0);
-                    drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-                    int ve = drawList->VtxBuffer.Size;
-                    ImGui::ShadeVertsLinearUV(drawList, vs, ve, winPos, {winPos.x + minimapWidth_, winPos.y + minimapHeight_}, ImVec2(u0, v0), ImVec2(u1, v1), false);
-                    drawList->PopTexture();
-                } else if (currentShape_ == Shape::Rounded) {
-                    // Rounded rect compositing: sample the offscreen texture through a rounded rectangle.
-                    auto *drawList = ImGui::GetWindowDrawList();
-                    drawList->PushTexture((ImTextureID)gpuHandle);
-                    int vs = drawList->VtxBuffer.Size;
-                    ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
-                    drawList->PathRect(winPos, shapeMax, cachedRounding_);
-                    drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-                    int ve = drawList->VtxBuffer.Size;
-                    ImGui::ShadeVertsLinearUV(drawList, vs, ve, winPos, shapeMax, ImVec2(u0, v0), ImVec2(u1, v1), false);
-                    drawList->PopTexture();
-                } else {
-                    ImGui::SetCursorPos(ImVec2(0, 0));
-                    ImGui::ImageWithBg((ImTextureID)gpuHandle, ImVec2(minimapWidth_, minimapHeight_), ImVec2(u0, v0), ImVec2(u1, v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-                }
-            }
-        }
-        // Draw shape border
-        if (borderWidth_ > 0.f) {
-            auto *drawList = ImGui::GetWindowDrawList();
-            auto winPos = ImGui::GetWindowPos();
-            ImVec2 shapeMin = winPos;
-            ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
-            if (currentShape_ == Shape::Circle) {
-                float radius = minimapWidth_ * 0.5f;
-                ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
-                drawList->AddCircle(center, radius, borderColor_, 0, borderWidth_);
-            } else if (currentShape_ == Shape::Rounded) {
-                drawList->AddRect(shapeMin, shapeMax, borderColor_, cachedRounding_, 0, borderWidth_);
-            } else {
-                drawList->AddRect(shapeMin, shapeMax, borderColor_, 0.f, 0, borderWidth_);
-            }
-        }
-        // Render bearing compass in top-right corner (rotation mode only)
-        if (currentRotate_ && bearingSprite_ != nullptr && bearingSprite_->texture != nullptr) {
-            auto *drawList = ImGui::GetWindowDrawList();
-            auto winPos = ImGui::GetWindowPos();
-            float bearingScale = minimapWidth_ * effectiveBearingRatio_ / (float)bearingSprite_->width;
-            float bw = bearingSprite_->width * bearingScale;
-            float bh = bearingSprite_->height * bearingScale;
-            float bcx = bearingSprite_->centerX * bearingScale;
-            float bcy = bearingSprite_->centerY * bearingScale;
-            float margin = minimapWidth_ * 0.04f;
-            float absX = winPos.x + minimapWidth_ - bw * 0.5f - margin;
-            float absY = winPos.y + bh * 0.5f + margin;
-            float cosRad = std::cos(mapRad);
-            float sinRad = std::sin(mapRad);
-            auto xRel0 = -bcx;
-            auto yRel0 = -bcy;
-            auto xRel1 = bw - bcx;
-            auto yRel1 = bh - bcy;
-            auto p1 = ImVec2(absX + xRel0 * cosRad - yRel0 * sinRad, absY + xRel0 * sinRad + yRel0 * cosRad);
-            auto p2 = ImVec2(absX + xRel1 * cosRad - yRel0 * sinRad, absY + xRel1 * sinRad + yRel0 * cosRad);
-            auto p3 = ImVec2(absX + xRel1 * cosRad - yRel1 * sinRad, absY + xRel1 * sinRad + yRel1 * cosRad);
-            auto p4 = ImVec2(absX + xRel0 * cosRad - yRel1 * sinRad, absY + xRel0 * sinRad + yRel1 * cosRad);
-            drawList->PushTexture((ImTextureID)bearingSprite_->texture->gpuHandle);
-            drawList->PrimReserve(6, 4);
-            drawList->PrimQuadUV(p1, p2, p3, p4,
-                ImVec2(bearingSprite_->u0, bearingSprite_->v0), ImVec2(bearingSprite_->u1, bearingSprite_->v0),
-                ImVec2(bearingSprite_->u1, bearingSprite_->v1), ImVec2(bearingSprite_->u0, bearingSprite_->v1),
-                IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-            drawList->PopTexture();
-        }
+        if (*gResources.status())
+            draw->AddText(origin + ImVec2(8, 8), IM_COL32(255, 255, 255, 255), gResources.status());
     }
     ImGui::End();
-    style.WindowPadding = originalPadding;
+    ImGui::PopStyleVar();
     return false;
 }
 
-bool Renderer::prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out) {
-    if (index < 0 || index >= (int)textures_.size()) {
-        return false;
-    }
-    auto &t = textures_[index];
-    if (!t.loaded) {
-        wchar_t path[256];
-        wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-        t = api->loadTexture(path);
-        if (t.texture == nullptr) {
-            // Fallback to JPG if PNG is not found
-            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-            t = api->loadTexture(path);
-        }
-    }
-    if (t.texture == nullptr) {
-        return false;
-    }
-    auto width = (float)t.width * scale;
-    auto height = (float)t.height * scale;
-    out.texWidth = width;
-    out.texHeight = height;
-    out.clipU = 0.f;
-    out.clipV = 0.f;
-    if (posX < 0) {
-        out.clipU = -posX;
-        width += posX;
-        posX = 0.f;
-    }
-    if (posY < 0) {
-        out.clipV = -posY;
-        height += posY;
-        posY = 0.f;
-    }
-    if (posX + width > minimapWidth_) {
-        width = minimapWidth_ - posX;
-    }
-    if (posY + height > minimapHeight_) {
-        height = minimapHeight_ - posY;
-    }
-    if (width <= 0.f || height <= 0.f) return false;
-    out.texture = &t;
-    out.posX = posX;
-    out.posY = posY;
-    out.width = width;
-    out.height = height;
-    return true;
-}
-
-void Renderer::renderMinimap(int index, float posX, float posY, float scale) {
-    TileInfo tile;
-    if (!prepareTile(index, posX, posY, scale, tile)) return;
-    ImGui::SetCursorPos(ImVec2(tile.posX, tile.posY));
-    ImGui::ImageWithBg((ImTextureID)tile.texture->gpuHandle, ImVec2(tile.width, tile.height),
-        ImVec2(tile.clipU / tile.texWidth, tile.clipV / tile.texHeight),
-        ImVec2((tile.clipU + tile.width) / tile.texWidth, (tile.clipV + tile.height) / tile.texHeight),
-        ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-}
-
-void Renderer::renderShapedMinimap(int index, float posX, float posY, float scale) {
-    TileInfo tile;
-    if (!prepareTile(index, posX, posY, scale, tile)) return;
-
-    auto *drawList = ImGui::GetWindowDrawList();
-    auto winPos = ImGui::GetWindowPos();
-
-    // Shape screen coordinates (full minimap bounds)
-    ImVec2 shapeMin = winPos;
-    ImVec2 shapeMax = {winPos.x + minimapWidth_, winPos.y + minimapHeight_};
-
-    // Tile screen coordinates
-    ImVec2 tileScreenMin = {winPos.x + tile.posX, winPos.y + tile.posY};
-    ImVec2 tileScreenMax = {tileScreenMin.x + tile.width, tileScreenMin.y + tile.height};
-
-    // PushClipRect to tile area intersected with minimap bounds
-    drawList->PushClipRect(
-        ImVec2(std::max(tileScreenMin.x, shapeMin.x), std::max(tileScreenMin.y, shapeMin.y)),
-        ImVec2(std::min(tileScreenMax.x, shapeMax.x), std::min(tileScreenMax.y, shapeMax.y)),
-        true);
-
-    drawList->PushTexture((ImTextureID)tile.texture->gpuHandle);
-    int vs = drawList->VtxBuffer.Size;
-    if (currentShape_ == Shape::Circle) {
-        float radius = minimapWidth_ * 0.5f;
-        ImVec2 center = {shapeMin.x + radius, shapeMin.y + radius};
-        drawList->PathArcTo(center, radius, 0.0f, IM_PI * 2.0f, 0);
-    } else {
-        drawList->PathRect(shapeMin, shapeMax, cachedRounding_);
-    }
-    drawList->PathFillConvex(IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-    int ve = drawList->VtxBuffer.Size;
-
-    // Map tile texture UVs: texOriginScreen is the screen position of UV (0,0) of this tile
-    ImVec2 texOriginScreen = {winPos.x + tile.posX - tile.clipU, winPos.y + tile.posY - tile.clipV};
-    ImGui::ShadeVertsLinearUV(drawList, vs, ve, texOriginScreen, {texOriginScreen.x + tile.texWidth, texOriginScreen.y + tile.texHeight}, ImVec2(0, 0), ImVec2(1, 1), false);
-
-    drawList->PopTexture();
-    drawList->PopClipRect();
-}
-
-void Renderer::renderRotatedTile(int index, float tileOffsetX, float tileOffsetY, float cosRot, float sinRot) {
-    if (index < 0 || index >= (int)textures_.size()) return;
-    auto &t = textures_[index];
-    if (!t.loaded) {
-        wchar_t path[256];
-        wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.png", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-        t = api->loadTexture(path);
-        if (t.texture == nullptr) {
-            wsprintfW(path, L"%ls\\data\\map\\%02d\\%d_%d.jpg", api->getModulePath(), index / 100, index % 10, (index % 100) / 10);
-            t = api->loadTexture(path);
-        }
-    }
-    if (t.texture == nullptr) return;
-
-    float texPixelW = (float)t.width * effectiveScale_;
-    float texPixelH = (float)t.height * effectiveScale_;
-
-    auto *drawList = ImGui::GetWindowDrawList();
-    auto winPos = ImGui::GetWindowPos();
-    float cx = winPos.x + minimapWidth_ * 0.5f;
-    float cy = winPos.y + minimapHeight_ * 0.5f;
-
-    // Compute 4 rotated corners in screen space (TL, TR, BR, BL)
-    float offsets[4][2] = {
-        {tileOffsetX, tileOffsetY},
-        {tileOffsetX + texPixelW, tileOffsetY},
-        {tileOffsetX + texPixelW, tileOffsetY + texPixelH},
-        {tileOffsetX, tileOffsetY + texPixelH},
+void Renderer::drawRecipe(const IconRecipe *recipe, Point center, float scale, float angle) {
+    if (!recipe || scale <= 0 || !std::isfinite(angle))
+        return;
+    auto *draw = ImGui::GetWindowDrawList();
+    ImVec2 origin = ImGui::GetWindowPos();
+    float cosine = std::cos(angle), sine = std::sin(angle);
+    auto project = [&](const IconLayer &layer, Point point) {
+        point = transform(layer.matrix, point);
+        point.x *= scale;
+        point.y *= scale;
+        return origin + ImVec2(center.x + point.x * cosine - point.y * sine, center.y + point.x * sine + point.y * cosine);
     };
-    ImVec2 p[4];
-    float minX = 1e10f, minY = 1e10f, maxX = -1e10f, maxY = -1e10f;
-    for (int i = 0; i < 4; i++) {
-        p[i] = {cx + offsets[i][0] * cosRot - offsets[i][1] * sinRot,
-                cy + offsets[i][0] * sinRot + offsets[i][1] * cosRot};
-        minX = std::min(minX, p[i].x);
-        minY = std::min(minY, p[i].y);
-        maxX = std::max(maxX, p[i].x);
-        maxY = std::max(maxY, p[i].y);
+    for (const auto &layer: recipe->layers) {
+        if (layer.bitmap()) {
+            AtlasRegion region;
+            ERTextureView texture;
+            if (!gResources.layerView(layer, region, texture))
+                continue;
+            ImVec2 uv0(float(region.x) / texture.width, float(region.y) / texture.height);
+            ImVec2 uv1(float(region.x + region.width) / texture.width, float(region.y + region.height) / texture.height);
+            draw->AddImageQuad((ImTextureID)texture.gpuHandle, project(layer, {0, 0}), project(layer, {float(layer.width), 0}),
+                               project(layer, {float(layer.width), float(layer.height)}), project(layer, {0, float(layer.height)}), uv0, ImVec2(uv1.x, uv0.y), uv1,
+                               ImVec2(uv0.x, uv1.y), IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
+        } else {
+            Point previous;
+            for (const auto &command: layer.shape.commands) {
+                if (command.op && command.stroke && command.stroke <= layer.shape.strokes.size()) {
+                    const auto &stroke = layer.shape.strokes[command.stroke - 1];
+                    uint32_t color = (stroke.color & 0xffffff) | (uint32_t(float(stroke.color >> 24) * currentAlpha_) << 24);
+                    float width = stroke.width * scale * std::sqrt(std::abs(layer.matrix[0] * layer.matrix[3] - layer.matrix[1] * layer.matrix[2]));
+                    auto from = project(layer, previous), to = project(layer, command.to);
+                    if (command.op == 1)
+                        draw->AddLine(from, to, color, std::max(.5f, width));
+                    else {
+                        auto control = project(layer, command.control);
+                        draw->AddBezierCubic(from, from + (control - from) * (2.f / 3.f), to + (control - to) * (2.f / 3.f), to, color, std::max(.5f, width));
+                    }
+                }
+                previous = command.to;
+            }
+        }
     }
-
-    // Early-out: bounding box completely outside minimap window
-    if (maxX < winPos.x || maxY < winPos.y || minX > winPos.x + minimapWidth_ || minY > winPos.y + minimapHeight_) {
-        return;
-    }
-
-    // Draw tile as a rotated textured quad.
-    // Adjacent tiles share edges exactly, so there are no gaps or overlaps.
-    // Circular clipping is handled by the offscreen compositing step.
-    drawList->PushTexture((ImTextureID)t.gpuHandle);
-    drawList->PrimReserve(6, 4);
-    drawList->PrimQuadUV(p[0], p[1], p[2], p[3],
-        ImVec2(0, 0), ImVec2(1, 0), ImVec2(1, 1), ImVec2(0, 1),
-        IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-    drawList->PopTexture();
 }
 
-void Renderer::renderPlayer(float deltaRad) {
-    if (playerSprite_ == nullptr) {
+void Renderer::drawTile(const TileView &tile, Point player, float cosine, float sine) {
+    ERTextureView texture;
+    if (!nativeApi || nativeApi->pollTexture(tile.texture, &texture) != ER_TEXTURE_READY)
         return;
+    auto origin = ImGui::GetWindowPos();
+    auto point = [&](float x, float y) {
+        x = (x - player.x) * effectiveScale_;
+        y = (y - player.y) * effectiveScale_;
+        return origin + ImVec2(minimapWidth_ * .5f + x * cosine - y * sine, minimapHeight_ * .5f + x * sine + y * cosine);
+    };
+    ImGui::GetWindowDrawList()->AddImageQuad((ImTextureID)texture.gpuHandle, point(tile.left, tile.top), point(tile.right, tile.top), point(tile.right, tile.bottom),
+                                             point(tile.left, tile.bottom), ImVec2(0, 0), ImVec2(1, 0), ImVec2(1, 1), ImVec2(0, 1),
+                                             IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
+}
+
+void Renderer::renderContent(const MapSnapshot &snapshot) {
+    const auto &state = snapshot.state;
+    Point center{minimapWidth_ * .5f, minimapHeight_ * .5f};
+    Point player{state.x, state.y};
+    float angle = currentRotate_ ? std::atan2(snapshot.camera.yawSin, snapshot.camera.yawCos) : 0.f;
+    float cosine = std::cos(angle), sine = std::sin(angle);
+    int map = state.mapId == 10 ? 2 : state.mapId == 0 ? ((state.underground & 1) ? 1 : 0) : -1;
+    if (snapshot.roundtable) {
+        drawRecipe(gResources.special("home"), center, currentScale_ * currentExtraTileScale_, angle);
+        drawRecipe(gResources.icon(snapshot.homeIcon), center, effectiveDecorationScale_ * effectiveScale_ * 2.f, angle);
+    } else if (map >= 0) {
+        // Keep L0 as the default until native L1/L2 seam and position acceptance
+        // is complete. Coarser assets and spans are already supported below.
+        uint8_t level = 0;
+        static constexpr float spans[] = {256, 342, 1288};
+        static constexpr int counts[] = {41, 31, 9};
+        float span = spans[level];
+        int count = counts[level];
+        gResources.beginFrame(state.generation, map, state.activeMasks, level);
+        float radius = currentRotate_ ? std::hypot(minimapWidth_, minimapHeight_) * .5f : 0.f;
+        float halfX = (currentRotate_ ? radius : minimapWidth_ * .5f) / effectiveScale_;
+        float halfY = (currentRotate_ ? radius : minimapHeight_ * .5f) / effectiveScale_;
+        int x0 = std::max(0, int(std::floor((player.x - halfX) / span)) - 1), x1 = std::min(count - 1, int(std::floor((player.x + halfX) / span)) + 1);
+        int y0 = std::max(0, int(std::floor((player.y - halfY) / span)) - 1), y1 = std::min(count - 1, int(std::floor((player.y + halfY) / span)) + 1);
+        auto drawLayer = [&](uint32_t layer) {
+            for (int y = y0; y <= y1; ++y)
+                for (int x = x0; x <= x1; ++x) {
+                    TileView tile;
+                    if (gResources.tile(layer, x, count - 1 - y, tile))
+                        drawTile(tile, player, cosine, sine);
+                }
+        };
+        // Native Image_0 is the surface underlay; Image_1 is shown for the
+        // underground view. M01 is translucent and needs the M00 base.
+        if (map == 1)
+            drawLayer(0);
+        drawLayer(map);
+        gResources.endFrame();
+        for (const auto &marker: snapshot.decorations) {
+            if (!(marker.maps & (1u << map)) || (marker.source == DecorationSource::Grace ? !showGraces_ : !showLandmarks_))
+                continue;
+            float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
+            Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
+            if (screen.x < -200 || screen.y < -200 || screen.x > minimapWidth_ + 200 || screen.y > minimapHeight_ + 200)
+                continue;
+            float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
+            drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
+        }
+        int deathMap = map == 2 ? 10 : map;
+        if (showDeath_ && state.deathValid && state.deathMapId == deathMap) {
+            float x = (state.deathX - player.x) * effectiveScale_, y = (state.deathY - player.y) * effectiveScale_;
+            Point death{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
+            drawRecipe(gResources.special("death"), death, effectiveScale_ * 2.f * effectivePlayerScale_, angle);
+        }
     }
-    auto halfWidth = minimapWidth_ * .5f;
-    auto halfHeight = minimapHeight_ * .5f;
-    ImGui::SetCursorPos(ImVec2(halfWidth - playerSprite_->centerX * effectiveScale_ * effectivePlayerScale_, halfHeight - playerSprite_->centerY * effectiveScale_ * effectivePlayerScale_));
-    ImGui::ImageWithBg((ImTextureID)playerSprite_->texture->gpuHandle, ImVec2(playerSprite_->width * effectiveScale_ * effectivePlayerScale_, playerSprite_->height * effectiveScale_ * effectivePlayerScale_), ImVec2(playerSprite_->u0, playerSprite_->v0), ImVec2(playerSprite_->u1, playerSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-    if (arrowSprite_ == nullptr) {
+    drawRecipe(gResources.special("player"), center, effectiveScale_ * effectivePlayerScale_);
+    drawRecipe(gResources.special("arrow"), center, effectiveScale_ * effectivePlayerScale_, state.oriDeg * std::numbers::pi_v<float> / 180.f + angle);
+    if (currentRotate_) {
+        float size = std::min(minimapWidth_, minimapHeight_) * effectiveBearingRatio_;
+        const auto *bearing = gResources.special("bearing");
+        if (bearing && !bearing->layers.empty()) {
+            auto width = float(bearing->layers[0].width);
+            drawRecipe(bearing, {minimapWidth_ - size * .5f, size * .5f}, size / width, angle);
+        }
+    }
+}
+
+void Renderer::composite(float alpha) {
+    void *handle = api->endOffscreen(offscreen_);
+    if (!handle)
         return;
-    }
-    if (deltaRad == 0.f) {
-        // In rotation mode the map already faces the player direction — arrow points up (no rotation)
-        ImGui::SetCursorPos(ImVec2(halfWidth - arrowSprite_->centerX * effectiveScale_ * effectivePlayerScale_, halfHeight - arrowSprite_->centerY * effectiveScale_ * effectivePlayerScale_));
-        ImGui::ImageWithBg((ImTextureID)arrowSprite_->texture->gpuHandle, ImVec2(arrowSprite_->width * effectiveScale_ * effectivePlayerScale_, arrowSprite_->height * effectiveScale_ * effectivePlayerScale_), ImVec2(arrowSprite_->u0, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, currentAlpha_));
-    } else {
-        auto *drawList = ImGui::GetWindowDrawList();
-        auto cursorPos = ImGui::GetWindowPos() + ImVec2(halfWidth, halfHeight);
-        auto xRel0 = -arrowSprite_->centerX * effectiveScale_ * effectivePlayerScale_;
-        auto yRel0 = -arrowSprite_->centerY * effectiveScale_ * effectivePlayerScale_;
-        auto xRel1 = (arrowSprite_->width - arrowSprite_->centerX) * effectiveScale_ * effectivePlayerScale_;
-        auto yRel1 = (arrowSprite_->height - arrowSprite_->centerY) * effectiveScale_ * effectivePlayerScale_;
-        auto cosRad = std::cos(deltaRad);
-        auto sinRad = std::sin(deltaRad);
-        // PrimQuadUV: TL, TR, BR, BL (matches PrimRectUV / AddImage winding).
-        auto p1 = cursorPos + ImVec2(xRel0 * cosRad - yRel0 * sinRad, xRel0 * sinRad + yRel0 * cosRad);
-        auto p2 = cursorPos + ImVec2(xRel1 * cosRad - yRel0 * sinRad, xRel1 * sinRad + yRel0 * cosRad);
-        auto p3 = cursorPos + ImVec2(xRel1 * cosRad - yRel1 * sinRad, xRel1 * sinRad + yRel1 * cosRad);
-        auto p4 = cursorPos + ImVec2(xRel0 * cosRad - yRel1 * sinRad, xRel0 * sinRad + yRel1 * cosRad);
-        drawList->PushTexture((ImTextureID)arrowSprite_->texture->gpuHandle);
-        drawList->PrimReserve(6, 4); // 6 indices for 2 triangles, 4 vertices
-        drawList->PrimQuadUV(p1, p2, p3, p4, ImVec2(arrowSprite_->u0, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v0), ImVec2(arrowSprite_->u1, arrowSprite_->v1), ImVec2(arrowSprite_->u0, arrowSprite_->v1), IM_COL32(255, 255, 255, (int)(currentAlpha_ * 255.f)));
-        drawList->PopTexture();
-    }
+    auto origin = ImGui::GetWindowPos();
+    auto *vp = ImGui::GetMainViewport();
+    auto *draw = ImGui::GetWindowDrawList();
+    ImVec2 far = origin + ImVec2(minimapWidth_, minimapHeight_);
+    ImVec2 uv0(origin.x / vp->Size.x, origin.y / vp->Size.y), uv1(far.x / vp->Size.x, far.y / vp->Size.y);
+    draw->PushTexture((ImTextureID)handle);
+    int first = draw->VtxBuffer.Size;
+    if (currentShape_ == Shape::Circle)
+        draw->PathArcTo(origin + ImVec2(minimapWidth_ * .5f, minimapHeight_ * .5f), minimapWidth_ * .5f, 0, IM_PI * 2, 0);
+    else
+        draw->PathRect(origin, far, currentShape_ == Shape::Rounded ? cachedRounding_ : 0.f);
+    draw->PathFillConvex(IM_COL32(255, 255, 255, int(alpha * 255)));
+    ImGui::ShadeVertsLinearUV(draw, first, draw->VtxBuffer.Size, origin, far, uv0, uv1, false);
+    draw->PopTexture();
 }
 
 bool Renderer::isPointInShape(float x, float y) const {
-    if (currentShape_ == Shape::Rect) return true;
+    if (currentShape_ == Shape::Rect)
+        return true;
     float cx = minimapWidth_ * 0.5f;
     float cy = minimapHeight_ * 0.5f;
     if (currentShape_ == Shape::Circle) {
-        float radius = cx;  // Circle forces square, so cx == cy == radius
+        float radius = cx; // Circle forces square, so cx == cy == radius
         float dx = x - cx;
         float dy = y - cy;
         return dx * dx + dy * dy <= radius * radius;
@@ -878,19 +489,26 @@ bool Renderer::isPointInShape(float x, float y) const {
     float top = cachedRounding_;
     float bottom = minimapHeight_ - cachedRounding_;
     // Inside the inner cross (no corner check needed)
-    if (x >= left && x <= right && y >= 0.f && y <= minimapHeight_) return true;
-    if (y >= top && y <= bottom && x >= 0.f && x <= minimapWidth_) return true;
+    if (x >= left && x <= right && y >= 0.f && y <= minimapHeight_)
+        return true;
+    if (y >= top && y <= bottom && x >= 0.f && x <= minimapWidth_)
+        return true;
     // Check the four corner arcs
     auto checkCorner = [](float px, float py, float cornerX, float cornerY, float r) {
         float dx = px - cornerX;
         float dy = py - cornerY;
         return dx * dx + dy * dy <= r * r;
     };
-    if (x < left && y < top) return checkCorner(x, y, left, top, cachedRounding_);
-    if (x > right && y < top) return checkCorner(x, y, right, top, cachedRounding_);
-    if (x < left && y > bottom) return checkCorner(x, y, left, bottom, cachedRounding_);
-    if (x > right && y > bottom) return checkCorner(x, y, right, bottom, cachedRounding_);
+    if (x < left && y < top)
+        return checkCorner(x, y, left, top, cachedRounding_);
+    if (x > right && y < top)
+        return checkCorner(x, y, right, top, cachedRounding_);
+    if (x < left && y > bottom)
+        return checkCorner(x, y, left, bottom, cachedRounding_);
+    if (x > right && y > bottom)
+        return checkCorner(x, y, right, bottom, cachedRounding_);
     return false;
 }
 
-}
+
+} // namespace er::minimap

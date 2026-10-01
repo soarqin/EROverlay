@@ -123,6 +123,7 @@ void D3DRenderer::releaseCommandQueue() {
 }
 
 bool D3DRenderer::captureCommandQueue(IUnknown *pDevice) {
+    std::lock_guard lock(deviceMutex_);
     if (pDevice == nullptr) return false;
 
     ID3D12CommandQueue *commandQueue = nullptr;
@@ -187,8 +188,12 @@ void D3DRenderer::resetCommandQueueCapture() {
 }
 
 void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
+    std::lock_guard lock(deviceMutex_);
     (void)reason;
+    drawingFrame_ = false;
+    waitForFrames();
     pluginsDestroyRenderers();
+    releaseTextureUploads();
 
     if (ImGui::GetCurrentContext() && ImGui::GetIO().BackendRendererUserData) {
         ImGui_ImplDX12_Shutdown();
@@ -438,6 +443,7 @@ void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle,
 }
 
 void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
+    std::lock_guard lock(deviceMutex_);
     DXGI_SWAP_CHAIN_DESC sd;
     if (FAILED(pSwapChain->GetDesc(&sd)))
         return;
@@ -566,7 +572,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
             rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(
                 D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
             D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-            commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_];
+            commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_]();
             freeDescriptors_.resize(DESCRIPTOR_COUNT);
             for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
                 freeDescriptors_[DESCRIPTOR_COUNT - i] = i - 1;
@@ -589,6 +595,10 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
                                         IID_PPV_ARGS(&commandList_)) != S_OK ||
             commandList_->Close() != S_OK) {
             releaseDeviceResources(L"command list creation failure");
+            return;
+        }
+        if (!initializeTextureUpload()) {
+            releaseDeviceResources(L"texture upload initialization failure");
             return;
         }
 
@@ -652,12 +662,19 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 
     if (ImGui::GetCurrentContext()) {
         currentBackBufferIndex_ = pSwapChain->GetCurrentBackBufferIndex();
+        if (deviceLost_) { handleDeviceLost(L"frame submission", DXGI_ERROR_DEVICE_REMOVED); return; }
+        if (currentBackBufferIndex_ >= buffersCounts_ || !backBuffer_ || !backBuffer_[currentBackBufferIndex_] || !frameFence_) return;
+        uint64_t completed = frameFence_->GetCompletedValue();
+        if (allocatorFences_[currentBackBufferIndex_] > completed || imguiFences_[frameValue_ % imguiFences_.size()] > completed) return;
+        processTextureUploads();
+        if (deviceLost_) { handleDeviceLost(L"native texture upload", DXGI_ERROR_DEVICE_REMOVED); return; }
 
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
         er::input::beginFrame();
+        drawingFrame_ = true;
         bool oldShowMenu = gShowMenu;
         gShowMenu = pluginsRender();
         if (gShowMenu != oldShowMenu) {
@@ -665,6 +682,8 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         }
 
         ImGui::EndFrame();
+        ImGui::Render();
+        if (ImGui::GetDrawData()->DisplaySize.x <= 0 || ImGui::GetDrawData()->DisplaySize.y <= 0) { drawingFrame_ = false; return; }
 
         UINT bufferIndex = currentBackBufferIndex_;
         currentRTV_ = renderTargets_[bufferIndex];
@@ -690,7 +709,6 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         commandList_->OMSetRenderTargets(1, &renderTargets_[bufferIndex], FALSE, nullptr);
         commandList_->SetDescriptorHeaps(1, &descriptorHeap_);
 
-        ImGui::Render();
         ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList_);
 
         barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -703,6 +721,7 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
 
         ID3D12CommandList *commandLists[] = { commandList_ };
         commandQueue_->ExecuteCommandLists(1, commandLists);
+        finishTextureFrame();
     }
 }
 
@@ -996,6 +1015,8 @@ void D3DRenderer::initStyle() {
 }
 
 void D3DRenderer::CleanupRenderTarget() {
+    std::lock_guard lock(deviceMutex_);
+    waitForFrames();
     if (!backBuffer_) return;
     for (UINT i = 0; i < buffersCounts_; ++i) {
         if (backBuffer_[i]) {
@@ -1107,8 +1128,10 @@ void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
     if (!ctx) return;
     for (auto &target : ctx->targets) {
         if (target.texture) {
-            target.texture->Release();
+            deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
             target.texture = nullptr;
+            target.srvCpuHandle = {};
+            target.srvGpuHandle = {};
         }
         if (target.srvCpuHandle.ptr) {
             HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
@@ -1126,8 +1149,10 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
 
     // Release old resources
     if (target.texture) {
-        target.texture->Release();
+        deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
         target.texture = nullptr;
+        target.srvCpuHandle = {};
+        target.srvGpuHandle = {};
     }
     if (target.srvCpuHandle.ptr) {
         HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
@@ -1161,6 +1186,13 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
         return;
     }
 
+    HeapDescriptorAlloc(&target.srvCpuHandle, &target.srvGpuHandle);
+    if (!target.srvCpuHandle.ptr) { target.texture->Release(); target.texture = nullptr; return; }
+    // Pair each offscreen RTV with its unique SRV allocation. Fixed slots per
+    // back buffer collide when more than one plugin creates an offscreen target.
+    auto descriptorIndex = (target.srvCpuHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / srvDescriptorSize_;
+    target.rtvCpuHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+    target.rtvCpuHandle.ptr += rtvDescriptorSize_ * (buffersCounts_ + descriptorIndex);
     // Create RTV
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -1168,7 +1200,6 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
     device_->CreateRenderTargetView(target.texture, &rtvDesc, target.rtvCpuHandle);
 
     // Create SRV
-    HeapDescriptorAlloc(&target.srvCpuHandle, &target.srvGpuHandle);
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -1219,13 +1250,13 @@ void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *
     cl->OMSetRenderTargets(1, &gD3DRenderer->currentRTV_, FALSE, nullptr);
 }
 
-void D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
-    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0) return;
+bool D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
+    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0) return false;
 
     auto *vp = ImGui::GetMainViewport();
     int w = (int)vp->Size.x;
     int h = (int)vp->Size.y;
-    if (w <= 0 || h <= 0) return;
+    if (w <= 0 || h <= 0) return false;
 
     if (ctx->targets.size() != buffersCounts_) {
         ctx->targets.resize(buffersCounts_);
@@ -1243,10 +1274,11 @@ void D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
     }
 
     ensureOffscreenSize(ctx, w, h);
-    if (!target.texture) return;
+    if (!target.texture) return false;
 
     auto *drawList = ImGui::GetWindowDrawList();
     drawList->AddCallback(BeginOffscreenCallback, ctx);
+    return true;
 }
 
 void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
@@ -1439,9 +1471,9 @@ bool D3DRenderer::LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIP
 }
 
 void D3DRenderer::DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle) {
-    (*texResource)->Release();
+    if (!texResource) return;
+    deferTexture(*texResource, srvCpuHandle, srvGpuHandle);
     *texResource = NULL;
-    HeapDescriptorFree(srvCpuHandle, srvGpuHandle);
 }
 
 }

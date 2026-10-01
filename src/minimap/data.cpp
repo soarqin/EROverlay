@@ -1,336 +1,267 @@
-#include "data.hpp"
-
-#include "defs/BonfireWarpParam.h"
-#include "defs/WorldMapLegacyConvParam.h"
-#include "defs/WorldMapPointParam.h"
-
-#include "api.h"
-#include "params/param.hpp"
-
-#include <nlohmann/json.hpp>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
-#include <cstdio>
+#include <cstring>
 #include <numbers>
-#include <string>
-#include <thread>
 #include <unordered_map>
-#include <vector>
+
+#include "data.hpp"
+#include "defs/BonfireWarpParam.h"
+#include "defs/WorldMapPointParam.h"
+#include "params/param.hpp"
+#include "resources.hpp"
 
 extern EROverlayAPI *api;
-
 namespace er::minimap {
-
 Data gData;
-Atlas gAtlas;
-
-void Atlas::load(const wchar_t *basePath) {
-    std::wstring path = std::wstring(basePath) + L"\\data\\map\\atlas.json";
-
-    FILE *f = _wfopen(path.c_str(), L"rb");
-    if (!f) return;
-
-    fseek(f, 0, SEEK_END);
-    auto size = static_cast<size_t>(ftell(f));
-    fseek(f, 0, SEEK_SET);
-    std::vector<char> buf(size);
-    fread(buf.data(), 1, size, f);
-    fclose(f);
-
-    std::string content(buf.data(), size);
-    auto j = nlohmann::json::parse(content, nullptr, false);
-    if (j.is_discarded() || !j.contains("atlases") || !j["atlases"].is_array()) return;
-
-    atlases_.clear();
-    for (auto &ja : j["atlases"]) {
-        auto &atlas = atlases_.emplace_back();
-        auto filename = ja.value("file", "");
-        atlas.filePath = std::wstring(basePath) + L"\\data\\map\\" + std::wstring(filename.begin(), filename.end());
-        atlas.width = ja.value("width", 0);
-        atlas.height = ja.value("height", 0);
-
-        if (ja.contains("sprites") && ja["sprites"].is_array()) {
-            for (auto &js : ja["sprites"]) {
-                auto &sprite = atlas.sprites.emplace_back();
-                sprite.name = js.value("name", "");
-                sprite.x = js.value("x", 0);
-                sprite.y = js.value("y", 0);
-                sprite.width = js.value("width", 0);
-                sprite.height = js.value("height", 0);
-                sprite.u0 = sprite.x / (float)atlas.width;
-                sprite.v0 = sprite.y / (float)atlas.height;
-                sprite.u1 = (sprite.x + sprite.width) / (float)atlas.width;
-                sprite.v1 = (sprite.y + sprite.height) / (float)atlas.height;
-                sprite.centerX = js.contains("centerX") ? js["centerX"].get<float>() : sprite.width / 2.0f;
-                sprite.centerY = js.contains("centerY") ? js["centerY"].get<float>() : sprite.height / 2.0f;
-                sprite.texture = nullptr;
-                atlas.spriteIndex[sprite.name] = atlas.sprites.size() - 1;
-            }
+static_assert(sizeof(WorldMapPointParam) == 256 && sizeof(BonfireWarpParam) == 236);
+namespace {
+template<typename T>
+bool read(uintptr_t address, T &value) {
+    SIZE_T copied = 0;
+    return address && ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<void *>(address), &value, sizeof(value), &copied) && copied == sizeof(value);
+}
+uintptr_t pointer(uintptr_t address) {
+    uintptr_t value = 0;
+    return read(address, value) ? value : 0;
+}
+bool flag(uint32_t id) { return nativeApi && nativeApi->readEventFlag(id); }
+bool enabled(uint32_t id) { return !id || id == UINT32_MAX || flag(id); }
+template<typename T>
+uint32_t value(const T &row, size_t offset) {
+    uint32_t v;
+    std::memcpy(&v, reinterpret_cast<const uint8_t *>(&row) + offset, 4);
+    return v;
+}
+template<typename T>
+bool alternate(const T &row, size_t secondEnable, size_t secondDisable) {
+    for (size_t i = 0; i < 8; ++i) {
+        int32_t text = static_cast<int32_t>(value(row, 48 + i * 12));
+        const auto type = reinterpret_cast<const uint8_t *>(&row)[144 + i];
+        if (text < 0 || type != 1)
+            continue;
+        auto enable1 = value(row, 52 + i * 12), enable2 = value(row, secondEnable + i * 4);
+        auto disable1 = value(row, 56 + i * 12), disable2 = value(row, secondDisable + i * 4);
+        if (!enabled(enable1) || !enabled(enable2))
+            continue;
+        unsigned activeDisable = 0;
+        bool all = true;
+        for (auto id: {disable1, disable2}) {
+            if (!id || id == UINT32_MAX)
+                continue;
+            if (!flag(id))
+                all = false;
+            else
+                ++activeDisable;
         }
+        if (!all || !activeDisable)
+            return true;
+    }
+    return false;
+}
+template<typename T, typename F>
+void rows(const wchar_t *name, F function) {
+    auto table = nativeApi->findParamTable(wcscmp(name, L"BonfireWarpParam") == 0 ? 43 : 87);
+    uint16_t count;
+    if (!table || !read(table + 0xA, count) || count > 20000)
+        return;
+    for (uint16_t i = 0; i < count; ++i) {
+        params::ParamEntryOffset entry;
+        T row;
+        if (!read(table + 0x40 + size_t(i) * 24, entry) || entry.offset <= 0 || entry.offset > 0x10000000 || !read(table + entry.offset, row))
+            continue;
+        function(entry.paramId, row);
     }
 }
-
-void Atlas::loadTextures() {
-    if (texturesLoaded_) return;
-    texturesLoaded_ = true;
-    for (auto &atlas : atlases_) {
-        if (atlas.texture.loaded) continue;
-        atlas.texture = api->loadTexture(atlas.filePath.c_str());
-        for (auto &sprite : atlas.sprites) {
-            sprite.texture = &atlas.texture;
-        }
-    }
-}
-
-void Atlas::unloadTextures() {
-    for (auto &atlas : atlases_) {
-        if (atlas.texture.texture != nullptr) {
-            api->destroyTexture(&atlas.texture);
-        }
-        atlas.texture = {};
-        for (auto &sprite : atlas.sprites) {
-            sprite.texture = nullptr;
-        }
-    }
-    texturesLoaded_ = false;
-}
-
-const SpriteInfo *Atlas::findSprite(const std::string &name) const {
-    for (auto &atlas : atlases_) {
-        auto it = atlas.spriteIndex.find(name);
-        if (it != atlas.spriteIndex.end()) {
-            return &atlas.sprites[it->second];
-        }
-    }
-    return nullptr;
-}
-
-bool DecorationInfo::isUnlocked() const {
-    if (eventFlagAddress == 0) {
-        eventFlagAddress = api->resolveFlagAddress(eventFlagId, &eventFlagBits);
-        if (eventFlagAddress == 0) {
-            eventFlagAddress = (uintptr_t)-1;
-            return false;
-        }
-    } else if (eventFlagAddress == (uintptr_t)-1) {
+// Read the game's already-built legacy-conversion trees. No Scaleform calls
+// or allocations are required on the overlay update thread.
+bool convert(uintptr_t view, uint32_t raw, float x, float y, float z, float &mapX, float &mapY) {
+    uint64_t count = 0;
+    if (!read(view + 0x280, count) || !count || count > 8)
         return false;
+    for (uint64_t i = 0; i < count; ++i) {
+        uintptr_t converter = view + 0xF8 + i * 48;
+        uint8_t origin[4];
+        if (!read(converter + 8, origin))
+            continue;
+        uint32_t target = raw;
+        float px = x, py = y, pz = z;
+        if ((raw >> 24) != 60 && (raw >> 24) != 61) {
+            uintptr_t conversion = pointer(converter + 40);
+            auto head = conversion ? pointer(conversion + 16) : 0;
+            auto node = head ? pointer(head + 8) : 0, candidate = head;
+            for (unsigned depth = 0; node && depth < 64; ++depth) {
+                uint8_t nil = 1;
+                uint32_t key;
+                if (!read(node + 25, nil) || nil || !read(node + 28, key))
+                    break;
+                if (key >= raw) {
+                    candidate = node;
+                    node = pointer(node);
+                } else
+                    node = pointer(node + 16);
+            }
+            uint32_t key = 0;
+            float offset[3];
+            if (!candidate || candidate == head || !read(candidate + 28, key) || key != raw || !read(candidate + 32, target) || !read(candidate + 36, offset))
+                continue;
+            px += offset[0];
+            py += offset[1];
+            pz += offset[2];
+        }
+        if ((target >> 24) != origin[3])
+            continue;
+        float settings[6];
+        if (!read(converter + 12, settings))
+            continue;
+        mapX = (px + (int((target >> 16) & 255) - int(origin[2])) * 256.f - settings[0]) * settings[5] + settings[3];
+        mapY = -(pz + (int((target >> 8) & 255) - int(origin[1])) * 256.f - settings[2]) * settings[5] + settings[4];
+        return std::isfinite(mapX) && std::isfinite(mapY);
     }
-    return (*(uint8_t *)(eventFlagAddress) & eventFlagBits) != 0;
+    return false;
 }
-
-void Data::load() {
-    std::thread th([this]() {
-        const void *t = api->paramFindTable(L"WorldMapLegacyConvParam");
-        if (t == nullptr) {
-            fwprintf(stderr, L"Unable to find WorldMapLegacyConvParam\n");
-            return;
-        }
-        struct ConvValue {
-            uint8_t u;
-            uint8_t v;
-            uint8_t w;
-            float x;
-            float y;
-            float z;
-        };
-        auto buildKey = [](uint8_t area, uint8_t gridX, uint8_t gridZ) {
-            return (uint32_t)area * 10000 + (uint32_t)gridX * 100 + (uint32_t)gridZ;
-        };
-        std::unordered_map<uint32_t, ConvValue> convTable;
-        paramTableIterateBegin(t, WorldMapLegacyConvParam, wmlcp) {
-            auto u0 = wmlcp->srcAreaNo;
-            auto u1 = wmlcp->dstAreaNo;
-            if (u0 != 60 && u0 != 61 && (u1 == 60 || u1 == 61)) {
-                auto key = buildKey(u0, wmlcp->srcGridXNo, wmlcp->srcGridZNo);
-                convTable[key] = { u1, wmlcp->dstGridXNo, wmlcp->dstGridZNo, wmlcp->dstPosX - wmlcp->srcPosX, wmlcp->dstPosY - wmlcp->srcPosY, wmlcp->dstPosZ - wmlcp->srcPosZ };
-            }
-        } paramTableIterateEnd();
-        paramTableIterateBegin(t, WorldMapLegacyConvParam, wmlcp) {
-            auto u0 = wmlcp->srcAreaNo;
-            auto u1 = wmlcp->dstAreaNo;
-            if (u0 != 60 && u0 != 61 && u1 != 60 && u1 != 61) {
-                auto key = buildKey(u0, wmlcp->srcGridXNo, wmlcp->srcGridZNo);
-                auto key2 = buildKey(u1, wmlcp->dstGridXNo, wmlcp->dstGridZNo);
-                auto it1 = convTable.find(key);
-                auto it2 = convTable.find(key2);
-                if (it1 == convTable.end() && it2 != convTable.end()) {
-                    auto &c = it2->second;
-                    convTable[key] = {c.u, c.v, c.w, c.x + wmlcp->dstPosX - wmlcp->srcPosX, c.y + wmlcp->dstPosY - wmlcp->srcPosY, c.z + wmlcp->dstPosZ - wmlcp->srcPosZ};
-                }
-                if (it2 == convTable.end() && it1 != convTable.end()) {
-                    auto &c = it1->second;
-                    convTable[key2] = {c.u, c.v, c.w, c.x + wmlcp->srcPosX - wmlcp->dstPosX, c.y + wmlcp->srcPosY - wmlcp->dstPosY, c.z + wmlcp->srcPosZ - wmlcp->dstPosZ};
-                }
-            }
-        } paramTableIterateEnd();
-
-        for (auto i = 0; i < 3; ++i) {
-            decorations_[i].clear();
-            decorationsAround_[i].clear();
-            decorationsAround_[i].resize(100);
-        }
-        auto addDecoration = [&](uint64_t id, int32_t layer, uint16_t iconId, uint32_t eventFlagId, uint8_t areaNo, uint8_t gridXNo, uint8_t gridZNo, float posX, float posY, float posZ, float rotationDeg, DecorationSource source) {
-            if (layer == -1) return;
-            if (iconId == 0) return;
-            char iconIdStr[16];
-            sprintf(iconIdStr, "%02d", iconId);
-            auto *sprite = gAtlas.findSprite(iconIdStr);
-            if (sprite == nullptr) return;
-            float worldX, worldZ;
-            if (areaNo == 60 || areaNo == 61) {
-                worldX = (gridXNo - 28) * 256.0f + 128.0f + posX;
-                worldZ = (64 - gridZNo) * 256.0f + 128.0f - posZ;
-                if (layer == 2) {
-                    worldX -= 3035.0f;
-                    worldZ -= 1864.0f;
-                }
-            } else {
-                auto key = buildKey(areaNo, gridXNo, gridZNo);
-                auto convIt = convTable.find(key);
-                if (convIt != convTable.end()) {
-                    auto &c = convIt->second;
-                    worldX = (c.v - 28) * 256.0f + 128.0f + posX + c.x;
-                    worldZ = (64 - c.w) * 256.0f + 128.0f - posZ - c.z;
-                    if (layer == 2) {
-                        worldX -= 3035.0f;
-                        worldZ -= 1864.0f;
-                    }
-                } else {
-                    return;
-                }
-            }
-            auto &g = decorations_[layer].emplace_back();
-            g.x = worldX;
-            g.y = worldZ;
-            g.id = id;
-            g.eventFlagId = eventFlagId;
-            g.layer = layer;
-            g.source = source;
-            int areaX = (int32_t)std::floor(g.x) / 1024;
-            int areaY = (int32_t)std::floor(g.y) / 1024;
-            g.localX = g.x - areaX * 1024;
-            g.localY = g.y - areaY * 1024;
-            g.rotationRad = rotationDeg == 0.f ? 0.f : static_cast<float>((rotationDeg + 180.0) * std::numbers::pi / 180.0);
-            g.sortKey = areaY * 10 + areaX;
-            g.sprite = sprite;
-        };
-        t = api->paramFindTable(L"BonfireWarpParam");
-        if (t == nullptr) {
-            fwprintf(stderr, L"Unable to find BonfireWarpParam\n");
-            return;
-        }
-        paramTableIterateBegin(t, BonfireWarpParam, bwp) {
-            int32_t layer = bwp->dispMask00 ? 0 : bwp->dispMask01 ? 1 : bwp->dispMask02 ? 2 : -1;
-            addDecoration(entry->paramId, layer, bwp->iconId, bwp->eventflagId, bwp->areaNo, bwp->gridXNo, bwp->gridZNo, bwp->posX, bwp->posY, bwp->posZ, 0.f, DecorationSource::Grace);
-        } paramTableIterateEnd();
-        t = api->paramFindTable(L"WorldMapPointParam");
-        if (t == nullptr) {
-            fwprintf(stderr, L"Unable to find WorldMapPointParam\n");
-            return;
-        }
-        paramTableIterateBegin(t, WorldMapPointParam, wmpp) {
-            // Map for Goblins injects synthetic rows into unused IDs below the first vanilla row.
-            // Its markers reuse vanilla icon IDs, so atlas lookup alone cannot distinguish them.
-            if (entry->paramId < 78500) continue;
-            /* 80 is the icon id for the NPCs, I don't want to show them as now, because its condition fields are a bit silly */
-            if (wmpp->iconId == 80) continue;
-            int32_t layer = wmpp->dispMask00 ? 0 : wmpp->dispMask01 ? 1 : wmpp->dispMask02 ? 2 : -1;
-            addDecoration(entry->paramId, layer, wmpp->iconId, wmpp->eventFlagId, wmpp->areaNo, wmpp->gridXNo, wmpp->gridZNo, wmpp->posX, wmpp->posY, wmpp->posZ, wmpp->angle, DecorationSource::Landmark);
-        } paramTableIterateEnd();
-        for (auto i = 0; i < 3; ++i) {
-            auto &l = decorations_[i];
-            if (l.empty()) continue;
-            std::sort(l.begin(), l.end(), [](const auto &a, const auto &b) {
-                if (a.sortKey == b.sortKey) {
-                    if (a.source == b.source) {
-                        return a.id > b.id;
-                    }
-                    return a.source > b.source;
-                }
-                return a.sortKey < b.sortKey;
-            });
-            auto sz = l.size();
-            auto lastSortKey = -1;
-            const auto *lastDecoration = &l.front();
-            auto &garound = decorationsAround_[i];
-            for (auto &g : l) {
-                if (g.sortKey != lastSortKey) {
-                    if (lastSortKey != -1) {
-                        if ((size_t)lastSortKey >= garound.size()) {
-                            garound.resize((size_t)(lastSortKey + 1));
-                        }
-                        garound[lastSortKey] = {lastDecoration, &g};
-                    }
-                    lastSortKey = g.sortKey;
-                    lastDecoration = &g;
-                }
-            }
-            if (lastSortKey != -1) {
-                if ((size_t)lastSortKey >= garound.size()) {
-                    garound.resize((size_t)(lastSortKey + 1));
-                }
-                garound[lastSortKey] = {lastDecoration, l.data() + sz};
-            }
-        }
-        paramsLoaded_ = true;
-    });
-    th.detach();
-    auto gameAddresses = api->getGameAddresses();
-    csMenuManImp_ = gameAddresses.csMenuManImp;
-    fieldArea_ = gameAddresses.fieldArea;
-    if (api->getGameVersion() < 0x0002000100000000ULL) {
-        // 1.02 ~ 1.10.1
-        locationOffset_ = 0x248;
-    } else {
-        // 1.12+
-        locationOffset_ = 0x250;
-    }
-}
+uint32_t rawMap(uint8_t area, uint8_t x, uint8_t z) { return (uint32_t(area) << 24) | (uint32_t(x) << 16) | (uint32_t(z) << 8); }
+} // namespace
 
 void Data::update() {
-    if (csMenuManImp_ == 0 || fieldArea_ == 0) {
-        auto gameAddresses = api->getGameAddresses();
-        if (csMenuManImp_ == 0) csMenuManImp_ = gameAddresses.csMenuManImp;
-        if (fieldArea_ == 0) fieldArea_ = gameAddresses.fieldArea;
-    }
-
-    if (csMenuManImp_ == 0) {
-        onGUI_ = true;
+    MapSnapshot next;
+    if (!nativeApi || !nativeApi->readMapState(&next.state)) {
+        next.onGUI = api->screenState() != 0;
+        std::lock_guard lock(mutex_);
+        snapshot_ = std::move(next);
         return;
     }
-    auto addr = *(uintptr_t*)csMenuManImp_;
-    if (addr == 0) {
-        onGUI_ = true;
-        return;
-    }
-    onGUI_ = api->screenState() != 0 || *reinterpret_cast<uint32_t*>(addr + 0x1C) != 0;
-
-    addr = *(uintptr_t*)(addr + 0x80);
-    if (addr != 0) {
-        addr = *(uintptr_t*)(addr + locationOffset_);
-        if (addr != 0) {
-            location_ = *(Location*)(addr + 0x24);
+    auto addresses = api->getGameAddresses();
+    auto menu = pointer(addresses.csMenuManImp);
+    uint32_t menuState = 1;
+    if (menu)
+        read(menu + 0x1C, menuState);
+    next.onGUI = api->screenState() != 0 || menuState != 0;
+    next.valid = !next.onGUI;
+    auto camera = pointer(addresses.fieldArea);
+    camera = camera ? pointer(camera + 0x20) : 0;
+    camera = camera ? pointer(camera + 0x18) : 0;
+    if (camera)
+        read(camera + 0x10, next.camera);
+    if (!std::isfinite(next.camera.yawCos) || !std::isfinite(next.camera.yawSin))
+        next.camera = {};
+    {
+        std::lock_guard lock(mutex_);
+        if (GetTickCount64() < markerRefresh_ && snapshot_.valid && snapshot_.state.generation == next.state.generation && snapshot_.state.rawMapId == next.state.rawMapId) {
+            next.roundtable = snapshot_.roundtable;
+            next.homeIcon = snapshot_.homeIcon;
+            next.decorations = snapshot_.decorations;
+            snapshot_ = std::move(next);
+            return;
         }
     }
-    if (fieldArea_ != 0 && (addr = *(uintptr_t*)(fieldArea_)) != 0) {
-        addr = *(uintptr_t*)(addr + 0x20);
-        if (addr != 0) {
-            addr = *(uintptr_t*)(addr + 0x18);
-            if (addr != 0) {
-                camera_ = *(Camera*)(addr + 0x10);
-            }
+    markerRefresh_ = GetTickCount64() + 200;
+    static uint64_t lastLog = 0;
+    if (GetTickCount64() >= lastLog) {
+        lastLog = GetTickCount64() + 5000;
+        char line[256];
+        std::snprintf(line, sizeof(line), "map raw=%08x map=%d position=%.2f,%.2f masks=%08x,%08x,%08x death=%d %.2f,%.2f/%d\n", next.state.rawMapId, next.state.mapId,
+                      next.state.x, next.state.y, next.state.activeMasks[0], next.state.activeMasks[1], next.state.activeMasks[2], int(next.state.deathValid), next.state.deathX,
+                      next.state.deathY, next.state.deathMapId);
+        if (nativeApi->log)
+            nativeApi->log(line);
+    }
+    uint32_t homeId = 0;
+    auto common = nativeApi->findParamTable(141);
+    if (common) {
+        uint16_t count = 0;
+        if (read(common + 0xA, count) && count) {
+            params::ParamEntryOffset entry;
+            if (read(common + 0x40, entry) && entry.paramId == 0 && entry.offset > 0)
+                read(common + entry.offset + 0x278, homeId);
         }
     }
-}
-
-std::tuple<const DecorationInfo *, const DecorationInfo *> Data::decorationsAround(int32_t layer, int u, int v) const {
-    size_t sortKey = (size_t)(v * 10 + u);
-    auto &decorations = decorationsAround_[layer];
-    if (sortKey >= decorations.size()) {
-        return { nullptr, nullptr };
+    std::unordered_map<uint64_t, uint32_t> nativeGraceIcons;
+    auto view = next.state.viewModel;
+    uintptr_t graces = pointer(view + 0x2E8), end = pointer(view + 0x2F0);
+    if (graces && end >= graces && (end - graces) % 0x350 == 0 && (end - graces) / 0x350 < 2000) {
+        for (auto entry = graces; entry < end; entry += 0x350) {
+            uint32_t id;
+            uint8_t normal = 1;
+            std::array<uint8_t, 236> row{};
+            if (!read(entry + 0x238, id) || !read(entry + 0x348, normal))
+                continue;
+            auto parameter = pointer(entry + 0x240);
+            bool alt = parameter && read(parameter, row) && alternate(row, 168, 200);
+            uint32_t icon;
+            if (read(entry + (alt ? (normal ? 0x2C8 : 0x308) : (normal ? 0x248 : 0x288)), icon))
+                nativeGraceIcons[id] = icon;
+        }
     }
-    return decorations[sortKey];
+    rows<BonfireWarpParam>(L"BonfireWarpParam", [&](uint64_t id, const BonfireWarpParam &row) {
+        uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
+        uint32_t selected = row.iconId;
+        auto game = nativeGraceIcons.find(id);
+        if (game != nativeGraceIcons.end())
+            selected = game->second;
+        else if (alternate(row, 168, 200) && row.altIconId)
+            selected = row.altIconId;
+        if (id == homeId) {
+            next.roundtable = next.state.rawMapId == raw;
+            next.homeIcon = selected;
+        }
+        if (!flag(row.eventflagId))
+            return;
+        DecorationInfo marker;
+        marker.id = id;
+        marker.iconId = selected;
+        marker.source = DecorationSource::Grace;
+        marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
+        if (!marker.maps || !selected || id == homeId || !convert(view, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
+            return;
+        next.decorations.push_back(marker);
+    });
+    rows<WorldMapPointParam>(L"WorldMapPointParam", [&](uint64_t id, const WorldMapPointParam &row) {
+        if (id < 78500 || !row.iconId || row.iconId == 80)
+            return;
+        bool opened = flag(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
+        if (!opened && !distant)
+            return;
+        DecorationInfo marker;
+        marker.id = id;
+        marker.iconId = row.iconId;
+        marker.source = DecorationSource::Landmark;
+        marker.areaIcon = row.isAreaIcon;
+        marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
+        if (!opened && distant && row.distViewIconId)
+            marker.iconId = row.distViewIconId;
+        else if (alternate(row, 192, 224) && row.altIconId)
+            marker.iconId = row.altIconId;
+        uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
+        float x = row.posX, y = row.posY, z = row.posZ;
+        if (distant && row.isOverrideDistViewMarkPos) {
+            raw = rawMap(row.areaNo_forDistViewMark, row.gridXNo_forDistViewMark, row.gridZNo_forDistViewMark);
+            x = row.posX_forDistViewMark;
+            y = row.posY_forDistViewMark;
+            z = row.posZ_forDistViewMark;
+        }
+        if (!marker.maps || !convert(view, raw, x, y, z, marker.x, marker.y))
+            return;
+        marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
+        next.decorations.push_back(marker);
+    });
+    ERMapState after;
+    if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != view || after.rawMapId != next.state.rawMapId) {
+        next.valid = false;
+        next.state.deathValid = false;
+        next.decorations.clear();
+    }
+    {
+        std::lock_guard lock(mutex_);
+        snapshot_ = std::move(next);
+    }
 }
-
+MapSnapshot Data::snapshot() const {
+    std::lock_guard lock(mutex_);
+    return snapshot_;
 }
+} // namespace er::minimap

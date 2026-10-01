@@ -1,118 +1,47 @@
 #pragma once
 
-#include "api.h"
-
-#include <atomic>
 #include <cstdint>
-#include <string>
-#include <tuple>
-#include <unordered_map>
+#include <mutex>
 #include <vector>
 
+#include "nativeapi.h"
+
 namespace er::minimap {
-
 enum class DecorationSource : uint8_t { Grace, Landmark };
-
-struct Location {
-    int32_t mapId;
-    float x;
-    float y;
-    int32_t underground;
-    float oriDeg;
-};
-
 struct Camera {
-    float yawCos;
-    int32_t dummy0;
-    float yawSin;
-    int32_t dummy1;
+    float yawCos = 1;
+    int32_t dummy0 = 0;
+    float yawSin = 0;
+    int32_t dummy1 = 0;
 };
-
-struct SpriteInfo;
-
 struct DecorationInfo {
     uint64_t id = 0;
-    uint32_t eventFlagId = 0;
-    int32_t layer = 0;
-    float x = 0.f;
-    float y = 0.f;
-    float localX = 0.f;
-    float localY = 0.f;
-    float rotationRad = 0.f;
-    int32_t sortKey = 0;
-    mutable uintptr_t eventFlagAddress = 0;
-    mutable uint8_t eventFlagBits = 0;
-    DecorationSource source = DecorationSource::Grace;
-    const SpriteInfo *sprite = nullptr;
-
-    [[nodiscard]] bool isUnlocked() const;
+    uint32_t iconId = 0;
+    uint32_t maps = 0;
+    float x = 0, y = 0;
+    float rotationRad = 0;
+    DecorationSource source = DecorationSource::Landmark;
+    bool areaIcon = false;
+};
+struct MapSnapshot {
+    ERMapState state{};
+    Camera camera;
+    bool onGUI = true;
+    bool valid = false;
+    bool roundtable = false;
+    uint32_t homeIcon = 48;
+    std::vector<DecorationInfo> decorations;
 };
 
 class Data {
 public:
-    void load();
     void update();
-
-    [[nodiscard]] inline bool onGUI() const { return onGUI_; }
-    [[nodiscard]] inline bool paramsLoaded() const { return paramsLoaded_; }
-    [[nodiscard]] inline const Location &location() const { return location_; }
-    [[nodiscard]] inline const Camera &camera() const { return camera_; }
-    [[nodiscard]] inline const std::vector<DecorationInfo> &decorations(int32_t layer) const { return decorations_[layer]; }
-    [[nodiscard]] std::tuple<const DecorationInfo *, const DecorationInfo *> decorationsAround(int32_t layer, int u, int v) const;
+    [[nodiscard]] MapSnapshot snapshot() const;
 
 private:
-    uintptr_t csMenuManImp_ = 0;
-    uintptr_t fieldArea_ = 0;
-    size_t locationOffset_ = 0;
-    Location location_ = {};
-    Camera camera_ = {};
-    bool onGUI_ = false;
-    std::atomic_bool paramsLoaded_ = false;
-
-    std::vector<DecorationInfo> decorations_[3];
-    std::vector<std::tuple<const DecorationInfo *, const DecorationInfo *>> decorationsAround_[3];
+    mutable std::mutex mutex_;
+    MapSnapshot snapshot_;
+    uint64_t markerRefresh_ = 0;
 };
-
 extern Data gData;
-
-struct SpriteInfo {
-    std::string name;
-    int x = 0;
-    int y = 0;
-    int width = 0;
-    int height = 0;
-    float u0 = 0.f;
-    float v0 = 0.f;
-    float u1 = 1.f;
-    float v1 = 1.f;
-    float centerX = 0.f;
-    float centerY = 0.f;
-    TextureContext *texture = nullptr;
-};
-
-struct AtlasInfo {
-    std::wstring filePath;
-    int width = 0;
-    int height = 0;
-    std::vector<SpriteInfo> sprites;
-    std::unordered_map<std::string, size_t> spriteIndex; // name -> index in sprites
-    TextureContext texture = {};
-};
-
-class Atlas {
-public:
-    void load(const wchar_t *basePath);
-    void loadTextures();
-    void unloadTextures();
-    [[nodiscard]] inline bool texturesLoaded() const { return texturesLoaded_; }
-    [[nodiscard]] const SpriteInfo *findSprite(const std::string &name) const;
-    [[nodiscard]] const std::vector<AtlasInfo> &atlases() const { return atlases_; }
-
-private:
-    std::vector<AtlasInfo> atlases_;
-    bool texturesLoaded_ = false;
-};
-
-extern Atlas gAtlas;
-
-}
+} // namespace er::minimap

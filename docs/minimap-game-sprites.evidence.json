@@ -1,0 +1,8764 @@
+{
+  "analysis_date": "2026-10-02",
+  "sources": [
+    {
+      "file": "src\\minimap\\data\\map\\atlas.json",
+      "bytes": 13409,
+      "sha256": "e79db48a69de9366ee9bfe2f4d2c16dde2edd0e6347be50d282e6c301fc9ab18"
+    },
+    {
+      "file": "build\\ida\\probes\\run-26836-32694765\\common-layouts.bin",
+      "bytes": 402623,
+      "sha256": "8627031c18be725fa6b34338da68a7bd83acc2252d49481c4056e0d19c1768e7"
+    },
+    {
+      "file": "build\\ida\\sprite-probe\\run-24636-34293203\\worldmap.gfx",
+      "bytes": 68768,
+      "sha256": "75ad2435032b59c7db1c25d3f16d111ad6623ca93fed0623ab824cd08af50446"
+    },
+    {
+      "file": "build\\ida\\byte-probe4\\map-atlas.bmp",
+      "bytes": 8388662,
+      "sha256": "8c8672966fb28057c5b1a863c4b3b7164fe65dbe22d481b3d346440bd75f4553"
+    },
+    {
+      "file": "build\\ida\\byte-probe4\\map-atlas02.bmp",
+      "bytes": 8388662,
+      "sha256": "02bcbdf3209e016420764d54a37bc0c3be4ba96ec7898907fcaf46cf6153fcc0"
+    },
+    {
+      "file": "build\\ida\\sprite-compare\\map-atlas-dlc.bmp",
+      "bytes": 8388662,
+      "sha256": "0cc7b429f1ac243bd1204f2f11c8e2b3056d3b4049578c3485aedcfc5d77ab97"
+    },
+    {
+      "file": "build\\ida\\sprite-compare\\chara.bmp",
+      "bytes": 4194358,
+      "sha256": "f75d7598647a8097bbfcf45dad4c2fa1281e627aeb744f289c7419eaa98113e4"
+    },
+    {
+      "file": "src\\minimap\\data\\map\\atlas.png",
+      "bytes": 5289753,
+      "sha256": "da88439df2b422d4358836b444935cdaeb29440e2ca02916c5ca262a9392fb9a"
+    },
+    {
+      "file": "build\\ida\\sprite-probe\\run-24636-34293203\\point-rows.bin",
+      "bytes": 124608,
+      "sha256": "ac87de7eb0c0e0ffd22c1b8da888e316ad08a9faea44c6a9359f5ff9ca0dce44"
+    },
+    {
+      "file": "build\\ida\\sprite-probe\\run-24636-34293203\\grace-rows.bin",
+      "bytes": 102968,
+      "sha256": "04615eca835df0fb59382360bfa10553b62de0ac0ebff44a335b0ad71fe3bb1b"
+    },
+    {
+      "file": "build\\ida\\sprite-probe\\run-24636-34293203\\game-system-common-rows.bin",
+      "bytes": 1032,
+      "sha256": "ff0d9b01e49cd558f2631b55d98c85beed4eccf0b98f57b7d0ec0bf4edf98f67"
+    }
+  ],
+  "constraints": {
+    "debugger": false,
+    "breakpoints": false,
+    "game_gpu_reuse": false
+  },
+  "comparison": {
+    "sprites": 93,
+    "exact_matches": 92,
+    "nonidentical": [
+      "Roundtable"
+    ],
+    "items": [
+      {
+        "external_name": "01",
+        "native_name": "MENU_MAP_01_Bonfire.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          718,
+          524,
+          156,
+          156
+        ],
+        "size": [
+          156,
+          156
+        ],
+        "native_size": [
+          156,
+          156
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "e4d336037153a9a83a4c46b73a88ece074d97de89308957ea6b3e23fd93cb684",
+        "native_pixel_sha256": "e4d336037153a9a83a4c46b73a88ece074d97de89308957ea6b3e23fd93cb684",
+        "external_anchor": [
+          78.0,
+          78.0
+        ]
+      },
+      {
+        "external_name": "03",
+        "native_name": "MENU_MAP_Church.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1660,
+          150,
+          140,
+          188
+        ],
+        "size": [
+          140,
+          188
+        ],
+        "native_size": [
+          140,
+          188
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "77abdcc90d949feb5ea91a3fb64351ddd0946f386098f492e57044a6eb5a44e7",
+        "native_pixel_sha256": "77abdcc90d949feb5ea91a3fb64351ddd0946f386098f492e57044a6eb5a44e7",
+        "external_anchor": [
+          70.0,
+          94.0
+        ]
+      },
+      {
+        "external_name": "04",
+        "native_name": "MENU_MAP_04.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1277,
+          0,
+          194,
+          178
+        ],
+        "size": [
+          194,
+          178
+        ],
+        "native_size": [
+          194,
+          178
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "0615e137e38386065a9c477d4eb028618d13b1fd0b5d40b407640d700323a2a6",
+        "native_pixel_sha256": "0615e137e38386065a9c477d4eb028618d13b1fd0b5d40b407640d700323a2a6",
+        "external_anchor": [
+          97.0,
+          89.0
+        ]
+      },
+      {
+        "external_name": "05",
+        "native_name": "MENU_MAP_05.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          557,
+          128,
+          262,
+          150
+        ],
+        "size": [
+          262,
+          150
+        ],
+        "native_size": [
+          262,
+          150
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d877fd3961e19c447c94725a19e656b96b75fb419c4574b8ef0f47568ae396fb",
+        "native_pixel_sha256": "d877fd3961e19c447c94725a19e656b96b75fb419c4574b8ef0f47568ae396fb",
+        "external_anchor": [
+          131.0,
+          75.0
+        ]
+      },
+      {
+        "external_name": "06",
+        "native_name": "MENU_MAP_06.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          818,
+          878,
+          214,
+          136
+        ],
+        "size": [
+          214,
+          136
+        ],
+        "native_size": [
+          214,
+          136
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "7b14bdbff0245bb2b493f9f1c384c98e63509b85e8eee166fe4037fa5520408b",
+        "native_pixel_sha256": "7b14bdbff0245bb2b493f9f1c384c98e63509b85e8eee166fe4037fa5520408b",
+        "external_anchor": [
+          107.0,
+          68.0
+        ]
+      },
+      {
+        "external_name": "08",
+        "native_name": "MENU_MAP_08.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1494,
+          180,
+          162,
+          176
+        ],
+        "size": [
+          162,
+          176
+        ],
+        "native_size": [
+          162,
+          176
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "9948f680fb3d5344b65a5ba86e726f08d7c0b39b5df84a9d949e3d8683910c70",
+        "native_pixel_sha256": "9948f680fb3d5344b65a5ba86e726f08d7c0b39b5df84a9d949e3d8683910c70",
+        "external_anchor": [
+          81.0,
+          88.0
+        ]
+      },
+      {
+        "external_name": "09",
+        "native_name": "MENU_MAP_09.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1481,
+          758,
+          164,
+          162
+        ],
+        "size": [
+          164,
+          162
+        ],
+        "native_size": [
+          164,
+          162
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ce965c6e55a738eca0b50fa47bad9db60f3b54f28c26b2bde905bafa12c38ef1",
+        "native_pixel_sha256": "ce965c6e55a738eca0b50fa47bad9db60f3b54f28c26b2bde905bafa12c38ef1",
+        "external_anchor": [
+          82.0,
+          81.0
+        ]
+      },
+      {
+        "external_name": "10",
+        "native_name": "MENU_MAP_10.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1068,
+          304,
+          224,
+          176
+        ],
+        "size": [
+          224,
+          176
+        ],
+        "native_size": [
+          224,
+          176
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "435cd7268492f26ff625174e814f0275ed8a2c240ee6ab406c9663a0cc70a134",
+        "native_pixel_sha256": "435cd7268492f26ff625174e814f0275ed8a2c240ee6ab406c9663a0cc70a134",
+        "external_anchor": [
+          112.0,
+          88.0
+        ]
+      },
+      {
+        "external_name": "11",
+        "native_name": "MENU_MAP_11.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          823,
+          128,
+          244,
+          172
+        ],
+        "size": [
+          244,
+          172
+        ],
+        "native_size": [
+          244,
+          172
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "3bb00ae081216a21dc2a599f23ad4e1d2537c4ccce180e6612cc1bd86fd6d9d8",
+        "native_pixel_sha256": "3bb00ae081216a21dc2a599f23ad4e1d2537c4ccce180e6612cc1bd86fd6d9d8",
+        "external_anchor": [
+          122.0,
+          86.0
+        ]
+      },
+      {
+        "external_name": "13",
+        "native_name": "MENU_MAP_13.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1068,
+          688,
+          204,
+          162
+        ],
+        "size": [
+          204,
+          162
+        ],
+        "native_size": [
+          204,
+          162
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "43c959dabe9776bbeb4e9780da6fd43ec0e13ae7d2efdebfcae11e5d4fc97cc8",
+        "native_pixel_sha256": "43c959dabe9776bbeb4e9780da6fd43ec0e13ae7d2efdebfcae11e5d4fc97cc8",
+        "external_anchor": [
+          102.0,
+          81.0
+        ]
+      },
+      {
+        "external_name": "14",
+        "native_name": "MENU_MAP_14.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1476,
+          420,
+          176,
+          154
+        ],
+        "size": [
+          176,
+          154
+        ],
+        "native_size": [
+          176,
+          154
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "edd50bf656e68b1b9a0ddd305437c62b68f0404faff69910388f68cc5d9984ae",
+        "native_pixel_sha256": "edd50bf656e68b1b9a0ddd305437c62b68f0404faff69910388f68cc5d9984ae",
+        "external_anchor": [
+          88.0,
+          77.0
+        ]
+      },
+      {
+        "external_name": "15",
+        "native_name": "MENU_MAP_Ungro.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1036,
+          870,
+          206,
+          130
+        ],
+        "size": [
+          206,
+          130
+        ],
+        "native_size": [
+          206,
+          130
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "f5a9f2338cff81a3ac2712270f19c33bb97cd71ff661bcd5196d07a8705f8dc4",
+        "native_pixel_sha256": "f5a9f2338cff81a3ac2712270f19c33bb97cd71ff661bcd5196d07a8705f8dc4",
+        "external_anchor": [
+          103.0,
+          65.0
+        ]
+      },
+      {
+        "external_name": "16",
+        "native_name": "MENU_MAP_16.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1068,
+          484,
+          212,
+          200
+        ],
+        "size": [
+          212,
+          200
+        ],
+        "native_size": [
+          212,
+          200
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "bf43fc2be2cf55cf1a4b79dc0c88a7cb4888b44e11a125f9964330fb5c05107a",
+        "native_pixel_sha256": "bf43fc2be2cf55cf1a4b79dc0c88a7cb4888b44e11a125f9964330fb5c05107a",
+        "external_anchor": [
+          106.0,
+          100.0
+        ]
+      },
+      {
+        "external_name": "17",
+        "native_name": "MENU_MAP_17.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1661,
+          510,
+          140,
+          236
+        ],
+        "size": [
+          140,
+          236
+        ],
+        "native_size": [
+          140,
+          236
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "0d3e204f3d941849ecc68c6ecfd063487f331e34c60e849b38f504640c6b3557",
+        "native_pixel_sha256": "0d3e204f3d941849ecc68c6ecfd063487f331e34c60e849b38f504640c6b3557",
+        "external_anchor": [
+          70.0,
+          118.0
+        ]
+      },
+      {
+        "external_name": "18",
+        "native_name": "MENU_MAP_18.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1276,
+          688,
+          201,
+          232
+        ],
+        "size": [
+          201,
+          232
+        ],
+        "native_size": [
+          201,
+          232
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "5aa0a6608d5b266110565cb564f6938c1576363c0b78e776b1df8c5d090a815a",
+        "native_pixel_sha256": "5aa0a6608d5b266110565cb564f6938c1576363c0b78e776b1df8c5d090a815a",
+        "external_anchor": [
+          100.5,
+          116.0
+        ]
+      },
+      {
+        "external_name": "19",
+        "native_name": "MENU_MAP_19.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          752,
+          0,
+          154,
+          172
+        ],
+        "size": [
+          154,
+          172
+        ],
+        "native_size": [
+          154,
+          172
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "a758ceacb8149c81886eb6851fd2db93d59ac1ffce8f5491e6d0bb7b92da30f6",
+        "native_pixel_sha256": "a758ceacb8149c81886eb6851fd2db93d59ac1ffce8f5491e6d0bb7b92da30f6",
+        "external_anchor": [
+          77.0,
+          86.0
+        ]
+      },
+      {
+        "external_name": "20",
+        "native_name": "MENU_MAP_20.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          816,
+          408,
+          248,
+          210
+        ],
+        "size": [
+          248,
+          210
+        ],
+        "native_size": [
+          248,
+          210
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "9a80a5613a732997d2b51ba65349fb499ac2c3f489e86f6e03d92ffc1193f840",
+        "native_pixel_sha256": "9a80a5613a732997d2b51ba65349fb499ac2c3f489e86f6e03d92ffc1193f840",
+        "external_anchor": [
+          124.0,
+          105.0
+        ]
+      },
+      {
+        "external_name": "208",
+        "native_name": "MENU_MAP_208.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          644,
+          0,
+          130,
+          256
+        ],
+        "size": [
+          130,
+          256
+        ],
+        "native_size": [
+          130,
+          256
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "fe1951fc63dcd8dfbf8f87fe63fd1bb259511badc68d8c4358a091992782154a",
+        "native_pixel_sha256": "fe1951fc63dcd8dfbf8f87fe63fd1bb259511badc68d8c4358a091992782154a",
+        "external_anchor": [
+          65.0,
+          128.0
+        ]
+      },
+      {
+        "external_name": "21",
+        "native_name": "MENU_MAP_21.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1296,
+          182,
+          194,
+          234
+        ],
+        "size": [
+          194,
+          234
+        ],
+        "native_size": [
+          194,
+          234
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "732bf080ae231af99502db3a52336acd3c5a377d4fc4ebc7319fdf5b9b9f862f",
+        "native_pixel_sha256": "732bf080ae231af99502db3a52336acd3c5a377d4fc4ebc7319fdf5b9b9f862f",
+        "external_anchor": [
+          97.0,
+          117.0
+        ]
+      },
+      {
+        "external_name": "210",
+        "native_name": "MENU_MAP_210.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          130,
+          266,
+          250
+        ],
+        "size": [
+          266,
+          250
+        ],
+        "native_size": [
+          266,
+          250
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "221dc6c4441ec692fdf56c6d8f08bbc7cd6c0a13ca017e0cba0410ee5a1903aa",
+        "native_pixel_sha256": "221dc6c4441ec692fdf56c6d8f08bbc7cd6c0a13ca017e0cba0410ee5a1903aa",
+        "external_anchor": [
+          133.0,
+          125.0
+        ]
+      },
+      {
+        "external_name": "211",
+        "native_name": "MENU_MAP_211.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          490,
+          682,
+          186,
+          240
+        ],
+        "size": [
+          186,
+          240
+        ],
+        "native_size": [
+          186,
+          240
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "451c3374988b885078b1fa3de94b285ba380617203d9250053729ab88dc240ee",
+        "native_pixel_sha256": "451c3374988b885078b1fa3de94b285ba380617203d9250053729ab88dc240ee",
+        "external_anchor": [
+          93.0,
+          120.0
+        ]
+      },
+      {
+        "external_name": "213",
+        "native_name": "MENU_MAP_213.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          656,
+          1836,
+          166,
+          208
+        ],
+        "size": [
+          166,
+          208
+        ],
+        "native_size": [
+          166,
+          208
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "e1d068ba6a4f681d07f4ac68c857406970f537ac9112c4a1cd805d7a33c5f07b",
+        "native_pixel_sha256": "e1d068ba6a4f681d07f4ac68c857406970f537ac9112c4a1cd805d7a33c5f07b",
+        "external_anchor": [
+          83.0,
+          104.0
+        ]
+      },
+      {
+        "external_name": "217",
+        "native_name": "MENU_MAP_217.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          484,
+          1646,
+          188,
+          186
+        ],
+        "size": [
+          188,
+          186
+        ],
+        "native_size": [
+          188,
+          186
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "538d89c407c214e4bca1de03fbf6b387a83039b1db164aa5e4d139f4ba0d0e44",
+        "native_pixel_sha256": "538d89c407c214e4bca1de03fbf6b387a83039b1db164aa5e4d139f4ba0d0e44",
+        "external_anchor": [
+          94.0,
+          93.0
+        ]
+      },
+      {
+        "external_name": "218",
+        "native_name": "MENU_MAP_218.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          1778,
+          238,
+          140
+        ],
+        "size": [
+          238,
+          140
+        ],
+        "native_size": [
+          238,
+          140
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "b95ab72553d8c12c31d77088c4d6335f7416f1f0fd774f6c67e4b83deb22f53f",
+        "native_pixel_sha256": "b95ab72553d8c12c31d77088c4d6335f7416f1f0fd774f6c67e4b83deb22f53f",
+        "external_anchor": [
+          119.0,
+          70.0
+        ]
+      },
+      {
+        "external_name": "23",
+        "native_name": "MENU_MAP_23.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1813,
+          636,
+          116,
+          236
+        ],
+        "size": [
+          116,
+          236
+        ],
+        "native_size": [
+          116,
+          236
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "5660703c2297e92cde4e71d316f4f0ff6eee226f709a17791520546cd991c71a",
+        "native_pixel_sha256": "5660703c2297e92cde4e71d316f4f0ff6eee226f709a17791520546cd991c71a",
+        "external_anchor": [
+          58.0,
+          118.0
+        ]
+      },
+      {
+        "external_name": "230",
+        "native_name": "MENU_MAP_230.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          496,
+          516,
+          146,
+          142
+        ],
+        "size": [
+          146,
+          142
+        ],
+        "native_size": [
+          146,
+          142
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "13c657df94a3ebc9c031f96a1f92d4d28e60ff0551e188a8d674511424baf359",
+        "native_pixel_sha256": "13c657df94a3ebc9c031f96a1f92d4d28e60ff0551e188a8d674511424baf359",
+        "external_anchor": [
+          73.0,
+          71.0
+        ]
+      },
+      {
+        "external_name": "231",
+        "native_name": "MENU_MAP_231.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          484,
+          1012,
+          222,
+          170
+        ],
+        "size": [
+          222,
+          170
+        ],
+        "native_size": [
+          222,
+          170
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "b9e25d09ba3e27613742379c80e2639a556485bd72f4cad4f08b7cb9e65b0f97",
+        "native_pixel_sha256": "b9e25d09ba3e27613742379c80e2639a556485bd72f4cad4f08b7cb9e65b0f97",
+        "external_anchor": [
+          111.0,
+          85.0
+        ]
+      },
+      {
+        "external_name": "232",
+        "native_name": "MENU_MAP_232.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          484,
+          1492,
+          202,
+          150
+        ],
+        "size": [
+          202,
+          150
+        ],
+        "native_size": [
+          202,
+          150
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "0e31694cba760d7e2542e16f5eac7731d5d2496efb6550736ae02c98c756d127",
+        "native_pixel_sha256": "0e31694cba760d7e2542e16f5eac7731d5d2496efb6550736ae02c98c756d127",
+        "external_anchor": [
+          101.0,
+          75.0
+        ]
+      },
+      {
+        "external_name": "234",
+        "native_name": "MENU_MAP_234.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          484,
+          1836,
+          168,
+          152
+        ],
+        "size": [
+          168,
+          152
+        ],
+        "native_size": [
+          168,
+          152
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "63f1c07edc630c0fd6b02f28f1a0d9bc47fffc52f7d26ee35ff7f7795b5d3cce",
+        "native_pixel_sha256": "63f1c07edc630c0fd6b02f28f1a0d9bc47fffc52f7d26ee35ff7f7795b5d3cce",
+        "external_anchor": [
+          84.0,
+          76.0
+        ]
+      },
+      {
+        "external_name": "24",
+        "native_name": "MENU_MAP_24.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          290,
+          180,
+          263,
+          191
+        ],
+        "size": [
+          263,
+          191
+        ],
+        "native_size": [
+          263,
+          191
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ecb135df8fb56d6a524e6c94e80b2063ff3b35b829ad52a4600df7dd092adae6",
+        "native_pixel_sha256": "ecb135df8fb56d6a524e6c94e80b2063ff3b35b829ad52a4600df7dd092adae6",
+        "external_anchor": [
+          131.5,
+          95.5
+        ]
+      },
+      {
+        "external_name": "240",
+        "native_name": "MENU_MAP_240.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          0,
+          270,
+          126
+        ],
+        "size": [
+          270,
+          126
+        ],
+        "native_size": [
+          270,
+          126
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "cfb9c95733081d0ae4c38461a7514a022622f76ba35d71fe630e289681b8344d",
+        "native_pixel_sha256": "cfb9c95733081d0ae4c38461a7514a022622f76ba35d71fe630e289681b8344d",
+        "external_anchor": [
+          135.0,
+          63.0
+        ]
+      },
+      {
+        "external_name": "241",
+        "native_name": "MENU_MAP_241.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          242,
+          1616,
+          238,
+          222
+        ],
+        "size": [
+          238,
+          222
+        ],
+        "native_size": [
+          238,
+          222
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "1f17459818229de7091e271050b80bec8386458dd23054052d3be832e54c7086",
+        "native_pixel_sha256": "1f17459818229de7091e271050b80bec8386458dd23054052d3be832e54c7086",
+        "external_anchor": [
+          119.0,
+          111.0
+        ]
+      },
+      {
+        "external_name": "242",
+        "native_name": "MENU_MAP_242.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          1274,
+          244,
+          194
+        ],
+        "size": [
+          244,
+          194
+        ],
+        "native_size": [
+          244,
+          194
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "163effd2cbcf0cbde6af319f9cb9f18e8df6e0666f3f0d766b5ad2a3519616ba",
+        "native_pixel_sha256": "163effd2cbcf0cbde6af319f9cb9f18e8df6e0666f3f0d766b5ad2a3519616ba",
+        "external_anchor": [
+          122.0,
+          97.0
+        ]
+      },
+      {
+        "external_name": "243",
+        "native_name": "MENU_MAP_243.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          586,
+          262,
+          202
+        ],
+        "size": [
+          262,
+          202
+        ],
+        "native_size": [
+          262,
+          202
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "744d8b632b07ed662bf24403265b35cf35868b01119fb2b9883799d1025a3a24",
+        "native_pixel_sha256": "744d8b632b07ed662bf24403265b35cf35868b01119fb2b9883799d1025a3a24",
+        "external_anchor": [
+          131.0,
+          101.0
+        ]
+      },
+      {
+        "external_name": "244",
+        "native_name": "MENU_MAP_244.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          266,
+          384,
+          228,
+          128
+        ],
+        "size": [
+          228,
+          128
+        ],
+        "native_size": [
+          228,
+          128
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "33e8a39f90b6d48e5b21cc3637151487f219641b35c3480ed83ff69146f75dcd",
+        "native_pixel_sha256": "33e8a39f90b6d48e5b21cc3637151487f219641b35c3480ed83ff69146f75dcd",
+        "external_anchor": [
+          114.0,
+          64.0
+        ]
+      },
+      {
+        "external_name": "245",
+        "native_name": "MENU_MAP_245.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          270,
+          130,
+          226,
+          170
+        ],
+        "size": [
+          226,
+          170
+        ],
+        "native_size": [
+          226,
+          170
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "71c02089dc0aae153b4d6d7d18f0182e57b2f7a584b11775c5800a7d1003cb89",
+        "native_pixel_sha256": "71c02089dc0aae153b4d6d7d18f0182e57b2f7a584b11775c5800a7d1003cb89",
+        "external_anchor": [
+          113.0,
+          85.0
+        ]
+      },
+      {
+        "external_name": "246",
+        "native_name": "MENU_MAP_246.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          250,
+          1080,
+          230,
+          146
+        ],
+        "size": [
+          230,
+          146
+        ],
+        "native_size": [
+          230,
+          146
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ddb73299cbdd558f320b568d7709de9bb7e372ede1ab25734e745a82c9f7fd4a",
+        "native_pixel_sha256": "ddb73299cbdd558f320b568d7709de9bb7e372ede1ab25734e745a82c9f7fd4a",
+        "external_anchor": [
+          115.0,
+          73.0
+        ]
+      },
+      {
+        "external_name": "247",
+        "native_name": "MENU_MAP_247.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          646,
+          482,
+          122,
+          182
+        ],
+        "size": [
+          122,
+          182
+        ],
+        "native_size": [
+          122,
+          182
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "491bb793d2433d0a84116544513f2d078d8f036b4b445206db45dd5780d20485",
+        "native_pixel_sha256": "491bb793d2433d0a84116544513f2d078d8f036b4b445206db45dd5780d20485",
+        "external_anchor": [
+          61.0,
+          91.0
+        ]
+      },
+      {
+        "external_name": "248",
+        "native_name": "MENU_MAP_248.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          256,
+          792,
+          230,
+          216
+        ],
+        "size": [
+          230,
+          216
+        ],
+        "native_size": [
+          230,
+          216
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "6e3c7cf89c45a13ea5d85ac4872c470d9fc286d2a41f1085eb5775d7baf4bc21",
+        "native_pixel_sha256": "6e3c7cf89c45a13ea5d85ac4872c470d9fc286d2a41f1085eb5775d7baf4bc21",
+        "external_anchor": [
+          115.0,
+          108.0
+        ]
+      },
+      {
+        "external_name": "249",
+        "native_name": "MENU_MAP_249.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          242,
+          1842,
+          238,
+          188
+        ],
+        "size": [
+          238,
+          188
+        ],
+        "native_size": [
+          238,
+          188
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "b33c9aec7abc1cccb86c723d91454a2fa6f3f1ef0488cdc3ce449fa9a587785d",
+        "native_pixel_sha256": "b33c9aec7abc1cccb86c723d91454a2fa6f3f1ef0488cdc3ce449fa9a587785d",
+        "external_anchor": [
+          119.0,
+          94.0
+        ]
+      },
+      {
+        "external_name": "25",
+        "native_name": "MENU_MAP_25.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          824,
+          622,
+          240,
+          244
+        ],
+        "size": [
+          240,
+          244
+        ],
+        "native_size": [
+          240,
+          244
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "109dbe78a574b3d6ee795fd97f403839842a9eb915e1e04122448e892ef40f24",
+        "native_pixel_sha256": "109dbe78a574b3d6ee795fd97f403839842a9eb915e1e04122448e892ef40f24",
+        "external_anchor": [
+          120.0,
+          122.0
+        ]
+      },
+      {
+        "external_name": "250",
+        "native_name": "MENU_MAP_250.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          902,
+          252,
+          174
+        ],
+        "size": [
+          252,
+          174
+        ],
+        "native_size": [
+          252,
+          174
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ff49e86d203b1e49004a798641e35d06e307688a26a4573ab07f9eb4998996c1",
+        "native_pixel_sha256": "ff49e86d203b1e49004a798641e35d06e307688a26a4573ab07f9eb4998996c1",
+        "external_anchor": [
+          126.0,
+          87.0
+        ]
+      },
+      {
+        "external_name": "251",
+        "native_name": "MENU_MAP_251.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          266,
+          516,
+          226,
+          162
+        ],
+        "size": [
+          226,
+          162
+        ],
+        "native_size": [
+          226,
+          162
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "bf9f8d58aa1bce91b51ad66cb7213f01bd9e0645d1c06ea903c83f90f32d4826",
+        "native_pixel_sha256": "bf9f8d58aa1bce91b51ad66cb7213f01bd9e0645d1c06ea903c83f90f32d4826",
+        "external_anchor": [
+          113.0,
+          81.0
+        ]
+      },
+      {
+        "external_name": "252",
+        "native_name": "MENU_MAP_252.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          1472,
+          242,
+          140
+        ],
+        "size": [
+          242,
+          140
+        ],
+        "native_size": [
+          242,
+          140
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "a9febc0d4ffaeeb4af85ff323a615ad3d010d94ddce16cbefb69afed645816f2",
+        "native_pixel_sha256": "a9febc0d4ffaeeb4af85ff323a615ad3d010d94ddce16cbefb69afed645816f2",
+        "external_anchor": [
+          121.0,
+          70.0
+        ]
+      },
+      {
+        "external_name": "253",
+        "native_name": "MENU_MAP_253.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          246,
+          1472,
+          234,
+          138
+        ],
+        "size": [
+          234,
+          138
+        ],
+        "native_size": [
+          234,
+          138
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "90153d134a9324e6af9b87bd7d8c8af6b6f9b5649581aef86eb523168bce07e1",
+        "native_pixel_sha256": "90153d134a9324e6af9b87bd7d8c8af6b6f9b5649581aef86eb523168bce07e1",
+        "external_anchor": [
+          117.0,
+          69.0
+        ]
+      },
+      {
+        "external_name": "254",
+        "native_name": "MENU_MAP_254.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          248,
+          1274,
+          232,
+          148
+        ],
+        "size": [
+          232,
+          148
+        ],
+        "native_size": [
+          232,
+          148
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "f473e41a7ca51bb2d56b15430416a0c697b0f0b7bfd9e9b75f0748f8a0d2dd5a",
+        "native_pixel_sha256": "f473e41a7ca51bb2d56b15430416a0c697b0f0b7bfd9e9b75f0748f8a0d2dd5a",
+        "external_anchor": [
+          116.0,
+          74.0
+        ]
+      },
+      {
+        "external_name": "255",
+        "native_name": "MENU_MAP_255.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          1922,
+          238,
+          98
+        ],
+        "size": [
+          238,
+          98
+        ],
+        "native_size": [
+          238,
+          98
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "3bad21a5a27fdf9a43dbcbb10a47a217479259b58a99d29b3edb0502f37aa5c8",
+        "native_pixel_sha256": "3bad21a5a27fdf9a43dbcbb10a47a217479259b58a99d29b3edb0502f37aa5c8",
+        "external_anchor": [
+          119.0,
+          49.0
+        ]
+      },
+      {
+        "external_name": "256",
+        "native_name": "MENU_MAP_256.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          498,
+          304,
+          154,
+          174
+        ],
+        "size": [
+          154,
+          174
+        ],
+        "native_size": [
+          154,
+          174
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "7ea9141a64dcb214396a929a38055f17ee3f46acd294699a7e6b268bbd023452",
+        "native_pixel_sha256": "7ea9141a64dcb214396a929a38055f17ee3f46acd294699a7e6b268bbd023452",
+        "external_anchor": [
+          77.0,
+          87.0
+        ]
+      },
+      {
+        "external_name": "257",
+        "native_name": "MENU_MAP_257.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          656,
+          260,
+          60,
+          202
+        ],
+        "size": [
+          60,
+          202
+        ],
+        "native_size": [
+          60,
+          202
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "a1a36ef62d98492e77a8ae89025e0dd65cfe33b2142e2387d7952ca6dd5edbe6",
+        "native_pixel_sha256": "a1a36ef62d98492e77a8ae89025e0dd65cfe33b2142e2387d7952ca6dd5edbe6",
+        "external_anchor": [
+          30.0,
+          101.0
+        ]
+      },
+      {
+        "external_name": "258",
+        "native_name": "MENU_MAP_258.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          500,
+          0,
+          140,
+          236
+        ],
+        "size": [
+          140,
+          236
+        ],
+        "native_size": [
+          140,
+          236
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "419da4c03037645ce384f56f5c83a437c973957e4251db36d9e38f6865c39293",
+        "native_pixel_sha256": "419da4c03037645ce384f56f5c83a437c973957e4251db36d9e38f6865c39293",
+        "external_anchor": [
+          70.0,
+          118.0
+        ]
+      },
+      {
+        "external_name": "259",
+        "native_name": "MENU_MAP_259.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          484,
+          1186,
+          214,
+          136
+        ],
+        "size": [
+          214,
+          136
+        ],
+        "native_size": [
+          214,
+          136
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "759a698a93f7e63f8bfe112c63677def02f715875c45b3bd42051629858db705",
+        "native_pixel_sha256": "759a698a93f7e63f8bfe112c63677def02f715875c45b3bd42051629858db705",
+        "external_anchor": [
+          107.0,
+          68.0
+        ]
+      },
+      {
+        "external_name": "26",
+        "native_name": "MENU_MAP_26.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          288,
+          388,
+          266,
+          216
+        ],
+        "size": [
+          266,
+          216
+        ],
+        "native_size": [
+          266,
+          216
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "416e8588a3428145cddcd45412a103677f174643707b5a1bd93c17edfaa11e21",
+        "native_pixel_sha256": "416e8588a3428145cddcd45412a103677f174643707b5a1bd93c17edfaa11e21",
+        "external_anchor": [
+          133.0,
+          108.0
+        ]
+      },
+      {
+        "external_name": "260",
+        "native_name": "MENU_MAP_260.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          792,
+          252,
+          106
+        ],
+        "size": [
+          252,
+          106
+        ],
+        "native_size": [
+          252,
+          106
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "bc714dcdb3eafa91417fe1cee6f582eb6ab768e6718ad6c601ec6b74a8fa6c47",
+        "native_pixel_sha256": "bc714dcdb3eafa91417fe1cee6f582eb6ab768e6718ad6c601ec6b74a8fa6c47",
+        "external_anchor": [
+          126.0,
+          53.0
+        ]
+      },
+      {
+        "external_name": "261",
+        "native_name": "MENU_MAP_261.png",
+        "native_atlas": "SB_MapCursor_03_dlc",
+        "native_rect": [
+          0,
+          1616,
+          238,
+          158
+        ],
+        "size": [
+          238,
+          158
+        ],
+        "native_size": [
+          238,
+          158
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "1319ff0b241d8bad7c3d9219172e8bae2362282d6317f1af2e4d6c8da219830e",
+        "native_pixel_sha256": "1319ff0b241d8bad7c3d9219172e8bae2362282d6317f1af2e4d6c8da219830e",
+        "external_anchor": [
+          119.0,
+          79.0
+        ]
+      },
+      {
+        "external_name": "27",
+        "native_name": "MENU_MAP_27.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          0,
+          720,
+          282,
+          238
+        ],
+        "size": [
+          282,
+          238
+        ],
+        "native_size": [
+          282,
+          238
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "b7b809d614d30750626850827bace4b12414f8bfb368e2af553345767425a24f",
+        "native_pixel_sha256": "b7b809d614d30750626850827bace4b12414f8bfb368e2af553345767425a24f",
+        "external_anchor": [
+          141.0,
+          119.0
+        ]
+      },
+      {
+        "external_name": "28",
+        "native_name": "MENU_MAP_28.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          0,
+          180,
+          286,
+          204
+        ],
+        "size": [
+          286,
+          204
+        ],
+        "native_size": [
+          286,
+          204
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "67f16d5301115a5c370a74a766a1082d411db755005200bb609f520d3d66516c",
+        "native_pixel_sha256": "67f16d5301115a5c370a74a766a1082d411db755005200bb609f520d3d66516c",
+        "external_anchor": [
+          143.0,
+          102.0
+        ]
+      },
+      {
+        "external_name": "29",
+        "native_name": "MENU_MAP_29.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          286,
+          720,
+          280,
+          232
+        ],
+        "size": [
+          280,
+          232
+        ],
+        "native_size": [
+          280,
+          232
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "9da4a58df06fb25abad5394d04758ebd4a185631d7ae69ae3e31de74b91483ec",
+        "native_pixel_sha256": "9da4a58df06fb25abad5394d04758ebd4a185631d7ae69ae3e31de74b91483ec",
+        "external_anchor": [
+          140.0,
+          116.0
+        ]
+      },
+      {
+        "external_name": "30",
+        "native_name": "MENU_MAP_30.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1071,
+          0,
+          202,
+          248
+        ],
+        "size": [
+          202,
+          248
+        ],
+        "native_size": [
+          202,
+          248
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d86bd6d1f3ef12ae83b25a5353125d57a6e80bdd1304c7d0b82a5a2087e48530",
+        "native_pixel_sha256": "d86bd6d1f3ef12ae83b25a5353125d57a6e80bdd1304c7d0b82a5a2087e48530",
+        "external_anchor": [
+          101.0,
+          124.0
+        ]
+      },
+      {
+        "external_name": "32",
+        "native_name": "MENU_MAP_32.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          470,
+          1904,
+          222,
+          132
+        ],
+        "size": [
+          222,
+          132
+        ],
+        "native_size": [
+          222,
+          132
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "c63a9607ff95f30558673bae443b9537feb39b91fda06ff7a29a52b09c4b1f73",
+        "native_pixel_sha256": "c63a9607ff95f30558673bae443b9537feb39b91fda06ff7a29a52b09c4b1f73",
+        "external_anchor": [
+          111.0,
+          66.0
+        ]
+      },
+      {
+        "external_name": "33",
+        "native_name": "MENU_MAP_33.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          554,
+          186,
+          194,
+          174
+        ],
+        "size": [
+          194,
+          174
+        ],
+        "native_size": [
+          194,
+          174
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "4e65aca1940aaf7164bb444eb230d310140e23176264a60a51316017f1979871",
+        "native_pixel_sha256": "4e65aca1940aaf7164bb444eb230d310140e23176264a60a51316017f1979871",
+        "external_anchor": [
+          97.0,
+          87.0
+        ]
+      },
+      {
+        "external_name": "34",
+        "native_name": "MENU_MAP_34.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          504,
+          504,
+          210,
+          210
+        ],
+        "size": [
+          210,
+          210
+        ],
+        "native_size": [
+          210,
+          210
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ef03779124231fa0a542d2e7ba5b34f66cef0150e7a9676d529ab8b399ae520c",
+        "native_pixel_sha256": "ef03779124231fa0a542d2e7ba5b34f66cef0150e7a9676d529ab8b399ae520c",
+        "external_anchor": [
+          105.0,
+          105.0
+        ]
+      },
+      {
+        "external_name": "35",
+        "native_name": "MENU_MAP_35.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          0,
+          1880,
+          236,
+          128
+        ],
+        "size": [
+          236,
+          128
+        ],
+        "native_size": [
+          236,
+          128
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "c9e049b2ae3817edef4cbdec40afecf53a467eb62c8b85e60458ad4afb32584d",
+        "native_pixel_sha256": "c9e049b2ae3817edef4cbdec40afecf53a467eb62c8b85e60458ad4afb32584d",
+        "external_anchor": [
+          118.0,
+          64.0
+        ]
+      },
+      {
+        "external_name": "36",
+        "native_name": "MENU_MAP_36.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          704,
+          1751,
+          176,
+          166
+        ],
+        "size": [
+          176,
+          166
+        ],
+        "native_size": [
+          176,
+          166
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "f79a4e390cb6134abbf7ee2c463a75a2f9065f00b1146af409f60c48ad977fbb",
+        "native_pixel_sha256": "f79a4e390cb6134abbf7ee2c463a75a2f9065f00b1146af409f60c48ad977fbb",
+        "external_anchor": [
+          88.0,
+          83.0
+        ]
+      },
+      {
+        "external_name": "37",
+        "native_name": "MENU_MAP_37.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          370,
+          1131,
+          224,
+          126
+        ],
+        "size": [
+          224,
+          126
+        ],
+        "native_size": [
+          224,
+          126
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d8bd9184a39cece56cdc890076dcaaa86c76d7fb46bb14f7c73cd75966325899",
+        "native_pixel_sha256": "d8bd9184a39cece56cdc890076dcaaa86c76d7fb46bb14f7c73cd75966325899",
+        "external_anchor": [
+          112.0,
+          63.0
+        ]
+      },
+      {
+        "external_name": "38",
+        "native_name": "MENU_MAP_38.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          370,
+          1008,
+          224,
+          119
+        ],
+        "size": [
+          224,
+          119
+        ],
+        "native_size": [
+          224,
+          119
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "f1d1d196b4b82be036b971187c06a76e0ce8c744b2b1993a15ab2f683529a47c",
+        "native_pixel_sha256": "f1d1d196b4b82be036b971187c06a76e0ce8c744b2b1993a15ab2f683529a47c",
+        "external_anchor": [
+          112.0,
+          59.5
+        ]
+      },
+      {
+        "external_name": "39",
+        "native_name": "MENU_MAP_39.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          240,
+          1904,
+          226,
+          124
+        ],
+        "size": [
+          226,
+          124
+        ],
+        "native_size": [
+          226,
+          124
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "96f15ecb42ee1da72ef2c4229a5094d43ebf64aee79caf4edeaa0f17c9f236eb",
+        "native_pixel_sha256": "96f15ecb42ee1da72ef2c4229a5094d43ebf64aee79caf4edeaa0f17c9f236eb",
+        "external_anchor": [
+          113.0,
+          62.0
+        ]
+      },
+      {
+        "external_name": "40",
+        "native_name": "MENU_MAP_40.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          264,
+          1494,
+          224,
+          110
+        ],
+        "size": [
+          224,
+          110
+        ],
+        "native_size": [
+          224,
+          110
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "1549dbe92fd12a11667167e58ffd88affc4e2ac650aaa27262e1314c941fa124",
+        "native_pixel_sha256": "1549dbe92fd12a11667167e58ffd88affc4e2ac650aaa27262e1314c941fa124",
+        "external_anchor": [
+          112.0,
+          55.0
+        ]
+      },
+      {
+        "external_name": "45",
+        "native_name": "MENU_MAP_45.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          716,
+          1372,
+          168,
+          160
+        ],
+        "size": [
+          168,
+          160
+        ],
+        "native_size": [
+          168,
+          160
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "cff5002f4d2195ba1af842d392a9e5e53a96a29d95d2fc39c38ac278bf8c02b9",
+        "native_pixel_sha256": "cff5002f4d2195ba1af842d392a9e5e53a96a29d95d2fc39c38ac278bf8c02b9",
+        "external_anchor": [
+          84.0,
+          80.0
+        ]
+      },
+      {
+        "external_name": "46",
+        "native_name": "MENU_MAP_46.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          492,
+          1435,
+          220,
+          150
+        ],
+        "size": [
+          220,
+          150
+        ],
+        "native_size": [
+          220,
+          150
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "5be01f9944a00db34d8a908867669920c3e93419dbf6dba1d36a87991145e11e",
+        "native_pixel_sha256": "5be01f9944a00db34d8a908867669920c3e93419dbf6dba1d36a87991145e11e",
+        "external_anchor": [
+          110.0,
+          75.0
+        ]
+      },
+      {
+        "external_name": "47",
+        "native_name": "MENU_MAP_47.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          494,
+          1589,
+          218,
+          158
+        ],
+        "size": [
+          218,
+          158
+        ],
+        "native_size": [
+          218,
+          158
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "e2403fd54658850c26d8cfa6cba2dfe2433206bb961e0f193bbfb7e6ae5f96a3",
+        "native_pixel_sha256": "e2403fd54658850c26d8cfa6cba2dfe2433206bb961e0f193bbfb7e6ae5f96a3",
+        "external_anchor": [
+          109.0,
+          79.0
+        ]
+      },
+      {
+        "external_name": "50",
+        "native_name": "MENU_MAP_50.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          558,
+          408,
+          254,
+          212
+        ],
+        "size": [
+          254,
+          212
+        ],
+        "native_size": [
+          254,
+          212
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ed04cd9b23cb4a1ade2ac17fcfa37772eb7853625767d0e1168e369683765d13",
+        "native_pixel_sha256": "ed04cd9b23cb4a1ade2ac17fcfa37772eb7853625767d0e1168e369683765d13",
+        "external_anchor": [
+          127.0,
+          106.0
+        ]
+      },
+      {
+        "external_name": "51",
+        "native_name": "MENU_MAP_51.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          504,
+          718,
+          208,
+          198
+        ],
+        "size": [
+          208,
+          198
+        ],
+        "native_size": [
+          208,
+          198
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "bd4fd5031c4c19c5aeb3e634cbbb00239dea7ad156ff1d85776c969693636f5b",
+        "native_pixel_sha256": "bd4fd5031c4c19c5aeb3e634cbbb00239dea7ad156ff1d85776c969693636f5b",
+        "external_anchor": [
+          104.0,
+          99.0
+        ]
+      },
+      {
+        "external_name": "52",
+        "native_name": "MENU_MAP_52.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          262,
+          1692,
+          228,
+          208
+        ],
+        "size": [
+          228,
+          208
+        ],
+        "native_size": [
+          228,
+          208
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "dee3670f9816c432b181a84ace71ec83753bab269ba3ff51df37838f99a3575c",
+        "native_pixel_sha256": "dee3670f9816c432b181a84ace71ec83753bab269ba3ff51df37838f99a3575c",
+        "external_anchor": [
+          114.0,
+          104.0
+        ]
+      },
+      {
+        "external_name": "53",
+        "native_name": "MENU_MAP_53.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          784,
+          1138,
+          124,
+          208
+        ],
+        "size": [
+          124,
+          208
+        ],
+        "native_size": [
+          124,
+          208
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "017cdbfb5b31754ee478532f39412a1ed9d15c17ddf8e00e2cdef4cea9982efc",
+        "native_pixel_sha256": "017cdbfb5b31754ee478532f39412a1ed9d15c17ddf8e00e2cdef4cea9982efc",
+        "external_anchor": [
+          62.0,
+          104.0
+        ]
+      },
+      {
+        "external_name": "54",
+        "native_name": "MENU_MAP_54.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          716,
+          718,
+          160,
+          194
+        ],
+        "size": [
+          160,
+          194
+        ],
+        "native_size": [
+          160,
+          194
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "42193fafab32aa02eb2b7cdea81020b385eb3d48ab64ba103d51ca5979198429",
+        "native_pixel_sha256": "42193fafab32aa02eb2b7cdea81020b385eb3d48ab64ba103d51ca5979198429",
+        "external_anchor": [
+          80.0,
+          97.0
+        ]
+      },
+      {
+        "external_name": "55",
+        "native_name": "MENU_MAP_55.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          716,
+          1536,
+          166,
+          204
+        ],
+        "size": [
+          166,
+          204
+        ],
+        "native_size": [
+          166,
+          204
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "4b780f2e0c7aee4b64d1ea69de3d459977eb69f88c71059084239a47934e13ee",
+        "native_pixel_sha256": "4b780f2e0c7aee4b64d1ea69de3d459977eb69f88c71059084239a47934e13ee",
+        "external_anchor": [
+          83.0,
+          102.0
+        ]
+      },
+      {
+        "external_name": "56",
+        "native_name": "MENU_MAP_56.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          494,
+          1751,
+          206,
+          144
+        ],
+        "size": [
+          206,
+          144
+        ],
+        "native_size": [
+          206,
+          144
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "5fcdf2e51676f718377cbb9749197c81f8b41fe0769c7ab4044b727407829256",
+        "native_pixel_sha256": "5fcdf2e51676f718377cbb9749197c81f8b41fe0769c7ab4044b727407829256",
+        "external_anchor": [
+          103.0,
+          72.0
+        ]
+      },
+      {
+        "external_name": "57",
+        "native_name": "MENU_MAP_57.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          554,
+          0,
+          194,
+          182
+        ],
+        "size": [
+          194,
+          182
+        ],
+        "native_size": [
+          194,
+          182
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d561fb35c3027e9661146c2c259ec11a0c97622f069e0aaebabbbeb9247abc69",
+        "native_pixel_sha256": "d561fb35c3027e9661146c2c259ec11a0c97622f069e0aaebabbbeb9247abc69",
+        "external_anchor": [
+          97.0,
+          91.0
+        ]
+      },
+      {
+        "external_name": "58",
+        "native_name": "MENU_MAP_58.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          370,
+          1261,
+          224,
+          170
+        ],
+        "size": [
+          224,
+          170
+        ],
+        "native_size": [
+          224,
+          170
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "beb015706b9ba8e4cb8fb6898a6349d7865eebc865b1f1a14d6a4258004f9b06",
+        "native_pixel_sha256": "beb015706b9ba8e4cb8fb6898a6349d7865eebc865b1f1a14d6a4258004f9b06",
+        "external_anchor": [
+          112.0,
+          85.0
+        ]
+      },
+      {
+        "external_name": "59",
+        "native_name": "MENU_MAP_59.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          598,
+          920,
+          190,
+          214
+        ],
+        "size": [
+          190,
+          214
+        ],
+        "native_size": [
+          190,
+          214
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "3bc2efa2289e398e1eb2269004ef998e292423858d61fd816b7a4d4577c2de7b",
+        "native_pixel_sha256": "3bc2efa2289e398e1eb2269004ef998e292423858d61fd816b7a4d4577c2de7b",
+        "external_anchor": [
+          95.0,
+          107.0
+        ]
+      },
+      {
+        "external_name": "60",
+        "native_name": "MENU_MAP_60.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          0,
+          1692,
+          258,
+          184
+        ],
+        "size": [
+          258,
+          184
+        ],
+        "native_size": [
+          258,
+          184
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d1f0db3b08023134273e5ece208c9a4dd38e51a3344261a6df914f6e74521920",
+        "native_pixel_sha256": "d1f0db3b08023134273e5ece208c9a4dd38e51a3344261a6df914f6e74521920",
+        "external_anchor": [
+          129.0,
+          92.0
+        ]
+      },
+      {
+        "external_name": "61",
+        "native_name": "MENU_MAP_61.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          0,
+          1382,
+          294,
+          108
+        ],
+        "size": [
+          294,
+          108
+        ],
+        "native_size": [
+          294,
+          108
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "49b13ed6a9277f36892bb342bef2117efc8c810f129fcd8fc1b0ba25d3a3834f",
+        "native_pixel_sha256": "49b13ed6a9277f36892bb342bef2117efc8c810f129fcd8fc1b0ba25d3a3834f",
+        "external_anchor": [
+          147.0,
+          54.0
+        ]
+      },
+      {
+        "external_name": "66",
+        "native_name": "MENU_MAP_66.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          878,
+          324,
+          102,
+          230
+        ],
+        "size": [
+          102,
+          230
+        ],
+        "native_size": [
+          102,
+          230
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "e63f0bae2a2e0930db1feb42d136acbaac71399ba5a2ec484226f7e8891be1e1",
+        "native_pixel_sha256": "e63f0bae2a2e0930db1feb42d136acbaac71399ba5a2ec484226f7e8891be1e1",
+        "external_anchor": [
+          51.0,
+          115.0
+        ]
+      },
+      {
+        "external_name": "80",
+        "native_name": "MENU_MAP_80.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          554,
+          364,
+          124,
+          124
+        ],
+        "size": [
+          124,
+          124
+        ],
+        "native_size": [
+          124,
+          124
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "3b6f97bfe446024936c30f7214bef08780ac2f6a4abe3d15f6f11aed2231ec14",
+        "native_pixel_sha256": "3b6f97bfe446024936c30f7214bef08780ac2f6a4abe3d15f6f11aed2231ec14",
+        "external_anchor": [
+          62.0,
+          62.0
+        ]
+      },
+      {
+        "external_name": "83",
+        "native_name": "MENU_MAP_83.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          880,
+          558,
+          98,
+          292
+        ],
+        "size": [
+          98,
+          292
+        ],
+        "native_size": [
+          98,
+          292
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "b33550bf4f2e2130c2eb30244995d6874b280b73137608fb3c7be6a0fe3d923b",
+        "native_pixel_sha256": "b33550bf4f2e2130c2eb30244995d6874b280b73137608fb3c7be6a0fe3d923b",
+        "external_anchor": [
+          49,
+          300
+        ]
+      },
+      {
+        "external_name": "84",
+        "native_name": "MENU_MAP_84.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          882,
+          176,
+          48,
+          124
+        ],
+        "size": [
+          48,
+          124
+        ],
+        "native_size": [
+          48,
+          124
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "02d977c7815d4949df085d95457f1c109f657081f009d97d3fabf1c76720fa29",
+        "native_pixel_sha256": "02d977c7815d4949df085d95457f1c109f657081f009d97d3fabf1c76720fa29",
+        "external_anchor": [
+          24,
+          125
+        ]
+      },
+      {
+        "external_name": "85",
+        "native_name": "MENU_MAP_85.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          752,
+          176,
+          126,
+          144
+        ],
+        "size": [
+          126,
+          144
+        ],
+        "native_size": [
+          126,
+          144
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "d6eb4ea8f84a94cb1ebe80397175d9d6da1a8ed8a07fc00d3030cb56cbd2f538",
+        "native_pixel_sha256": "d6eb4ea8f84a94cb1ebe80397175d9d6da1a8ed8a07fc00d3030cb56cbd2f538",
+        "external_anchor": [
+          63.0,
+          72.0
+        ]
+      },
+      {
+        "external_name": "87",
+        "native_name": "MENU_MAP_87.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          264,
+          1608,
+          78,
+          78
+        ],
+        "size": [
+          78,
+          78
+        ],
+        "native_size": [
+          78,
+          78
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "22ac3c88d575b10abcd45dc9238df71e218252125a9d3036852240b48a4bf08e",
+        "native_pixel_sha256": "22ac3c88d575b10abcd45dc9238df71e218252125a9d3036852240b48a4bf08e",
+        "external_anchor": [
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "external_name": "88",
+        "native_name": "MENU_MAP_88.png",
+        "native_atlas": "SB_MapCursor_02",
+        "native_rect": [
+          346,
+          1608,
+          70,
+          70
+        ],
+        "size": [
+          70,
+          70
+        ],
+        "native_size": [
+          70,
+          70
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "652bff057b8acf33ae37335908a5dc62ae5129c44ebc3103894039cf969cafd6",
+        "native_pixel_sha256": "652bff057b8acf33ae37335908a5dc62ae5129c44ebc3103894039cf969cafd6",
+        "external_anchor": [
+          35.0,
+          35.0
+        ]
+      },
+      {
+        "external_name": "Arrow",
+        "native_name": "MENU_MAP_Player_01.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1931,
+          432,
+          72,
+          150
+        ],
+        "size": [
+          72,
+          150
+        ],
+        "native_size": [
+          72,
+          150
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "4d862464cf41b5cc3caf0888da97afa3e4bc99febacad4eec9ecd17dcf60e4ee",
+        "native_pixel_sha256": "4d862464cf41b5cc3caf0888da97afa3e4bc99febacad4eec9ecd17dcf60e4ee",
+        "external_anchor": [
+          32,
+          87
+        ]
+      },
+      {
+        "external_name": "Bearing",
+        "native_name": "MENU_MAP_Bearing.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          0,
+          388,
+          284,
+          328
+        ],
+        "size": [
+          284,
+          328
+        ],
+        "native_size": [
+          284,
+          328
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "e6456161cb064c341f86f7f097295e95e62f9ed55761bc9e367045e614c80b4a",
+        "native_pixel_sha256": "e6456161cb064c341f86f7f097295e95e62f9ed55761bc9e367045e614c80b4a",
+        "external_anchor": [
+          142.0,
+          164.0
+        ]
+      },
+      {
+        "external_name": "Player",
+        "native_name": "MENU_MAP_Host.png",
+        "native_atlas": "SB_MapCursor",
+        "native_rect": [
+          1806,
+          358,
+          74,
+          76
+        ],
+        "size": [
+          74,
+          76
+        ],
+        "native_size": [
+          74,
+          76
+        ],
+        "equal_rgba": true,
+        "external_pixel_sha256": "ee10a647afee90e344273e087e2b02abf224f75fc14c2498d73b9978ccd391f1",
+        "native_pixel_sha256": "ee10a647afee90e344273e087e2b02abf224f75fc14c2498d73b9978ccd391f1",
+        "external_anchor": [
+          37.0,
+          38.0
+        ]
+      },
+      {
+        "external_name": "Roundtable",
+        "native_name": "MENU_FL_Hub.png",
+        "native_atlas": "SB_Chara",
+        "native_rect": [
+          0,
+          558,
+          400,
+          400
+        ],
+        "size": [
+          400,
+          400
+        ],
+        "native_size": [
+          400,
+          400
+        ],
+        "equal_rgba": false,
+        "external_pixel_sha256": "7ccee634b02e9ae9b38c2a61558a71b3600139979dec149803e2d66f93f54d10",
+        "native_pixel_sha256": "ac127037ca8ab408a135121ca565f4c095bdffb2fe7625660499b2eae6f5f615",
+        "external_anchor": [
+          200.0,
+          200.0
+        ]
+      }
+    ]
+  },
+  "gfx": {
+    "file": "build\\ida\\sprite-probe\\run-24636-34293203\\worldmap.gfx",
+    "sha256": "75ad2435032b59c7db1c25d3f16d111ad6623ca93fed0623ab824cd08af50446",
+    "bytes": 68768,
+    "declared_bytes": 68763,
+    "trailing_zero_bytes": 5,
+    "version": 11,
+    "frame_count": 17,
+    "image_count": 151,
+    "sprite_count": 79,
+    "worldmap_item_id": 174,
+    "icon_timeline_id": 171,
+    "icon_timeline_offset": "0x25c0",
+    "icon_frame_count": 348,
+    "abc_blocks": [
+      {
+        "offset": "0x9ef8",
+        "bytes": 23943,
+        "sha256": "0c29b5330c85d967e22a92cbea35e67d15c9698060cbaabcf99162bc5a3bb938",
+        "metadata": {
+          "version": [
+            16,
+            46
+          ],
+          "method_count": 568,
+          "class_count": 179,
+          "namespace_set_count": 0,
+          "relevant_frame_scripts": [
+            {
+              "class": "_02_120_WorldMap_fla:PC__48",
+              "initializer_code_hex": "d030d049005dd5012400d066b4014fd5010247",
+              "frame_scripts": [
+                {
+                  "name": "_02_120_WorldMap_fla:frame1",
+                  "method": 490,
+                  "code_hex": "d0305dd4014fd4010047",
+                  "stop_only": true
+                }
+              ]
+            },
+            {
+              "class": "_02_120_WorldMap_fla:PC__49",
+              "initializer_code_hex": "d030d049005dd5012400d066b4014fd5010247",
+              "frame_scripts": [
+                {
+                  "name": "_02_120_WorldMap_fla:frame1",
+                  "method": 494,
+                  "code_hex": "d0305dd4014fd4010047",
+                  "stop_only": true
+                }
+              ]
+            },
+            {
+              "class": "_02_120_WorldMap_fla:Timeline_23",
+              "initializer_code_hex": "d030d049005dd5012400d066b4014fd5010247",
+              "frame_scripts": [
+                {
+                  "name": "_02_120_WorldMap_fla:frame1",
+                  "method": 504,
+                  "code_hex": "d0305dd4014fd4010047",
+                  "stop_only": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "coverage": {
+    "point_rows": 472,
+    "grace_rows": 422,
+    "selected_base_markers": 393,
+    "base_icon_ids": 87,
+    "alias_marker_counts": {
+      "3": 20,
+      "15": 4
+    },
+    "candidate_nonzero_field_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      66,
+      83,
+      84,
+      85,
+      87,
+      88,
+      101,
+      102,
+      103,
+      105,
+      106,
+      107,
+      109,
+      113,
+      117,
+      118,
+      121,
+      138,
+      208,
+      210,
+      211,
+      213,
+      217,
+      218,
+      230,
+      231,
+      232,
+      234,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      348
+    ],
+    "candidate_count": 105,
+    "field_sets": {
+      "point_base": [
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        45,
+        46,
+        47,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        66,
+        83,
+        84,
+        85,
+        87,
+        88,
+        208,
+        210,
+        211,
+        213,
+        217,
+        218,
+        230,
+        231,
+        232,
+        234,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261
+      ],
+      "point_alternate": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        45,
+        46,
+        47,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        66,
+        83,
+        84,
+        85,
+        87,
+        88,
+        103,
+        105,
+        106,
+        107,
+        109,
+        113,
+        117,
+        118,
+        121,
+        138,
+        208,
+        210,
+        211,
+        213,
+        217,
+        218,
+        230,
+        231,
+        232,
+        234,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        348
+      ],
+      "point_distant": [],
+      "grace_base": [
+        1,
+        48
+      ],
+      "grace_forbidden": [
+        2,
+        49
+      ],
+      "grace_alternate": [
+        1,
+        48,
+        101
+      ],
+      "grace_alternate_forbidden": [
+        2,
+        49,
+        102
+      ]
+    },
+    "missing_recipe_ids": [],
+    "different_alternate_rows": [
+      {
+        "row_id": 180000,
+        "base": 13,
+        "alternate": 113,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 450000,
+        "base": 24,
+        "alternate": 0,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 450100,
+        "base": 24,
+        "alternate": 0,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 450200,
+        "base": 24,
+        "alternate": 0,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61413301,
+        "base": 5,
+        "alternate": 105,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61413800,
+        "base": 6,
+        "alternate": 106,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61443302,
+        "base": 37,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61443500,
+        "base": 9,
+        "alternate": 109,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61453701,
+        "base": 5,
+        "alternate": 105,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 61463600,
+        "base": 18,
+        "alternate": 118,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62344800,
+        "base": 5,
+        "alternate": 105,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62345000,
+        "base": 17,
+        "alternate": 117,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62345001,
+        "base": 17,
+        "alternate": 117,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "row_id": 62354200,
+        "base": 39,
+        "alternate": 107,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62354400,
+        "base": 3,
+        "alternate": 103,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62364900,
+        "base": 3,
+        "alternate": 103,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62374600,
+        "base": 3,
+        "alternate": 103,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62384800,
+        "base": 35,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62393900,
+        "base": 3,
+        "alternate": 103,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 62394400,
+        "base": 38,
+        "alternate": 138,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 63375200,
+        "base": 40,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 63385000,
+        "base": 21,
+        "alternate": 121,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 63385100,
+        "base": 5,
+        "alternate": 105,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 63395200,
+        "base": 3,
+        "alternate": 103,
+        "text_types": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 63415400,
+        "base": 36,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 64473801,
+        "base": 18,
+        "alternate": 118,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 64503800,
+        "base": 6,
+        "alternate": 106,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 64503901,
+        "base": 33,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 65485700,
+        "base": 34,
+        "alternate": 7,
+        "text_types": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "row_id": 69514500,
+        "base": 248,
+        "alternate": 348,
+        "text_types": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "scope": "Nonzero parameter fields are coverage candidates; event/text conditions still select the actual frame"
+  },
+  "selected_icon_recipes": {
+    "1": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 169,
+          "offset": "0x255f",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_01_Bonfire",
+          "file_name": "MENU_MAP_01_Bonfire.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -39.0,
+          -39.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x25ca"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          524,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -39.0,
+          -39.0,
+          39.0,
+          39.0
+        ]
+      }
+    ],
+    "2": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 169,
+          "offset": "0x255f",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_01_Bonfire",
+          "file_name": "MENU_MAP_01_Bonfire.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -39.0,
+          -39.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x25e5"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          524,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -39.0,
+          -39.0,
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "kind": "vector",
+        "shape": {
+          "id": 170,
+          "offset": "0x2597",
+          "code": 83,
+          "body_hex": "aa00550eba59c9385536b05c489801000128000000cc0000ff012554ddc5e6b1518800",
+          "bounds": [
+            -18.85,
+            -15.3,
+            18.6,
+            14.75
+          ],
+          "fills": [],
+          "strokes": [
+            {
+              "width": 2.0,
+              "rgba": [
+                204,
+                0,
+                0,
+                255
+              ],
+              "flags": 0
+            }
+          ],
+          "commands": [
+            {
+              "op": "move",
+              "to": [
+                -17.85,
+                -14.3
+              ]
+            },
+            {
+              "op": "line",
+              "to": [
+                17.6,
+                13.75
+              ],
+              "fill0": 0,
+              "fill1": 0,
+              "stroke": 1
+            }
+          ],
+          "fully_transparent": false
+        },
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x25fa"
+        ],
+        "local_bounds": [
+          -18.85,
+          -15.3,
+          18.6,
+          14.75
+        ]
+      }
+    ],
+    "3": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 168,
+          "offset": "0x252f",
+          "format": 13,
+          "width": 140,
+          "height": 188,
+          "export_name": "MENU_MAP_Church",
+          "file_name": "MENU_MAP_Church.tga"
+        },
+        "matrix": [
+          0.5399932861328125,
+          0.0,
+          0.0,
+          0.5399932861328125,
+          -39.55,
+          -60.7
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x260c"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1660,
+          150,
+          140,
+          188
+        ],
+        "local_bounds": [
+          -39.55,
+          -60.7,
+          36.04906005859375,
+          40.81873779296875
+        ]
+      }
+    ],
+    "4": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 167,
+          "offset": "0x2507",
+          "format": 13,
+          "width": 194,
+          "height": 178,
+          "export_name": "MENU_MAP_04",
+          "file_name": "MENU_MAP_04.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -50.05,
+          -46.7
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2627"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1277,
+          0,
+          194,
+          178
+        ],
+        "local_bounds": [
+          -50.05,
+          -46.7,
+          50.82786865234375,
+          45.85804443359375
+        ]
+      }
+    ],
+    "5": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 166,
+          "offset": "0x24df",
+          "format": 13,
+          "width": 262,
+          "height": 150,
+          "export_name": "MENU_MAP_05",
+          "file_name": "MENU_MAP_05.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -54.6,
+          -43.8
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2642"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          557,
+          128,
+          262,
+          150
+        ],
+        "local_bounds": [
+          -54.6,
+          -43.8,
+          63.299200439453124,
+          23.699542236328128
+        ]
+      }
+    ],
+    "6": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 165,
+          "offset": "0x24b7",
+          "format": 13,
+          "width": 214,
+          "height": 136,
+          "export_name": "MENU_MAP_06",
+          "file_name": "MENU_MAP_06.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -47.85,
+          -30.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x265d"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          818,
+          878,
+          214,
+          136
+        ],
+        "local_bounds": [
+          -47.85,
+          -30.85,
+          48.449346923828124,
+          30.3495849609375
+        ]
+      }
+    ],
+    "7": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 164,
+          "offset": "0x248f",
+          "format": 13,
+          "width": 244,
+          "height": 113,
+          "export_name": "MENU_MAP_07",
+          "file_name": "MENU_MAP_07.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -56.7,
+          -25.1
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2678"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          570,
+          878,
+          244,
+          113
+        ],
+        "local_bounds": [
+          -56.7,
+          -25.1,
+          53.09925537109375,
+          25.749655151367186
+        ]
+      }
+    ],
+    "8": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 163,
+          "offset": "0x2467",
+          "format": 13,
+          "width": 162,
+          "height": 176,
+          "export_name": "MENU_MAP_08",
+          "file_name": "MENU_MAP_08.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -43.8,
+          -54.05
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2693"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1494,
+          180,
+          162,
+          176
+        ],
+        "local_bounds": [
+          -43.8,
+          -54.05,
+          29.099505615234378,
+          25.149462890625003
+        ]
+      }
+    ],
+    "9": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 162,
+          "offset": "0x243f",
+          "format": 13,
+          "width": 164,
+          "height": 162,
+          "export_name": "MENU_MAP_09",
+          "file_name": "MENU_MAP_09.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -41.15,
+          -40.95
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x26ae"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1481,
+          758,
+          164,
+          162
+        ],
+        "local_bounds": [
+          -41.15,
+          -40.95,
+          40.85,
+          40.05
+        ]
+      }
+    ],
+    "10": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 161,
+          "offset": "0x2417",
+          "format": 13,
+          "width": 224,
+          "height": 176,
+          "export_name": "MENU_MAP_10",
+          "file_name": "MENU_MAP_10.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -44.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x26c9"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1068,
+          304,
+          224,
+          176
+        ],
+        "local_bounds": [
+          -55.65,
+          -44.65,
+          56.35,
+          43.35
+        ]
+      }
+    ],
+    "11": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 160,
+          "offset": "0x23ef",
+          "format": 13,
+          "width": 244,
+          "height": 172,
+          "export_name": "MENU_MAP_11",
+          "file_name": "MENU_MAP_11.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -60.65,
+          -44.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x26e4"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          823,
+          128,
+          244,
+          172
+        ],
+        "local_bounds": [
+          -60.65,
+          -44.65,
+          61.35,
+          41.35
+        ]
+      }
+    ],
+    "13": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 159,
+          "offset": "0x23c7",
+          "format": 13,
+          "width": 204,
+          "height": 162,
+          "export_name": "MENU_MAP_13",
+          "file_name": "MENU_MAP_13.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -53.45,
+          -44.45
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2701"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1068,
+          688,
+          204,
+          162
+        ],
+        "local_bounds": [
+          -53.45,
+          -44.45,
+          52.6277587890625,
+          39.78822021484375
+        ]
+      }
+    ],
+    "14": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 158,
+          "offset": "0x239f",
+          "format": 13,
+          "width": 176,
+          "height": 154,
+          "export_name": "MENU_MAP_14",
+          "file_name": "MENU_MAP_14.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -45.35,
+          -43.2
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x271c"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1476,
+          420,
+          176,
+          154
+        ],
+        "local_bounds": [
+          -45.35,
+          -43.2,
+          46.16806640625,
+          36.87830810546875
+        ]
+      }
+    ],
+    "15": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 157,
+          "offset": "0x2371",
+          "format": 13,
+          "width": 206,
+          "height": 130,
+          "export_name": "MENU_MAP_Ungro",
+          "file_name": "MENU_MAP_Ungro.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -52.95,
+          -37.05
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2737"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1036,
+          870,
+          206,
+          130
+        ],
+        "local_bounds": [
+          -52.95,
+          -37.05,
+          54.16773681640625,
+          30.548571777343753
+        ]
+      }
+    ],
+    "16": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 156,
+          "offset": "0x2349",
+          "format": 13,
+          "width": 212,
+          "height": 200,
+          "export_name": "MENU_MAP_16",
+          "file_name": "MENU_MAP_16.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -51.8,
+          -56.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2752"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1068,
+          484,
+          212,
+          200
+        ],
+        "local_bounds": [
+          -51.8,
+          -56.85,
+          58.4376708984375,
+          47.147802734375
+        ]
+      }
+    ],
+    "17": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 155,
+          "offset": "0x2321",
+          "format": 13,
+          "width": 140,
+          "height": 236,
+          "export_name": "MENU_MAP_17",
+          "file_name": "MENU_MAP_17.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -36.0,
+          -71.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x276d"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1661,
+          510,
+          140,
+          236
+        ],
+        "local_bounds": [
+          -36.0,
+          -71.85,
+          36.7984619140625,
+          50.867407226562506
+        ]
+      }
+    ],
+    "18": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 154,
+          "offset": "0x22f9",
+          "format": 13,
+          "width": 201,
+          "height": 232,
+          "export_name": "MENU_MAP_18",
+          "file_name": "MENU_MAP_18.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -52.1,
+          -74.55
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2788"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1276,
+          688,
+          201,
+          232
+        ],
+        "local_bounds": [
+          -52.1,
+          -74.55,
+          52.417791748046874,
+          46.087451171875
+        ]
+      }
+    ],
+    "19": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 153,
+          "offset": "0x22d1",
+          "format": 13,
+          "width": 154,
+          "height": 172,
+          "export_name": "MENU_MAP_19",
+          "file_name": "MENU_MAP_19.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -38.15,
+          -56.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x27a3"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          752,
+          0,
+          154,
+          172
+        ],
+        "local_bounds": [
+          -38.15,
+          -56.65,
+          38.85,
+          29.35
+        ]
+      }
+    ],
+    "20": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 152,
+          "offset": "0x22a9",
+          "format": 13,
+          "width": 248,
+          "height": 210,
+          "export_name": "MENU_MAP_20",
+          "file_name": "MENU_MAP_20.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -47.05,
+          -63.95
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x27be"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          816,
+          408,
+          248,
+          210
+        ],
+        "local_bounds": [
+          -47.05,
+          -63.95,
+          81.907275390625,
+          45.24769287109375
+        ]
+      }
+    ],
+    "21": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 151,
+          "offset": "0x2281",
+          "format": 13,
+          "width": 194,
+          "height": 234,
+          "export_name": "MENU_MAP_21",
+          "file_name": "MENU_MAP_21.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -51.75,
+          -66.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x27d9"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1296,
+          182,
+          194,
+          234
+        ],
+        "local_bounds": [
+          -51.75,
+          -66.5,
+          49.12786865234375,
+          55.17742919921875
+        ]
+      }
+    ],
+    "23": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 149,
+          "offset": "0x2231",
+          "format": 13,
+          "width": 116,
+          "height": 236,
+          "export_name": "MENU_MAP_23",
+          "file_name": "MENU_MAP_23.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -27.1,
+          -61.25
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x280f"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1813,
+          636,
+          116,
+          236
+        ],
+        "local_bounds": [
+          -27.1,
+          -61.25,
+          33.2187255859375,
+          61.4674072265625
+        ]
+      }
+    ],
+    "24": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 148,
+          "offset": "0x2209",
+          "format": 13,
+          "width": 263,
+          "height": 191,
+          "export_name": "MENU_MAP_24",
+          "file_name": "MENU_MAP_24.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -61.45,
+          -45.2
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x282a"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          290,
+          180,
+          263,
+          191
+        ],
+        "local_bounds": [
+          -61.45,
+          -45.2,
+          62.156307983398435,
+          44.567318725585935
+        ]
+      }
+    ],
+    "25": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 147,
+          "offset": "0x21e1",
+          "format": 13,
+          "width": 240,
+          "height": 244,
+          "export_name": "MENU_MAP_25",
+          "file_name": "MENU_MAP_25.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -54.5,
+          -55.1
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2845"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          824,
+          622,
+          240,
+          244
+        ],
+        "local_bounds": [
+          -54.5,
+          -55.1,
+          53.499267578125,
+          54.69925537109375
+        ]
+      }
+    ],
+    "26": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 146,
+          "offset": "0x21b9",
+          "format": 13,
+          "width": 266,
+          "height": 216,
+          "export_name": "MENU_MAP_26",
+          "file_name": "MENU_MAP_26.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -59.5,
+          -49.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2860"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          288,
+          388,
+          266,
+          216
+        ],
+        "local_bounds": [
+          -59.5,
+          -49.15,
+          60.199188232421875,
+          48.0493408203125
+        ]
+      }
+    ],
+    "27": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 145,
+          "offset": "0x2191",
+          "format": 13,
+          "width": 282,
+          "height": 238,
+          "export_name": "MENU_MAP_27",
+          "file_name": "MENU_MAP_27.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -66.05,
+          -55.9
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x287b"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          0,
+          720,
+          282,
+          238
+        ],
+        "local_bounds": [
+          -66.05,
+          -55.9,
+          66.48604125976563,
+          55.956658935546876
+        ]
+      }
+    ],
+    "28": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 144,
+          "offset": "0x2169",
+          "format": 13,
+          "width": 286,
+          "height": 204,
+          "export_name": "MENU_MAP_28",
+          "file_name": "MENU_MAP_28.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -66.4,
+          -48.55
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2896"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          0,
+          180,
+          286,
+          204
+        ],
+        "local_bounds": [
+          -66.4,
+          -48.55,
+          68.01598510742187,
+          47.32713623046875
+        ]
+      }
+    ],
+    "29": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 143,
+          "offset": "0x2141",
+          "format": 13,
+          "width": 280,
+          "height": 232,
+          "export_name": "MENU_MAP_29",
+          "file_name": "MENU_MAP_29.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -66.45,
+          -54.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x28b1"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          286,
+          720,
+          280,
+          232
+        ],
+        "local_bounds": [
+          -66.45,
+          -54.85,
+          65.1460693359375,
+          54.1867431640625
+        ]
+      }
+    ],
+    "30": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 142,
+          "offset": "0x2119",
+          "format": 13,
+          "width": 202,
+          "height": 248,
+          "export_name": "MENU_MAP_30",
+          "file_name": "MENU_MAP_30.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -47.15,
+          -57.95
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x28cc"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1071,
+          0,
+          202,
+          248
+        ],
+        "local_bounds": [
+          -47.15,
+          -57.95,
+          47.787164306640626,
+          58.6065185546875
+        ]
+      }
+    ],
+    "32": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 141,
+          "offset": "0x20f1",
+          "format": 13,
+          "width": 222,
+          "height": 132,
+          "export_name": "MENU_MAP_32",
+          "file_name": "MENU_MAP_32.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.5,
+          -26.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x28e9"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          470,
+          1904,
+          222,
+          132
+        ],
+        "local_bounds": [
+          -55.5,
+          -26.0,
+          55.5,
+          40.0
+        ]
+      }
+    ],
+    "33": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 140,
+          "offset": "0x20c9",
+          "format": 13,
+          "width": 194,
+          "height": 174,
+          "export_name": "MENU_MAP_33",
+          "file_name": "MENU_MAP_33.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -47.15,
+          -46.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2904"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          554,
+          186,
+          194,
+          174
+        ],
+        "local_bounds": [
+          -47.15,
+          -46.5,
+          49.85,
+          40.5
+        ]
+      }
+    ],
+    "34": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 139,
+          "offset": "0x20a1",
+          "format": 13,
+          "width": 210,
+          "height": 210,
+          "export_name": "MENU_MAP_34",
+          "file_name": "MENU_MAP_34.tga"
+        },
+        "matrix": [
+          0.5000152587890625,
+          0.0,
+          0.0,
+          0.5000152587890625,
+          -53.5,
+          -60.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x291f"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          504,
+          504,
+          210,
+          210
+        ],
+        "local_bounds": [
+          -53.5,
+          -60.5,
+          51.503204345703125,
+          44.503204345703125
+        ]
+      }
+    ],
+    "35": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 138,
+          "offset": "0x2079",
+          "format": 13,
+          "width": 236,
+          "height": 128,
+          "export_name": "MENU_MAP_35",
+          "file_name": "MENU_MAP_35.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -58.65,
+          -25.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x293a"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          0,
+          1880,
+          236,
+          128
+        ],
+        "local_bounds": [
+          -58.65,
+          -25.65,
+          59.35,
+          38.35
+        ]
+      }
+    ],
+    "36": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 137,
+          "offset": "0x2051",
+          "format": 13,
+          "width": 176,
+          "height": 166,
+          "export_name": "MENU_MAP_36",
+          "file_name": "MENU_MAP_36.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -43.65,
+          -47.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2955"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          704,
+          1751,
+          176,
+          166
+        ],
+        "local_bounds": [
+          -43.65,
+          -47.65,
+          44.35,
+          35.35
+        ]
+      }
+    ],
+    "37": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 136,
+          "offset": "0x2029",
+          "format": 13,
+          "width": 224,
+          "height": 126,
+          "export_name": "MENU_MAP_37",
+          "file_name": "MENU_MAP_37.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -32.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2970"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          370,
+          1131,
+          224,
+          126
+        ],
+        "local_bounds": [
+          -55.65,
+          -32.0,
+          56.35,
+          31.0
+        ]
+      }
+    ],
+    "38": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 135,
+          "offset": "0x2001",
+          "format": 13,
+          "width": 224,
+          "height": 119,
+          "export_name": "MENU_MAP_38",
+          "file_name": "MENU_MAP_38.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -28.9
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x298b"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          370,
+          1008,
+          224,
+          119
+        ],
+        "local_bounds": [
+          -55.65,
+          -28.9,
+          56.35,
+          30.6
+        ]
+      }
+    ],
+    "39": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 134,
+          "offset": "0x1fd9",
+          "format": 13,
+          "width": 226,
+          "height": 124,
+          "export_name": "MENU_MAP_39",
+          "file_name": "MENU_MAP_39.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -56.15,
+          -31.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x29a6"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          240,
+          1904,
+          226,
+          124
+        ],
+        "local_bounds": [
+          -56.15,
+          -31.65,
+          56.85,
+          30.35
+        ]
+      }
+    ],
+    "40": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 133,
+          "offset": "0x1fb1",
+          "format": 13,
+          "width": 224,
+          "height": 110,
+          "export_name": "MENU_MAP_40",
+          "file_name": "MENU_MAP_40.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -25.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x29c1"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          264,
+          1494,
+          224,
+          110
+        ],
+        "local_bounds": [
+          -55.65,
+          -25.15,
+          56.35,
+          29.85
+        ]
+      }
+    ],
+    "45": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 132,
+          "offset": "0x1f89",
+          "format": 13,
+          "width": 168,
+          "height": 160,
+          "export_name": "MENU_MAP_45",
+          "file_name": "MENU_MAP_45.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -42.0,
+          -41.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x29e4"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          716,
+          1372,
+          168,
+          160
+        ],
+        "local_bounds": [
+          -42.0,
+          -41.65,
+          42.0,
+          38.35
+        ]
+      }
+    ],
+    "46": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 131,
+          "offset": "0x1f61",
+          "format": 13,
+          "width": 220,
+          "height": 150,
+          "export_name": "MENU_MAP_46",
+          "file_name": "MENU_MAP_46.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.15,
+          -38.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x29ff"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          492,
+          1435,
+          220,
+          150
+        ],
+        "local_bounds": [
+          -55.15,
+          -38.0,
+          54.85,
+          37.0
+        ]
+      }
+    ],
+    "47": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 130,
+          "offset": "0x1f39",
+          "format": 13,
+          "width": 218,
+          "height": 158,
+          "export_name": "MENU_MAP_47",
+          "file_name": "MENU_MAP_47.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -54.65,
+          -45.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2a1a"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          494,
+          1589,
+          218,
+          158
+        ],
+        "local_bounds": [
+          -54.65,
+          -45.15,
+          54.35,
+          33.85
+        ]
+      }
+    ],
+    "48": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 129,
+          "offset": "0x1f11",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_48",
+          "file_name": "MENU_MAP_48.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -40.0,
+          -47.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2a35"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          364,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -40.0,
+          -47.0,
+          38.0,
+          31.0
+        ]
+      }
+    ],
+    "49": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 129,
+          "offset": "0x1f11",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_48",
+          "file_name": "MENU_MAP_48.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -40.0,
+          -47.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2a50"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          364,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -40.0,
+          -47.0,
+          38.0,
+          31.0
+        ]
+      },
+      {
+        "kind": "vector",
+        "shape": {
+          "id": 170,
+          "offset": "0x2597",
+          "code": 83,
+          "body_hex": "aa00550eba59c9385536b05c489801000128000000cc0000ff012554ddc5e6b1518800",
+          "bounds": [
+            -18.85,
+            -15.3,
+            18.6,
+            14.75
+          ],
+          "fills": [],
+          "strokes": [
+            {
+              "width": 2.0,
+              "rgba": [
+                204,
+                0,
+                0,
+                255
+              ],
+              "flags": 0
+            }
+          ],
+          "commands": [
+            {
+              "op": "move",
+              "to": [
+                -17.85,
+                -14.3
+              ]
+            },
+            {
+              "op": "line",
+              "to": [
+                17.6,
+                13.75
+              ],
+              "fill0": 0,
+              "fill1": 0,
+              "stroke": 1
+            }
+          ],
+          "fully_transparent": false
+        },
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          -1.0,
+          3.25
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2a65"
+        ],
+        "local_bounds": [
+          -19.85,
+          -12.05,
+          17.6,
+          18.0
+        ]
+      }
+    ],
+    "50": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 128,
+          "offset": "0x1ee9",
+          "format": 13,
+          "width": 254,
+          "height": 212,
+          "export_name": "MENU_MAP_50",
+          "file_name": "MENU_MAP_50.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -65.6,
+          -55.75
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2a79"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          558,
+          408,
+          254,
+          212
+        ],
+        "local_bounds": [
+          -65.6,
+          -55.75,
+          66.47720947265626,
+          54.4876708984375
+        ]
+      }
+    ],
+    "51": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 127,
+          "offset": "0x1ec1",
+          "format": 13,
+          "width": 208,
+          "height": 198,
+          "export_name": "MENU_MAP_51",
+          "file_name": "MENU_MAP_51.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -50.5,
+          -58.05
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2a94"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          504,
+          718,
+          208,
+          198
+        ],
+        "local_bounds": [
+          -50.5,
+          -58.05,
+          57.65771484375,
+          44.90782470703125
+        ]
+      }
+    ],
+    "52": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 126,
+          "offset": "0x1e99",
+          "format": 13,
+          "width": 228,
+          "height": 208,
+          "export_name": "MENU_MAP_52",
+          "file_name": "MENU_MAP_52.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -59.3,
+          -54.7
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2aaf"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          262,
+          1692,
+          228,
+          208
+        ],
+        "local_bounds": [
+          -59.3,
+          -54.7,
+          59.2574951171875,
+          53.45771484375
+        ]
+      }
+    ],
+    "53": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 125,
+          "offset": "0x1e71",
+          "format": 13,
+          "width": 124,
+          "height": 208,
+          "export_name": "MENU_MAP_53",
+          "file_name": "MENU_MAP_53.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -28.5,
+          -54.4
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2aca"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          784,
+          1138,
+          124,
+          208
+        ],
+        "local_bounds": [
+          -28.5,
+          -54.4,
+          35.9786376953125,
+          53.75771484375
+        ]
+      }
+    ],
+    "54": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 124,
+          "offset": "0x1e49",
+          "format": 13,
+          "width": 160,
+          "height": 194,
+          "export_name": "MENU_MAP_54",
+          "file_name": "MENU_MAP_54.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -42.25,
+          -50.05
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2ae5"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          716,
+          718,
+          160,
+          194
+        ],
+        "local_bounds": [
+          -42.25,
+          -50.05,
+          40.9482421875,
+          50.82786865234375
+        ]
+      }
+    ],
+    "55": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 123,
+          "offset": "0x1e21",
+          "format": 13,
+          "width": 166,
+          "height": 204,
+          "export_name": "MENU_MAP_55",
+          "file_name": "MENU_MAP_55.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -49.7,
+          -54.9
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b00"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          716,
+          1536,
+          166,
+          204
+        ],
+        "local_bounds": [
+          -49.7,
+          -54.9,
+          36.61817626953125,
+          51.1777587890625
+        ]
+      }
+    ],
+    "56": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 122,
+          "offset": "0x1df9",
+          "format": 13,
+          "width": 206,
+          "height": 144,
+          "export_name": "MENU_MAP_56",
+          "file_name": "MENU_MAP_56.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -53.7,
+          -37.35
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b1b"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          494,
+          1751,
+          206,
+          144
+        ],
+        "local_bounds": [
+          -53.7,
+          -37.35,
+          53.41773681640625,
+          37.52841796875
+        ]
+      }
+    ],
+    "57": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 121,
+          "offset": "0x1dd1",
+          "format": 13,
+          "width": 194,
+          "height": 182,
+          "export_name": "MENU_MAP_57",
+          "file_name": "MENU_MAP_57.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -48.55,
+          -38.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b36"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          554,
+          0,
+          194,
+          182
+        ],
+        "local_bounds": [
+          -48.55,
+          -38.85,
+          52.32786865234375,
+          55.78800048828125
+        ]
+      }
+    ],
+    "58": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 120,
+          "offset": "0x1da9",
+          "format": 13,
+          "width": 224,
+          "height": 170,
+          "export_name": "MENU_MAP_58",
+          "file_name": "MENU_MAP_58.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -42.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b51"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          370,
+          1261,
+          224,
+          170
+        ],
+        "local_bounds": [
+          -55.65,
+          -42.15,
+          56.35,
+          42.85
+        ]
+      }
+    ],
+    "59": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 119,
+          "offset": "0x1d81",
+          "format": 13,
+          "width": 190,
+          "height": 214,
+          "export_name": "MENU_MAP_59",
+          "file_name": "MENU_MAP_59.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -47.15,
+          -51.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b6c"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          598,
+          920,
+          190,
+          214
+        ],
+        "local_bounds": [
+          -47.15,
+          -51.15,
+          47.85,
+          55.85
+        ]
+      }
+    ],
+    "60": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 118,
+          "offset": "0x1d59",
+          "format": 13,
+          "width": 258,
+          "height": 184,
+          "export_name": "MENU_MAP_60",
+          "file_name": "MENU_MAP_60.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -64.5,
+          -44.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2b87"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          0,
+          1692,
+          258,
+          184
+        ],
+        "local_bounds": [
+          -64.5,
+          -44.65,
+          64.5,
+          47.35
+        ]
+      }
+    ],
+    "61": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 117,
+          "offset": "0x1d31",
+          "format": 13,
+          "width": 294,
+          "height": 108,
+          "export_name": "MENU_MAP_61",
+          "file_name": "MENU_MAP_61.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -72.5,
+          -25.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2ba2"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          0,
+          1382,
+          294,
+          108
+        ],
+        "local_bounds": [
+          -72.5,
+          -25.0,
+          74.5,
+          29.0
+        ]
+      }
+    ],
+    "66": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 114,
+          "offset": "0x1cb9",
+          "format": 13,
+          "width": 102,
+          "height": 230,
+          "export_name": "MENU_MAP_66",
+          "file_name": "MENU_MAP_66.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -25.5,
+          -55.15
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2bf7"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          878,
+          324,
+          102,
+          230
+        ],
+        "local_bounds": [
+          -25.5,
+          -55.15,
+          25.5,
+          59.85
+        ]
+      }
+    ],
+    "80": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 112,
+          "offset": "0x1c63",
+          "format": 13,
+          "width": 124,
+          "height": 124,
+          "export_name": "MENU_MAP_80",
+          "file_name": "MENU_MAP_80.tga"
+        },
+        "matrix": [
+          0.3199920654296875,
+          0.0,
+          0.0,
+          0.3199920654296875,
+          -19.7,
+          -20.4
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2c41"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          554,
+          364,
+          124,
+          124
+        ],
+        "local_bounds": [
+          -19.7,
+          -20.4,
+          19.97901611328125,
+          19.27901611328125
+        ]
+      }
+    ],
+    "83": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 111,
+          "offset": "0x1c3b",
+          "format": 13,
+          "width": 98,
+          "height": 292,
+          "export_name": "MENU_MAP_83",
+          "file_name": "MENU_MAP_83.tga"
+        },
+        "matrix": [
+          -0.5,
+          0.0,
+          0.0,
+          -0.5,
+          25.4,
+          157.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2c5f"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          880,
+          558,
+          98,
+          292
+        ],
+        "local_bounds": [
+          -23.6,
+          11.5,
+          25.4,
+          157.5
+        ]
+      }
+    ],
+    "84": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 110,
+          "offset": "0x1c13",
+          "format": 13,
+          "width": 48,
+          "height": 124,
+          "export_name": "MENU_MAP_84",
+          "file_name": "MENU_MAP_84.tga"
+        },
+        "matrix": [
+          -0.5,
+          0.0,
+          0.0,
+          -0.5,
+          10.0,
+          46.35
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2c7a"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          882,
+          176,
+          48,
+          124
+        ],
+        "local_bounds": [
+          -14.0,
+          -15.649999999999999,
+          10.0,
+          46.35
+        ]
+      }
+    ],
+    "85": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 109,
+          "offset": "0x1beb",
+          "format": 13,
+          "width": 126,
+          "height": 144,
+          "export_name": "MENU_MAP_85",
+          "file_name": "MENU_MAP_85.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -31.5,
+          -29.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2c95"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          752,
+          176,
+          126,
+          144
+        ],
+        "local_bounds": [
+          -31.5,
+          -29.0,
+          31.5,
+          43.0
+        ]
+      }
+    ],
+    "87": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 107,
+          "offset": "0x1b9b",
+          "format": 13,
+          "width": 78,
+          "height": 78,
+          "export_name": "MENU_MAP_87",
+          "file_name": "MENU_MAP_87.tga"
+        },
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          -39.0,
+          -40.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2ccb"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          264,
+          1608,
+          78,
+          78
+        ],
+        "local_bounds": [
+          -39.0,
+          -40.0,
+          39.0,
+          38.0
+        ]
+      }
+    ],
+    "88": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 106,
+          "offset": "0x1b73",
+          "format": 13,
+          "width": 70,
+          "height": 70,
+          "export_name": "MENU_MAP_88",
+          "file_name": "MENU_MAP_88.tga"
+        },
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          -35.0,
+          -36.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2ce1"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          346,
+          1608,
+          70,
+          70
+        ],
+        "local_bounds": [
+          -35.0,
+          -36.0,
+          35.0,
+          34.0
+        ]
+      }
+    ],
+    "101": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 169,
+          "offset": "0x255f",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_01_Bonfire",
+          "file_name": "MENU_MAP_01_Bonfire.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -39.0,
+          -39.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2d4d"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          524,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -39.0,
+          -39.0,
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          0.9,
+          0.85
+        ],
+        "depth_path": [
+          3
+        ],
+        "source_tags": [
+          "0x2d62"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          0.9,
+          0.85,
+          48.89957275390625,
+          48.84957275390625
+        ]
+      }
+    ],
+    "102": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 169,
+          "offset": "0x255f",
+          "format": 13,
+          "width": 156,
+          "height": 156,
+          "export_name": "MENU_MAP_01_Bonfire",
+          "file_name": "MENU_MAP_01_Bonfire.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -39.0,
+          -39.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2d4d"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          718,
+          524,
+          156,
+          156
+        ],
+        "local_bounds": [
+          -39.0,
+          -39.0,
+          39.0,
+          39.0
+        ]
+      },
+      {
+        "kind": "vector",
+        "shape": {
+          "id": 170,
+          "offset": "0x2597",
+          "code": 83,
+          "body_hex": "aa00550eba59c9385536b05c489801000128000000cc0000ff012554ddc5e6b1518800",
+          "bounds": [
+            -18.85,
+            -15.3,
+            18.6,
+            14.75
+          ],
+          "fills": [],
+          "strokes": [
+            {
+              "width": 2.0,
+              "rgba": [
+                204,
+                0,
+                0,
+                255
+              ],
+              "flags": 0
+            }
+          ],
+          "commands": [
+            {
+              "op": "move",
+              "to": [
+                -17.85,
+                -14.3
+              ]
+            },
+            {
+              "op": "line",
+              "to": [
+                17.6,
+                13.75
+              ],
+              "fill0": 0,
+              "fill1": 0,
+              "stroke": 1
+            }
+          ],
+          "fully_transparent": false
+        },
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2d77"
+        ],
+        "local_bounds": [
+          -18.85,
+          -15.3,
+          18.6,
+          14.75
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          0.9,
+          0.85
+        ],
+        "depth_path": [
+          3
+        ],
+        "source_tags": [
+          "0x2d62"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          0.9,
+          0.85,
+          48.89957275390625,
+          48.84957275390625
+        ]
+      }
+    ],
+    "103": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 168,
+          "offset": "0x252f",
+          "format": 13,
+          "width": 140,
+          "height": 188,
+          "export_name": "MENU_MAP_Church",
+          "file_name": "MENU_MAP_Church.tga"
+        },
+        "matrix": [
+          0.5399932861328125,
+          0.0,
+          0.0,
+          0.5399932861328125,
+          -39.55,
+          -60.7
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2d89"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1660,
+          150,
+          140,
+          188
+        ],
+        "local_bounds": [
+          -39.55,
+          -60.7,
+          36.04906005859375,
+          40.81873779296875
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          4.9,
+          0.35
+        ],
+        "depth_path": [
+          3
+        ],
+        "source_tags": [
+          "0x2d9e"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          4.9,
+          0.35,
+          52.89957275390625,
+          48.34957275390625
+        ]
+      }
+    ],
+    "105": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 166,
+          "offset": "0x24df",
+          "format": 13,
+          "width": 262,
+          "height": 150,
+          "export_name": "MENU_MAP_05",
+          "file_name": "MENU_MAP_05.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -54.6,
+          -43.8
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2db7"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          557,
+          128,
+          262,
+          150
+        ],
+        "local_bounds": [
+          -54.6,
+          -43.8,
+          63.299200439453124,
+          23.699542236328128
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          17.4,
+          -10.15
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2dcc"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          17.4,
+          -10.15,
+          65.39957275390626,
+          37.84957275390625
+        ]
+      }
+    ],
+    "106": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 165,
+          "offset": "0x24b7",
+          "format": 13,
+          "width": 214,
+          "height": 136,
+          "export_name": "MENU_MAP_06",
+          "file_name": "MENU_MAP_06.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -47.85,
+          -30.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2de6"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          818,
+          878,
+          214,
+          136
+        ],
+        "local_bounds": [
+          -47.85,
+          -30.85,
+          48.449346923828124,
+          30.3495849609375
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          9.9,
+          -2.15
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2dfb"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          9.9,
+          -2.15,
+          57.89957275390625,
+          45.84957275390625
+        ]
+      }
+    ],
+    "107": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 138,
+          "offset": "0x2079",
+          "format": 13,
+          "width": 236,
+          "height": 128,
+          "export_name": "MENU_MAP_35",
+          "file_name": "MENU_MAP_35.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -58.65,
+          -25.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2e0e"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          0,
+          1880,
+          236,
+          128
+        ],
+        "local_bounds": [
+          -58.65,
+          -25.65,
+          59.35,
+          38.35
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          17.9,
+          6.35
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2e23"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          17.9,
+          6.35,
+          65.89957275390626,
+          54.34957275390625
+        ]
+      }
+    ],
+    "109": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 162,
+          "offset": "0x243f",
+          "format": 13,
+          "width": 164,
+          "height": 162,
+          "export_name": "MENU_MAP_09",
+          "file_name": "MENU_MAP_09.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -41.15,
+          -40.95
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2e3c"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1481,
+          758,
+          164,
+          162
+        ],
+        "local_bounds": [
+          -41.15,
+          -40.95,
+          40.85,
+          40.05
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          -1.6,
+          2.35
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2e51"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          -1.6,
+          2.35,
+          46.39957275390625,
+          50.34957275390625
+        ]
+      }
+    ],
+    "113": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 159,
+          "offset": "0x23c7",
+          "format": 13,
+          "width": 204,
+          "height": 162,
+          "export_name": "MENU_MAP_13",
+          "file_name": "MENU_MAP_13.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -53.45,
+          -44.45
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2e75"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1068,
+          688,
+          204,
+          162
+        ],
+        "local_bounds": [
+          -53.45,
+          -44.45,
+          52.6277587890625,
+          39.78822021484375
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          8.4,
+          3.35
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2e8a"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          8.4,
+          3.35,
+          56.39957275390625,
+          51.34957275390625
+        ]
+      }
+    ],
+    "117": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 155,
+          "offset": "0x2321",
+          "format": 13,
+          "width": 140,
+          "height": 236,
+          "export_name": "MENU_MAP_17",
+          "file_name": "MENU_MAP_17.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -36.0,
+          -71.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2eae"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1661,
+          510,
+          140,
+          236
+        ],
+        "local_bounds": [
+          -36.0,
+          -71.85,
+          36.7984619140625,
+          50.867407226562506
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          5.9,
+          13.35
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2ec3"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          5.9,
+          13.35,
+          53.89957275390625,
+          61.34957275390625
+        ]
+      }
+    ],
+    "118": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 154,
+          "offset": "0x22f9",
+          "format": 13,
+          "width": 201,
+          "height": 232,
+          "export_name": "MENU_MAP_18",
+          "file_name": "MENU_MAP_18.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -52.1,
+          -74.55
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2edd"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1276,
+          688,
+          201,
+          232
+        ],
+        "local_bounds": [
+          -52.1,
+          -74.55,
+          52.417791748046874,
+          46.087451171875
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          13.4,
+          8.85
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2ef2"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          13.4,
+          8.85,
+          61.39957275390625,
+          56.84957275390625
+        ]
+      }
+    ],
+    "121": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 151,
+          "offset": "0x2281",
+          "format": 13,
+          "width": 194,
+          "height": 234,
+          "export_name": "MENU_MAP_21",
+          "file_name": "MENU_MAP_21.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -51.75,
+          -66.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2f0d"
+        ],
+        "atlas": "SB_MapCursor",
+        "atlas_rect": [
+          1296,
+          182,
+          194,
+          234
+        ],
+        "local_bounds": [
+          -51.75,
+          -66.5,
+          49.12786865234375,
+          55.17742919921875
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          8.4,
+          13.35
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2f22"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          8.4,
+          13.35,
+          56.39957275390625,
+          61.34957275390625
+        ]
+      }
+    ],
+    "138": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 135,
+          "offset": "0x2001",
+          "format": 13,
+          "width": 224,
+          "height": 119,
+          "export_name": "MENU_MAP_38",
+          "file_name": "MENU_MAP_38.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -55.65,
+          -28.9
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x2f60"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          370,
+          1008,
+          224,
+          119
+        ],
+        "local_bounds": [
+          -55.65,
+          -28.9,
+          56.35,
+          30.6
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          15.4,
+          1.85
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x2f75"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          15.4,
+          1.85,
+          63.39957275390625,
+          49.84957275390625
+        ]
+      }
+    ],
+    "208": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 103,
+          "offset": "0x1af1",
+          "format": 13,
+          "width": 130,
+          "height": 256,
+          "export_name": "MENU_MAP_208",
+          "file_name": "MENU_MAP_208.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -35.0,
+          -95.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3043"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          644,
+          0,
+          130,
+          256
+        ],
+        "local_bounds": [
+          -35.0,
+          -95.0,
+          30.0,
+          33.0
+        ]
+      }
+    ],
+    "210": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 102,
+          "offset": "0x1ac7",
+          "format": 13,
+          "width": 266,
+          "height": 250,
+          "export_name": "MENU_MAP_210",
+          "file_name": "MENU_MAP_210.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -64.0,
+          -60.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3060"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          130,
+          266,
+          250
+        ],
+        "local_bounds": [
+          -64.0,
+          -60.0,
+          55.699188232421875,
+          52.499237060546875
+        ]
+      }
+    ],
+    "211": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 101,
+          "offset": "0x1a9d",
+          "format": 13,
+          "width": 186,
+          "height": 240,
+          "export_name": "MENU_MAP_211",
+          "file_name": "MENU_MAP_211.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -43.0,
+          -59.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x307b"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          490,
+          682,
+          186,
+          240
+        ],
+        "local_bounds": [
+          -43.0,
+          -59.0,
+          40.699432373046875,
+          48.999267578125
+        ]
+      }
+    ],
+    "213": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 99,
+          "offset": "0x1a49",
+          "format": 13,
+          "width": 166,
+          "height": 208,
+          "export_name": "MENU_MAP_213",
+          "file_name": "MENU_MAP_213.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -37.0,
+          -61.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x30b1"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          656,
+          1836,
+          166,
+          208
+        ],
+        "local_bounds": [
+          -37.0,
+          -61.0,
+          46.0,
+          43.0
+        ]
+      }
+    ],
+    "217": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 96,
+          "offset": "0x19cb",
+          "format": 13,
+          "width": 188,
+          "height": 186,
+          "export_name": "MENU_MAP_217",
+          "file_name": "MENU_MAP_217.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -46.5,
+          -44.85
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3104"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          484,
+          1646,
+          188,
+          186
+        ],
+        "local_bounds": [
+          -46.5,
+          -44.85,
+          47.5,
+          48.15
+        ]
+      }
+    ],
+    "218": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 95,
+          "offset": "0x19a1",
+          "format": 13,
+          "width": 238,
+          "height": 140,
+          "export_name": "MENU_MAP_218",
+          "file_name": "MENU_MAP_218.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -56.0,
+          -38.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x311f"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          1778,
+          238,
+          140
+        ],
+        "local_bounds": [
+          -56.0,
+          -38.0,
+          55.856658935546875,
+          27.79803466796875
+        ]
+      }
+    ],
+    "230": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 94,
+          "offset": "0x1977",
+          "format": 13,
+          "width": 146,
+          "height": 142,
+          "export_name": "MENU_MAP_230",
+          "file_name": "MENU_MAP_230.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -38.0,
+          -36.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3150"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          496,
+          516,
+          146,
+          142
+        ],
+        "local_bounds": [
+          -38.0,
+          -36.0,
+          37.91839599609375,
+          37.83843994140625
+        ]
+      }
+    ],
+    "231": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 93,
+          "offset": "0x194d",
+          "format": 13,
+          "width": 222,
+          "height": 170,
+          "export_name": "MENU_MAP_231",
+          "file_name": "MENU_MAP_231.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -56.0,
+          -43.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x316b"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          484,
+          1012,
+          222,
+          170
+        ],
+        "local_bounds": [
+          -56.0,
+          -43.0,
+          59.43756103515625,
+          45.39813232421875
+        ]
+      }
+    ],
+    "232": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 92,
+          "offset": "0x1923",
+          "format": 13,
+          "width": 202,
+          "height": 150,
+          "export_name": "MENU_MAP_232",
+          "file_name": "MENU_MAP_232.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -46.0,
+          -40.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3186"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          484,
+          1492,
+          202,
+          150
+        ],
+        "local_bounds": [
+          -46.0,
+          -40.0,
+          59.03778076171875,
+          37.99835205078125
+        ]
+      }
+    ],
+    "234": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 90,
+          "offset": "0x18cf",
+          "format": 13,
+          "width": 168,
+          "height": 152,
+          "export_name": "MENU_MAP_234",
+          "file_name": "MENU_MAP_234.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -44.0,
+          -40.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x31bc"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          484,
+          1836,
+          168,
+          152
+        ],
+        "local_bounds": [
+          -44.0,
+          -40.0,
+          43.358154296875,
+          39.038330078125
+        ]
+      }
+    ],
+    "240": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 89,
+          "offset": "0x18a5",
+          "format": 13,
+          "width": 270,
+          "height": 126,
+          "export_name": "MENU_MAP_240",
+          "file_name": "MENU_MAP_240.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -65.0,
+          -29.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x31e1"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          0,
+          270,
+          126
+        ],
+        "local_bounds": [
+          -65.0,
+          -29.0,
+          70.0,
+          34.0
+        ]
+      }
+    ],
+    "241": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 88,
+          "offset": "0x187b",
+          "format": 13,
+          "width": 238,
+          "height": 222,
+          "export_name": "MENU_MAP_241",
+          "file_name": "MENU_MAP_241.tga"
+        },
+        "matrix": [
+          0.4699859619140625,
+          0.0,
+          0.0,
+          0.4699859619140625,
+          -56.0,
+          -63.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x31fc"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          242,
+          1616,
+          238,
+          222
+        ],
+        "local_bounds": [
+          -56.0,
+          -63.5,
+          55.856658935546875,
+          40.836883544921875
+        ]
+      }
+    ],
+    "242": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 87,
+          "offset": "0x1851",
+          "format": 13,
+          "width": 244,
+          "height": 194,
+          "export_name": "MENU_MAP_242",
+          "file_name": "MENU_MAP_242.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -65.25,
+          -59.6
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3217"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          1274,
+          244,
+          194
+        ],
+        "local_bounds": [
+          -65.25,
+          -59.6,
+          56.75,
+          37.4
+        ]
+      }
+    ],
+    "243": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 86,
+          "offset": "0x1827",
+          "format": 13,
+          "width": 262,
+          "height": 202,
+          "export_name": "MENU_MAP_243",
+          "file_name": "MENU_MAP_243.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -65.75,
+          -63.65
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3232"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          586,
+          262,
+          202
+        ],
+        "local_bounds": [
+          -65.75,
+          -63.65,
+          65.25,
+          37.35
+        ]
+      }
+    ],
+    "244": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 85,
+          "offset": "0x17fd",
+          "format": 13,
+          "width": 228,
+          "height": 128,
+          "export_name": "MENU_MAP_244",
+          "file_name": "MENU_MAP_244.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -56.0,
+          -32.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x324d"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          266,
+          384,
+          228,
+          128
+        ],
+        "local_bounds": [
+          -56.0,
+          -32.0,
+          58.0,
+          32.0
+        ]
+      }
+    ],
+    "245": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 84,
+          "offset": "0x17d3",
+          "format": 13,
+          "width": 226,
+          "height": 170,
+          "export_name": "MENU_MAP_245",
+          "file_name": "MENU_MAP_245.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -56.0,
+          -55.5
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3268"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          270,
+          130,
+          226,
+          170
+        ],
+        "local_bounds": [
+          -56.0,
+          -55.5,
+          57.0,
+          29.5
+        ]
+      }
+    ],
+    "246": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 83,
+          "offset": "0x17a9",
+          "format": 13,
+          "width": 230,
+          "height": 146,
+          "export_name": "MENU_MAP_246",
+          "file_name": "MENU_MAP_246.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -59.0,
+          -42.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3283"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          250,
+          1080,
+          230,
+          146
+        ],
+        "local_bounds": [
+          -59.0,
+          -42.0,
+          56.0,
+          31.0
+        ]
+      }
+    ],
+    "247": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 82,
+          "offset": "0x177f",
+          "format": 13,
+          "width": 122,
+          "height": 182,
+          "export_name": "MENU_MAP_247",
+          "file_name": "MENU_MAP_247.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -30.0,
+          -50.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x329e"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          646,
+          482,
+          122,
+          182
+        ],
+        "local_bounds": [
+          -30.0,
+          -50.0,
+          31.0,
+          41.0
+        ]
+      }
+    ],
+    "248": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 81,
+          "offset": "0x1755",
+          "format": 13,
+          "width": 230,
+          "height": 216,
+          "export_name": "MENU_MAP_248",
+          "file_name": "MENU_MAP_248.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -57.0,
+          -60.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x32b9"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          256,
+          792,
+          230,
+          216
+        ],
+        "local_bounds": [
+          -57.0,
+          -60.0,
+          58.0,
+          48.0
+        ]
+      }
+    ],
+    "249": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 80,
+          "offset": "0x172b",
+          "format": 13,
+          "width": 238,
+          "height": 188,
+          "export_name": "MENU_MAP_249",
+          "file_name": "MENU_MAP_249.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -64.0,
+          -60.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x32d4"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          242,
+          1842,
+          238,
+          188
+        ],
+        "local_bounds": [
+          -64.0,
+          -60.0,
+          55.0,
+          34.0
+        ]
+      }
+    ],
+    "250": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 79,
+          "offset": "0x1701",
+          "format": 13,
+          "width": 252,
+          "height": 174,
+          "export_name": "MENU_MAP_250",
+          "file_name": "MENU_MAP_250.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -64.0,
+          -53.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x32ef"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          902,
+          252,
+          174
+        ],
+        "local_bounds": [
+          -64.0,
+          -53.0,
+          62.0,
+          34.0
+        ]
+      }
+    ],
+    "251": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 78,
+          "offset": "0x16d7",
+          "format": 13,
+          "width": 226,
+          "height": 162,
+          "export_name": "MENU_MAP_251",
+          "file_name": "MENU_MAP_251.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -58.0,
+          -52.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x330a"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          266,
+          516,
+          226,
+          162
+        ],
+        "local_bounds": [
+          -58.0,
+          -52.0,
+          55.0,
+          29.0
+        ]
+      }
+    ],
+    "252": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 77,
+          "offset": "0x16ad",
+          "format": 13,
+          "width": 242,
+          "height": 140,
+          "export_name": "MENU_MAP_252",
+          "file_name": "MENU_MAP_252.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -62.0,
+          -43.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3325"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          1472,
+          242,
+          140
+        ],
+        "local_bounds": [
+          -62.0,
+          -43.0,
+          59.0,
+          27.0
+        ]
+      }
+    ],
+    "253": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 76,
+          "offset": "0x1683",
+          "format": 13,
+          "width": 234,
+          "height": 138,
+          "export_name": "MENU_MAP_253",
+          "file_name": "MENU_MAP_253.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -59.0,
+          -41.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3340"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          246,
+          1472,
+          234,
+          138
+        ],
+        "local_bounds": [
+          -59.0,
+          -41.0,
+          58.0,
+          28.0
+        ]
+      }
+    ],
+    "254": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 75,
+          "offset": "0x1659",
+          "format": 13,
+          "width": 232,
+          "height": 148,
+          "export_name": "MENU_MAP_254",
+          "file_name": "MENU_MAP_254.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -60.0,
+          -46.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x335b"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          248,
+          1274,
+          232,
+          148
+        ],
+        "local_bounds": [
+          -60.0,
+          -46.0,
+          56.0,
+          28.0
+        ]
+      }
+    ],
+    "255": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 74,
+          "offset": "0x162f",
+          "format": 13,
+          "width": 238,
+          "height": 98,
+          "export_name": "MENU_MAP_255",
+          "file_name": "MENU_MAP_255.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -60.0,
+          -25.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3376"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          1922,
+          238,
+          98
+        ],
+        "local_bounds": [
+          -60.0,
+          -25.0,
+          59.0,
+          24.0
+        ]
+      }
+    ],
+    "256": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 73,
+          "offset": "0x1605",
+          "format": 13,
+          "width": 154,
+          "height": 174,
+          "export_name": "MENU_MAP_256",
+          "file_name": "MENU_MAP_256.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -39.0,
+          -50.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3391"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          498,
+          304,
+          154,
+          174
+        ],
+        "local_bounds": [
+          -39.0,
+          -50.0,
+          38.0,
+          37.0
+        ]
+      }
+    ],
+    "257": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 72,
+          "offset": "0x15db",
+          "format": 13,
+          "width": 60,
+          "height": 202,
+          "export_name": "MENU_MAP_257",
+          "file_name": "MENU_MAP_257.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -15.0,
+          -55.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x33ac"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          656,
+          260,
+          60,
+          202
+        ],
+        "local_bounds": [
+          -15.0,
+          -55.0,
+          15.0,
+          46.0
+        ]
+      }
+    ],
+    "258": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 71,
+          "offset": "0x15b1",
+          "format": 13,
+          "width": 140,
+          "height": 236,
+          "export_name": "MENU_MAP_258",
+          "file_name": "MENU_MAP_258.tga"
+        },
+        "matrix": [
+          0.519989013671875,
+          0.0,
+          0.0,
+          0.519989013671875,
+          -36.0,
+          -72.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x33c7"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          500,
+          0,
+          140,
+          236
+        ],
+        "local_bounds": [
+          -36.0,
+          -72.0,
+          36.7984619140625,
+          50.7174072265625
+        ]
+      }
+    ],
+    "259": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 70,
+          "offset": "0x1587",
+          "format": 13,
+          "width": 214,
+          "height": 136,
+          "export_name": "MENU_MAP_259",
+          "file_name": "MENU_MAP_259.tga"
+        },
+        "matrix": [
+          0.4499969482421875,
+          0.0,
+          0.0,
+          0.4499969482421875,
+          -48.0,
+          -30.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x33e2"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          484,
+          1186,
+          214,
+          136
+        ],
+        "local_bounds": [
+          -48.0,
+          -30.0,
+          48.299346923828125,
+          31.1995849609375
+        ]
+      }
+    ],
+    "260": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 69,
+          "offset": "0x155d",
+          "format": 13,
+          "width": 252,
+          "height": 106,
+          "export_name": "MENU_MAP_260",
+          "file_name": "MENU_MAP_260.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -62.0,
+          -26.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x33fd"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          792,
+          252,
+          106
+        ],
+        "local_bounds": [
+          -62.0,
+          -26.0,
+          64.0,
+          27.0
+        ]
+      }
+    ],
+    "261": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 68,
+          "offset": "0x1533",
+          "format": 13,
+          "width": 238,
+          "height": 158,
+          "export_name": "MENU_MAP_261",
+          "file_name": "MENU_MAP_261.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -60.0,
+          -45.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x3418"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          0,
+          1616,
+          238,
+          158
+        ],
+        "local_bounds": [
+          -60.0,
+          -45.0,
+          59.0,
+          34.0
+        ]
+      }
+    ],
+    "348": [
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 81,
+          "offset": "0x1755",
+          "format": 13,
+          "width": 230,
+          "height": 216,
+          "export_name": "MENU_MAP_248",
+          "file_name": "MENU_MAP_248.tga"
+        },
+        "matrix": [
+          0.5,
+          0.0,
+          0.0,
+          0.5,
+          -57.0,
+          -60.0
+        ],
+        "depth_path": [
+          1
+        ],
+        "source_tags": [
+          "0x34df"
+        ],
+        "atlas": "SB_MapCursor_03_dlc",
+        "atlas_rect": [
+          256,
+          792,
+          230,
+          216
+        ],
+        "local_bounds": [
+          -57.0,
+          -60.0,
+          58.0,
+          48.0
+        ]
+      },
+      {
+        "kind": "bitmap",
+        "image": {
+          "id": 104,
+          "offset": "0x1b1b",
+          "format": 13,
+          "width": 100,
+          "height": 100,
+          "export_name": "MENU_MAP_80_Add",
+          "file_name": "MENU_MAP_80_Add.tga"
+        },
+        "matrix": [
+          0.4799957275390625,
+          0.0,
+          0.0,
+          0.4799957275390625,
+          6.0,
+          19.0
+        ],
+        "depth_path": [
+          2
+        ],
+        "source_tags": [
+          "0x34f4"
+        ],
+        "atlas": "SB_MapCursor_02",
+        "atlas_rect": [
+          696,
+          1921,
+          100,
+          100
+        ],
+        "local_bounds": [
+          6.0,
+          19.0,
+          53.99957275390625,
+          66.99957275390625
+        ]
+      }
+    ]
+  },
+  "special_recipes": {
+    "home": {
+      "path": "Body/_/Base/Home",
+      "character_id": 198,
+      "layers": [
+        {
+          "kind": "vector",
+          "shape": {
+            "id": 197,
+            "offset": "0x3b9e",
+            "code": 32,
+            "body_hex": "c5006d728e7fbf64fa000100ffffff000010158e7f7eded6ff785d17db202f045d40",
+            "bounds": [
+              -130.7,
+              -51.7,
+              92.75,
+              127.4
+            ],
+            "fills": [
+              [
+                255,
+                255,
+                255,
+                0
+              ]
+            ],
+            "strokes": [],
+            "commands": [
+              {
+                "op": "move",
+                "to": [
+                  92.75,
+                  -51.7
+                ]
+              },
+              {
+                "op": "line",
+                "to": [
+                  92.75,
+                  127.4
+                ],
+                "fill0": 0,
+                "fill1": 1,
+                "stroke": 0
+              },
+              {
+                "op": "line",
+                "to": [
+                  -130.7,
+                  127.4
+                ],
+                "fill0": 0,
+                "fill1": 1,
+                "stroke": 0
+              },
+              {
+                "op": "line",
+                "to": [
+                  -130.7,
+                  -51.7
+                ],
+                "fill0": 0,
+                "fill1": 1,
+                "stroke": 0
+              },
+              {
+                "op": "line",
+                "to": [
+                  92.75,
+                  -51.7
+                ],
+                "fill0": 0,
+                "fill1": 1,
+                "stroke": 0
+              }
+            ],
+            "fully_transparent": true
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "depth_path": [
+            1
+          ],
+          "source_tags": [
+            "0x3bd0"
+          ],
+          "local_bounds": [
+            -130.7,
+            -51.7,
+            92.75,
+            127.4
+          ]
+        },
+        {
+          "kind": "bitmap",
+          "image": {
+            "id": 175,
+            "offset": "0x35d9",
+            "format": 13,
+            "width": 400,
+            "height": 400,
+            "export_name": "MENU_FL_Hub",
+            "file_name": "MENU_FL_Hub.tga"
+          },
+          "matrix": [
+            0.5,
+            0.0,
+            0.0,
+            0.5,
+            -98.15,
+            -100.15
+          ],
+          "depth_path": [
+            2
+          ],
+          "source_tags": [
+            "0x3bd8"
+          ],
+          "atlas": "SB_Chara",
+          "atlas_rect": [
+            0,
+            558,
+            400,
+            400
+          ],
+          "local_bounds": [
+            -98.15,
+            -100.15,
+            101.85,
+            99.85
+          ]
+        }
+      ]
+    },
+    "player_rotate": {
+      "path": "Body/_/Base/Player/Rotate",
+      "character_id": 206,
+      "layers": [
+        {
+          "kind": "bitmap",
+          "image": {
+            "id": 25,
+            "offset": "0x502",
+            "format": 13,
+            "width": 72,
+            "height": 150,
+            "export_name": "MENU_MAP_Player_01",
+            "file_name": "MENU_MAP_Player_01.tga"
+          },
+          "matrix": [
+            0.5,
+            0.0,
+            0.0,
+            0.5,
+            -15.95,
+            -43.7
+          ],
+          "depth_path": [
+            1
+          ],
+          "source_tags": [
+            "0x3cfc"
+          ],
+          "atlas": "SB_MapCursor",
+          "atlas_rect": [
+            1931,
+            432,
+            72,
+            150
+          ],
+          "local_bounds": [
+            -15.95,
+            -43.7,
+            20.05,
+            31.299999999999997
+          ]
+        }
+      ],
+      "native_pixel_pivot": [
+        31.9,
+        87.4
+      ]
+    },
+    "player_fix": {
+      "path": "Body/_/Base/Player/Fix",
+      "character_id": 207,
+      "layers": [
+        {
+          "kind": "bitmap",
+          "image": {
+            "id": 22,
+            "offset": "0x468",
+            "format": 13,
+            "width": 42,
+            "height": 62,
+            "export_name": "MENU_MAP_Player_02",
+            "file_name": "MENU_MAP_Player_02.tga"
+          },
+          "matrix": [
+            0.5,
+            0.0,
+            0.0,
+            0.5,
+            -10.5,
+            -15.5
+          ],
+          "depth_path": [
+            1
+          ],
+          "source_tags": [
+            "0x3d55"
+          ],
+          "atlas": "SB_MapCursor",
+          "atlas_rect": [
+            286,
+            956,
+            42,
+            62
+          ],
+          "local_bounds": [
+            -10.5,
+            -15.5,
+            10.5,
+            15.5
+          ]
+        }
+      ],
+      "parent_translation": [
+        2.25,
+        2.75
+      ]
+    },
+    "overlay_player_compatibility": {
+      "layers": [
+        {
+          "kind": "bitmap",
+          "image": {
+            "id": 28,
+            "offset": "0x59c",
+            "format": 13,
+            "width": 74,
+            "height": 76,
+            "export_name": "MENU_MAP_Host",
+            "file_name": "MENU_MAP_Host.tga"
+          },
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "depth_path": [],
+          "atlas": "SB_MapCursor",
+          "atlas_rect": [
+            1806,
+            358,
+            74,
+            76
+          ],
+          "local_bounds": [
+            0.0,
+            0.0,
+            74.0,
+            76.0
+          ]
+        }
+      ],
+      "reason": "The existing external Player bitmap is the native Host bitmap",
+      "anchor": [
+        37.0,
+        38.0
+      ]
+    }
+  },
+  "roundtable": {
+    "home_bonfire_param_id": 111000,
+    "map": [
+      11,
+      10,
+      0
+    ],
+    "base_icon_id": 48,
+    "base_position": [
+      -305.70001220703125,
+      -20.0,
+      -298.1000061035156
+    ],
+    "external_comparison_composition": {
+      "hub_translation": [
+        -1,
+        -2
+      ],
+      "icon48_translation": [
+        118,
+        109
+      ],
+      "rendered_metrics": [
+        {
+          "background_gray": 0,
+          "rgba_mae": [
+            0.5959875,
+            0.5642875,
+            0.598125,
+            0.0
+          ]
+        },
+        {
+          "background_gray": 40,
+          "rgba_mae": [
+            0.57729375,
+            0.54471875,
+            0.58533125,
+            0.0
+          ]
+        },
+        {
+          "background_gray": 255,
+          "rgba_mae": [
+            0.5136875,
+            0.5303375,
+            0.6246375,
+            0.0
+          ]
+        }
+      ],
+      "pixel_identical": false,
+      "scope": "Comparison of the author's crop; runtime uses native Home and marker recipes"
+    },
+    "external_name_case": "Roundtable",
+    "current_code_lookup": "RoundTable",
+    "native_layout": {
+      "transparent_character_id": 197,
+      "hub_character_id": 175,
+      "home_bounds": [
+        -130.7,
+        -100.15,
+        101.85,
+        127.4
+      ],
+      "initial_position": [
+        95.8,
+        645.65
+      ],
+      "map_position_rule": "homeView=(V.left+P.x-B.left,V.bottom+P.y-B.bottom); homeMap=(viewOffset+homeView)/viewScale",
+      "rva": "0x9c96d0",
+      "comparison_only": "Local external composition translations are not native layout coordinates"
+    }
+  },
+  "conclusion": "All existing external sprite assets have internal bitmap/recipe replacements; no external pixel fallback is required",
+  "native_alias_chain": {
+    "WorldMapItem": 174,
+    "Icon_0": 171,
+    "frame_indexing": "one-based frame equals selected iconId",
+    "alias_3": "MENU_MAP_Church",
+    "alias_15": "MENU_MAP_Ungro",
+    "image_tag_loader_rva": "0x11e5890",
+    "frame_select_rva": "0x74a7d0",
+    "subtexture_key_rva": "0x120da0",
+    "subtexture_lookup_rva": "0xd67f20"
+  },
+  "all_target_atlas_half_values": [
+    0
+  ]
+}

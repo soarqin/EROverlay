@@ -34,9 +34,11 @@ copy /y ..\..\src\minimap\README.md .
 copy /y ..\..\LICENSE .
 IF NOT EXIST configs mkdir configs
 copy /y ..\..\configs\minimap.ini configs\
-IF NOT EXIST data mkdir data
-xcopy /y /e ..\..\src\minimap\data\* data\
-7z a -tzip -r -mx=9 ..\Minimap.zip
+copy /y ..\..\configs\common.ini configs\
+copy /y ..\..\configs\input.ini configs\
+copy /y ..\..\configs\style.ini configs\
+IF EXIST ..\Minimap.zip 7z d -r ..\Minimap.zip data
+7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs README.md LICENSE
 popd
 
 endlocal

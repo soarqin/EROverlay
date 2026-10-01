@@ -1,6 +1,8 @@
 #pragma once
 
 #include "imgui.h"
+#include "nativeapi.h"
+#include "util/assets.hpp"
 #include "util/vector.hpp"
 
 #define WIN32_LEAN_AND_MEAN
@@ -11,6 +13,8 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <unordered_map>
+#include <mutex>
 
 struct ImGui_ImplDX12_InitInfo;
 struct ImDrawList;
@@ -41,6 +45,7 @@ class D3DRenderer {
     };
 */
     friend class EROverlayAPIWrapper;
+    friend struct NativeTextureVerifier;
 public:
     explicit D3DRenderer() = default;
     ~D3DRenderer() noexcept;
@@ -76,11 +81,14 @@ public:
     bool LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
     bool LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource, int *outWidth, int *outHeight);
     void DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle);
+    [[nodiscard]] uint64_t createDdsTexture(const void *bytes, uint64_t size);
+    [[nodiscard]] ERTextureStatus pollTexture(uint64_t token, ERTextureView &view);
+    void retireTexture(uint64_t token);
 
     // Offscreen rendering
     OffscreenContext *CreateOffscreen();
     void DestroyOffscreen(OffscreenContext *ctx);
-    void BeginOffscreen(OffscreenContext *ctx);
+    [[nodiscard]] bool BeginOffscreen(OffscreenContext *ctx);
     void *EndOffscreen(OffscreenContext *ctx);
 
     static void BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd);
@@ -88,6 +96,33 @@ public:
 
 private:
     void ensureOffscreenSize(OffscreenContext *ctx, int w, int h);
+    struct NativeTexture {
+        std::vector<uint8_t> bytes;
+        util::DdsImage image;
+        ID3D12Resource *texture = nullptr;
+        ID3D12Resource *upload = nullptr;
+        ID3D12CommandAllocator *allocator = nullptr;
+        ID3D12GraphicsCommandList *list = nullptr;
+        D3D12_CPU_DESCRIPTOR_HANDLE cpu = {};
+        D3D12_GPU_DESCRIPTOR_HANDLE gpu = {};
+        uint64_t uploadValue = 0;
+        uint64_t drawValue = 0;
+        ERTextureStatus status = ER_TEXTURE_PENDING;
+        bool retired = false;
+    };
+    struct RetiredTexture {
+        ID3D12Resource *texture;
+        D3D12_CPU_DESCRIPTOR_HANDLE cpu;
+        D3D12_GPU_DESCRIPTOR_HANDLE gpu;
+        uint64_t drawValue;
+    };
+    [[nodiscard]] bool initializeTextureUpload();
+    [[nodiscard]] bool submitTextureUpload(NativeTexture &texture);
+    void processTextureUploads();
+    void finishTextureFrame();
+    void releaseTextureUploads();
+    void waitForFrames();
+    void deferTexture(ID3D12Resource *texture, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
 
 private:
     void releaseDeviceResources(const wchar_t *reason);
@@ -200,6 +235,19 @@ private:
     bool eclHookInstalled_ = false;
     D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
     UINT currentBackBufferIndex_ = 0;
+    ID3D12CommandQueue *uploadQueue_ = nullptr;
+    ID3D12Fence *uploadFence_ = nullptr;
+    ID3D12Fence *frameFence_ = nullptr;
+    uint64_t uploadValue_ = 0;
+    uint64_t frameValue_ = 0;
+    uint64_t nextTextureToken_ = 1;
+    size_t queuedTextureBytes_ = 0;
+    std::vector<uint64_t> allocatorFences_;
+    std::vector<uint64_t> imguiFences_;
+    std::unordered_map<uint64_t, NativeTexture> nativeTextures_;
+    std::vector<RetiredTexture> retiredTextures_;
+    bool drawingFrame_ = false;
+    std::recursive_mutex deviceMutex_;
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;

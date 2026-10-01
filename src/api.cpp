@@ -1,4 +1,7 @@
 #include "api.h"
+#include "nativeapi.h"
+#include "gamefiles.hpp"
+#include "util/nativelog.hpp"
 
 #include "config.hpp"
 #include "global.hpp"
@@ -151,7 +154,7 @@ public:
             er::gD3DRenderer->DestroyOffscreen((er::OffscreenContext *)offscreen);
         },
         [](void *offscreen) {
-            er::gD3DRenderer->BeginOffscreen((er::OffscreenContext *)offscreen);
+            (void)er::gD3DRenderer->BeginOffscreen((er::OffscreenContext *)offscreen);
         },
         [](void *offscreen) -> void * {
             return er::gD3DRenderer->EndOffscreen((er::OffscreenContext *)offscreen);
@@ -171,4 +174,30 @@ public:
 
 EROverlayAPI *getEROverlayAPI() {
     return er::EROverlayAPIWrapper::get();
+}
+
+const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version) {
+    if (version != 1) return nullptr;
+    static const EROverlayNativeAPI native = {
+        sizeof(EROverlayNativeAPI), 1,
+        [] { return er::gGameFiles && er::gGameFiles->compatible(); },
+        [](const ERFileRequest *request) -> uint64_t { return er::gGameFiles && request ? er::gGameFiles->request(*request) : 0; },
+        [](uint64_t token, const wchar_t *part, ERFileData *data) {
+            if (!data || !er::gGameFiles) return ER_FILE_INVALID;
+            return er::gGameFiles->poll(token, part, *data);
+        },
+        [](uint64_t token) { if (er::gGameFiles) er::gGameFiles->release(token); },
+        [](const void *bytes, uint64_t size) -> uint64_t { return er::gD3DRenderer ? er::gD3DRenderer->createDdsTexture(bytes, size) : 0; },
+        [](uint64_t token, ERTextureView *view) {
+            if (!view || !er::gD3DRenderer) return ER_TEXTURE_INVALID;
+            return er::gD3DRenderer->pollTexture(token, *view);
+        },
+        [](uint64_t token) { if (er::gD3DRenderer) er::gD3DRenderer->retireTexture(token); },
+        [](ERMapState *state) { return state && er::gGameFiles && er::gGameFiles->readMapState(*state); },
+        [](void *offscreen) { return er::gD3DRenderer && er::gD3DRenderer->BeginOffscreen(static_cast<er::OffscreenContext *>(offscreen)); },
+        [](uint32_t group) -> uintptr_t { return er::gGameFiles ? er::gGameFiles->findParamTable(group) : 0; },
+        [](const char *message) { if (message) er::util::nativeLog("%s", message); },
+        [](uint32_t id) { return er::gGameFiles && er::gGameFiles->readEventFlag(id); }
+    };
+    return &native;
 }

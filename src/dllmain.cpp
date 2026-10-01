@@ -1,10 +1,12 @@
 #include "config.hpp"
 #include "d3drenderer.hpp"
 #include "global.hpp"
+#include "gamefiles.hpp"
 #include "hooking.hpp"
 #include "input.hpp"
 #include "plugin.hpp"
 #include "util/steam.hpp"
+#include "util/nativelog.hpp"
 #include "proxy/winhttp.h"
 
 #include <chrono>
@@ -67,6 +69,8 @@ void init() {
     PathRemoveFileSpecW(::er::gModulePath);
     er::gConfig.loadFile(L"EROverlay.ini");
     er::gConfig.loadDir(L"configs");
+    auto nativeLog = er::gConfig.getw("minimap.native_log", L"");
+    if (!nativeLog.empty()) er::util::nativeLogFile = _wfopen(nativeLog.c_str(), L"ab");
     bool enableConsole = false;
     if (er::gConfig.enabled("common.console")) {
         enableConsole = true;
@@ -81,17 +85,28 @@ void init() {
     er::gIsDLC01Installed = er::gGameVersion >= 0x0002000200000000ULL && (er::util::isDLCInstalled(2778580) || er::util::isDLCInstalled(2778590));
     fwprintf(stderr, L"DLC \"Shadow of the Erdtree\" is %ls\n", er::gIsDLC01Installed ? L"installed" : L"not installed");
     er::gHooking = std::make_unique<er::Hooking>();
+    er::gGameFiles = std::make_unique<er::GameFiles>();
 
     er::pluginsInit();
 
     if (!waitForRendererHook()) {
         fwprintf(stderr, L"[EROverlay] D3D hook was not installed; overlay thread exiting\n");
+        er::pluginsUninit();
+        er::gGameFiles->stop();
+        er::gGameFiles.reset();
         return;
     }
 
     mainThread();
 
     er::Hooking::unhook();
+    er::pluginsUninit();
+    er::gGameFiles->stop();
+    er::gGameFiles.reset();
+    {
+        std::lock_guard lock(er::util::nativeLogMutex);
+        if (er::util::nativeLogFile) { fclose(er::util::nativeLogFile); er::util::nativeLogFile = nullptr; }
+    }
     std::this_thread::sleep_for(500ms);
     if (enableConsole) {
         FreeConsole();

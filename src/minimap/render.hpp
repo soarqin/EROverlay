@@ -1,11 +1,12 @@
 #pragma once
 
 #include "data.hpp"
+#include "resources.hpp"
 
 #include "api.h"
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace er::minimap {
 
@@ -13,30 +14,24 @@ enum class Shape { Rect, Rounded, Circle };
 
 class Renderer {
 public:
-    ~Renderer();
+    explicit Renderer() = default;
+    ~Renderer() noexcept;
+    Renderer(const Renderer &) = delete;
+    Renderer &operator=(const Renderer &) = delete;
+    Renderer(Renderer &&) = delete;
+    Renderer &operator=(Renderer &&) = delete;
     void init(void *context, void *allocFunc, void *freeFunc, void *userData);
     bool render();
 
 private:
-    struct TileInfo {
-        TextureContext *texture;
-        float posX, posY, width, height;
-        float texWidth, texHeight;
-        float clipU, clipV;  // texture offset from clipping
-    };
-    [[nodiscard]] bool prepareTile(int index, float &posX, float &posY, float scale, TileInfo &out);
-    void renderMinimap(int index, float posX, float posY, float scale = 1.0f);
-    void renderShapedMinimap(int index, float posX, float posY, float scale = 1.0f);
-    void renderRotatedTile(int index, float tileOffsetX, float tileOffsetY, float cosRot, float sinRot);
-    void renderPlayer(float deltaRad);
+    void drawRecipe(const IconRecipe *recipe, Point center, float scale, float angle = 0);
+    void drawTile(const TileView &tile, Point player, float cosMap, float sinMap);
+    void renderContent(const MapSnapshot &snapshot);
+    void composite(float alpha);
     [[nodiscard]] bool isPointInShape(float x, float y) const;
 
 private:
-    const SpriteInfo *playerSprite_ = nullptr;
-    const SpriteInfo *arrowSprite_ = nullptr;
-    const SpriteInfo *roundTableSprite_ = nullptr;
-    const SpriteInfo *bearingSprite_ = nullptr;
-    std::vector<TextureContext> textures_;
+    bool showDeath_ = true;
 
     float minimapWidth_ = 0.f;
     float minimapHeight_ = 0.f;
@@ -48,11 +43,11 @@ private:
     bool showGraces_ = true;
     int landmarksKey_ = 0;
     bool showLandmarks_ = true;
-    std::vector<float> widthRatios_ = { 0.3f, 0.4f };
-    std::vector<float> heightRatios_ = { 0.3f, 0.4f };
-    std::vector<float> scales_ = { 0.75f, 1.f };
-    std::vector<float> alphas_ = { 0.8f, 0.6f };
-    std::vector<bool> isCentered_ = { false, true };
+    std::vector<float> widthRatios_ = {0.3f, 0.4f};
+    std::vector<float> heightRatios_ = {0.3f, 0.4f};
+    std::vector<float> scales_ = {0.75f, 1.f};
+    std::vector<float> alphas_ = {0.8f, 0.6f};
+    std::vector<bool> isCentered_ = {false, true};
     std::vector<Shape> shapes_;
     size_t currentScaleIndex_ = 0;
 
@@ -72,7 +67,7 @@ private:
 
     float cachedRounding_ = 0.f;
 
-    uint32_t borderColor_ = 0x64FFFFFF;  // ABGR (ImGui IM_COL32 format): white, alpha=100
+    uint32_t borderColor_ = 0x64FFFFFF; // ABGR (ImGui IM_COL32 format): white, alpha=100
     float borderWidth_ = 1.5f;
 
     // Per-state extra scale multipliers (cycled via scale_key, like scales_/alphas_)
@@ -95,4 +90,4 @@ private:
     void *offscreen_ = nullptr;
 };
 
-}
+} // namespace er::minimap
