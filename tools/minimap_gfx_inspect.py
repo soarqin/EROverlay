@@ -387,6 +387,33 @@ def abc_frame_metadata(data: bytes) -> dict:
             "namespace_set_count": len(namespace_sets) - 1, "relevant_frame_scripts": relevant}
 
 
+def edit_text(data: bytes) -> dict:
+    reader = Reader(data)
+    identity = reader.u16()
+    bounds, reader.position = rectangle(data, reader.position)
+    flags = int.from_bytes(reader.take(2), "big")
+    result = {"id": identity, "bounds": bounds, "flags": hex(flags)}
+    if flags & 0x100:
+        result["font_id"] = reader.u16()
+    if flags & 0x80:
+        result["font_class"] = reader.textz()
+    if flags & 0x180:
+        result["font_height"] = reader.u16() / 20
+    if flags & 0x400:
+        result["rgba"] = list(reader.take(4))
+    if flags & 0x200:
+        result["max_length"] = reader.u16()
+    if flags & 0x20:
+        result["layout"] = {"align": reader.u8(), "left_margin": reader.u16() / 20,
+                            "right_margin": reader.u16() / 20, "indent": reader.u16() / 20,
+                            "leading": reader.unpack("<h")[0] / 20}
+    result["variable"] = reader.textz()
+    if flags & 0x8000:
+        result["initial_text"] = reader.textz()
+    reader.finish()
+    return result
+
+
 def read_gfx(path: Path) -> dict:
     data = path.read_bytes()
     reader = Reader(data)
@@ -400,7 +427,7 @@ def read_gfx(path: Path) -> dict:
     bounds, reader.position = rectangle(reader.data, reader.position)
     rate, frame_count = reader.u16() / 256, reader.u16()
     records = list(tags(reader.data, reader.position, declared))
-    images, sprites, shapes, symbols, abc_blocks = {}, {}, {}, {}, []
+    images, sprites, shapes, texts, symbols, abc_blocks = {}, {}, {}, {}, {}, []
     for code, offset, body_offset, body in records:
         current = Reader(body)
         if code == 1009:
@@ -420,6 +447,9 @@ def read_gfx(path: Path) -> dict:
             identity = current.u16()
             shapes[identity] = {"id": identity, "offset": hex(offset), "code": code,
                                 "body_hex": body.hex()}
+        elif code == 37:
+            text = edit_text(body)
+            texts[text["id"]] = {"offset": hex(offset), **text}
         elif code == 76:
             for _ in range(current.u16()):
                 identity, name = current.u16(), current.textz()
@@ -438,7 +468,7 @@ def read_gfx(path: Path) -> dict:
     return {"file": str(path), "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),
             "declared_bytes": declared, "trailing_zero_bytes": len(data) - declared,
             "version": version, "bounds": bounds, "frame_rate": rate, "frame_count": frame_count,
-            "images": images, "sprites": sprites, "shapes": shapes, "symbols": symbols,
+            "images": images, "sprites": sprites, "shapes": shapes, "texts": texts, "symbols": symbols,
             "root_frames": timeline(records, frame_count), "abc_blocks": abc_blocks}
 
 
@@ -600,7 +630,8 @@ def worldmap_metadata(movie: dict) -> dict:
     icon_frames = movie["sprites"][icon_id]["frames"]
     recipes = {frame["frame"]: recipe(movie, icon_id, frame["frame"]) for frame in icon_frames}
     paths = {"home": "Body/_/Base/Home", "player_rotate": "Body/_/Base/Player/Rotate",
-             "player_fix": "Body/_/Base/Player/Fix"}
+             "player_fix": "Body/_/Base/Player/Fix", "death": "Body/_/Base/Dead",
+             "player_marker": "Body/_/Base/MarkerList/Item_0/Icon_0"}
     special = {name: {"path": path, "character_id": named_path(movie, path),
                       "layers": recipe(movie, named_path(movie, path))} for name, path in paths.items()}
     host_ids = [identity for identity, value in movie["images"].items() if value["export_name"] == "MENU_MAP_Host"]
@@ -608,6 +639,12 @@ def worldmap_metadata(movie: dict) -> dict:
         raise ValueError("Host bitmap is missing")
     special["overlay_player_compatibility"] = {"layers": recipe(movie, host_ids[0]),
                                                "reason": "The existing external Player bitmap is the native Host bitmap"}
+    marker = movie["sprites"][named_path(movie, "Body/_/Base/MarkerList/Item_0")]
+    placements = [entry for entry in marker["frames"][0]["display"] if entry.get("name") == "Text_0"]
+    if len(placements) != 1 or placements[0]["character_id"] not in movie["texts"]:
+        raise ValueError("Numbered marker Text_0 is missing or ambiguous")
+    marker_text = {"path": "Body/_/Base/MarkerList/Item_0/Text_0",
+                   "placement": placements[0], "definition": movie["texts"][placements[0]["character_id"]]}
     return {"file": movie["file"], "sha256": movie["sha256"], "bytes": movie["bytes"],
             "declared_bytes": movie["declared_bytes"], "trailing_zero_bytes": movie["trailing_zero_bytes"],
             "version": movie["version"], "frame_count": movie["frame_count"],
@@ -615,7 +652,7 @@ def worldmap_metadata(movie: dict) -> dict:
             "worldmap_item_id": item_id, "icon_timeline_id": icon_id,
             "icon_timeline_offset": movie["sprites"][icon_id]["offset"],
             "icon_frame_count": len(icon_frames), "icon_recipes": recipes,
-            "special_recipes": special, "abc_blocks": movie["abc_blocks"]}
+            "special_recipes": special, "player_marker_text": marker_text, "abc_blocks": movie["abc_blocks"]}
 
 
 def main() -> None:

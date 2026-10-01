@@ -13,6 +13,8 @@ cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_map_verify.cp
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_death_render_verify.cpp src\minimap\render.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_death_render_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_marker_render_verify.cpp src\minimap\render.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_marker_render_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
+if errorlevel 1 goto :failed
 rem Do not rebuild a DLL already loaded in a verification game process.
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_progress_verify.cpp src\util\gameflags.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_progress_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed

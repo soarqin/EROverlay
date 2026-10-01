@@ -142,12 +142,16 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     if (icons.empty())
         return false;
     std::unordered_map<std::string, IconRecipe> specials;
-    for (auto [name, path]: {std::pair{"home", "Body/_/Base/Home"}, std::pair{"arrow", "Body/_/Base/Player/Rotate"}, std::pair{"death", "Body/_/Base/Dead"}}) {
+    for (auto [name, path]: {std::pair{"home", "Body/_/Base/Home"}, std::pair{"arrow", "Body/_/Base/Player/Rotate"}, std::pair{"death", "Body/_/Base/Dead"},
+                             std::pair{"marker", "Body/_/Base/MarkerList/Item_0/Icon_0"}}) {
         IconRecipe recipe;
         if (!movie.special(path, recipe))
             return false;
         specials.emplace(name, std::move(recipe));
     }
+    TextLayout markerText;
+    if (!movie.text("Body/_/Base/MarkerList/Item_0/Text_0", markerText))
+        return false;
     for (auto [name, image]: {std::pair{"player", "MENU_MAP_Host"}, std::pair{"bearing", "MENU_MAP_Bearing"}}) {
         IconRecipe recipe;
         if (!movie.image(image, recipe))
@@ -176,6 +180,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     regions_ = std::move(regions);
     icons_ = std::move(icons);
     specials_ = std::move(specials);
+    playerMarkerText_ = std::move(markerText);
     definitionsReady_ = true;
     return true;
 }
@@ -440,6 +445,7 @@ const IconRecipe *Resources::special(const std::string &name) const {
     auto it = specials_.find(name);
     return it == specials_.end() ? nullptr : &it->second;
 }
+const TextLayout *Resources::playerMarkerText() const { return definitionsReady_.load(std::memory_order_acquire) ? &playerMarkerText_ : nullptr; }
 bool Resources::layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view) {
     if (!atlasesReady_.load(std::memory_order_acquire) || !definitionsReady_.load(std::memory_order_acquire))
         return false;

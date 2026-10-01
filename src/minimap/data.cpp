@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <numbers>
 #include <unordered_map>
@@ -20,14 +22,60 @@ namespace er::minimap {
 Data gData;
 static_assert(sizeof(WorldMapPointParam) == 256 && sizeof(BonfireWarpParam) == 236);
 namespace {
+bool readBytes(uintptr_t address, void *value, size_t bytes) {
+    SIZE_T copied = 0;
+    return address && ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void *>(address), value, bytes, &copied) && copied == bytes;
+}
 template<typename T>
 bool read(uintptr_t address, T &value) {
-    SIZE_T copied = 0;
-    return address && ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<void *>(address), &value, sizeof(value), &copied) && copied == sizeof(value);
+    return readBytes(address, &value, sizeof(value));
 }
 uintptr_t pointer(uintptr_t address) {
     uintptr_t value = 0;
     return read(address, value) ? value : 0;
+}
+// CSMenuMarkersSaveData reserves ten records (RVA 0x81A550), while the
+// ordinary placement path limits active numbered beacons to five (0x887440).
+constexpr size_t PLAYER_MARKER_LIMIT = 5;
+constexpr size_t PLAYER_MARKER_CAPACITY = 10;
+struct SavedPlayerMarker {
+    int32_t id;
+    float x, y;
+    uint8_t map, icon;
+    uint16_t padding;
+};
+static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map) == 12 && offsetof(SavedPlayerMarker, icon) == 13);
+[[nodiscard]] bool readPlayerMarkers(uintptr_t view, std::vector<PlayerMarkerInfo> &markers) {
+    markers.clear();
+    if (!view)
+        return false;
+    struct Header {
+        uintptr_t slots;
+        uint64_t capacity;
+    } first{}, after{};
+    auto save = pointer(view + 0x338); // WorldMapMarkerDataList +0x38.
+    uint64_t count = 0, afterCount = 0;
+    std::array<SavedPlayerMarker, PLAYER_MARKER_CAPACITY> records{}, afterRecords{};
+    if (!save || !read(save + 8, first) || !first.slots || !first.capacity || first.capacity > records.size() || !read(save + 0x40, count) || count > first.capacity)
+        return false;
+    size_t bytes = static_cast<size_t>(first.capacity) * sizeof(SavedPlayerMarker);
+    // Copy values, never retain game-owned slots. A concurrent insertion,
+    // deletion or load discards this sample and is retried on the next update.
+    if (!readBytes(first.slots, records.data(), bytes) || !readBytes(first.slots, afterRecords.data(), bytes) || !read(save + 8, after) || !read(save + 0x40, afterCount) ||
+        pointer(view + 0x338) != save || first.slots != after.slots || first.capacity != after.capacity || count != afterCount ||
+        std::memcmp(records.data(), afterRecords.data(), bytes) ||
+        static_cast<uint64_t>(std::count_if(records.begin(), records.begin() + first.capacity, [](const auto &record) { return record.id >= 0; })) != count)
+        return false;
+    markers.reserve(PLAYER_MARKER_LIMIT);
+    for (size_t slot = 0; slot < std::min<size_t>(first.capacity, PLAYER_MARKER_LIMIT); ++slot) {
+        const auto &record = records[slot];
+        if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon != 1)
+            continue;
+        // 0x879330 formats Text_0 with slot+1, independent of the save ID
+        // and of the active list's ordering. These are already map coordinates.
+        markers.push_back({record.id, record.x, record.y, static_cast<uint8_t>(slot + 1), record.map});
+    }
+    return true;
 }
 bool flag(uint32_t id) { return nativeApi && nativeApi->readEventFlag(id); }
 bool enabled(uint32_t id) { return !id || id == UINT32_MAX || flag(id); }
@@ -149,27 +197,51 @@ void Data::update() {
         read(camera + 0x10, next.camera);
     if (!std::isfinite(next.camera.yawCos) || !std::isfinite(next.camera.yawSin))
         next.camera = {};
+    auto publish = [&] {
+        bool markersRead = next.valid && readPlayerMarkers(next.state.viewModel, next.playerMarkers);
+        ERMapState after{};
+        if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != next.state.viewModel || after.rawMapId != next.state.rawMapId ||
+            after.mapId != next.state.mapId || after.underground != next.state.underground) {
+            next.valid = false;
+            next.state.deathValid = false;
+            next.decorations.clear();
+            next.playerMarkers.clear();
+        }
+        static uint64_t lastLog = 0;
+        if (GetTickCount64() >= lastLog) {
+            lastLog = GetTickCount64() + 5000;
+            char line[320];
+            std::snprintf(line, sizeof(line), "map raw=%08x map=%d position=%.2f,%.2f masks=%08x,%08x,%08x death=%d %.2f,%.2f/%d markers=%zu markers-read=%d valid=%d\n",
+                          next.state.rawMapId, next.state.mapId, next.state.x, next.state.y, next.state.activeMasks[0], next.state.activeMasks[1], next.state.activeMasks[2],
+                          int(next.state.deathValid), next.state.deathX, next.state.deathY, next.state.deathMapId, next.playerMarkers.size(), int(markersRead), int(next.valid));
+            if (nativeApi->log) {
+                nativeApi->log(line);
+                for (const auto &marker: next.playerMarkers) {
+                    std::snprintf(line, sizeof(line), "player-marker number=%u id=%d position=%.3f,%.3f map=%u\n", unsigned(marker.number), marker.id, marker.x, marker.y,
+                                  unsigned(marker.map));
+                    nativeApi->log(line);
+                }
+            }
+        }
+        std::lock_guard lock(mutex_);
+        snapshot_ = std::move(next);
+    };
+    bool cached = false;
     {
         std::lock_guard lock(mutex_);
-        if (GetTickCount64() < markerRefresh_ && snapshot_.valid && snapshot_.state.generation == next.state.generation && snapshot_.state.rawMapId == next.state.rawMapId) {
+        if (GetTickCount64() < markerRefresh_ && snapshot_.valid && snapshot_.state.generation == next.state.generation && snapshot_.state.rawMapId == next.state.rawMapId &&
+            snapshot_.state.viewModel == next.state.viewModel) {
             next.roundtable = snapshot_.roundtable;
             next.homeIcon = snapshot_.homeIcon;
             next.decorations = snapshot_.decorations;
-            snapshot_ = std::move(next);
-            return;
+            cached = true;
         }
     }
-    markerRefresh_ = GetTickCount64() + 200;
-    static uint64_t lastLog = 0;
-    if (GetTickCount64() >= lastLog) {
-        lastLog = GetTickCount64() + 5000;
-        char line[256];
-        std::snprintf(line, sizeof(line), "map raw=%08x map=%d position=%.2f,%.2f masks=%08x,%08x,%08x death=%d %.2f,%.2f/%d\n", next.state.rawMapId, next.state.mapId,
-                      next.state.x, next.state.y, next.state.activeMasks[0], next.state.activeMasks[1], next.state.activeMasks[2], int(next.state.deathValid), next.state.deathX,
-                      next.state.deathY, next.state.deathMapId);
-        if (nativeApi->log)
-            nativeApi->log(line);
+    if (cached) {
+        publish();
+        return;
     }
+    markerRefresh_ = GetTickCount64() + 200;
     uint32_t homeId = 0;
     auto common = nativeApi->findParamTable(141);
     if (common) {
@@ -249,16 +321,7 @@ void Data::update() {
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
         next.decorations.push_back(marker);
     });
-    ERMapState after;
-    if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != view || after.rawMapId != next.state.rawMapId) {
-        next.valid = false;
-        next.state.deathValid = false;
-        next.decorations.clear();
-    }
-    {
-        std::lock_guard lock(mutex_);
-        snapshot_ = std::move(next);
-    }
+    publish();
 }
 MapSnapshot Data::snapshot() const {
     std::lock_guard lock(mutex_);

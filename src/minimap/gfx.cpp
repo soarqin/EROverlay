@@ -310,6 +310,14 @@ bool GfxMovie::parseTimeline(util::Bytes bytes, uint32_t count, Character &chara
             // shapes when resolving the recipes actually used by the overlay.
             shapeBytes_[identity] = {code, std::vector<uint8_t>(body.begin(), body.end())};
             characters_.emplace(identity, std::move(child));
+        } else if (code == 37) {
+            uint16_t identity;
+            if (!current.read(identity) || characters_.contains(identity))
+                return false;
+            // Parse only requested dynamic text fields; unrelated fonts and
+            // text are not rendered by the overlay's bitmap/vector recipes.
+            textBytes_[identity] = std::vector<uint8_t>(body.begin(), body.end());
+            characters_.emplace(identity, Character{});
         } else if (code == 26 || code == 70) {
             uint8_t flags, extra = 0;
             uint16_t depth;
@@ -411,6 +419,7 @@ bool GfxMovie::parseTimeline(util::Bytes bytes, uint32_t count, Character &chara
 bool GfxMovie::parse(util::Bytes bytes) {
     characters_.clear();
     shapeBytes_.clear();
+    textBytes_.clear();
     icons_ = worldMapItem_ = 0;
     if (bytes.size() < 8 || std::memcmp(bytes.data(), "GFX\x0b", 4))
         return false;
@@ -439,7 +448,7 @@ bool GfxMovie::parse(util::Bytes bytes) {
     return icons_ && characters_.contains(icons_);
 }
 
-uint32_t GfxMovie::named(const std::string &path) const {
+uint32_t GfxMovie::named(const std::string &path, Matrix *placementMatrix) const {
     uint32_t identity = 0;
     size_t start = 0;
     while (start < path.size()) {
@@ -455,6 +464,8 @@ uint32_t GfxMovie::named(const std::string &path) const {
                 if (match)
                     return 0;
                 match = placement.character;
+                if (placementMatrix)
+                    *placementMatrix = placement.matrix;
             }
         }
         if (!match)
@@ -540,6 +551,41 @@ bool GfxMovie::image(const std::string &name, IconRecipe &recipe) const {
         return false;
     recipeBounds(recipe);
     return true;
+}
+bool GfxMovie::text(const std::string &path, TextLayout &layout) const {
+    layout = {};
+    uint32_t identity = named(path, &layout.matrix);
+    auto found = textBytes_.find(identity);
+    if (!identity || found == textBytes_.end())
+        return false;
+    util::AssetReader reader(found->second);
+    uint16_t id, font, height = 0, ignored;
+    uint8_t high, low;
+    if (!reader.read(id) || id != identity || !readRectangle(reader, layout.bounds) || !reader.read(high) || !reader.read(low))
+        return false;
+    uint16_t flags = (uint16_t(high) << 8) | low;
+    if (((flags & 0x100) && !reader.read(font)) || ((flags & 0x80) && !reader.text(layout.fontClass)) || ((flags & 0x180) && !reader.read(height)))
+        return false;
+    layout.fontHeight = height / 20.f;
+    if ((flags & 0x400) && !reader.read(layout.color))
+        return false;
+    if ((flags & 0x200) && !reader.read(ignored))
+        return false;
+    if (flags & 0x20) {
+        uint16_t left, right, indent;
+        int16_t leading;
+        if (!reader.read(layout.align) || layout.align > 3 || !reader.read(left) || !reader.read(right) || !reader.read(indent) || !reader.read(leading))
+            return false;
+        layout.leftMargin = left / 20.f;
+        layout.rightMargin = right / 20.f;
+        layout.indent = indent / 20.f;
+        layout.leading = leading / 20.f;
+    }
+    std::string variable, initial;
+    if (!reader.text(variable) || ((flags & 0x8000) && !reader.text(initial)) || !reader.finished())
+        return false;
+    return std::isfinite(layout.fontHeight) && layout.fontHeight > 0 && layout.fontHeight <= 1024 && layout.bounds.right > layout.bounds.left &&
+           layout.bounds.bottom > layout.bounds.top;
 }
 uint32_t GfxMovie::iconFrameCount() const {
     auto found = characters_.find(icons_);

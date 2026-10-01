@@ -45,6 +45,15 @@ struct IconRecipe {
     std::vector<IconLayer> layers;
     Bounds bounds;
 };
+struct TextLayout {
+    Bounds bounds;
+    Matrix matrix = IDENTITY_MATRIX;
+    float fontHeight = 0;
+    uint32_t color = 0xffffffff;
+    uint8_t align = 0;
+    float leftMargin = 0, rightMargin = 0, indent = 0, leading = 0;
+    std::string fontClass;
+};
 
 class GfxMovie {
 public:
@@ -52,6 +61,7 @@ public:
     [[nodiscard]] bool icon(uint32_t frame, IconRecipe &recipe) const;
     [[nodiscard]] bool special(const std::string &path, IconRecipe &recipe) const;
     [[nodiscard]] bool image(const std::string &name, IconRecipe &recipe) const;
+    [[nodiscard]] bool text(const std::string &path, TextLayout &layout) const;
     [[nodiscard]] uint32_t iconFrameCount() const;
     [[nodiscard]] uint32_t iconLayerCount(uint32_t frame) const;
 
@@ -72,9 +82,10 @@ private:
     };
     [[nodiscard]] bool parseTimeline(util::Bytes bytes, uint32_t count, Character &character, unsigned nesting);
     [[nodiscard]] bool flatten(uint32_t character, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe) const;
-    [[nodiscard]] uint32_t named(const std::string &path) const;
+    [[nodiscard]] uint32_t named(const std::string &path, Matrix *placementMatrix = nullptr) const;
     std::unordered_map<uint32_t, Character> characters_;
     std::unordered_map<uint32_t, std::pair<uint16_t, std::vector<uint8_t>>> shapeBytes_;
+    std::unordered_map<uint32_t, std::vector<uint8_t>> textBytes_;
     uint32_t icons_ = 0;
     uint32_t worldMapItem_ = 0;
 };

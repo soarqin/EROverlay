@@ -10,6 +10,8 @@
 
 死亡位置默认显示内部卢恩图标，游戏清除死亡记录后隐藏。使用 `minimap.ini` 中的 `death_marker=0` 关闭。
 
+游戏大地图放置的编号标记会同步显示为内部下箭头和数字 1～5。标记位置、删除和地图层随游戏更新；旋转小地图时箭头与数字保持朝上。使用 `player_markers=0` 关闭编号标记。
+
 * 按自己需求修改 `configs` 目录内的 `minimap.ini` 文件
 * 将 `EROverlay.dll` 注入艾尔登法环游戏，你可以：
   + 将 `EROverlay.dll` 改名为 `winhttp.dll` 放到游戏 `eldenring.exe` 所在目录，同时复制 `configs` 和包含 `Minimap.dll` 的 `overlays` 目录。

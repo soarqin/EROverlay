@@ -111,10 +111,22 @@ build\native-checks\minimap_native_verify.exe
 build\native-checks\minimap_map_verify.exe
 build\native-checks\minimap_progress_verify.exe
 build\native-checks\minimap_death_render_verify.exe
+build\native-checks\minimap_marker_render_verify.exe
 python3 tools/check_minimap_native_recipes.py
 ~~~
 
 产物位于 build/native-checks。纹理验证程序使用 build/native 中 Release 的正式对象文件；运行前须让系统可找到 Steam 安装目录中的 steam_api64.dll。该程序只创建自有 D3D12 设备，检查 BC7 上传、回读与 fence 延迟回收，不连接游戏。
+
+编号标记验证需要先保存游戏中已有编号点的只读快照。在附近存在编号 1/2 的游戏状态下执行：
+
+~~~powershell
+python3 tools/minimap_marker_capture.py --pid <PID> --output build/ida/player-marker-live
+build/native-checks/minimap_marker_render_verify.exe build/ida/player-marker-live
+~~~
+
+采样工具只取得 QUERY_INFORMATION | VM_READ 权限，从 Steam 定位并校验 EXE、枚举实际模块基址，再复制 view、保存对象与 16 字节槽位。状态改变时拒绝发布混合记录；结果包含 JSON 和本地回放字节，保存在忽略目录，不加入分发。
+
+绘制验证程序回放这些记录，通过正式 update 快照、GFX/XML/DDS 资源和 ImGui Renderer 核对内部箭头 UV、数字字形及位置。回归再覆盖五个编号、空槽、删除/移动、图层、旋转/透明度和失效清除；这些变化仅发生在验证程序自己的内存，不写回游戏。字体字形使用已有 ImGui 字体，原生软阴影近似为描边，仍需要正常加载新 DLL 后验收画面。
 
 bridge_verify.dll 可通过上文加载器在指定脱机 mod 会话运行，它直接使用正式 GameFiles 源码。预期取消请求返回 native status=2，独立请求仍成功，四张目标 DDS 共 7,340,624 字节，stop 在请求回收后返回。DLL 仍保留到进程退出。
 

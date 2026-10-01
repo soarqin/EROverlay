@@ -25,6 +25,7 @@ public:
 
 private:
     void drawRecipe(const IconRecipe *recipe, Point center, float scale, float angle = 0);
+    void drawPlayerMarker(const PlayerMarkerInfo &marker, Point center, float scale);
     void drawTile(const TileView &tile, Point player, float cosMap, float sinMap);
     void renderContent(const MapSnapshot &snapshot);
     void composite(float alpha);
@@ -32,6 +33,7 @@ private:
 
 private:
     bool showDeath_ = true;
+    bool showPlayerMarkers_ = true;
 
     float minimapWidth_ = 0.f;
     float minimapHeight_ = 0.f;

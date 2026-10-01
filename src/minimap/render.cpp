@@ -4,6 +4,7 @@
 #include <imgui_internal.h>
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <numbers>
 
@@ -28,6 +29,7 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 
     offscreen_ = api->createOffscreen();
     showDeath_ = api->configGetInt("minimap.death_marker", 1) != 0;
+    showPlayerMarkers_ = api->configGetInt("minimap.player_markers", 1) != 0;
 
     toggleKey_ = api->configGetVirtualKey("minimap.toggle_key", 'M');
     scaleKey_ = api->configGetVirtualKey("minimap.scale_key", 'N');
@@ -370,6 +372,39 @@ void Renderer::drawRecipe(const IconRecipe *recipe, Point center, float scale, f
     }
 }
 
+void Renderer::drawPlayerMarker(const PlayerMarkerInfo &marker, Point center, float scale) {
+    const auto *arrow = gResources.special("marker");
+    const auto *layout = gResources.playerMarkerText();
+    if (!arrow || arrow->layers.empty() || !layout || marker.number < 1 || marker.number > 5 || !std::isfinite(center.x) || !std::isfinite(center.y) || !std::isfinite(scale) ||
+        scale <= 0)
+        return;
+    AtlasRegion region;
+    ERTextureView texture;
+    if (!gResources.layerView(arrow->layers.front(), region, texture))
+        return;
+    drawRecipe(arrow, center, scale);
+    // Keep the beacon and its digit upright while the map position rotates.
+    // The native Text_0 is dynamic text, not a numbered bitmap frame.
+    char text[]{static_cast<char>('0' + marker.number), 0};
+    auto *font = ImGui::GetFont();
+    float size = layout->fontHeight * scale;
+    auto extent = font->CalcTextSizeA(size, FLT_MAX, 0, text);
+    float left = layout->bounds.left + layout->leftMargin, right = layout->bounds.right - layout->rightMargin;
+    float x = layout->align == 2 ? (left + right - extent.x / scale) * .5f : layout->align == 1 ? right - extent.x / scale : left + layout->indent;
+    // SWF text fields include a two-pixel inset inside their bounds.
+    Point local = transform(layout->matrix, {x, layout->bounds.top + 2.f});
+    auto position = ImGui::GetWindowPos() + ImVec2(center.x + local.x * scale, center.y + local.y * scale);
+    auto *draw = ImGui::GetWindowDrawList();
+    uint32_t color = (layout->color & 0xffffff) | (uint32_t(float(layout->color >> 24) * currentAlpha_) << 24);
+    uint32_t shadow = IM_COL32(26, 14, 0, int(currentAlpha_ * 255));
+    float offset = std::max(.5f, scale);
+    draw->AddText(font, size, position + ImVec2(-offset, 0), shadow, text);
+    draw->AddText(font, size, position + ImVec2(offset, 0), shadow, text);
+    draw->AddText(font, size, position + ImVec2(0, -offset), shadow, text);
+    draw->AddText(font, size, position + ImVec2(0, offset), shadow, text);
+    draw->AddText(font, size, position, color, text);
+}
+
 void Renderer::drawTile(const TileView &tile, Point player, float cosine, float sine) {
     ERTextureView texture;
     if (!nativeApi || nativeApi->pollTexture(tile.texture, &texture) != ER_TEXTURE_READY)
@@ -433,12 +468,22 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
             float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
             drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
         }
-        int deathMap = map == 2 ? 10 : map;
-        if (showDeath_ && state.deathValid && state.deathMapId == deathMap) {
+        int markerMap = map == 2 ? 10 : map;
+        if (showDeath_ && state.deathValid && state.deathMapId == markerMap) {
             float x = (state.deathX - player.x) * effectiveScale_, y = (state.deathY - player.y) * effectiveScale_;
             Point death{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
             drawRecipe(gResources.special("death"), death, effectiveScale_ * 2.f * effectivePlayerScale_, angle);
         }
+        if (showPlayerMarkers_)
+            for (const auto &marker: snapshot.playerMarkers) {
+                if (marker.map != markerMap)
+                    continue;
+                float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
+                Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
+                if (screen.x < -200 || screen.y < -200 || screen.x > minimapWidth_ + 200 || screen.y > minimapHeight_ + 200)
+                    continue;
+                drawPlayerMarker(marker, screen, effectiveScale_ * 2.f * effectivePlayerScale_);
+            }
     }
     drawRecipe(gResources.special("player"), center, effectiveScale_ * effectivePlayerScale_);
     drawRecipe(gResources.special("arrow"), center, effectiveScale_ * effectivePlayerScale_, state.oriDeg * std::numbers::pi_v<float> / 180.f + angle);

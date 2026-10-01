@@ -10,6 +10,8 @@ The minimap reads tiles and sprites from the game's archives and creates its own
 
 Dropped runes use the native death marker, enabled by default. Set `death_marker=0` in `minimap.ini` to hide it.
 
+Numbered beacons placed in the game's world map appear as native downward arrows with digits 1–5. Positions, removal and map layers follow the game; arrows and digits stay upright on a rotating minimap. Set `player_markers=0` to hide them.
+
 * Modify `minimap.ini` inside `configs` folder to your liking.
 * Inject the mod to Elden Ring, you can either:
   + Rename `EROverlay.dll` to `winhttp.dll` and put it beside `eldenring.exe`, along with `configs` and the `overlays` folder containing `Minimap.dll`.

@@ -46,6 +46,7 @@ public:
     void endFrame();
     [[nodiscard]] const IconRecipe *icon(uint32_t id) const;
     [[nodiscard]] const IconRecipe *special(const std::string &name) const;
+    [[nodiscard]] const TextLayout *playerMarkerText() const;
     [[nodiscard]] bool layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view);
     [[nodiscard]] const char *status() const { return status_.load(std::memory_order_acquire); }
     [[nodiscard]] bool ready() const { return definitionsReady_.load(std::memory_order_acquire) && directoryReady_.load(std::memory_order_acquire); }
@@ -85,6 +86,7 @@ private:
     std::unordered_map<std::string, AtlasRegion> regions_;
     std::unordered_map<uint32_t, IconRecipe> icons_;
     std::unordered_map<std::string, IconRecipe> specials_;
+    TextLayout playerMarkerText_;
     std::unordered_set<std::string> tileNames_;
     std::array<std::unordered_map<uint32_t, Mask>, 3> masks_;
     std::unordered_map<uint64_t, Tile> tiles_;

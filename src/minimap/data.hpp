@@ -23,6 +23,12 @@ struct DecorationInfo {
     DecorationSource source = DecorationSource::Landmark;
     bool areaIcon = false;
 };
+struct PlayerMarkerInfo {
+    int32_t id = -1;
+    float x = 0, y = 0;
+    uint8_t number = 0;
+    uint8_t map = 0;
+};
 struct MapSnapshot {
     ERMapState state{};
     Camera camera;
@@ -31,6 +37,7 @@ struct MapSnapshot {
     bool roundtable = false;
     uint32_t homeIcon = 48;
     std::vector<DecorationInfo> decorations;
+    std::vector<PlayerMarkerInfo> playerMarkers;
 };
 
 class Data {
