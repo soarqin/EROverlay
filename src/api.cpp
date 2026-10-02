@@ -197,7 +197,8 @@ const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version) {
         [](void *offscreen) { return er::gD3DRenderer && er::gD3DRenderer->BeginOffscreen(static_cast<er::OffscreenContext *>(offscreen)); },
         [](uint32_t group) -> uintptr_t { return er::gGameFiles ? er::gGameFiles->findParamTable(group) : 0; },
         [](const char *message) { if (message) er::util::nativeLog("%s", message); },
-        [](uint32_t id) { return er::gGameFiles && er::gGameFiles->readEventFlag(id); }
+        [](uint32_t id) { return er::gGameFiles && er::gGameFiles->readEventFlag(id); },
+        [](ERGameLayout *layout) { return layout && er::gGameFiles && er::gGameFiles->readGameLayout(*layout); }
     };
     return &native;
 }

@@ -26,6 +26,13 @@ void put(std::array<uint8_t, 1200> &data, size_t offset, const T &value) {
     std::memcpy(data.data() + offset, &value, sizeof(value));
 }
 void prepare() {
+    for (auto *table: {&pointTable, &graceTable, &commonTable}) {
+        (*table)[0x2D] = 4;
+        (*table)[0x2E] = 2;
+    }
+    put(pointTable, 0, uint32_t{128 + sizeof(WorldMapPointParam)});
+    put(graceTable, 0, uint32_t{128 + sizeof(BonfireWarpParam)});
+    put(commonTable, 0, uint32_t{128 + 0x280});
     put(view, 0x280, uint64_t{2});
     uint8_t surface[]{0, 64, 28, 60}, dlc[]{0, 64, 28, 61};
     std::memcpy(view.data() + 0xF8 + 8, surface, 4);

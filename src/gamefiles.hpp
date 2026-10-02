@@ -22,8 +22,10 @@ public:
     [[nodiscard]] bool readMapState(ERMapState &state);
     [[nodiscard]] uintptr_t findParamTable(uint32_t group) const;
     [[nodiscard]] bool readEventFlag(uint32_t id) const;
+    [[nodiscard]] bool readGameLayout(ERGameLayout &layout) const;
 
 private:
+    friend struct NativeFileVerifier;
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

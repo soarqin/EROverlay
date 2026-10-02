@@ -17,7 +17,7 @@ int init(EROverlayAPI *erOverlayAPI) {
         core = GetModuleHandleW(L"winhttp.dll");
     auto getNative = core ? reinterpret_cast<const EROverlayNativeAPI *(*)(uint32_t)>(GetProcAddress(core, "getEROverlayNativeAPI")) : nullptr;
     er::minimap::nativeApi = getNative ? getNative(1) : nullptr;
-    if (er::minimap::nativeApi && (er::minimap::nativeApi->size < sizeof(EROverlayNativeAPI) || er::minimap::nativeApi->version != 1))
+    if (er::minimap::nativeApi && (er::minimap::nativeApi->size < ER_NATIVE_API_V1_SIZE || er::minimap::nativeApi->version != 1))
         er::minimap::nativeApi = nullptr;
 
     return 0;

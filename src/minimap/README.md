@@ -6,7 +6,9 @@
 
 ## USAGE
 
-The minimap reads tiles and sprites from the game's archives and creates its own textures. External `data/map` files are no longer required. Native loading currently supports the verified Steam 1.17.1 executable; a hash mismatch disables game calls and shows a status message.
+The minimap reads tiles and sprites from the game's archives and creates its own textures. External `data/map` files are no longer required. Native adapters cover the hash-verified 1.02–1.17 historical executables and Steam 1.17.1, selecting addresses and layouts by SHA-256. Unknown executables disable game calls and show a status message. All historical EXEs passed offline address and layout checks; individual old-game visual testing remains pending. See the [compatibility report](../../docs/minimap-version-compatibility.md).
+
+Atlas names and counts come from the game's GFX and TextureAtlas definitions, including mod-added atlases. Loading, drawing and retirement were verified with 12 atlases. Assets must be available through the game's file layer and use supported PC GFX/TPF/DDS formats; package and GPU descriptor budgets still apply. Pre-DLC games require only surface/underground resources, with no mandatory DLC atlas or M10.
 
 Dropped runes use the native death marker, enabled by default. Set `death_marker=0` in `minimap.ini` to hide it.
 

@@ -14,8 +14,9 @@
 #include "data.hpp"
 #include "defs/BonfireWarpParam.h"
 #include "defs/WorldMapPointParam.h"
-#include "params/param.hpp"
+#include "layout.hpp"
 #include "resources.hpp"
+#include "util/paramreader.hpp"
 
 extern EROverlayAPI *api;
 namespace er::minimap {
@@ -112,29 +113,42 @@ bool alternate(const T &row, size_t secondEnable, size_t secondDisable) {
     return false;
 }
 template<typename T, typename F>
-void rows(const wchar_t *name, F function) {
-    auto table = nativeApi->findParamTable(wcscmp(name, L"BonfireWarpParam") == 0 ? 43 : 87);
-    uint16_t count;
-    if (!table || !read(table + 0xA, count) || count > 20000)
+void rows(uint32_t group, size_t minimum, F function) {
+    auto table = nativeApi->findParamTable(group);
+    util::ParamRows reader;
+    if (!table)
         return;
-    for (uint16_t i = 0; i < count; ++i) {
-        params::ParamEntryOffset entry;
-        T row;
-        if (!read(table + 0x40 + size_t(i) * 24, entry) || entry.offset <= 0 || entry.offset > 0x10000000 || !read(table + entry.offset, row))
+    if (!reader.open(table)) {
+        if (nativeApi->log) {
+            char line[120];
+            std::snprintf(line, sizeof(line), "minimap-param group=%u invalid-directory\n", group);
+            nativeApi->log(line);
+        }
+        return;
+    }
+    for (const auto &entry: reader.rows()) {
+        T row{};
+        if (!reader.read(entry, row, minimum)) {
+            if (nativeApi->log) {
+                char line[150];
+                std::snprintf(line, sizeof(line), "minimap-param group=%u row=%u bytes=%zu minimum=%zu unreadable-or-short-row\n", group, entry.id, entry.size, minimum);
+                nativeApi->log(line);
+            }
             continue;
-        function(entry.paramId, row);
+        }
+        function(entry.id, row, entry.size);
     }
 }
 // Read the game's already-built legacy-conversion trees. No Scaleform calls
 // or allocations are required on the overlay update thread.
-bool convert(uintptr_t view, uint32_t raw, float x, float y, float z, float &mapX, float &mapY) {
+bool convert(uintptr_t view, uint32_t mapMask, uint32_t raw, float x, float y, float z, float &mapX, float &mapY) {
     uint64_t count = 0;
     if (!read(view + 0x280, count) || !count || count > 8)
         return false;
     for (uint64_t i = 0; i < count; ++i) {
         uintptr_t converter = view + 0xF8 + i * 48;
         uint8_t origin[4];
-        if (!read(converter + 8, origin))
+        if (!read(converter + 8, origin) || (origin[3] != 60 && (origin[3] != 61 || !(mapMask & 4))))
             continue;
         uint32_t target = raw;
         float px = x, py = y, pz = z;
@@ -242,40 +256,44 @@ void Data::update() {
         return;
     }
     markerRefresh_ = GetTickCount64() + 200;
+    const auto layout = gameLayout();
     uint32_t homeId = 0;
     auto common = nativeApi->findParamTable(141);
-    if (common) {
-        uint16_t count = 0;
-        if (read(common + 0xA, count) && count) {
-            params::ParamEntryOffset entry;
-            if (read(common + 0x40, entry) && entry.paramId == 0 && entry.offset > 0)
-                read(common + entry.offset + 0x278, homeId);
-        }
-    }
-    std::unordered_map<uint64_t, uint32_t> nativeGraceIcons;
+    util::ParamRows commonRows;
+    if (commonRows.open(common))
+        for (const auto &entry: commonRows.rows())
+            if (entry.id == 0) {
+                (void)commonRows.field(entry, 0x278, homeId);
+                break;
+            }
+    struct GraceIcons {
+        uint32_t base = 0, alternate = 0;
+    };
+    std::unordered_map<uint64_t, GraceIcons> nativeGraceIcons;
     auto view = next.state.viewModel;
     uintptr_t graces = pointer(view + 0x2E8), end = pointer(view + 0x2F0);
-    if (graces && end >= graces && (end - graces) % 0x350 == 0 && (end - graces) / 0x350 < 2000) {
-        for (auto entry = graces; entry < end; entry += 0x350) {
+    if (graces && end >= graces && layout.graceStride && (end - graces) % layout.graceStride == 0 && (end - graces) / layout.graceStride < 2000) {
+        for (auto entry = graces; entry < end; entry += layout.graceStride) {
             uint32_t id;
             uint8_t normal = 1;
-            std::array<uint8_t, 236> row{};
-            if (!read(entry + 0x238, id) || !read(entry + 0x348, normal))
+            if (!read(entry + 0x238, id) || !read(entry + layout.graceNormalOffset, normal))
                 continue;
-            auto parameter = pointer(entry + 0x240);
-            bool alt = parameter && read(parameter, row) && alternate(row, 168, 200);
-            uint32_t icon;
-            if (read(entry + (alt ? (normal ? 0x2C8 : 0x308) : (normal ? 0x248 : 0x288)), icon))
-                nativeGraceIcons[id] = icon;
+            GraceIcons icons{};
+            if (read(entry + (normal ? 0x248 : 0x288), icons.base)) {
+                if (layout.alternateIcons)
+                    (void)read(entry + (normal ? 0x2C8 : 0x308), icons.alternate);
+                nativeGraceIcons[id] = icons;
+            }
         }
     }
-    rows<BonfireWarpParam>(L"BonfireWarpParam", [&](uint64_t id, const BonfireWarpParam &row) {
+    rows<BonfireWarpParam>(43, 48, [&](uint64_t id, const BonfireWarpParam &row, size_t size) {
         uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
         uint32_t selected = row.iconId;
         auto game = nativeGraceIcons.find(id);
+        bool alt = layout.alternateIcons && size >= sizeof(row) && alternate(row, 168, 200);
         if (game != nativeGraceIcons.end())
-            selected = game->second;
-        else if (alternate(row, 168, 200) && row.altIconId)
+            selected = alt ? game->second.alternate : game->second.base;
+        else if (alt && row.altIconId)
             selected = row.altIconId;
         if (id == homeId) {
             next.roundtable = next.state.rawMapId == raw;
@@ -288,11 +306,12 @@ void Data::update() {
         marker.iconId = selected;
         marker.source = DecorationSource::Grace;
         marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
-        if (!marker.maps || !selected || id == homeId || !convert(view, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
+        marker.maps &= layout.mapMask;
+        if (!marker.maps || !selected || id == homeId || !convert(view, layout.mapMask, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
             return;
         next.decorations.push_back(marker);
     });
-    rows<WorldMapPointParam>(L"WorldMapPointParam", [&](uint64_t id, const WorldMapPointParam &row) {
+    rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
         if (id < 78500 || !row.iconId || row.iconId == 80)
             return;
         bool opened = flag(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
@@ -304,9 +323,10 @@ void Data::update() {
         marker.source = DecorationSource::Landmark;
         marker.areaIcon = row.isAreaIcon;
         marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
+        marker.maps &= layout.mapMask;
         if (!opened && distant && row.distViewIconId)
             marker.iconId = row.distViewIconId;
-        else if (alternate(row, 192, 224) && row.altIconId)
+        else if (layout.alternateIcons && size >= sizeof(row) && alternate(row, 192, 224) && row.altIconId)
             marker.iconId = row.altIconId;
         uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
         float x = row.posX, y = row.posY, z = row.posZ;
@@ -316,7 +336,7 @@ void Data::update() {
             y = row.posY_forDistViewMark;
             z = row.posZ_forDistViewMark;
         }
-        if (!marker.maps || !convert(view, raw, x, y, z, marker.x, marker.y))
+        if (!marker.maps || !convert(view, layout.mapMask, raw, x, y, z, marker.x, marker.y))
             return;
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
         next.decorations.push_back(marker);

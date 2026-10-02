@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [Unreleased]
+
+#### Added
+
+- Native resource extension through `getEROverlayNativeAPI(1)` for asynchronous game-file reads, map snapshots, parameter tables and event flags. Executable hash and entry-byte checks disable native integration for unsupported builds.
+- Overlay-owned DDS textures with asynchronous uploads, upload/frame fences and deferred texture/SRV retirement.
+- Native resource profiles for hash-verified 1.02–1.17 historical executables and Steam 1.17.1, retaining hash/entry checks and exposing version layouts through a size-gated extension.
+
+#### Changed
+
+- Centralized hotkey handling using Win32 Virtual-Key codes and modifier combinations. Shortcuts activate only while the game is in the foreground, and multiple plugins can react to the same press through `inputIsKeyDown` / `inputIsKeyPressed`.
+- Parse each TPF once and publish per-DDS results, removing the eight-name limit and isolating missing entries from valid sibling atlases. PARAM reads support 12/24-byte directories and check row boundaries.
+
+#### Fixed
+
+- Fixed offscreen composition ghosting by using a separate render target for each swap-chain back buffer.
+- Fixed game-window lookup using the ELDEN RING window title as a window class name.
+- Corrected direct-storage event-flag reads (`type=2`), allowing the minimap to read map-fragment progress correctly.
+
 ### [1.3.0] - 2026-06-30
 
 #### Fixed

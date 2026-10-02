@@ -3,6 +3,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -53,6 +54,7 @@ public:
     [[nodiscard]] bool loadDefinitions(util::Bytes gfx, util::Bytes layouts);
     [[nodiscard]] bool loadDirectory(util::Bytes index, util::Bytes masks);
     [[nodiscard]] size_t iconCount() const { return icons_.size(); }
+    [[nodiscard]] size_t atlasCount() const { return definitionsReady_.load(std::memory_order_acquire) ? atlases_.size() : 0; }
 
 private:
     struct File {
@@ -61,10 +63,20 @@ private:
         bool complete = false;
     };
     struct Atlas {
+        std::wstring name;
+        std::wstring path;
+        bool required = false;
         std::vector<uint8_t> dds;
         uint64_t texture = 0;
         uint32_t width = 0, height = 0;
         uint64_t retry = 0;
+        // Update publishes CPU bytes once; only render changes GPU state.
+        std::atomic_bool ready{false};
+    };
+    struct AtlasFile {
+        File file;
+        std::wstring path;
+        std::vector<uint32_t> atlases;
     };
     struct Tile {
         File file;
@@ -76,12 +88,13 @@ private:
         uint32_t allowed = 0;
         bool exists = false;
     };
-    bool request(File &file, const wchar_t *path, uint32_t flags, bool atlas = false);
+    bool request(File &file, const wchar_t *path, uint32_t flags, const std::vector<const wchar_t *> &names = {});
     [[nodiscard]] bool poll(File &file, util::Bytes &bytes);
     void release(File &file);
     void clearTiles();
-    std::array<Atlas, 4> atlases_;
-    std::array<File, 5> files_;
+    std::vector<std::unique_ptr<Atlas>> atlases_;
+    std::vector<AtlasFile> atlasFiles_;
+    std::array<File, 4> files_;
     std::array<std::vector<uint8_t>, 4> metadata_;
     std::unordered_map<std::string, AtlasRegion> regions_;
     std::unordered_map<uint32_t, IconRecipe> icons_;
@@ -94,7 +107,9 @@ private:
     uint32_t map_ = 0;
     std::array<uint32_t, 3> activeMasks_{};
     uint8_t level_ = 0;
-    std::atomic_bool definitionsReady_{false}, directoryReady_{false}, atlasesReady_{false};
+    bool atlasesLogged_ = false;
+    uint32_t mapMask_ = 0;
+    std::atomic_bool definitionsReady_{false}, directoryReady_{false};
     std::atomic<const char *> status_{"正在等待游戏资源"};
 };
 

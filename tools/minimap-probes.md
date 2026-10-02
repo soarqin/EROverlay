@@ -4,6 +4,8 @@
 
 ## 静态分析
 
+通用扫描回归使用 [verify_minimap_scanner.py](verify_minimap_scanner.py)，先按共享规则解析，随后才与逐 EXE 证据比较。独立 `--resolve-only` 模式不读取历史期望值；调用命令与运行时接入范围见[通用扫描方案](../docs/minimap-scanner-design.md)。该工具继续使用 Python idapro 静态分析，没有调试器或游戏调用。
+
 在项目根目录运行：
 
 ~~~powershell
@@ -13,6 +15,15 @@ python3 tools/ida_minimap_research.py --targeted --queries tools/ida_minimap_que
 脚本从 Steam 库和 appmanifest_1245620.acf 定位 EXE，直接读取原文件。数据库、输出缓存和查询配置都按 SHA-256 校验。游戏更新后使用新的 --database 和 --output，重新定位；不能修改哈希后继续调用旧 RVA。
 
 IDA 数据库不应由两个会话同时打开。--request-dir 可以保持一个 idapro 进程处理多个编号查询；向该目录写入包含 stop=true 的请求后保存退出。
+
+历史版本使用 [ida_minimap_versions.py](ida_minimap_versions.py) 按独立数据库分析，输出存入 `build/ida/versions/<version>/`。支持 RTTI、chained unwind、指令窗口、完整指令和分支核对，以及按已导出的旧函数补充 reference 变体。范围与具体结果见[历史版本报告](../docs/minimap-version-compatibility.md)。
+
+~~~powershell
+python3 tools/ida_minimap_versions.py analyze --exe 'D:/Games/EldenRingExe/1.17/Game/eldenring.exe' --database build/ida/versions/1.17/fresh.i64 --output build/ida/versions/1.17 --label 1.17 --profile build/ida/versions/reference.json
+python3 tools/collect_minimap_version_evidence.py
+~~~
+
+证据收集器只读取 IDA 导出的 JSON，并逐样本核对哈希、函数、内部分支和调用关系；它不启动旧游戏，不代替历史资源和实际游戏验收。
 
 ## 构建运行验证程序
 
@@ -138,6 +149,25 @@ bridge_verify.dll 可通过上文加载器在指定脱机 mod 会话运行，它
 
 `minimap_progress_verify.exe` 只读取本进程构造的 PARAM/事件存储和已有本地地图资源，不连接游戏。它验证直接与索引两类标记存储、地表/地下/DLC 的参数 ID、位 31、已获得和未获得时的请求后缀、地下两层独立掩码，以及不可读进度的拒绝行为。实际游戏地点另用 `native_log` 的 `map-progress` 和文件请求行对照，不能把该回归结果替代游戏画面验收。
 
+## 历史布局与多图集验证
+
+2026-10-02 的旧 EXE 适配与 mod 图集改动可在本地复核，不需要连接游戏：
+
+~~~powershell
+python3 tools/generate_minimap_profiles.py --check --verify-exes
+python3 tools/make_minimap_mod_fixture.py
+build/native-checks/minimap_compatibility_verify.exe
+build/native-checks/minimap_atlas_verify.exe
+build/native-checks/minimap_file_verify.exe
+build/native-checks/minimap_texture_verify.exe
+~~~
+
+先用 VS x64 Native Tools Command Prompt 运行 `tools/build_minimap_native_checks.bat` 编译验证程序，纹理验证需要当前 Release 正式对象文件。生成资源仅写到忽略目录 `build/native-checks/mod-fixture`，不加入分发。
+
+`minimap_compatibility_verify.exe` 将全部 28 条哈希布局送入正式读取代码，覆盖 menu/view、早期赐福、六种 PARAM 目录、保护页短行、死亡与编号，以及 size-gated 旧核心接口。`minimap_atlas_verify.exe` 使用 12 图集和 117 个可见图标检查正式 ImGui 纹理/UV，包含缺失图集、错误 DDS、重复别名、上传失败和重建；无 M10 的删减资源另检查旧版地表/地下选图。
+
+`minimap_file_verify.exe` 直接执行正式 GameFiles 回调，验证 12 个 DDS 提取、逐项结果、原 allocator 单次释放与未知 EXE 拒绝。`minimap_texture_verify.exe` 将 12 张 BC1 图集通过正式 D3D12 多帧上传，逐张 GPU 回读并比较 DDS 块，随后核对全部 SRV 回收；原 BC7 与 fence 回归保留。以上通过只证明代码与本地资源，不代表全部旧游戏已经实测。
+
 ## 结果边界
 
-一次请求成功不证明早于挂载的启动时机、返回标题竞态、完整游戏进度变化和跨版本适配。最终 DLL 已在本次研究进程复跑，12 条请求均取得终态。历史试验和复跑证据见[精选证据](../docs/minimap-game-textures.evidence.json)；重新运行可获得新的日志。
+一次请求成功不证明早于挂载的启动时机、返回标题竞态、完整游戏进度变化和跨版本适配。原生素材研究 DLL 的复跑已取得 12 条请求终态，历史试验和复跑见[精选证据](../docs/minimap-game-textures.evidence.json)。本次历史适配只运行本地验证程序，没有重新注入研究 DLL 或部署当前构建。

@@ -4,6 +4,7 @@ add_project(minimap SHARED
     render.cpp render.hpp
     gfx.cpp gfx.hpp
     resources.cpp resources.hpp
+    layout.hpp ../util/paramreader.hpp
     ../util/assets.cpp ../util/assets.hpp
     defs/BonfireWarpParam.h
     defs/WorldMapLegacyConvParam.h

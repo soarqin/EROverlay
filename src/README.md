@@ -10,6 +10,8 @@ The core loader (`EROverlay.dll`) for ELDEN RING Overlay Hook. It hooks into the
 
 Do **not** use this mod alongside overlays such as `FPS Counter` in Nvidia GeForce Experience, `MSI Afterburner`, or `RivaTuner Statistics Server`. They hook the same DirectX APIs and will cause the game to crash.
 
+Minimap native file adapters cover hash-verified 1.02–1.17 historical EXEs and Steam 1.17.1. Offline address/layout regressions passed for all supplied old EXEs; per-version old-game visual testing remains pending. Atlas mods were verified with 12 atlases. See the [compatibility report](../docs/minimap-version-compatibility.md).
+
 ---
 
 ## Installation

@@ -43,6 +43,7 @@ uint64_t generation = 1, nextTexture = 100;
 unsigned reads = 0;
 bool valid = true, enabled = true, offscreenUsed = false;
 int fullMapConfig = -1; // Missing key exercises the production default.
+ERGameLayout selectedLayout{sizeof(ERGameLayout), 0x80, 0x250, 0x720, 0x730, 0x350, 0x348, 1, 7, 194};
 uint32_t progressMasks[3]{};
 std::vector<std::wstring> requestedTiles;
 enum class Invalidation { None, Generation, View, RawMap, Layer };
@@ -230,6 +231,12 @@ int main(int argc, char **argv) {
     legacy.inputIsKeyPressed = [](int) { return false; };
     api = &legacy;
     EROverlayNativeAPI native{};
+    native.size = sizeof(native);
+    native.version = 1;
+    native.readGameLayout = [](ERGameLayout *layout) {
+        *layout = selectedLayout;
+        return true;
+    };
     native.readMapState = [](ERMapState *out) {
         *out = {};
         out->generation = generation;
@@ -446,6 +453,16 @@ int main(int argc, char **argv) {
     alpha = L"0.6";
     if (!tileFrame("full_map on rotated transparent minimap", 1, 0, 0, {L"M00_L0_20_20_00008400.tpf.dcx"}, true) || view != unchangedView)
         return 34;
+    rotate = L"0";
+    alpha = L"1";
+    for (auto layout: {ERGameLayout{sizeof(ERGameLayout), 0x78, 0x248, 0x708, 0x718, 0x2D0, 0x2C8, 0, 3, 185},
+                       ERGameLayout{sizeof(ERGameLayout), 0x80, 0x248, 0x718, 0x728, 0x350, 0x348, 1, 3, 186}}) {
+        selectedLayout = layout;
+        if (!tileFrame("old layout full_map surface", 1, 0, 0, {L"M00_L0_20_20_00008400.tpf.dcx"}) ||
+            !tileFrame("old layout full_map underground", 1, 0, 1, {L"M00_L0_20_20_00008400.tpf.dcx", L"M01_L0_20_20_00000008.tpf.dcx"}) ||
+            !tileFrame("old layout actual fragment progress", 0, 0, 0, {L"M00_L0_20_20_00000000.tpf.dcx"}))
+            return 35;
+    }
     er::minimap::gResources.stop();
     er::minimap::nativeApi = nullptr;
     ImGui::DestroyContext();

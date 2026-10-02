@@ -81,6 +81,7 @@ int main() {
     constexpr int32_t events[] = {-1, 110, 111, 112, 113, 114, 115};
     table[0x2D] = 4;
     table[0x2E] = 2;
+    put(table, 0, uint32_t{512 + std::size(ids) * 24});
     put(table, 0xA, uint16_t{7});
     for (size_t i = 0; i < std::size(ids); ++i) {
         er::params::ParamEntryOffset entry{ids[i], static_cast<intptr_t>(512 + i * 24), 0};

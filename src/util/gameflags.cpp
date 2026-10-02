@@ -6,7 +6,7 @@
 #include <limits>
 
 #include "gameflags.hpp"
-#include "params/param.hpp"
+#include "paramreader.hpp"
 
 namespace er::util {
 namespace {
@@ -90,25 +90,18 @@ bool readMapPieceMasks(uintptr_t table, uintptr_t manager, bool reveal, uint32_t
             mask = UINT32_MAX;
         return true;
     }
-    uint16_t count = 0;
-    uint8_t flags[2]{};
-    // The installed sample uses PARAM's 24-byte row entries. Reject other
-    // layouts rather than interpreting unrelated bytes as event flag IDs.
-    if (!table || !manager || !read(table + 0xA, count) || !count || count > 8192 || !read(table + 0x2D, flags) ||
-        !((flags[0] & 0x7F) == 4 || ((flags[0] & 0x7F) == 5 && (flags[0] & 0x80))) || !(flags[1] & 2))
+    ParamRows rows;
+    if (!manager || !rows.open(table) || rows.rows().size() > 8192)
         return false;
     uint32_t selected[3]{};
-    for (uint16_t i = 0; i < count; ++i) {
-        params::ParamEntryOffset entry;
-        if (!read(table + 0x40 + size_t(i) * sizeof(entry), entry))
-            return false;
+    for (const auto &entry: rows.rows()) {
         // RVA 0x8892C0 queries exactly 32 IDs per map: 0..31, 100..131,
         // and 1000..1031. Rows such as DLC 1070 are separate reveal areas.
-        uint64_t map = entry.paramId / 100, bit = entry.paramId % 100;
+        uint64_t map = entry.id / 100, bit = entry.id % 100;
         if (bit >= 32 || (map != 0 && map != 1 && map != 10))
             continue;
         int32_t event = 0;
-        if (entry.offset <= 0 || entry.offset > 0x10000000 || uintptr_t(entry.offset) > std::numeric_limits<uintptr_t>::max() - table - 4 || !read(table + entry.offset + 4, event))
+        if (!rows.field(entry, 4, event))
             return false;
         bool unlocked = false;
         if (!readGameEventFlag(manager, event == -1 ? 0u : static_cast<uint32_t>(event), unlocked))

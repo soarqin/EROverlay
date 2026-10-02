@@ -10,6 +10,8 @@ ELDEN RING Overlay Hook 的核心加载器（`EROverlay.dll`）。通过钩入�
 
 **请勿**将本 Mod 与 Nvidia GeForce Experience 中的 `FPS Counter`、`MSI Afterburner` 或 `RivaTuner Statistics Server` 等覆盖层同时使用。它们会钩入相同的 DirectX API，导致游戏崩溃。
 
+Minimap 原生文件接口已按完整哈希适配核对过的 1.02～1.17 历史 EXE 与 Steam 1.17.1。旧目录全部通过离线核对与布局回归，逐旧版游戏画面仍待实测；图集 mod 已通过 12 图集验证。详见[兼容性报告](../docs/minimap-version-compatibility.md)。
+
 ---
 
 ## 安装方法

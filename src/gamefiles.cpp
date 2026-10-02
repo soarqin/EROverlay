@@ -20,15 +20,12 @@
 #include "gamefiles.hpp"
 #include "util/assets.hpp"
 #include "util/gameflags.hpp"
+#include "util/gameprofile.hpp"
 #include "util/mapstate.hpp"
 #include "util/nativelog.hpp"
 
 namespace er {
 namespace {
-// A version number can be shared by executables with different layouts.
-constexpr uint8_t EXACT_HASH[32] = {0x1a, 0x35, 0x47, 0x10, 0x13, 0x27, 0xf6, 0x5d, 0x0c, 0x76, 0xda, 0x2f, 0x91, 0x90, 0xac, 0x0a,
-                                    0xa6, 0x68, 0x71, 0xea, 0x42, 0xba, 0xe2, 0xae, 0xcc, 0x61, 0xe1, 0x1a, 0x8b, 0x59, 0x78, 0x91};
-
 template<typename T>
 bool readGame(uintptr_t address, T &value) {
     SIZE_T read = 0;
@@ -38,14 +35,14 @@ uintptr_t pointer(uintptr_t address) {
     uintptr_t value = 0;
     return readGame(address, value) ? value : 0;
 }
-bool hashMatches() {
+const util::GameProfile *executableProfile() {
     wchar_t path[32768];
     DWORD length = GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
     if (!length || length >= std::size(path))
-        return false;
+        return nullptr;
     HANDLE file = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (file == INVALID_HANDLE_VALUE)
-        return false;
+        return nullptr;
     BCRYPT_ALG_HANDLE algorithm = nullptr;
     BCRYPT_HASH_HANDLE hash = nullptr;
     bool ok = BCryptOpenAlgorithmProvider(&algorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0) >= 0;
@@ -60,13 +57,13 @@ bool hashMatches() {
         ok = BCryptHashData(hash, buffer, read, 0) >= 0;
     }
     if (ok)
-        ok = BCryptFinishHash(hash, digest, sizeof(digest), 0) >= 0 && !std::memcmp(digest, EXACT_HASH, sizeof(digest));
+        ok = BCryptFinishHash(hash, digest, sizeof(digest), 0) >= 0;
     if (hash)
         BCryptDestroyHash(hash);
     if (algorithm)
         BCryptCloseAlgorithmProvider(algorithm, 0);
     CloseHandle(file);
-    return ok;
+    return ok ? util::findGameProfile(digest) : nullptr;
 }
 bool entryMatches(uintptr_t base, uintptr_t rva, std::initializer_list<uint8_t> bytes) {
     uint8_t actual[16];
@@ -101,12 +98,14 @@ struct GameFiles::Impl {
             };
             std::unique_ptr<uint8_t, Deleter> bytes;
             size_t size = 0;
+            bool valid = false;
             bool copy(util::Bytes data) {
                 bytes.reset(static_cast<uint8_t *>(HeapAlloc(GetProcessHeap(), 0, data.size())));
                 if (!bytes)
                     return false;
                 std::memcpy(bytes.get(), data.data(), data.size());
                 size = data.size();
+                valid = true;
                 return true;
             }
         };
@@ -126,6 +125,7 @@ struct GameFiles::Impl {
         bool logged = false;
     };
     uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
+    const util::GameProfile *profile = nullptr;
     std::atomic_bool checked{false};
     std::atomic_bool supported{false};
     std::mutex mutex;
@@ -153,9 +153,21 @@ struct GameFiles::Impl {
             if (item.names.empty()) {
                 ok = item.parts[0].copy(bytes);
             } else {
+                std::vector<util::TpfEntry> entries;
+                ok = util::parseTpf(bytes, entries);
+                std::unordered_map<std::wstring, util::Bytes> found;
+                for (const auto &entry: entries) {
+                    auto [part, inserted] = found.emplace(entry.name, entry.dds);
+                    if (!inserted)
+                        part->second = {};
+                }
+                size_t copied = 0;
                 for (size_t i = 0; ok && i < item.names.size(); ++i) {
-                    util::Bytes dds;
-                    ok = util::findTpfDds(bytes, item.names[i], dds) && item.parts[i].copy(dds);
+                    auto entry = found.find(item.names[i]);
+                    if (entry != found.end() && !entry->second.empty() && entry->second.size() <= item.maxBytes - copied && item.parts[i].copy(entry->second))
+                        copied += entry->second.size();
+                    // A missing/invalid entry fails only that part, so an
+                    // unused mod/DLC atlas cannot block other valid images.
                 }
             }
         }
@@ -172,10 +184,9 @@ struct GameFiles::Impl {
     bool retired(const Item &item) const {
         if (!item.submitted)
             return true;
-        // FD4 request objects return to their shared pool through 0x26F9340.
-        // Read its published owner rather than depending on containment in
-        // the manager; this sample resolves it to manager +0xF0.
-        auto poolOwner = pointer(base + 0x4860D70);
+        // FD4 request cleanup returns objects to the shared pool. Use the
+        // hash-selected published pool owner, independent of containment.
+        auto poolOwner = profile ? pointer(base + profile->retirePoolOwner) : 0;
         auto pool = poolOwner ? pointer(poolOwner) : 0;
         auto generations = pool ? pointer(pool + 0x50) : 0;
         uint16_t generation = 0;
@@ -183,21 +194,22 @@ struct GameFiles::Impl {
     }
 
     void run() {
-        bool match = hashMatches() && entryMatches(base, 0x26EEB60, {0x4c, 0x8b, 0xdc, 0x48, 0x83, 0xec, 0x78}) &&
-                     entryMatches(base, 0x26EED40, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) && entryMatches(base, 0x26F42E0, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) &&
-                     entryMatches(base, 0x26EE2C0, {0x48, 0x83, 0xec, 0x28, 0x48, 0x8b, 0x15});
+        profile = executableProfile();
+        bool match = profile && entryMatches(base, profile->submit, {0x4c, 0x8b, 0xdc, 0x48, 0x83, 0xec, 0x78}) &&
+                     entryMatches(base, profile->flush, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) && entryMatches(base, profile->enqueue, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) &&
+                     entryMatches(base, profile->cancel, {0x48, 0x83, 0xec, 0x28, 0x48, 0x8b, 0x15});
         supported.store(match, std::memory_order_release);
         checked.store(true, std::memory_order_release);
-        util::nativeLog("game-compatible=%d base=%llx\n", match, static_cast<unsigned long long>(base));
+        util::nativeLog("game-compatible=%d profile=%s base=%llx\n", match, profile ? profile->label : "unknown", static_cast<unsigned long long>(base));
         if (!match)
             fwprintf(stderr, L"[Minimap] 当前 EXE 与原生资源适配器不匹配，已禁用游戏调用。\n");
-        auto submit = reinterpret_cast<int (*)(void *, uint64_t *, const ReadRequest *)>(base + 0x26EEB60);
-        auto flush = reinterpret_cast<void (*)(void *)>(base + 0x26EED40);
-        auto enqueue = reinterpret_cast<void (*)(void *, void *, uint64_t)>(base + 0x26F42E0);
+        auto submit = match ? reinterpret_cast<int (*)(void *, uint64_t *, const ReadRequest *)>(base + profile->submit) : nullptr;
+        auto flush = match ? reinterpret_cast<void (*)(void *)>(base + profile->flush) : nullptr;
+        auto enqueue = match ? reinterpret_cast<void (*)(void *, void *, uint64_t)>(base + profile->enqueue) : nullptr;
         for (;;) {
             std::vector<std::shared_ptr<Item>> submitItems, cancelItems;
-            uintptr_t manager = pointer(base + 0x48611A0);
-            auto allocator = reinterpret_cast<void *>(pointer(base + 0x3D8B360));
+            uintptr_t manager = match ? pointer(base + profile->manager) : 0;
+            auto allocator = match ? reinterpret_cast<void *>(pointer(base + profile->allocator)) : nullptr;
             uint8_t ending = 1;
             bool ready = match && manager && allocator && readGame(manager + 0xE38, ending) && !ending;
             {
@@ -250,7 +262,7 @@ struct GameFiles::Impl {
             if (!submitItems.empty())
                 flush(reinterpret_cast<void *>(manager));
             for (const auto &item: cancelItems) {
-                enqueue(reinterpret_cast<void *>(item->manager + 0x20), reinterpret_cast<void *>(base + 0x26EE2C0), item->nativeId);
+                enqueue(reinterpret_cast<void *>(item->manager + 0x20), reinterpret_cast<void *>(base + profile->cancel), item->nativeId);
             }
             std::unique_lock lock(mutex);
             condition.wait_for(lock, std::chrono::milliseconds(10));
@@ -264,7 +276,7 @@ GameFiles::GameFiles() : impl_(std::make_unique<Impl>()) {
 GameFiles::~GameFiles() noexcept { stop(); }
 bool GameFiles::compatible() const { return impl_->supported.load(std::memory_order_acquire); }
 uint64_t GameFiles::request(const ERFileRequest &request) {
-    if (!request.path || !*request.path || request.flags & ~0x40u || request.tpfNameCount > 8 || (request.tpfNameCount && !request.tpfNames))
+    if (!request.path || !*request.path || request.flags & ~0x40u || request.tpfNameCount > 4096 || (request.tpfNameCount && !request.tpfNames))
         return 0;
     auto item = std::make_shared<Impl::Item>();
     item->path = request.path;
@@ -276,6 +288,8 @@ uint64_t GameFiles::request(const ERFileRequest &request) {
         if (!request.tpfNames[i] || !*request.tpfNames[i])
             return 0;
         item->names.emplace_back(request.tpfNames[i]);
+        if (item->names.back().size() > 4096)
+            return 0;
     }
     item->parts.resize(std::max<size_t>(1, item->names.size()));
     std::lock_guard lock(impl_->mutex);
@@ -294,6 +308,8 @@ ERFileStatus GameFiles::poll(uint64_t token, const wchar_t *part, ERFileData &da
         return ER_FILE_INVALID;
     auto &item = *it->second;
     auto status = item.status.load(std::memory_order_acquire);
+    if (status != ER_FILE_PENDING && status != ER_FILE_QUEUED)
+        data.nativeStatus = item.nativeStatus;
     if (status == ER_FILE_SUCCEEDED) {
         size_t index = 0;
         if (!item.names.empty()) {
@@ -304,11 +320,11 @@ ERFileStatus GameFiles::poll(uint64_t token, const wchar_t *part, ERFileData &da
                 return ER_FILE_INVALID;
             index = found - item.names.begin();
         }
+        if (!item.parts[index].valid)
+            return ER_FILE_FAILED;
         data.data = item.parts[index].bytes.get();
         data.size = item.parts[index].size;
     }
-    if (status != ER_FILE_PENDING && status != ER_FILE_QUEUED)
-        data.nativeStatus = item.nativeStatus;
     return status;
 }
 void GameFiles::release(uint64_t token) {
@@ -331,14 +347,10 @@ bool GameFiles::readMapState(ERMapState &state) {
     state = {};
     if (!compatible())
         return false;
-    auto menu = pointer(impl_->base + 0x3D6F820);
-    auto owner = menu ? pointer(menu + 0x80) : 0;
-    auto view = owner ? pointer(owner + 0x250) : 0;
-    auto gameData = pointer(impl_->base + 0x3D61F98);
-    auto player = gameData ? pointer(gameData + 0x58) : 0;
-    uint16_t screen = 1;
-    if (!menu || !readGame(menu + 0x730, screen) || screen)
-        player = 0;
+    const auto &profile = *impl_->profile;
+    util::MapContext context;
+    bool contextRead = util::readMapContext(impl_->base + profile.menu, impl_->base + profile.gameData, profile.layout, context);
+    auto view = context.view, player = context.player;
     if (view != impl_->lastView || player != impl_->lastPlayer) {
         ++impl_->mapGeneration;
         impl_->lastView = view;
@@ -346,15 +358,15 @@ bool GameFiles::readMapState(ERMapState &state) {
         impl_->maskRefresh = 0;
     }
     state.generation = impl_->mapGeneration;
-    if (!view || !player)
+    if (!contextRead)
         return false;
     uint8_t reveal = 0;
-    auto repository = pointer(impl_->base + 0x3D85F58);
+    auto repository = pointer(impl_->base + profile.repository);
     auto pieceEntry = repository ? pointer(repository + 0x88 + 88 * 72) : 0;
     auto pieceCap = pieceEntry ? pointer(pieceEntry + 0x80) : 0;
     auto pieceTable = pieceCap ? pointer(pieceCap + 0x80) : 0;
-    auto flags = pointer(impl_->base + 0x3D6C4B8);
-    if (!util::readWorldMapView(view, state) || !readGame(impl_->base + 0x3D71030, reveal) || owner != pointer(menu + 0x80) || view != pointer(owner + 0x250))
+    auto flags = pointer(impl_->base + profile.eventFlags);
+    if (!util::readWorldMapView(view, state) || !readGame(impl_->base + profile.reveal, reveal) || !util::mapContextUnchanged(context, profile.layout))
         return false;
     uint64_t now = GetTickCount64();
     if (now >= impl_->maskRefresh || flags != impl_->lastFlags || pieceTable != impl_->lastPieceTable || reveal != impl_->lastReveal) {
@@ -368,7 +380,7 @@ bool GameFiles::readMapState(ERMapState &state) {
         std::copy(std::begin(masks), std::end(masks), impl_->activeMasks);
         if (now >= impl_->maskLog) {
             uint32_t cached[3]{};
-            bool cacheReadable = readGame(view + 0x39C, cached);
+            bool cacheReadable = profile.layout.mapMask & 4 ? readGame(view + 0x39C, cached) : false;
             util::nativeLog("map-progress masks=%08x,%08x,%08x cached=%08x,%08x,%08x cache-readable=%d reveal=%u\n", masks[0], masks[1], masks[2], cached[0], cached[1], cached[2],
                             cacheReadable, reveal);
             impl_->maskLog = now + 5000;
@@ -383,15 +395,22 @@ bool GameFiles::readMapState(ERMapState &state) {
 }
 
 uintptr_t GameFiles::findParamTable(uint32_t group) const {
-    if (!compatible() || (group != 43 && group != 87 && group != 141))
+    if (!compatible() || (group != 43 && group != 87 && group != 88 && group != 141) || group >= impl_->profile->layout.repositoryGroups)
         return 0;
-    auto repository = pointer(impl_->base + 0x3D85F58);
+    auto repository = pointer(impl_->base + impl_->profile->repository);
     auto entry = repository ? pointer(repository + 0x88 + group * 72) : 0;
     auto cap = entry ? pointer(entry + 0x80) : 0;
     return cap ? pointer(cap + 0x80) : 0;
 }
 bool GameFiles::readEventFlag(uint32_t id) const {
     bool value = false;
-    return compatible() && id != UINT32_MAX && util::readGameEventFlag(pointer(impl_->base + 0x3D6C4B8), id, value) && value;
+    return compatible() && id != UINT32_MAX && util::readGameEventFlag(pointer(impl_->base + impl_->profile->eventFlags), id, value) && value;
+}
+bool GameFiles::readGameLayout(ERGameLayout &layout) const {
+    layout = {};
+    if (!compatible())
+        return false;
+    layout = impl_->profile->layout;
+    return true;
 }
 } // namespace er

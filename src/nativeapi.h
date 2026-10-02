@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "api.h"
 
 #if defined(__cplusplus)
@@ -14,7 +16,8 @@ typedef struct {
     const wchar_t *path;
     uint32_t flags;
     // When nonempty, copy only these DDS entries from a TPF in the callback.
-    // Names and paths are copied before requestFile() returns.
+    // Names and paths are copied before requestFile() returns. Each named part
+    // has its own success/failure result; missing entries do not fail siblings.
     const wchar_t *const *tpfNames;
     uint32_t tpfNameCount;
     uint64_t maxBytes;
@@ -52,6 +55,20 @@ typedef struct {
     uintptr_t viewModel;
 } ERMapState;
 
+// Optional, size-gated CPU layout information for hash-verified executables.
+typedef struct {
+    uint32_t size;
+    uint32_t menuOwnerOffset;
+    uint32_t ownerViewOffset;
+    uint32_t menuInfoOffset;
+    uint32_t screenStateOffset;
+    uint32_t graceStride;
+    uint32_t graceNormalOffset;
+    uint32_t alternateIcons;
+    uint32_t mapMask; // Bit 0: M00/m60, bit 1: M01, bit 2: M10/m61.
+    uint32_t repositoryGroups;
+} ERGameLayout;
+
 typedef struct {
     uint32_t size;
     uint32_t version;
@@ -70,7 +87,12 @@ typedef struct {
     uintptr_t (*findParamTable)(uint32_t repositoryGroup);
     void (*log)(const char *message);
     bool (*readEventFlag)(uint32_t id);
+    // Appended to version 1. Check size before accessing this member. Older
+    // cores without it support only the original latest-game layout.
+    bool (*readGameLayout)(ERGameLayout *layout);
 } EROverlayNativeAPI;
+
+#define ER_NATIVE_API_V1_SIZE offsetof(EROverlayNativeAPI, readGameLayout)
 
 API_EXPORT const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version);
 

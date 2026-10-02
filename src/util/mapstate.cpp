@@ -29,6 +29,24 @@ struct Death {
 };
 } // namespace
 
+bool readMapContext(uintptr_t menuGlobal, uintptr_t gameDataGlobal, const ERGameLayout &layout, MapContext &context) {
+    context = {};
+    uint16_t screen = 1;
+    bool menuRead = read(menuGlobal, context.menu) && context.menu && read(context.menu + layout.menuOwnerOffset, context.owner) && context.owner &&
+                    read(context.owner + layout.ownerViewOffset, context.view);
+    bool playerRead = read(gameDataGlobal, context.gameData) && context.gameData && read(context.gameData + 0x58, context.player);
+    if (!context.menu || !read(context.menu + layout.screenStateOffset, screen) || screen)
+        context.player = 0;
+    return menuRead && playerRead && context.view && context.player;
+}
+bool mapContextUnchanged(const MapContext &context, const ERGameLayout &layout) {
+    uintptr_t owner = 0, view = 0, player = 0;
+    uint16_t screen = 1;
+    return context.menu && context.owner && context.gameData && read(context.menu + layout.menuOwnerOffset, owner) && owner == context.owner &&
+           read(owner + layout.ownerViewOffset, view) && view == context.view && read(context.gameData + 0x58, player) && player == context.player &&
+           read(context.menu + layout.screenStateOffset, screen) && !screen;
+}
+
 bool readWorldMapView(uintptr_t view, ERMapState &state) {
     state.deathValid = false;
     Location location;

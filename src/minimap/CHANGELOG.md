@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [Unreleased]
+
+#### Added
+
+- Native dropped-runes marker, enabled by default with `death_marker=1`. The marker follows the game's death record and is hidden after rune recovery or on a different map layer.
+- Player-placed numbered map beacons 1–5, drawn with native downward arrows and dynamic digits. Enabled by default with `player_markers=1`; placement and removal follow the game, and remaining beacons retain their numbers.
+- Optional fully revealed minimap terrain with `full_map=1`, covering the surface, underground and DLC. Disabled by default; this changes only the minimap display, leaving the save and grace/landmark discovery unchanged.
+
+#### Changed
+
+- Map tiles, icon atlases and GFX layouts now load through the game's file layer and render with Overlay-owned textures. External `data/map` files are no longer required or packaged.
+- Surface, underground, DLC and Roundtable Hold rendering now uses native map coordinates, icon aliases and resource layouts.
+- Minimap shortcuts now use the loader's shared Virtual-Key input handling, including modifier combinations and shared key presses.
+- Native adapters cover hash-verified 1.02–1.17 historical EXEs and Steam 1.17.1, selecting menu, map, grace and parameter layouts by hash. Pre-DLC versions do not require M10 or DLC atlases.
+- Atlas names and counts are discovered from GFX/TextureAtlas references, supporting mods with more than three atlases. Missing or malformed individual atlases no longer block valid siblings.
+
+#### Fixed
+
+- Corrected map-fragment progress synchronization and tile-variant selection so obtained fragments show explored terrain instead of the unexplored map layer.
+- Added the surface underlay beneath the translucent underground map.
+- Fixed surface death markers being hidden because padding bytes were interpreted as part of the underground flag.
+- Corrected icon pivots, layered state graphics and Roundtable Hold asset selection.
+
+#### Testing
+
+- In-game testing with the latest ELDEN RING version was confirmed successful on 2026-10-02.
+- Historical adapters passed offline checks for all 28 old directories and the latest EXE, plus three-layout, bounded short-row, death/beacon/full-map regressions. Per-version old-game testing remains pending.
+- Twelve atlases passed production callback extraction, texture/UV drawing for 117 visible icon recipes, failure isolation and reset/retirement checks.
+- Twelve BC1 atlases passed production D3D12 uploads, per-texture GPU readback comparisons and complete SRV retirement.
+
 ### [1.1.3] - 2026-06-30
 
 #### Fixed

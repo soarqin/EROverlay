@@ -16,9 +16,15 @@ if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_marker_render_verify.cpp src\minimap\render.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_marker_render_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 rem Do not rebuild a DLL already loaded in a verification game process.
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_compatibility_verify.cpp src\minimap\data.cpp src\util\gameflags.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_compatibility_verify.exe /link xmllite.lib shlwapi.lib
+if errorlevel 1 goto :failed
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_atlas_verify.cpp src\minimap\render.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_atlas_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
+if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_progress_verify.cpp src\util\gameflags.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_progress_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /LD /Isrc tools\minimap_bridge_verify.cpp src\gamefiles.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\bridge_verify.dll /link bcrypt.lib
+if errorlevel 1 goto :failed
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_file_verify.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_file_verify.exe /link bcrypt.lib
 if errorlevel 1 goto :failed
 if exist build\native\src\EROverlayDLL.dir\Release\textureupload.obj (
     cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /DEROVERLAY_EXPORTS /Isrc /Ideps\imgui tools\minimap_texture_verify.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_texture_verify.exe /link build\native\src\EROverlayDLL.dir\Release\*.obj build\native\deps\fmt\Release\fmt.lib build\native\deps\imgui\Release\imgui.lib build\native\deps\imgui\Release\imgui_dx12_backend.lib build\native\deps\minhook\Release\minhook.lib deps\steamworks\lib\steam_api64.lib d3d12.lib dxgi.lib d3dcompiler.lib dwmapi.lib shlwapi.lib version.lib bcrypt.lib advapi32.lib
