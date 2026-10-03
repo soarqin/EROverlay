@@ -4,6 +4,8 @@
 
 ## 静态分析
 
+2026-10-03 起，小地图采用新的分区配置。资源/地图日志使用 `[diagnostics] log_file`，历史记录中的旧 `native_log` 仅保留为当时的配置名。配置解析可用 `tools/build_minimap_settings_check.bat` 构建并验证，或直接运行已构建的 `build/native-checks/minimap_settings_verify.exe`；这项检查读取真实 INI，不连接游戏。
+
 通用扫描回归使用 [verify_minimap_scanner.py](verify_minimap_scanner.py)，先按共享规则解析，随后才与逐 EXE 证据比较。独立 `--resolve-only` 模式不读取历史期望值；调用命令与运行时接入范围见[通用扫描方案](../docs/minimap-scanner-design.md)。该工具继续使用 Python idapro 静态分析，没有调试器或游戏调用。
 
 在项目根目录运行：
@@ -146,6 +148,8 @@ bridge_verify.dll 可通过上文加载器在指定脱机 mod 会话运行，它
 正式帧对照和实测范围见[执行记录](../docs/minimap-native-implementation.md)。
 
 `minimap_death_render_verify.exe` 使用实际 GFX、图集与已捕获的未回收卢恩状态，连接正式 view 读取、Data 快照和 Renderer，检查 DropSoul 的实际 ImGui 四边形。它不创建游戏窗口、不连接游戏 GPU，不代表最终屏幕画面已验收。
+
+该绘制验证还检查预设切换、四角边距与居中位置，以及圆形、圆角、透明绘制的合成 UV；边距覆盖像素、百分比、负值、零值和留空，另核对视口原点及运行中的分辨率变化。配置字段的缺省、冲突和无效值由 `minimap_settings_verify.exe` 通过真实 INI 读取验证。
 
 `minimap_progress_verify.exe` 只读取本进程构造的 PARAM/事件存储和已有本地地图资源，不连接游戏。它验证直接与索引两类标记存储、地表/地下/DLC 的参数 ID、位 31、已获得和未获得时的请求后缀、地下两层独立掩码，以及不可读进度的拒绝行为。实际游戏地点另用 `native_log` 的 `map-progress` 和文件请求行对照，不能把该回归结果替代游戏画面验收。
 

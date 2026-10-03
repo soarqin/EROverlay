@@ -9,7 +9,6 @@
 #include <numbers>
 
 #include "render.hpp"
-#include "util/string.hpp"
 
 extern EROverlayAPI *api;
 namespace er::minimap {
@@ -28,219 +27,39 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
 
     offscreen_ = api->createOffscreen();
-    showDeath_ = api->configGetInt("minimap.death_marker", 1) != 0;
-    showPlayerMarkers_ = api->configGetInt("minimap.player_markers", 1) != 0;
-    fullMap_ = api->configGetInt("minimap.full_map", 0) != 0;
+    auto settings = loadSettings(*api);
+    show_ = true;
+    showDeath_ = settings.showDeath;
+    showPlayerMarkers_ = settings.showBeacons;
+    fullMap_ = settings.fullMap;
+    toggleKey_ = settings.toggleKey;
+    scaleKey_ = settings.cycleKey;
+    gracesKey_ = settings.gracesKey;
+    showGraces_ = settings.showGraces;
+    landmarksKey_ = settings.landmarksKey;
+    showLandmarks_ = settings.showLandmarks;
+    borderColor_ = settings.borderColor;
+    borderWidth_ = settings.borderWidth;
+    presets_ = std::move(settings.presets);
+    selectPreset(0);
+}
 
-    toggleKey_ = api->configGetVirtualKey("minimap.toggle_key", 'M');
-    scaleKey_ = api->configGetVirtualKey("minimap.scale_key", 'N');
-    gracesKey_ = api->configGetVirtualKey("minimap.graces_key", 'N');
-    showGraces_ = api->configGetInt("minimap.graces", 1) != 0;
-    landmarksKey_ = api->configGetVirtualKey("minimap.landmarks_key", 'N');
-    showLandmarks_ = api->configGetInt("minimap.landmarks", 1) != 0;
-    widthRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.width_ratio", L"30%,90%"));
-    heightRatios_ = util::strSplitToFloatVec(api->configGetString("minimap.height_ratio", L"30%,90%"));
-    auto sl = util::splitString(std::wstring(api->configGetString("minimap.scale", L"0.75,+1.5")), L',');
-    scales_.clear();
-    isCentered_.clear();
-    for (auto &s: sl) {
-        if (s.empty()) {
-            scales_.push_back(0.f);
-            isCentered_.push_back(false);
-            continue;
-        }
-        if (s.front() == '+') {
-            s.erase(0, 1);
-            isCentered_.push_back(true);
-        } else {
-            isCentered_.push_back(false);
-        }
-        if (s.empty()) {
-            scales_.push_back(0.f);
-            continue;
-        }
-        if (s.back() == '%') {
-            s.pop_back();
-            scales_.push_back(std::stof(s) / 100.f);
-        } else {
-            scales_.push_back(std::stof(s));
-        }
-    }
-    alphas_ = util::strSplitToFloatVec(api->configGetString("minimap.alpha", L"0.8,0.6"));
-    auto shapeStrs = util::splitString(std::wstring(api->configGetString("minimap.shape", L"rect")), L',');
-    shapes_.clear();
-    for (auto &s: shapeStrs) {
-        if (s == L"rounded")
-            shapes_.push_back(Shape::Rounded);
-        else if (s == L"circle")
-            shapes_.push_back(Shape::Circle);
-        else
-            shapes_.push_back(Shape::Rect);
-    }
-    auto rotateStrs = util::splitString(std::wstring(api->configGetString("minimap.rotate", L"0")), L',');
-    rotates_.clear();
-    for (auto &s: rotateStrs) {
-        rotates_.push_back(s == L"1" || s == L"yes" || s == L"true");
-    }
-    auto roundingStrs = util::splitString(std::wstring(api->configGetString("minimap.rounding", L"20%")), L',');
-    roundings_.clear();
-    roundingIsPercent_.clear();
-    for (auto &s: roundingStrs) {
-        if (s.empty()) {
-            roundings_.push_back(0.f);
-            roundingIsPercent_.push_back(true);
-            continue;
-        }
-        if (s.back() == L'%') {
-            auto sv = s.substr(0, s.size() - 1);
-            roundings_.push_back(std::stof(sv) / 100.f);
-            roundingIsPercent_.push_back(true);
-        } else {
-            roundings_.push_back(std::stof(s));
-            roundingIsPercent_.push_back(false);
-        }
-    }
-    // Parse border_color: "R,G,B,A" format (0-255 each), stored as ABGR (ImGui IM_COL32 format)
-    {
-        auto colorStr = std::wstring(api->configGetString("minimap.border_color", L"255,255,255,100"));
-        auto parts = util::splitString(colorStr, L',');
-        int r = 255, g = 255, b = 255, a = 100;
-        if (parts.size() >= 1 && !parts[0].empty())
-            r = std::clamp((int)std::stof(parts[0]), 0, 255);
-        if (parts.size() >= 2 && !parts[1].empty())
-            g = std::clamp((int)std::stof(parts[1]), 0, 255);
-        if (parts.size() >= 3 && !parts[2].empty())
-            b = std::clamp((int)std::stof(parts[2]), 0, 255);
-        if (parts.size() >= 4 && !parts[3].empty())
-            a = std::clamp((int)std::stof(parts[3]), 0, 255);
-        borderColor_ = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)g << 8) | (uint32_t)r;
-    }
-    borderWidth_ = (float)api->configGetInt("minimap.border_width_x10", 15) / 10.f;
-    extraTileScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_tile_scale", L"1"));
-    extraDecorationScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_decoration_scale", L"1"));
-    extraPlayerScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_player_scale", L"1"));
-    extraBearingScales_ = util::strSplitToFloatVec(api->configGetString("minimap.extra_bearing_scale", L"1"));
-    auto maxCount = std::max({widthRatios_.size(), heightRatios_.size(), scales_.size(), alphas_.size(), shapes_.size(), roundings_.size(), rotates_.size(),
-                              extraTileScales_.size(), extraDecorationScales_.size(), extraPlayerScales_.size(), extraBearingScales_.size()});
-    if (maxCount == 0) {
-        maxCount = 1;
-        widthRatios_.push_back(0.3f);
-        heightRatios_.push_back(0.3f);
-        scales_.push_back(0.75f);
-        alphas_.push_back(0.8f);
-        isCentered_.push_back(false);
-        shapes_.push_back(Shape::Rect);
-        roundings_.push_back(0.2f);
-        roundingIsPercent_.push_back(true);
-        rotates_.push_back(false);
-        extraTileScales_.push_back(1.f);
-        extraDecorationScales_.push_back(1.f);
-        extraPlayerScales_.push_back(1.f);
-        extraBearingScales_.push_back(1.f);
-    } else {
-        if (widthRatios_.empty()) {
-            widthRatios_.push_back(0.3f);
-        }
-        if (heightRatios_.empty()) {
-            heightRatios_.push_back(0.3f);
-        }
-        if (scales_.empty()) {
-            scales_.push_back(0.75f);
-        }
-        if (alphas_.empty()) {
-            alphas_.push_back(0.8f);
-        }
-        if (isCentered_.empty()) {
-            isCentered_.push_back(false);
-        }
-        if (shapes_.empty()) {
-            shapes_.push_back(Shape::Rect);
-        }
-        if (roundings_.empty()) {
-            roundings_.push_back(0.2f);
-            roundingIsPercent_.push_back(true);
-        }
-        if (rotates_.empty()) {
-            rotates_.push_back(false);
-        }
-        if (extraTileScales_.empty()) {
-            extraTileScales_.push_back(1.f);
-        }
-        if (extraDecorationScales_.empty()) {
-            extraDecorationScales_.push_back(1.f);
-        }
-        if (extraPlayerScales_.empty()) {
-            extraPlayerScales_.push_back(1.f);
-        }
-        if (extraBearingScales_.empty()) {
-            extraBearingScales_.push_back(1.f);
-        }
-        while (widthRatios_.size() < maxCount) {
-            widthRatios_.push_back(widthRatios_.back());
-        }
-        while (heightRatios_.size() < maxCount) {
-            heightRatios_.push_back(heightRatios_.back());
-        }
-        while (scales_.size() < maxCount) {
-            scales_.push_back(scales_.back());
-        }
-        while (alphas_.size() < maxCount) {
-            alphas_.push_back(alphas_.back());
-        }
-        while (isCentered_.size() < maxCount) {
-            isCentered_.push_back(isCentered_.back());
-        }
-        while (shapes_.size() < maxCount) {
-            shapes_.push_back(shapes_.back());
-        }
-        while (roundings_.size() < maxCount) {
-            roundings_.push_back(roundings_.back());
-            roundingIsPercent_.push_back(roundingIsPercent_.back());
-        }
-        while (rotates_.size() < maxCount) {
-            rotates_.push_back(rotates_.back());
-        }
-        while (extraTileScales_.size() < maxCount) {
-            extraTileScales_.push_back(extraTileScales_.back());
-        }
-        while (extraDecorationScales_.size() < maxCount) {
-            extraDecorationScales_.push_back(extraDecorationScales_.back());
-        }
-        while (extraPlayerScales_.size() < maxCount) {
-            extraPlayerScales_.push_back(extraPlayerScales_.back());
-        }
-        while (extraBearingScales_.size() < maxCount) {
-            extraBearingScales_.push_back(extraBearingScales_.back());
-        }
-    }
-    if (toggleKey_ == scaleKey_) {
-        scales_.push_back(0.f);
-        widthRatios_.push_back(widthRatios_.back());
-        heightRatios_.push_back(heightRatios_.back());
-        alphas_.push_back(alphas_.back());
-        isCentered_.push_back(isCentered_.back());
-        shapes_.push_back(shapes_.back());
-        roundings_.push_back(roundings_.back());
-        roundingIsPercent_.push_back(roundingIsPercent_.back());
-        rotates_.push_back(rotates_.back());
-        extraTileScales_.push_back(extraTileScales_.back());
-        extraDecorationScales_.push_back(extraDecorationScales_.back());
-        extraPlayerScales_.push_back(extraPlayerScales_.back());
-        extraBearingScales_.push_back(extraBearingScales_.back());
-    }
-    currentWidthRatio_ = widthRatios_[0];
-    currentHeightRatio_ = heightRatios_[0];
-    currentScale_ = scales_[0];
-    currentAlpha_ = alphas_[0];
-    currentIsCentered_ = isCentered_[0];
-    currentShape_ = shapes_[0];
-    currentRounding_ = roundings_[0];
-    currentRoundingIsPercent_ = roundingIsPercent_[0];
-    currentRotate_ = rotates_[0];
-    currentExtraTileScale_ = extraTileScales_[0];
-    currentExtraDecorationScale_ = extraDecorationScales_[0];
-    currentExtraPlayerScale_ = extraPlayerScales_[0];
-    currentExtraBearingScale_ = extraBearingScales_[0];
+void Renderer::selectPreset(size_t index) {
+    currentScaleIndex_ = index;
+    const auto &preset = presets_[index];
+    currentWidthRatio_ = preset.widthRatio;
+    currentHeightRatio_ = preset.heightRatio;
+    currentScale_ = preset.zoom;
+    currentAlpha_ = preset.opacity;
+    currentPosition_ = preset.position;
+    currentShape_ = preset.rotate ? Shape::Circle : preset.shape;
+    currentRounding_ = preset.rounding;
+    currentRoundingIsPercent_ = preset.roundingIsPercent;
+    currentRotate_ = preset.rotate;
+    currentExtraTileScale_ = preset.mapScale;
+    currentExtraDecorationScale_ = preset.decorationScale;
+    currentExtraPlayerScale_ = preset.playerScale;
+    currentExtraBearingScale_ = preset.compassScale;
 }
 
 bool Renderer::render() {
@@ -251,21 +70,7 @@ bool Renderer::render() {
     if (toggleKey_ && toggleKey_ != scaleKey_ && api->inputIsKeyPressed(toggleKey_))
         show_ = !show_;
     if (show_ && scaleKey_ && api->inputIsKeyPressed(scaleKey_)) {
-        currentScaleIndex_ = (currentScaleIndex_ + 1) % scales_.size();
-        auto i = currentScaleIndex_;
-        currentWidthRatio_ = widthRatios_[i];
-        currentHeightRatio_ = heightRatios_[i];
-        currentScale_ = scales_[i];
-        currentAlpha_ = alphas_[i];
-        currentIsCentered_ = isCentered_[i];
-        currentShape_ = shapes_[i];
-        currentRounding_ = roundings_[i];
-        currentRoundingIsPercent_ = roundingIsPercent_[i];
-        currentRotate_ = rotates_[i];
-        currentExtraTileScale_ = extraTileScales_[i];
-        currentExtraDecorationScale_ = extraDecorationScales_[i];
-        currentExtraPlayerScale_ = extraPlayerScales_[i];
-        currentExtraBearingScale_ = extraBearingScales_[i];
+        selectPreset((currentScaleIndex_ + 1) % presets_.size());
     }
     if (!show_ || currentScale_ < 0.0001f || (!snapshot.valid && !*gResources.status()))
         return false;
@@ -281,7 +86,7 @@ bool Renderer::render() {
         currentShape_ = Shape::Circle;
     if (currentShape_ == Shape::Circle)
         minimapWidth_ = minimapHeight_ = std::min(minimapWidth_, minimapHeight_);
-    if (minimapWidth_ <= 0 || minimapHeight_ <= 0)
+    if (!std::isfinite(minimapWidth_) || !std::isfinite(minimapHeight_) || minimapWidth_ <= 0 || minimapHeight_ <= 0)
         return false;
     cachedRounding_ = currentRoundingIsPercent_ ? currentRounding_ * std::min(minimapWidth_, minimapHeight_) * .5f : currentRounding_;
     cachedRounding_ = std::clamp(cachedRounding_, 0.f, std::min(minimapWidth_, minimapHeight_) * .5f);
@@ -289,9 +94,21 @@ bool Renderer::render() {
     effectivePlayerScale_ = texturePlayerScale * currentExtraPlayerScale_;
     effectiveDecorationScale_ = textureDecorationScale * currentExtraDecorationScale_;
     effectiveBearingRatio_ = textureBearingRatio * currentExtraBearingScale_;
+    ImVec2 position;
+    if (currentPosition_.centered) {
+        position = ImVec2((vp->Size.x - minimapWidth_) * .5f, (vp->Size.y - minimapHeight_) * .5f);
+    } else {
+        const auto &horizontal = currentPosition_.horizontalMargin;
+        const auto &vertical = currentPosition_.verticalMargin;
+        float x = horizontal.isPercent ? horizontal.value * vp->Size.x : horizontal.value;
+        float y = vertical.isPercent ? vertical.value * vp->Size.y : vertical.value;
+        position.x = currentPosition_.horizontalAnchor == HorizontalAnchor::Right ? vp->Size.x - minimapWidth_ - x : x;
+        position.y = currentPosition_.verticalAnchor == VerticalAnchor::Bottom ? vp->Size.y - minimapHeight_ - y : y;
+    }
+    position = vp->Pos + ImVec2(std::floor(position.x), std::floor(position.y));
+    if (!std::isfinite(position.x) || !std::isfinite(position.y))
+        return false;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImVec2 position =
-        currentIsCentered_ ? ImVec2(std::floor((vp->Size.x - minimapWidth_) * .5f), std::floor((vp->Size.y - minimapHeight_) * .5f)) : ImVec2(vp->Size.x - minimapWidth_, 0);
     ImGui::SetNextWindowPos(position, ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
     if (ImGui::Begin("##minimap_window", nullptr,
@@ -511,7 +328,7 @@ void Renderer::composite(float alpha) {
     auto *vp = ImGui::GetMainViewport();
     auto *draw = ImGui::GetWindowDrawList();
     ImVec2 far = origin + ImVec2(minimapWidth_, minimapHeight_);
-    ImVec2 uv0(origin.x / vp->Size.x, origin.y / vp->Size.y), uv1(far.x / vp->Size.x, far.y / vp->Size.y);
+    ImVec2 uv0 = (origin - vp->Pos) / vp->Size, uv1 = (far - vp->Pos) / vp->Size;
     draw->PushTexture((ImTextureID)handle);
     int first = draw->VtxBuffer.Size;
     if (currentShape_ == Shape::Circle)

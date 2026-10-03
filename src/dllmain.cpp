@@ -69,7 +69,7 @@ void init() {
     PathRemoveFileSpecW(::er::gModulePath);
     er::gConfig.loadFile(L"EROverlay.ini");
     er::gConfig.loadDir(L"configs");
-    auto nativeLog = er::gConfig.getw("minimap.native_log", L"");
+    auto nativeLog = er::gConfig.getw("minimap.diagnostics.log_file", L"");
     if (!nativeLog.empty()) er::util::nativeLogFile = _wfopen(nativeLog.c_str(), L"ab");
     bool enableConsole = false;
     if (er::gConfig.enabled("common.console")) {

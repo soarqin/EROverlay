@@ -1,16 +1,14 @@
 #pragma once
 
-#include "data.hpp"
-#include "resources.hpp"
-
-#include "api.h"
-
 #include <cstdint>
 #include <vector>
 
-namespace er::minimap {
+#include "api.h"
+#include "data.hpp"
+#include "resources.hpp"
+#include "settings.hpp"
 
-enum class Shape { Rect, Rounded, Circle };
+namespace er::minimap {
 
 class Renderer {
 public:
@@ -24,6 +22,7 @@ public:
     bool render();
 
 private:
+    void selectPreset(size_t index);
     void drawRecipe(const IconRecipe *recipe, Point center, float scale, float angle = 0);
     void drawPlayerMarker(const PlayerMarkerInfo &marker, Point center, float scale);
     void drawTile(const TileView &tile, Point player, float cosMap, float sinMap);
@@ -46,24 +45,16 @@ private:
     bool showGraces_ = true;
     int landmarksKey_ = 0;
     bool showLandmarks_ = true;
-    std::vector<float> widthRatios_ = {0.3f, 0.4f};
-    std::vector<float> heightRatios_ = {0.3f, 0.4f};
-    std::vector<float> scales_ = {0.75f, 1.f};
-    std::vector<float> alphas_ = {0.8f, 0.6f};
-    std::vector<bool> isCentered_ = {false, true};
-    std::vector<Shape> shapes_;
+    std::vector<Preset> presets_;
     size_t currentScaleIndex_ = 0;
 
     float currentWidthRatio_ = 0.3f;
     float currentHeightRatio_ = 0.3f;
     float currentScale_ = 0.75f;
     float currentAlpha_ = 0.8f;
-    bool currentIsCentered_ = false;
+    Position currentPosition_;
     Shape currentShape_ = Shape::Rect;
 
-    std::vector<float> roundings_;
-    std::vector<bool> roundingIsPercent_;
-    std::vector<bool> rotates_;
     float currentRounding_ = 0.f;
     bool currentRoundingIsPercent_ = true;
     bool currentRotate_ = false;
@@ -72,12 +63,6 @@ private:
 
     uint32_t borderColor_ = 0x64FFFFFF; // ABGR (ImGui IM_COL32 format): white, alpha=100
     float borderWidth_ = 1.5f;
-
-    // Per-state extra scale multipliers (cycled via scale_key, like scales_/alphas_)
-    std::vector<float> extraTileScales_;
-    std::vector<float> extraDecorationScales_;
-    std::vector<float> extraPlayerScales_;
-    std::vector<float> extraBearingScales_;
 
     float currentExtraTileScale_ = 1.f;
     float currentExtraDecorationScale_ = 1.f;

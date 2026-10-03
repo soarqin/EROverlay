@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Changed
 
+- Minimap diagnostics use `[diagnostics] log_file` in the sectioned minimap.ini format. The former `native_log` key is no longer read.
+
 - Centralized hotkey handling using Win32 Virtual-Key codes and modifier combinations. Shortcuts activate only while the game is in the foreground, and multiple plugins can react to the same press through `inputIsKeyDown` / `inputIsKeyPressed`.
 - Parse each TPF once and publish per-DDS results, removing the eight-name limit and isolating missing entries from valid sibling atlases. PARAM reads support 12/24-byte directories and check row boundaries.
 

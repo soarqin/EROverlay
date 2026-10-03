@@ -74,16 +74,20 @@ bool setImages(const char *path) {
 void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
     legacy.screenState = [] { return 0; };
     legacy.getGameAddresses = [] { return GameAddresses{reinterpret_cast<uintptr_t>(&menuPointer), 0, 0, 0, 0}; };
-    legacy.configGetInt = [](const char *key, int fallback) { return std::strcmp(key, "minimap.full_map") ? fallback : int(fullMap); };
+    legacy.configGetInt = [](const char *, int fallback) { return fallback; };
     legacy.configGetVirtualKey = [](const char *, int) { return 0; };
     legacy.configGetString = [](const char *key, const wchar_t *fallback) {
-        if (!std::strcmp(key, "minimap.shape"))
+        if (!std::strcmp(key, "minimap.presets.order"))
+            return L"compact";
+        if (!std::strcmp(key, "minimap.map.full_map"))
+            return fullMap ? L"true" : L"false";
+        if (!std::strcmp(key, "minimap.preset.compact.shape"))
             return L"rect";
-        if (!std::strcmp(key, "minimap.rotate"))
+        if (!std::strcmp(key, "minimap.preset.compact.rotate"))
             return L"0";
-        if (!std::strcmp(key, "minimap.alpha"))
+        if (!std::strcmp(key, "minimap.preset.compact.opacity"))
             return L"1";
-        if (!std::strcmp(key, "minimap.scale"))
+        if (!std::strcmp(key, "minimap.preset.compact.zoom"))
             return L"0.75";
         return fallback;
     };

@@ -16,6 +16,8 @@
 
 #### 变更
 
+- Minimap 诊断日志改用分区配置中的 `[diagnostics] log_file`，不再读取旧 `native_log` 键。
+
 - 统一使用 Win32 Virtual-Key 代码和修饰键组合处理快捷键。仅在游戏位于前台时响应，通过 `inputIsKeyDown` / `inputIsKeyPressed` 允许多个插件响应同一次按键。
 - TPF 一次解析后发布各个 DDS 的读取结果，取消原先八个名称的限制；缺失项不再令其他有效图集读取失败。PARAM 读取支持 12/24 字节目录并检查行边界。
 

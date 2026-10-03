@@ -8,11 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+#### Configuration format change
+
+- Replace flat keys and parallel comma-separated lists with sections and independent named display presets. All existing controls, marker switches and display adjustments remain configurable.
+- Separate position from zoom, accept border width directly in pixels, and rewrite the INI comments and configuration guides. Invalid values use field defaults without throwing.
+- Position presets at the center or using horizontal/vertical edge margins anchored to the matching map corner. Margins support pixels, screen percentages and negative values, retaining the anchor through size changes and circle mode.
+- Replace old minimap.ini files with the new template; old configuration keys are no longer read.
+
 #### Added
 
-- Native dropped-runes marker, enabled by default with `death_marker=1`. The marker follows the game's death record and is hidden after rune recovery or on a different map layer.
-- Player-placed numbered map beacons 1–5, drawn with native downward arrows and dynamic digits. Enabled by default with `player_markers=1`; placement and removal follow the game, and remaining beacons retain their numbers.
-- Optional fully revealed minimap terrain with `full_map=1`, covering the surface, underground and DLC. Disabled by default; this changes only the minimap display, leaving the save and grace/landmark discovery unchanged.
+- Native dropped-runes marker, enabled by default with `[markers] death = true`. The marker follows the game's death record and is hidden after rune recovery or on a different map layer.
+- Player-placed numbered map beacons 1–5, drawn with native downward arrows and dynamic digits. Enabled by default with `[markers] beacons = true`; placement and removal follow the game, and remaining beacons retain their numbers.
+- Optional fully revealed minimap terrain with `[map] full_map = true`, covering the surface, underground and DLC. Disabled by default; this changes only the minimap display, leaving the save and grace/landmark discovery unchanged.
 
 #### Changed
 

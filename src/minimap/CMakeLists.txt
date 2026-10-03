@@ -2,6 +2,7 @@ add_project(minimap SHARED
     dllmain.cpp
     data.cpp data.hpp
     render.cpp render.hpp
+    settings.cpp settings.hpp
     gfx.cpp gfx.hpp
     resources.cpp resources.hpp
     layout.hpp ../util/paramreader.hpp
