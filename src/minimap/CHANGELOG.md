@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
+- Fix minimap atlas loading repeatedly failing with mods that use larger UI texture packs.
 - Fix circular borders being cut off at the top, bottom, left and right edges.
 
 #### Upgrade notes

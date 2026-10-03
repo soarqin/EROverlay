@@ -1,7 +1,8 @@
 """Build local multi-atlas resource fixtures from captured native layouts.
 
 No external sprites are introduced. This redistributes original aliases over
-12 synthetic BC1 atlases and adds one unused layout without a DDS.
+12 synthetic BC1 atlases and adds one unused layout without a DDS. A larger
+TPF also includes unreferenced UI images to exercise the native copy budget.
 """
 
 from __future__ import annotations
@@ -59,6 +60,27 @@ def tpf(entries):
     return data
 
 
+def write_tpf(path, entries):
+    # Stream the large fixture without holding another whole-container copy.
+    header = bytearray(16 + 20 * len(entries))
+    header[:4] = b"TPF\0"
+    header[13] = 3
+    struct.pack_into("<I", header, 8, len(entries))
+    with path.open("wb") as stream:
+        stream.write(header)
+        for index, (name, payload) in enumerate(entries):
+            if stream.tell() % 2:
+                stream.write(bytes(1))
+            name_offset = stream.tell()
+            stream.write(name.encode("utf-16-le") + bytes(2))
+            offset = stream.tell()
+            stream.write(payload)
+            struct.pack_into("<II4BII", header, 16 + index * 20, offset, len(payload), 0, 0, 0, 1, name_offset, 0)
+        struct.pack_into("<I", header, 4, stream.tell() - 16)
+        stream.seek(0)
+        stream.write(header)
+
+
 def main():
     output = Path("build/native-checks/mod-fixture")
     output.mkdir(parents=True, exist_ok=True)
@@ -78,6 +100,10 @@ def main():
     (output / "atlases.tpf").write_bytes(tpf(images))
     (output / "partial-atlases.tpf").write_bytes(tpf([entry for i, entry in enumerate(images) if i != 11]))
     (output / "malformed-atlases.tpf").write_bytes(tpf([(name, payload[:-1] if i == 11 else payload) for i, (name, payload) in enumerate(images)]))
+    # 42 valid images total >256 MiB, while the 12 requested DDS total <25 MiB.
+    # Unreferenced UI atlases must not consume the named-copy budget.
+    unused = dds(4096, 4096, 2048)
+    write_tpf(output / "large-atlases.tpf", images + [(f"SB_ModUnreferenced_{i:02}", unused) for i in range(30)])
     # Use modern GFX with only pre-DLC aliases/masks to exercise absent DLC
     # frames without claiming to have tested historical asset bundles.
     old_entries = [(entry["name"], checked_slice(source, entry["data_offset"], entry["data_size"]))
@@ -87,7 +113,8 @@ def main():
     masks_entries = [(entry["name"], checked_slice(masks, entry["data_offset"], entry["data_size"]))
                      for entry in binder_metadata(masks)["entries"] if "MENU_MapTile_M10" not in entry["name"]]
     (output / "pre-dlc-masks.bin").write_bytes(binder(masks_entries))
-    print(json.dumps({"atlases": 12, "aliases": len(sprites), "unused_missing_atlases": 1, "duplicate_missing_atlases": 1, "output": str(output)}))
+    print(json.dumps({"atlases": 12, "aliases": len(sprites), "unused_missing_atlases": 1, "duplicate_missing_atlases": 1,
+                      "large_tpf_bytes": (output / "large-atlases.tpf").stat().st_size, "output": str(output)}))
 
 
 if __name__ == "__main__":

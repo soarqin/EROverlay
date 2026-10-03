@@ -146,7 +146,9 @@ struct GameFiles::Impl {
     static void complete(uint32_t status, void *context, void *buffer, uint64_t size) {
         auto &item = *static_cast<Item *>(context);
         item.nativeStatus = static_cast<int32_t>(status);
-        bool ok = status == 1 && buffer && size && size <= item.maxBytes && size <= SIZE_MAX;
+        // Named TPF reads borrow the game's container and copy only selected
+        // DDS. Unrelated mod/UI textures must not consume the output budget.
+        bool ok = status == 1 && buffer && size && size <= SIZE_MAX && (!item.names.empty() || size <= item.maxBytes);
         if (ok) {
             util::Bytes bytes(static_cast<const uint8_t *>(buffer), static_cast<size_t>(size));
             if (item.names.empty()) {

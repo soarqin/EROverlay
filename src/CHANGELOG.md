@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
+- Fix minimap resources failing to load with mods that use larger UI texture packs.
 - Fix ghosting in translucent overlays.
 - Fix overlays failing to appear due to incorrect game-window detection.
 

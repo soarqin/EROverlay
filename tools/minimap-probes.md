@@ -174,7 +174,9 @@ build/native-checks/minimap_texture_verify.exe
 
 `minimap_compatibility_verify.exe` 将全部 28 条哈希布局送入正式读取代码，覆盖 menu/view、早期赐福、六种 PARAM 目录、保护页短行、死亡与编号，以及 size-gated 旧核心接口。`minimap_atlas_verify.exe` 使用 12 图集和 117 个可见图标检查正式 ImGui 纹理/UV，包含缺失图集、错误 DDS、重复别名、上传失败和重建；无 M10 的删减资源另检查旧版地表/地下选图。
 
-`minimap_file_verify.exe` 直接执行正式 GameFiles 回调，验证 12 个 DDS 提取、逐项结果、原 allocator 单次释放与未知 EXE 拒绝。`minimap_texture_verify.exe` 将 12 张 BC1 图集通过正式 D3D12 多帧上传，逐张 GPU 回读并比较 DDS 块，随后核对全部 SRV 回收；原 BC7 与 fence 回归保留。以上通过只证明代码与本地资源，不代表全部旧游戏已经实测。
+`minimap_file_verify.exe` 直接执行正式 GameFiles 请求、回调和查询，将 42 张图片、约 264 MiB 的 TPF 中所需的 12 张 DDS 交给正式 Resources。验证只复制约 24 MiB、必要图集提示清除、六组特殊图标可渲染，并检查复制预算、逐项失败、原 allocator 单次释放、取消与未知 EXE 拒绝。`minimap_texture_verify.exe` 将 12 张 BC1 图集通过正式 D3D12 多帧上传，逐张 GPU 回读并比较 DDS 块，随后核对全部 SRV 回收；原 BC7 与 fence 回归保留。以上通过只证明代码与本地资源，不代表全部旧游戏已经实测。
+
+文件验证也接受三个额外参数：已解压 TPF、WorldMap GFX 和已解压布局 BND。提供这些参数后，先运行上述回归，再将指定资源交给正式 Resources 检查图集状态及六组特殊图形；该步骤模拟 GPU 提交，原文件不会修改。
 
 ## 结果边界
 

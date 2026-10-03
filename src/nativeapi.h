@@ -20,6 +20,8 @@ typedef struct {
     // has its own success/failure result; missing entries do not fail siblings.
     const wchar_t *const *tpfNames;
     uint32_t tpfNameCount;
+    // Maximum bytes copied into overlay memory (default/cap: 256 MiB). For
+    // named TPF reads, this bounds the sum of selected DDS, not the container.
     uint64_t maxBytes;
 } ERFileRequest;
 
