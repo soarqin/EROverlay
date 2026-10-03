@@ -36,7 +36,9 @@ The loader maintains backward compatibility — you only need to ensure the Over
 
 ## Configuration
 
-All configuration files are located in the `configs/` folder. Edit them with any text editor before launching the game.
+The loader reads INI files from `configs/`. Save edits as UTF-8 and restart the game to apply them. Put comments on separate lines.
+
+`configs/` contains English comments; `configs_CN/` contains Chinese-comment templates with the same filenames, keys and default values. To use Chinese comments, back up any customized file, copy its matching template into `configs/` and reapply your settings. Editing `configs_CN/` alone does not affect the running mod. The comment language does not select the game or data language.
 
 ### `common.ini` — Global Settings
 
@@ -44,7 +46,7 @@ All configuration files are located in the `configs/` folder. Edit them with any
 |---|---|---|
 | `console` | `false` | Enable debug console output. |
 | `font` | *(empty)* | Path to a font file in the `data/` folder (or an absolute path). Leave empty to use the built-in Latin font or fall back to system fonts for other languages. |
-| `font_size` | `20` | Font size in points. |
+| `font_size` | `20` | Font size in pixels. |
 | `charset` | *(empty)* | Character set for font loading (`enUS`, `jaJP`, `koKR`, `zhCN`, `ruRU`, etc.). Leave empty to auto-detect from the game language. |
 | `language` | *(empty)* | Language used to load data files. Leave empty to use the game language. |
 
@@ -57,7 +59,7 @@ All configuration files are located in the `configs/` folder. Edit them with any
 | `allow_revive` | `false` | Allow reviving defeated bosses. |
 | `panel_pos` | `-10,10,15%,90%` | Panel position and size: `x, y, width, height`. Values can be pixels or percentages; negative x/y are relative to the right/bottom edge. |
 | `boss_kill_text` | `{kills}/{total}` | Display format for boss kill count. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `$n` (newline). |
-| `challenge_mode` | `false` | Enable challenge mode — stops recording kills if death count exceeds the allowed value. |
+| `challenge_mode` | `false` | Track a personal best within the death limit; exceeding it stops best-score updates while the current kill count still updates. |
 | `challenge_death_count` | `0` | Maximum allowed deaths in challenge mode. |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | Display format for challenge mode status. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `{pb}`, `{tries}`, `$n`. |
 
@@ -65,8 +67,8 @@ All configuration files are located in the `configs/` folder. Edit them with any
 
 | Key | Default | Description |
 |---|---|---|
-| `max_achievements` | `20` | Maximum number of achievements to display at once. |
-| `panel_pos` | `0,12%,0,60%` | Panel position and size (same format as `boss.ini`). |
+| `max_achievements` | `20` | Maximum pending entries; newly unlocked notices may still appear in addition. |
+| `panel_pos` | `0,12%,0,60%` | `x, y, maximum width, maximum height`; 0 removes a size limit. Positions use the same anchors as `boss.ini`. |
 
 ### `minimap.ini` — Minimap Overlay
 

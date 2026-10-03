@@ -15,12 +15,18 @@ copy /y ..\..\build\bin\EROverlay.dll .
 IF NOT EXIST overlays mkdir overlays
 copy /y ..\..\build\bin\overlays\Boss.dll overlays\
 copy /y ..\..\src\boss\README.md .
+copy /y ..\..\src\boss\README_CN.md .
 copy /y ..\..\LICENSE .
 IF NOT EXIST configs mkdir configs
 copy /y ..\..\configs\boss.ini configs\
 copy /y ..\..\configs\common.ini configs\
 copy /y ..\..\configs\input.ini configs\
 copy /y ..\..\configs\style.ini configs\
+IF NOT EXIST configs_CN mkdir configs_CN
+copy /y ..\..\configs_CN\boss.ini configs_CN\
+copy /y ..\..\configs_CN\common.ini configs_CN\
+copy /y ..\..\configs_CN\input.ini configs_CN\
+copy /y ..\..\configs_CN\style.ini configs_CN\
 IF NOT EXIST data mkdir data
 xcopy /y /e ..\..\src\boss\data\* data\
 7z a -tzip -r -mx=9 ..\Boss.zip
@@ -38,8 +44,13 @@ copy /y ..\..\configs\minimap.ini configs\
 copy /y ..\..\configs\common.ini configs\
 copy /y ..\..\configs\input.ini configs\
 copy /y ..\..\configs\style.ini configs\
+IF NOT EXIST configs_CN mkdir configs_CN
+copy /y ..\..\configs_CN\minimap.ini configs_CN\
+copy /y ..\..\configs_CN\common.ini configs_CN\
+copy /y ..\..\configs_CN\input.ini configs_CN\
+copy /y ..\..\configs_CN\style.ini configs_CN\
 IF EXIST ..\Minimap.zip 7z d -r ..\Minimap.zip data
-7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs README.md README_CN.md LICENSE
+7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs configs_CN README.md README_CN.md LICENSE
 popd
 
 endlocal

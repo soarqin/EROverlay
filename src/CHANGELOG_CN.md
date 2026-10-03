@@ -16,6 +16,7 @@
 
 #### 变更
 
+- 整理英文 INI 注释，澄清单位、示例和实际行为；新增 configs_CN/ 中文注释模板，相关模板纳入 Boss 和 Minimap 分发包，键名和默认值保持一致。
 - Minimap 诊断日志改用分区配置中的 `[diagnostics] log_file`，不再读取旧 `native_log` 键。
 
 - 统一使用 Win32 Virtual-Key 代码和修饰键组合处理快捷键。仅在游戏位于前台时响应，通过 `inputIsKeyDown` / `inputIsKeyPressed` 允许多个插件响应同一次按键。

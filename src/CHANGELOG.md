@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Changed
 
+- Rewrite the English INI comments for clearer units, examples and behavior. Add matching Chinese-comment templates in configs_CN/ and include relevant templates in the Boss and Minimap packages; configuration keys and defaults remain identical.
 - Minimap diagnostics use `[diagnostics] log_file` in the sectioned minimap.ini format. The former `native_log` key is no longer read.
 
 - Centralized hotkey handling using Win32 Virtual-Key codes and modifier combinations. Shortcuts activate only while the game is in the foreground, and multiple plugins can react to the same press through `inputIsKeyDown` / `inputIsKeyPressed`.

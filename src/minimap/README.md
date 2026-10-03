@@ -19,6 +19,8 @@ The minimap reads game archives and renders its own textures. External `data/map
 
 Edit `configs/minimap.ini` with a text editor, save as UTF-8 and restart the game. The core reads the file when loading; rebuilding the renderer alone does not reload the file. Put comments on separate lines starting with `#` or `;`. Use `true` and `false` for switches.
 
+English comments are in `configs/`; Chinese-comment templates are in `configs_CN/` with identical keys and defaults. To use a Chinese template, back up your customized file, copy its matching template into `configs/` and reapply your settings. Editing `configs_CN/` alone has no effect; the loader reads `configs/`.
+
 ## Find the setting
 
 | Section | Purpose |

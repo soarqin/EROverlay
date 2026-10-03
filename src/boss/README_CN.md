@@ -5,7 +5,9 @@
 * 你可以使用`EROverlay.dll`来加载多个覆盖层，我会保持向后兼容性，所以你只需要确保`覆盖层加载器`的版本满足特定覆盖层的最低要求即可。
 
 ## 用法
-* 按自己需求修改 `configs` 目录内的 .ini 文件
+
+* 按需修改 `configs/` 中的 INI，使用 UTF-8 保存，修改后重启游戏。
+* 中文注释模板在 `configs_CN/`，键名和默认值与英文版一致。先备份自定义文件，再将对应模板复制到 `configs/`，重新填写设置；加载器读取 `configs/`。
 * 将 `EROverlay.dll` 注入艾尔登法环游戏，你可以：
   + 将 `EROverlay.dll` 改名为 `winhttp.dll` 放到游戏 `eldenring.exe` 所在目录 (同时把 `configs` 和 `data` 目录也放到游戏目录)
   + 使用Mod加载器(你可以选择[EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) 或 [ModEngine2](https://github.com/soulsmods/ModEngine2) 或 [me3](https://github.com/garyttierney/me3))

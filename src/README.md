@@ -33,7 +33,9 @@ The loader maintains backward compatibility — you only need to ensure the Over
 
 ## Configuration
 
-All configuration files are located in the `configs/` folder. Edit them with any text editor before launching the game.
+The loader reads INI files from `configs/`. Save edits as UTF-8 and restart the game to apply them. Put comments on separate lines.
+
+`configs/` contains English comments; `configs_CN/` contains Chinese-comment templates with the same filenames, keys and default values. To use Chinese comments, back up any customized file, copy its matching template into `configs/` and reapply your settings. Editing `configs_CN/` alone does not affect the running mod. The comment language does not select the game or data language.
 
 ### `common.ini` — Global Settings
 
@@ -41,7 +43,7 @@ All configuration files are located in the `configs/` folder. Edit them with any
 |---|---|---|
 | `console` | `false` | Enable debug console output. |
 | `font` | *(empty)* | Path to a font file in the `data/` folder (or an absolute path). Leave empty to use the built-in Latin font or fall back to system fonts for other languages. |
-| `font_size` | `20` | Font size in points. |
+| `font_size` | `20` | Font size in pixels. |
 | `charset` | *(empty)* | Character set for font loading (`enUS`, `jaJP`, `koKR`, `zhCN`, `ruRU`, etc.). Leave empty to auto-detect from the game language. |
 | `language` | *(empty)* | Language used to load data files. Leave empty to use the game language. |
 
