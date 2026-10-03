@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-### [Unreleased]
+### [2.0.0] - 2026-10-03
 
 #### Added
 
@@ -18,26 +18,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Use the game's map and icon artwork; external map images are no longer required.
 - Reduce rendering overhead and video memory use, including circular and translucent maps; release unused map resources automatically.
-- Remove repetitive debug logs. Leaving `log_file` empty skips diagnostics; enabled resource logs use buffered writes.
 - Organize settings into sections and independent named display presets, keeping all existing display options configurable. Provide clearer English instructions and separate Chinese-comment templates.
 - Enter border width directly in pixels.
 - Position the map at the center or any corner using horizontal and vertical margins. Margins support pixels, percentages and negative values, retaining the selected corner when the map changes size.
 - Width, height and all percentage margins use the shorter screen side. Equal percentages give equal horizontal and vertical distances; pixel margins keep their units.
-- Expand compatibility with ELDEN RING versions 1.02–1.17.1 and mods using more than three icon sets. A missing icon set no longer prevents other icons from displaying.
 - Support modifier-key shortcuts and sharing keys with other overlays.
 
 #### Fixed
 
 - Fix circular borders being cut off at the top, bottom, left and right edges.
-- Fix obtained map fragments still showing unexplored terrain.
-- Fix missing background terrain on the underground map.
-- Fix dropped runes not appearing on the surface map.
-- Correct icon positioning, rotation and appearance, including Roundtable Hold.
 
 #### Upgrade notes
 
 - Replace the old `configs/minimap.ini` with the new template and reapply custom settings. The old flat settings and comma-separated preset lists are no longer supported.
-- For Chinese comments, copy the matching template from `configs_CN/` into `configs/`. Save as UTF-8 and restart the game after editing.
 
 ### [1.1.3] - 2026-06-30
 

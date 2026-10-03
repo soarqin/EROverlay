@@ -6,27 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-### [Unreleased]
+### [1.4.0] - 2026-10-03
 
 #### Added
 
-- Add Chinese-comment configuration templates in `configs_CN/` alongside clearer English instructions. Copy a matching template into `configs/` to use it.
-- Expand Minimap compatibility with ELDEN RING versions 1.02–1.17.1.
+- Add `EROverlayNativeAPI` and its retrieval interface, used to deal with game native resources, which is used for `minimap` overlay.
 
 #### Changed
 
 - Shortcuts support Ctrl, Alt, Shift and Win combinations. Multiple overlays can share the same key; shortcuts respond only while the game is in the foreground.
-- Reduce Minimap rendering overhead and video memory use, with unused map resources released automatically.
 
 #### Fixed
 
 - Fix ghosting in translucent overlays.
 - Fix overlays failing to appear due to incorrect game-window detection.
-- Fix Minimap map-fragment progress synchronization.
-
-#### Upgrade notes
-
-- Minimap uses a new configuration format. Replace the old `minimap.ini` with the supplied template and reapply custom settings; see the [Minimap changelog](minimap/CHANGELOG.md).
 
 ### [1.3.0] - 2026-06-30
 
