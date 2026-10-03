@@ -35,7 +35,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 #### Upgrade notes
 
 - Replace the old `configs/minimap.ini` with the new template and reapply custom settings. The old flat settings and comma-separated preset lists are no longer supported.
-- Percentage margins use the shorter screen side, and map sizing on narrower screens no longer uses the former 16:9 adjustment. Review custom sizes and positions after upgrading.
 - For Chinese comments, copy the matching template from `configs_CN/` into `configs/`. Save as UTF-8 and restart the game after editing.
 
 ### [1.1.3] - 2026-06-30
