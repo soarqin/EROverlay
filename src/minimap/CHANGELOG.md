@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
+- Keep circular minimap borders and their antialiasing inside the map bounds, preventing the top, bottom, left and right edges from being clipped. The minimap no longer inherits ImGui's window-border clipping inset.
 - Corrected map-fragment progress synchronization and tile-variant selection so obtained fragments show explored terrain instead of the unexplored map layer.
 - Added the surface underlay beneath the translucent underground map.
 - Fixed surface death markers being hidden because padding bytes were interpreted as part of the underground flag.

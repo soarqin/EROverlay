@@ -5,7 +5,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <algorithm>
 #include <array>
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -29,6 +31,8 @@ const wchar_t *shape = L"rect", *rotate = L"0";
 bool offscreenUsed = false;
 bool verifyPresets = false, separateKeys = false;
 bool verifyMargins = false;
+const wchar_t *testedBorderWidth = nullptr;
+bool offscreenAvailable = true;
 std::unordered_map<std::string, const wchar_t *> marginSettings;
 int pressedKey = 0;
 unsigned configReads = 0;
@@ -135,6 +139,57 @@ bool marginFrame(const char *label, std::initializer_list<std::pair<const char *
         std::fprintf(stderr, "FAIL: %s\n", label);
     return result;
 }
+
+bool borderFrame(const char *label, const wchar_t *width, bool rotateMap, float windowBorder, bool offscreen, ImVec2 position) {
+    testedBorderWidth = width;
+    offscreenAvailable = offscreen;
+    auto &style = ImGui::GetStyle();
+    float previousWindowBorder = style.WindowBorderSize;
+    style.WindowBorderSize = windowBorder;
+    bool result = marginFrame(label, {{"shape", L"circle"}, {"rotate", rotateMap ? L"true" : L"false"}, {"margin_left", L"0"}, {"margin_top", L"0"}}, {216, 216}, position,
+                              offscreen, position);
+    result = result && style.WindowBorderSize == windowBorder;
+    style.WindowBorderSize = previousWindowBorder;
+    testedBorderWidth = nullptr;
+    offscreenAvailable = true;
+    if (!result)
+        return false;
+
+    constexpr uint32_t COLOR = IM_COL32(37, 119, 211, 255);
+    unsigned vertices = 0;
+    ImVec2 minimum(FLT_MAX, FLT_MAX), maximum(-FLT_MAX, -FLT_MAX);
+    for (const auto *list: ImGui::GetDrawData()->CmdLists)
+        for (const auto &command: list->CmdBuffer) {
+            if (command.UserCallback)
+                continue;
+            for (unsigned i = command.IdxOffset; i < command.IdxOffset + command.ElemCount; ++i) {
+                const auto &vertex = list->VtxBuffer[list->IdxBuffer[i] + command.VtxOffset];
+                if ((vertex.col & ~IM_COL32_A_MASK) != (COLOR & ~IM_COL32_A_MASK))
+                    continue;
+                ++vertices;
+                // Check the real stroke and AA vertices against the GPU scissor
+                // and the configured map bounds, including flush screen edges.
+                if (!std::isfinite(vertex.pos.x) || !std::isfinite(vertex.pos.y) || vertex.pos.x < command.ClipRect.x - .01f || vertex.pos.y < command.ClipRect.y - .01f ||
+                    vertex.pos.x > command.ClipRect.z + .01f || vertex.pos.y > command.ClipRect.w + .01f || vertex.pos.x < position.x - .01f || vertex.pos.y < position.y - .01f ||
+                    vertex.pos.x > position.x + 216.01f || vertex.pos.y > position.y + 216.01f) {
+                    std::fprintf(stderr, "FAIL: %s: border vertex (%.3f, %.3f) exceeds clip (%.1f, %.1f, %.1f, %.1f).\n", label, vertex.pos.x, vertex.pos.y, command.ClipRect.x,
+                                 command.ClipRect.y, command.ClipRect.z, command.ClipRect.w);
+                    return false;
+                }
+                minimum.x = std::min(minimum.x, vertex.pos.x);
+                minimum.y = std::min(minimum.y, vertex.pos.y);
+                maximum.x = std::max(maximum.x, vertex.pos.x);
+                maximum.y = std::max(maximum.y, vertex.pos.y);
+            }
+        }
+    if (!std::wcscmp(width, L"0"))
+        return vertices == 0;
+    if (!vertices || minimum.x > position.x + 3 || minimum.y > position.y + 3 || maximum.x < position.x + 213 || maximum.y < position.y + 213) {
+        std::fprintf(stderr, "FAIL: %s: circle border missing from one or more edges.\n", label);
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 int main() {
@@ -165,6 +220,12 @@ int main() {
     };
     legacy.configGetString = [](const char *key, const wchar_t *fallback) {
         ++configReads;
+        if (testedBorderWidth) {
+            if (!std::strcmp(key, "minimap.border.color"))
+                return L"37,119,211,255";
+            if (!std::strcmp(key, "minimap.border.width"))
+                return testedBorderWidth;
+        }
         if (verifyMargins) {
             if (!std::strcmp(key, "minimap.presets.order"))
                 return L"compact";
@@ -207,7 +268,7 @@ int main() {
             return rotate;
         return fallback;
     };
-    legacy.createOffscreen = [] { return reinterpret_cast<void *>(1); };
+    legacy.createOffscreen = [] { return offscreenAvailable ? reinterpret_cast<void *>(1) : nullptr; };
     legacy.destroyOffscreen = [](void *) {};
     legacy.endOffscreen = [](void *) { return reinterpret_cast<void *>(88); };
     legacy.inputIsKeyPressed = [](int key) { return key == pressedKey; };
@@ -357,6 +418,13 @@ int main() {
         if (!presetFrame(renderer, 0, {182, 121}, {876, 851}, false))
             return 17;
     }
+    io.DisplaySize = {1920, 1080};
+    const wchar_t *borderWidths[] = {L"0", L"1", L"1.5", L"4", L"24", L"100", L"400"};
+    for (const auto *width: borderWidths)
+        if (!borderFrame("circle at screen edge", width, false, 1, true, {0, 0}) || !borderFrame("rotated circle at screen edge", width, true, 1, true, {0, 0}) ||
+            !borderFrame("circle with thick global window border", width, false, 8, true, {100, 50}) ||
+            !borderFrame("circle without offscreen target", width, false, 1, false, {0, 0}))
+            return 18;
     er::minimap::gResources.stop();
     er::minimap::nativeApi = nullptr;
     ImGui::DestroyContext();
@@ -365,4 +433,6 @@ int main() {
               "config reads.");
     std::puts("PASS: actual ImGui placement and composite UVs with four corner margins, pixels/percentages/negative/zero/blank values, centered/circle/rounded shapes, viewport "
               "origin and live resizing.");
+    std::puts("PASS: circle border vertices and AA fit the actual scissor and map bounds for zero/thin/fractional/thick/oversized widths, rotation, global window styles and "
+              "the direct-render fallback.");
 }

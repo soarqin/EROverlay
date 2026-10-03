@@ -109,6 +109,9 @@ bool Renderer::render() {
     if (!std::isfinite(position.x) || !std::isfinite(position.y))
         return false;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    // The minimap draws its own border. ImGui's window border would inset
+    // the content scissor even though the window has no background.
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
     ImGui::SetNextWindowPos(position, ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(minimapWidth_, minimapHeight_));
     if (ImGui::Begin("##minimap_window", nullptr,
@@ -119,7 +122,7 @@ bool Renderer::render() {
         if (offscreen) {
             if (!nativeApi || !nativeApi->beginOffscreen(offscreen_)) {
                 ImGui::End();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(2);
                 return false;
             }
             currentAlpha_ = 1.f;
@@ -133,16 +136,23 @@ bool Renderer::render() {
         auto origin = ImGui::GetWindowPos();
         ImVec2 far = origin + ImVec2(minimapWidth_, minimapHeight_);
         if (borderWidth_ > 0) {
-            if (currentShape_ == Shape::Circle)
-                draw->AddCircle(origin + ImVec2(minimapWidth_ * .5f, minimapHeight_ * .5f), minimapWidth_ * .5f, borderColor_, 0, borderWidth_);
-            else
+            if (currentShape_ == Shape::Circle) {
+                float radius = minimapWidth_ * .5f;
+                // AddCircle centers the stroke on its path. Keep the full stroke
+                // and AA fringe inside the crop, including flush screen edges.
+                // Limit oversized widths before the inner edge crosses the center.
+                float thickness = std::min(borderWidth_, std::max(0.f, radius - 1.f));
+                float borderRadius = radius - std::max(thickness, 1.f) * .5f - 1.f;
+                if (thickness > 0)
+                    draw->AddCircle(origin + ImVec2(radius, radius), borderRadius, borderColor_, 0, thickness);
+            } else
                 draw->AddRect(origin, far, borderColor_, currentShape_ == Shape::Rounded ? cachedRounding_ : 0.f, 0, borderWidth_);
         }
         if (*gResources.status())
             draw->AddText(origin + ImVec2(8, 8), IM_COL32(255, 255, 255, 255), gResources.status());
     }
     ImGui::End();
-    ImGui::PopStyleVar();
+    ImGui::PopStyleVar(2);
     return false;
 }
 
