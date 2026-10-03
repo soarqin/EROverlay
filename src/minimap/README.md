@@ -80,10 +80,10 @@ Each preset is independent, with one value per setting. There is no inheritance 
 
 | Key in `[preset.name]` | Default if omitted | Meaning |
 |---|---|---|
-| `width` / `height` | `30%` / `30%` | Relative to the game's 16:9 reference height; `30%` equals `0.3` |
+| `width` / `height` | `30%` / `30%` | Relative to the shorter screen side; `30%` equals `0.3` |
 | `position` | `margins` | Position using edge margins; `center` centers the map and ignores all margins |
-| `margin_left` / `margin_right` | Right margin `0` if both are unset | Choose one horizontal edge; pixels such as `24` or `24px`, or screen-width percentages such as `2%` |
-| `margin_top` / `margin_bottom` | Top margin `0` if both are unset | Choose one vertical edge; pixels such as `24` or `24px`, or screen-height percentages such as `2%` |
+| `margin_left` / `margin_right` | Right margin `0` if both are unset | Choose one horizontal edge; pixels such as `24` or `24px`, or shorter-screen-side percentages such as `2%` |
+| `margin_top` / `margin_bottom` | Top margin `0` if both are unset | Choose one vertical edge; pixels such as `24` or `24px`, or shorter-screen-side percentages such as `2%` |
 | `zoom` | `0.75` | Larger values enlarge terrain and show less area in the same window; `0` hides the preset |
 | `opacity` | `80%` | `0%` is transparent, `100%` is opaque; decimals 0–1 also work |
 | `rotate` | `false` | Keep camera-forward up, use a circle and show a compass |
@@ -94,7 +94,7 @@ Each preset is independent, with one value per setting. There is no inheritance 
 | `player_scale` | `1` | Player dot/arrow, death marker and numbered beacons |
 | `compass_scale` | `1` | Compass size, visible only when rotation is enabled |
 
-The size reference is `min(screen height, screen width × 9 / 16)`. At 1920×1080, 30% width/height gives 324×324 pixels; 90% gives 972×972 pixels.
+Width, height and all percentage margins use `min(screen width, screen height)`. At 1920×1080, 30% width/height gives 324×324 pixels; 90% gives 972×972 pixels. Equal horizontal and vertical percentages always give equal pixel lengths, including square, portrait and ultrawide views.
 
 A size multiplier of `1` is normal and `1.5` is 150%. Setting `decoration_scale`, `player_scale` or `compass_scale` to 0 hides that icon group. Zoom also affects map-scaled icons; to enlarge only player markers, change `player_scale`.
 
@@ -109,7 +109,7 @@ Set `position = margins` in the preset you want to change, then choose one horiz
 | `margin_right` + `margin_bottom` | Lower right |
 | `margin_left` + `margin_bottom` | Lower left |
 
-`24` or `24px` means 24 pixels. `2%` means 2% of the full screen width or height, independent of the map-size reference above. Horizontal and vertical margins can use different units. Positive values move inward and negative values move outward; portions outside the screen are clipped.
+`24` or `24px` means 24 pixels. Every percentage margin uses the same shorter screen side as `width` and `height`. At 1920×1080, `5%` is 54 pixels for any edge; the map's own size does not affect the reference. Horizontal and vertical margins can use different units. Positive values move inward and negative values move outward; portions outside the screen are clipped.
 
 Omit or leave a margin empty to leave that edge unset. `0` explicitly selects the edge with no gap. When both edges on an axis are unset, the horizontal default is right `0` and the vertical default is top `0`. If both have valid values, left or top takes precedence and the console reports the conflict. The configured map dimensions are retained; margins do not stretch it. Invalid margins are treated as unset, so the other edge's valid value remains usable.
 

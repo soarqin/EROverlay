@@ -79,9 +79,9 @@ bool Renderer::render() {
     if (landmarksKey_ && api->inputIsKeyPressed(landmarksKey_))
         showLandmarks_ = !showLandmarks_;
     auto *vp = ImGui::GetMainViewport();
-    float height = std::min(vp->Size.y, vp->Size.x * .5625f);
-    minimapWidth_ = std::floor(height * currentWidthRatio_);
-    minimapHeight_ = std::floor(height * currentHeightRatio_);
+    float referenceLength = std::min(vp->Size.x, vp->Size.y);
+    minimapWidth_ = std::floor(referenceLength * currentWidthRatio_);
+    minimapHeight_ = std::floor(referenceLength * currentHeightRatio_);
     if (currentRotate_)
         currentShape_ = Shape::Circle;
     if (currentShape_ == Shape::Circle)
@@ -100,8 +100,8 @@ bool Renderer::render() {
     } else {
         const auto &horizontal = currentPosition_.horizontalMargin;
         const auto &vertical = currentPosition_.verticalMargin;
-        float x = horizontal.isPercent ? horizontal.value * vp->Size.x : horizontal.value;
-        float y = vertical.isPercent ? vertical.value * vp->Size.y : vertical.value;
+        float x = horizontal.isPercent ? horizontal.value * referenceLength : horizontal.value;
+        float y = vertical.isPercent ? vertical.value * referenceLength : vertical.value;
         position.x = currentPosition_.horizontalAnchor == HorizontalAnchor::Right ? vp->Size.x - minimapWidth_ - x : x;
         position.y = currentPosition_.verticalAnchor == VerticalAnchor::Bottom ? vp->Size.y - minimapHeight_ - y : y;
     }

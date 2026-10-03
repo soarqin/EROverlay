@@ -383,8 +383,13 @@ int main() {
         !marginFrame("upper left", {{"margin_left", L"24px"}, {"margin_top", L"36"}}, {324, 216}, {24, 36}) ||
         !marginFrame("lower right", {{"margin_right", L"24px"}, {"margin_bottom", L"36"}}, {324, 216}, {1572, 828}) ||
         !marginFrame("lower left", {{"margin_left", L"24px"}, {"margin_bottom", L"36"}}, {324, 216}, {24, 828}) ||
-        !marginFrame("percent margins use full viewport", {{"margin_left", L"5%"}, {"margin_bottom", L"10%"}}, {324, 216}, {96, 756}) ||
-        !marginFrame("mixed units", {{"margin_right", L"2%"}, {"margin_top", L"24px"}}, {324, 216}, {1557, 24}) ||
+        !marginFrame("percent margins use shorter screen side", {{"margin_left", L"5%"}, {"margin_bottom", L"10%"}}, {324, 216}, {54, 756}) ||
+        !marginFrame("equal percentages at upper right", {{"margin_right", L"5%"}, {"margin_top", L"5%"}}, {324, 216}, {1542, 54}) ||
+        !marginFrame("equal percentages at upper left", {{"margin_left", L"5%"}, {"margin_top", L"5%"}}, {324, 216}, {54, 54}) ||
+        !marginFrame("equal percentages at lower right", {{"margin_right", L"5%"}, {"margin_bottom", L"5%"}}, {324, 216}, {1542, 810}) ||
+        !marginFrame("equal percentages at lower left", {{"margin_left", L"5%"}, {"margin_bottom", L"5%"}}, {324, 216}, {54, 810}) ||
+        !marginFrame("mixed units", {{"margin_right", L"2%"}, {"margin_top", L"24px"}}, {324, 216}, {1574, 24}) ||
+        !marginFrame("negative percent margins", {{"margin_right", L"-2%"}, {"margin_top", L"-2%"}}, {324, 216}, {1617, -22}) ||
         !marginFrame("negative margins move outward", {{"margin_right", L"-24"}, {"margin_top", L"-36"}}, {324, 216}, {1620, -36}) ||
         !marginFrame("zero selects lower left", {{"margin_left", L"0"}, {"margin_bottom", L"0"}}, {324, 216}, {0, 864}) ||
         !marginFrame("blank margins are unset", {{"margin_left", L""}, {"margin_right", L"30"}, {"margin_top", L""}, {"margin_bottom", L"0"}}, {324, 216}, {1566, 864}) ||
@@ -397,6 +402,8 @@ int main() {
                      {1464, 612}, true) ||
         !marginFrame("rotated circle uses final diameter", {{"width", L"60%"}, {"height", L"40%"}, {"rotate", L"true"}, {"margin_right", L"24"}, {"margin_bottom", L"36"}},
                      {432, 432}, {1464, 612}, true) ||
+        !marginFrame("rotated circle percent margins use screen side",
+                     {{"width", L"60%"}, {"height", L"40%"}, {"rotate", L"true"}, {"margin_right", L"5%"}, {"margin_bottom", L"5%"}}, {432, 432}, {1434, 594}, true) ||
         !marginFrame("rounded composite respects margins", {{"shape", L"rounded"}, {"margin_right", L"24"}, {"margin_bottom", L"36"}}, {324, 216}, {1572, 828}, true) ||
         !marginFrame("translucent rectangle respects margins", {{"opacity", L"50%"}, {"margin_left", L"24"}, {"margin_top", L"36"}}, {324, 216}, {24, 36}, true) ||
         !marginFrame("viewport origin", {{"margin_right", L"24"}, {"margin_bottom", L"36"}}, {324, 216}, {1672, 878}, false, {100, 50}) ||
@@ -406,17 +413,23 @@ int main() {
     {
         er::minimap::Renderer renderer;
         renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(allocate), reinterpret_cast<void *>(deallocate), nullptr);
-        if (!presetFrame(renderer, 0, {324, 216}, {1557, 756}, false))
+        if (!presetFrame(renderer, 0, {324, 216}, {1574, 756}, false))
             return 14;
         io.DisplaySize = {2560, 1440};
-        if (!presetFrame(renderer, 0, {432, 288}, {2076, 1008}, false))
+        if (!presetFrame(renderer, 0, {432, 288}, {2099, 1008}, false))
             return 15;
         io.DisplaySize = {3440, 1440};
-        if (!presetFrame(renderer, 0, {432, 288}, {2939, 1008}, false))
+        if (!presetFrame(renderer, 0, {432, 288}, {2979, 1008}, false))
             return 16;
         io.DisplaySize = {1080, 1080};
-        if (!presetFrame(renderer, 0, {182, 121}, {876, 851}, false))
+        if (!presetFrame(renderer, 0, {324, 216}, {734, 756}, false))
             return 17;
+        io.DisplaySize = {1080, 1920};
+        if (!presetFrame(renderer, 0, {324, 216}, {734, 1596}, false))
+            return 19;
+        io.DisplaySize = {1280, 1024};
+        if (!presetFrame(renderer, 0, {307, 204}, {952, 717}, false))
+            return 20;
     }
     io.DisplaySize = {1920, 1080};
     const wchar_t *borderWidths[] = {L"0", L"1", L"1.5", L"4", L"24", L"100", L"400"};
@@ -432,7 +445,7 @@ int main() {
     std::puts("PASS: named preset cycling changes actual window sizes/positions; rotation returns to rect; shared-key hidden cycle and separate show/cycle keys; no per-frame "
               "config reads.");
     std::puts("PASS: actual ImGui placement and composite UVs with four corner margins, pixels/percentages/negative/zero/blank values, centered/circle/rounded shapes, viewport "
-              "origin and live resizing.");
+              "origin and live resizing; widths, heights and percentage margins share the shorter screen side, including square and portrait views.");
     std::puts("PASS: circle border vertices and AA fit the actual scissor and map bounds for zero/thin/fractional/thick/oversized widths, rotation, global window styles and "
               "the direct-render fallback.");
 }
