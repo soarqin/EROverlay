@@ -1,19 +1,23 @@
 #include "plugin.hpp"
 
-#include "global.hpp"
 #include "api.h"
+#include "global.hpp"
 
+#include <filesystem>
 #include <fmt/format.h>
 #include <fmt/xchar.h>
-#include <filesystem>
 #include <mutex>
+#include <shared_mutex>
 #include <tuple>
 
 namespace er {
 
-static std::vector<std::tuple<int, int, PluginExports*>> plugins;
+static std::vector<std::tuple<int, int, PluginExports *, bool>> plugins;
 static bool renderersLoaded = false;
-static std::mutex pluginsMutex;
+// Lifecycle changes are exclusive. Legacy plugins keep serialized callbacks;
+// only plugins explicitly exporting the opt-in may update during rendering.
+static std::shared_mutex pluginsMutex;
+static std::mutex legacyCallbacksMutex;
 
 void pluginsInit() {
     std::lock_guard lock(pluginsMutex);
@@ -40,7 +44,8 @@ void pluginsInit() {
                     continue;
                 }
                 auto ver = exports->init(api);
-                plugins.emplace_back(ver, 0, exports);
+                auto concurrent = reinterpret_cast<bool (*)()>(GetProcAddress(lib, "supportsConcurrentUpdateRender"));
+                plugins.emplace_back(ver, 0, exports, concurrent && concurrent());
                 fmt::print(" successful. (API Version {})\n", ver);
             } else {
                 fmt::print(" unable to load.\n");
@@ -61,10 +66,13 @@ void pluginsUninit() {
 }
 
 void pluginsUpdate() {
-    std::lock_guard lock(pluginsMutex);
+    std::shared_lock lock(pluginsMutex);
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->update) {
+            std::unique_lock<std::mutex> callLock;
+            if (!std::get<3>(pl))
+                callLock = std::unique_lock(legacyCallbacksMutex);
             p->update();
         }
     }
@@ -80,9 +88,7 @@ void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *
             std::get<1>(pl) = priority;
         }
     }
-    std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) {
-        return std::get<1>(a) < std::get<1>(b);
-    });
+    std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) { return std::get<1>(a) < std::get<1>(b); });
     renderersLoaded = true;
 }
 
@@ -98,12 +104,16 @@ void pluginsDestroyRenderers() {
 }
 
 bool pluginsRender() {
-    std::lock_guard lock(pluginsMutex);
-    if (!renderersLoaded) return false;
+    std::shared_lock lock(pluginsMutex);
+    if (!renderersLoaded)
+        return false;
     bool showCursor = false;
     for (const auto &pl: plugins) {
         auto *p = std::get<2>(pl);
         if (p->render) {
+            std::unique_lock<std::mutex> callLock;
+            if (!std::get<3>(pl))
+                callLock = std::unique_lock(legacyCallbacksMutex);
             auto r = p->render();
             showCursor = showCursor || r;
         }
@@ -111,4 +121,4 @@ bool pluginsRender() {
     return showCursor;
 }
 
-}
+} // namespace er

@@ -1,18 +1,18 @@
 #include "config.hpp"
 #include "d3drenderer.hpp"
-#include "global.hpp"
 #include "gamefiles.hpp"
+#include "global.hpp"
 #include "hooking.hpp"
 #include "input.hpp"
 #include "plugin.hpp"
-#include "util/steam.hpp"
-#include "util/nativelog.hpp"
 #include "proxy/winhttp.h"
+#include "util/nativelog.hpp"
+#include "util/steam.hpp"
 
 #include <chrono>
+#include <shlwapi.h>
 #include <thread>
 #include <vector>
-#include <shlwapi.h>
 
 void init();
 void mainThread();
@@ -51,7 +51,8 @@ void checkGameVersion() {
     wchar_t exepath[MAX_PATH];
     GetModuleFileNameW(nullptr, exepath, MAX_PATH);
     DWORD len = GetFileVersionInfoSizeW(exepath, nullptr);
-    if (len == 0) return;
+    if (len == 0)
+        return;
     std::vector<BYTE> versionResource(len);
     if (!GetFileVersionInfoW(exepath, 0, len, versionResource.data())) {
         return;
@@ -70,7 +71,8 @@ void init() {
     er::gConfig.loadFile(L"EROverlay.ini");
     er::gConfig.loadDir(L"configs");
     auto nativeLog = er::gConfig.getw("minimap.diagnostics.log_file", L"");
-    if (!nativeLog.empty()) er::util::nativeLogFile = _wfopen(nativeLog.c_str(), L"ab");
+    if (!nativeLog.empty())
+        er::util::nativeLogFile = _wfopen(nativeLog.c_str(), L"ab");
     bool enableConsole = false;
     if (er::gConfig.enabled("common.console")) {
         enableConsole = true;
@@ -94,6 +96,7 @@ void init() {
         er::pluginsUninit();
         er::gGameFiles->stop();
         er::gGameFiles.reset();
+        er::util::closeNativeLog();
         return;
     }
 
@@ -103,10 +106,7 @@ void init() {
     er::pluginsUninit();
     er::gGameFiles->stop();
     er::gGameFiles.reset();
-    {
-        std::lock_guard lock(er::util::nativeLogMutex);
-        if (er::util::nativeLogFile) { fclose(er::util::nativeLogFile); er::util::nativeLogFile = nullptr; }
-    }
+    er::util::closeNativeLog();
     std::this_thread::sleep_for(500ms);
     if (enableConsole) {
         FreeConsole();

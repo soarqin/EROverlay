@@ -177,7 +177,8 @@ EROverlayAPI *getEROverlayAPI() {
 }
 
 const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version) {
-    if (version != 1) return nullptr;
+    if (version != 1)
+        return nullptr;
     static const EROverlayNativeAPI native = {
         sizeof(EROverlayNativeAPI), 1,
         [] { return er::gGameFiles && er::gGameFiles->compatible(); },
@@ -196,9 +197,14 @@ const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version) {
         [](ERMapState *state) { return state && er::gGameFiles && er::gGameFiles->readMapState(*state); },
         [](void *offscreen) { return er::gD3DRenderer && er::gD3DRenderer->BeginOffscreen(static_cast<er::OffscreenContext *>(offscreen)); },
         [](uint32_t group) -> uintptr_t { return er::gGameFiles ? er::gGameFiles->findParamTable(group) : 0; },
-        [](const char *message) { if (message) er::util::nativeLog("%s", message); },
+        er::util::nativeLogEnabled() ? +[](const char *message) { if (message) er::util::nativeLog("%s", message); } : nullptr,
         [](uint32_t id) { return er::gGameFiles && er::gGameFiles->readEventFlag(id); },
-        [](ERGameLayout *layout) { return layout && er::gGameFiles && er::gGameFiles->readGameLayout(*layout); }
+        [](ERGameLayout *layout) { return layout && er::gGameFiles && er::gGameFiles->readGameLayout(*layout); },
+        [](const void *bytes, uint64_t size) -> uint64_t { return er::gD3DRenderer ? er::gD3DRenderer->createDdsTexture(bytes, size) : 0; },
+        [](void *offscreen, float x, float y, float width, float height) {
+            return er::gD3DRenderer && er::gD3DRenderer->BeginOffscreenRegion(static_cast<er::OffscreenContext *>(offscreen), x, y, width, height);
+        },
+        [](uint64_t token) -> uint64_t { return er::gD3DRenderer ? er::gD3DRenderer->textureMemoryBytes(token) : 0; }
     };
     return &native;
 }

@@ -6,15 +6,16 @@
 #include "util/vector.hpp"
 
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <windows.h>
 
-#include <vector>
-#include <memory>
+#include <atomic>
 #include <cstdint>
-#include <unordered_map>
+#include <memory>
 #include <mutex>
+#include <unordered_map>
+#include <vector>
 
 struct ImGui_ImplDX12_InitInfo;
 struct ImDrawList;
@@ -32,20 +33,25 @@ struct OffscreenTarget {
 };
 
 struct OffscreenContext {
+    class D3DRenderer *renderer = nullptr;
     std::vector<OffscreenTarget> targets;
     UINT currentIndex = 0;
+    bool local = false;
+    ImVec2 origin{}, displayPos{}, displaySize{};
+    int firstVertex = 0, firstCommand = 0;
 };
 
 class D3DRenderer {
-/*
-    struct FrameContext {
-        ID3D12CommandAllocator *commandAllocator;
-        ID3D12Resource *resource;
-        D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
-    };
-*/
+    /*
+        struct FrameContext {
+            ID3D12CommandAllocator *commandAllocator;
+            ID3D12Resource *resource;
+            D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
+        };
+    */
     friend class EROverlayAPIWrapper;
     friend struct NativeTextureVerifier;
+
 public:
     explicit D3DRenderer() = default;
     ~D3DRenderer() noexcept;
@@ -54,9 +60,7 @@ public:
     D3DRenderer &operator=(D3DRenderer const &) = delete;
     D3DRenderer &operator=(D3DRenderer &&) = delete;
 
-    [[nodiscard]] inline bool isForeground() const {
-        return GetForegroundWindow() == gameWindow_;
-    }
+    [[nodiscard]] inline bool isForeground() const { return GetForegroundWindow() == gameWindow_; }
 
     [[nodiscard]] bool isDeviceLost() const { return deviceLost_; }
 
@@ -71,9 +75,9 @@ public:
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-/*
-    static bool WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight);
-*/
+    /*
+        static bool WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight);
+    */
 
     void loadFont();
     static void initStyle();
@@ -83,12 +87,14 @@ public:
     void DestroyTexture(ID3D12Resource **texResource, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle);
     [[nodiscard]] uint64_t createDdsTexture(const void *bytes, uint64_t size);
     [[nodiscard]] ERTextureStatus pollTexture(uint64_t token, ERTextureView &view);
+    [[nodiscard]] uint64_t textureMemoryBytes(uint64_t token) const;
     void retireTexture(uint64_t token);
 
     // Offscreen rendering
     OffscreenContext *CreateOffscreen();
     void DestroyOffscreen(OffscreenContext *ctx);
     [[nodiscard]] bool BeginOffscreen(OffscreenContext *ctx);
+    [[nodiscard]] bool BeginOffscreenRegion(OffscreenContext *ctx, float x, float y, float width, float height);
     void *EndOffscreen(OffscreenContext *ctx);
 
     static void BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd);
@@ -96,6 +102,7 @@ public:
 
 private:
     void ensureOffscreenSize(OffscreenContext *ctx, int w, int h);
+    [[nodiscard]] bool beginOffscreen(OffscreenContext *ctx, int width, int height);
     struct NativeTexture {
         std::vector<uint8_t> bytes;
         util::DdsImage image;
@@ -107,8 +114,11 @@ private:
         D3D12_GPU_DESCRIPTOR_HANDLE gpu = {};
         uint64_t uploadValue = 0;
         uint64_t drawValue = 0;
+        uint64_t allocationBytes = 0;
+        size_t uploadEstimate = 0, uploadBytes = 0;
         ERTextureStatus status = ER_TEXTURE_PENDING;
         bool retired = false;
+        bool working = false;
     };
     struct RetiredTexture {
         ID3D12Resource *texture;
@@ -135,47 +145,19 @@ private:
     void handleDeviceLost(const wchar_t *where, HRESULT hr);
     void CleanupRenderTarget();
 
-    static HRESULT WINAPI hkPresent(IDXGISwapChain3 *pSwapChain,
-                                    UINT SyncInterval,
-                                    UINT Flags);
-    static HRESULT WINAPI hkPresent1(IDXGISwapChain3 *pSwapChain,
-                                     UINT SyncInterval,
-                                     UINT PresentFlags,
-                                     const DXGI_PRESENT_PARAMETERS *pPresentParameters);
-    static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain *pSwapChain,
-                                          UINT BufferCount,
-                                          UINT Width,
-                                          UINT Height,
-                                          DXGI_FORMAT NewFormat,
-                                          UINT SwapChainFlags);
-    static HRESULT WINAPI hkSetSourceSize(IDXGISwapChain2 *pSwapChain,
-                                          UINT Width,
-                                          UINT Height);
-    static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,
-                                           UINT BufferCount,
-                                           UINT Width,
-                                           UINT Height,
-                                           DXGI_FORMAT NewFormat,
-                                           UINT SwapChainFlags,
-                                           const UINT *pCreationNodeMask,
-                                           IUnknown *const *ppPresentQueue);
-    static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue,
-                                             UINT NumCommandLists,
-                                             ID3D12CommandList *const *ppCommandLists);
-    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory,
-                                            IUnknown *pDevice,
-                                            DXGI_SWAP_CHAIN_DESC *pDesc,
-                                            IDXGISwapChain **ppSwapChain);
-    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
-                                                   IUnknown *pDevice,
-                                                   HWND hWnd,
-                                                   const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                   const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
-                                                   IDXGIOutput *pRestrictToOutput,
-                                                   IDXGISwapChain1 **ppSwapChain);
-    static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
-    static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
-    void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE* pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE* pOutGpuDescHandle);
+    static HRESULT WINAPI hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags);
+    static HRESULT WINAPI hkPresent1(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS *pPresentParameters);
+    static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
+    static HRESULT WINAPI hkSetSourceSize(IDXGISwapChain2 *pSwapChain, UINT Width, UINT Height);
+    static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3 *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags,
+                                           const UINT *pCreationNodeMask, IUnknown *const *ppPresentQueue);
+    static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *const *ppCommandLists);
+    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory, IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain);
+    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory *pFactory, IUnknown *pDevice, HWND hWnd, const DXGI_SWAP_CHAIN_DESC1 *pDesc,
+                                                   const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc, IDXGIOutput *pRestrictToOutput, IDXGISwapChain1 **ppSwapChain);
+    static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo *info, D3D12_CPU_DESCRIPTOR_HANDLE *pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pOutGpuDescHandle);
+    static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo *info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
+    void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE *pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pOutGpuDescHandle);
     void HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
 
     std::vector<uint32_t> freeDescriptors_;
@@ -187,13 +169,8 @@ private:
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
     std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
     std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *,
-                                      IUnknown *,
-                                      HWND,
-                                      const DXGI_SWAP_CHAIN_DESC1 *,
-                                      const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *,
-                                      IDXGIOutput *,
-                                      IDXGISwapChain1 **)> oCreateSwapChainForHwnd_;
+    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, HWND, const DXGI_SWAP_CHAIN_DESC1 *, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *, IDXGIOutput *, IDXGISwapChain1 **)>
+        oCreateSwapChainForHwnd_;
     uint64_t oldWndProc_ = 0;
 
     void *fnCreateSwapChain_ = nullptr;
@@ -225,9 +202,9 @@ private:
     size_t rtvDescriptorSize_ = 0;
     size_t srvDescriptorSize_ = 0;
 
-/*
-    FrameContext *frameContext_ = nullptr;
-*/
+    /*
+        FrameContext *frameContext_ = nullptr;
+    */
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
@@ -241,7 +218,15 @@ private:
     uint64_t uploadValue_ = 0;
     uint64_t frameValue_ = 0;
     uint64_t nextTextureToken_ = 1;
-    size_t queuedTextureBytes_ = 0;
+    std::atomic_size_t queuedTextureBytes_{0};
+    std::atomic_size_t nativeTextureCount_{0};
+    std::atomic_bool texturesQueued_{false};
+    std::atomic_bool acceptingTextures_{false};
+    std::mutex textureQueueMutex_;
+    std::unordered_map<uint64_t, NativeTexture> queuedTextures_;
+    std::vector<uint64_t> textureWork_;
+    size_t uploadingTextureBytes_ = 0;
+    unsigned uploadingTextureCount_ = 0;
     std::vector<uint64_t> allocatorFences_;
     std::vector<uint64_t> imguiFences_;
     std::unordered_map<uint64_t, NativeTexture> nativeTextures_;
@@ -251,4 +236,4 @@ private:
 };
 
 inline std::unique_ptr<D3DRenderer> gD3DRenderer;
-}
+} // namespace er

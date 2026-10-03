@@ -156,7 +156,7 @@ To choose where the hidden step occurs, add `off` to `order` and define `[preset
 
 Empty or invalid ordinary numbers, shapes and switches use their field defaults; empty or invalid margins are treated as unset. Invalid values report the exact key in the console. Use a decimal point and a single value, rather than the former comma-separated lists. To see configuration errors, set `console = true` in `common.ini` and restart the game.
 
-Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource requests and map state. Create the parent folder first. Absolute paths are easier to locate; relative paths use the game's working directory. Leave it empty to disable file logging. Configuration errors are reported in the console, not this resource/state log.
+Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource requests, completion results and resource errors. Create the parent folder first. Absolute paths are easier to locate; relative paths use the game's working directory. Leave it empty for normal play: diagnostic formatting, log locks and file writes are skipped. Logs are buffered and normally flushed within one second. Configuration errors are reported in the console.
 
 | Symptom | Check |
 |---|---|
@@ -173,6 +173,8 @@ Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource reque
 Native adapters cover hash-verified historical 1.02–1.17 EXEs and Steam 1.17.1. All supplied old EXEs passed offline address/layout checks; individual old-game visual testing remains pending. Unknown EXEs show a status and disable native calls. See the [compatibility report](../../docs/minimap-version-compatibility.md).
 
 Atlas names and counts come from native GFX/TextureAtlas definitions, including atlas mods. Loading, drawing and retirement were verified with 12 atlases. Resources must be readable through the game's file layer and use supported PC GFX/TPF/DDS formats. Pre-DLC games require only surface/underground resources; M10 and DLC atlases are optional. Resource and texture budgets still apply.
+
+Resources load asynchronously. Newly needed tiles or icons may take a few frames to appear. Only visible icon sets are uploaded; unused tiles, icon sets and compositing targets are released after about ten seconds. Reducing the displayed area or increasing zoom also reduces the number of map tiles needed. See the [performance notes](../../docs/minimap-performance.md) for cache limits and verification scope.
 
 ## License and credits
 

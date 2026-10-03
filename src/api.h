@@ -20,8 +20,8 @@
 extern "C" {
 #include <cstdint>
 #else
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #endif
 
 #pragma pack(push, 8)
@@ -101,6 +101,10 @@ typedef struct {
 /*
  * Plugin exports returned by getExports(), or struct in PLUGIN_DEFINE() macro.
  * Note: init() must not be null. Other functions are optional and will be called if they are not null.
+ * update()/render() are serialized unless an optional exported
+ * bool
+ * supportsConcurrentUpdateRender() returns true. Opt-in plugins must
+ * synchronize their data; renderer lifecycle/uninit still excludes both.
  */
 typedef struct {
     /* ==== Version 0 ==== */
@@ -126,7 +130,7 @@ extern EROverlayAPI *getEROverlayAPI();
 #else
 #define PLUGIN_EXPORT EXTERN_C
 #endif
-#define PLUGIN_DEFINE(pexp) \
+#define PLUGIN_DEFINE(pexp)                                                                                                                                                        \
     PLUGIN_EXPORT PluginExports *getExports() { return &pexp; }
 
 #if defined(__cplusplus)

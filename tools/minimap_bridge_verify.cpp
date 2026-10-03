@@ -23,14 +23,18 @@ DWORD WINAPI verify(void *) {
     ERFileRequest request{L"menu:/Hi/01_Common.sblytbnd.dcx", 0x40, nullptr, 0, 8 * 1024 * 1024};
     auto normal = files.request(request);
     for (unsigned wait = 0; wait < 12000; ++wait) {
-        ERFileData data; auto status = files.poll(normal, nullptr, data);
-        if (status == ER_FILE_PENDING) break;
+        ERFileData data;
+        auto status = files.poll(normal, nullptr, data);
+        if (status == ER_FILE_PENDING)
+            break;
         Sleep(1);
     }
     auto cancelled = files.request(request);
     for (unsigned wait = 0; wait < 12000; ++wait) {
-        ERFileData data; auto status = files.poll(cancelled, nullptr, data);
-        if (status != ER_FILE_QUEUED) break;
+        ERFileData data;
+        auto status = files.poll(cancelled, nullptr, data);
+        if (status != ER_FILE_QUEUED)
+            break;
         Sleep(1);
     }
     files.release(cancelled);
@@ -74,12 +78,7 @@ DWORD WINAPI verify(void *) {
     er::util::nativeLog("VERIFY stopping with queued token=%llu\n", static_cast<unsigned long long>(stopped));
     files.stop();
     er::util::nativeLog("%s: production file bridge stop returned after request pool retirement.\n", ready ? "PASS" : "FAIL");
-    {
-        std::lock_guard lock(er::util::nativeLogMutex);
-        if (er::util::nativeLogFile)
-            fclose(er::util::nativeLogFile);
-        er::util::nativeLogFile = nullptr;
-    }
+    er::util::closeNativeLog();
     return ready ? 0 : 1;
 }
 } // namespace

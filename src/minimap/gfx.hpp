@@ -39,6 +39,7 @@ struct IconLayer {
     Matrix matrix = IDENTITY_MATRIX;
     VectorShape shape;
     std::vector<uint16_t> depth;
+    uint32_t resourceRegion = UINT32_MAX; // Resolved once by Resources.
     [[nodiscard]] bool bitmap() const { return !image.empty(); }
 };
 struct IconRecipe {

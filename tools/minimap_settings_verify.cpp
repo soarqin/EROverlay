@@ -68,16 +68,16 @@ int main() {
         !check(close(defaults.borderWidth, 1.5f) && defaults.borderColor == 0x64FFFFFF, "pixel border and spaced RGBA color"))
         return 2;
     const auto &small = defaults.presets[0], &large = defaults.presets[1];
-    if (!check(small.name == "compact" && close(small.widthRatio, 0.3f) && close(small.heightRatio, 0.3f) && close(small.zoom, 0.75f) && close(small.opacity, 0.8f) &&
+    if (!check(small.name == "compact" && close(small.widthRatio, 0.32f) && close(small.heightRatio, 0.32f) && close(small.zoom, 0.75f) && close(small.opacity, 0.9f) &&
                    !small.position.centered && small.position.horizontalAnchor == er::minimap::HorizontalAnchor::Right &&
-                   small.position.verticalAnchor == er::minimap::VerticalAnchor::Top && close(small.position.horizontalMargin.value, 0) &&
-                   close(small.position.verticalMargin.value, 0) && !small.position.horizontalMargin.isPercent && !small.position.verticalMargin.isPercent && !small.rotate &&
-                   small.shape == er::minimap::Shape::Rect && close(small.rounding, 0.2f) && small.roundingIsPercent && close(small.mapScale, 1) &&
-                   close(small.decorationScale, 1) && close(small.playerScale, 1) && close(small.compassScale, 1),
-               "shipped compact matches every previous default") ||
-        !check(large.name == "large" && close(large.widthRatio, 0.9f) && close(large.heightRatio, 0.9f) && close(large.zoom, 1.5f) && close(large.opacity, 0.6f) &&
-                   large.position.centered && defaults.presets[2].zoom == 0,
-               "shipped large and hidden match previous defaults"))
+                   small.position.verticalAnchor == er::minimap::VerticalAnchor::Top && close(small.position.horizontalMargin.value, 10) &&
+                   close(small.position.verticalMargin.value, 10) && !small.position.horizontalMargin.isPercent && !small.position.verticalMargin.isPercent && !small.rotate &&
+                   small.shape == er::minimap::Shape::Circle && close(small.rounding, 0.2f) && small.roundingIsPercent && close(small.mapScale, 1) &&
+                   close(small.decorationScale, 1) && close(small.playerScale, 1) && close(small.compassScale, 0.5f),
+               "shipped compact keeps the current user-selected defaults") ||
+        !check(large.name == "large" && close(large.widthRatio, 0.9f) && close(large.heightRatio, 0.9f) && close(large.zoom, 1.5f) && close(large.opacity, 0.8f) &&
+                   large.position.centered && large.shape == er::minimap::Shape::Rounded && close(large.rounding, 0.1f) && defaults.presets[2].zoom == 0,
+               "shipped large and hidden keep the current defaults"))
         return 3;
 
     auto custom = fixture(R"ini(

@@ -141,7 +141,6 @@ struct GameFiles::Impl {
     uintptr_t lastPieceTable = 0;
     uint8_t lastReveal = 0;
     uint64_t maskRefresh = 0;
-    uint64_t maskLog = 0;
     uint32_t activeMasks[3]{};
 
     static void complete(uint32_t status, void *context, void *buffer, uint64_t size) {
@@ -206,6 +205,7 @@ struct GameFiles::Impl {
         auto submit = match ? reinterpret_cast<int (*)(void *, uint64_t *, const ReadRequest *)>(base + profile->submit) : nullptr;
         auto flush = match ? reinterpret_cast<void (*)(void *)>(base + profile->flush) : nullptr;
         auto enqueue = match ? reinterpret_cast<void (*)(void *, void *, uint64_t)>(base + profile->enqueue) : nullptr;
+        uint64_t logFlush = 0;
         for (;;) {
             std::vector<std::shared_ptr<Item>> submitItems, cancelItems;
             uintptr_t manager = match ? pointer(base + profile->manager) : 0;
@@ -217,7 +217,7 @@ struct GameFiles::Impl {
                 for (auto it = items.begin(); it != items.end();) {
                     auto &item = *it->second;
                     auto status = item.status.load(std::memory_order_acquire);
-                    if (!item.logged && status != ER_FILE_PENDING && status != ER_FILE_QUEUED) {
+                    if (util::nativeLogEnabled() && !item.logged && status != ER_FILE_PENDING && status != ER_FILE_QUEUED) {
                         size_t bytes = 0;
                         for (const auto &part: item.parts)
                             bytes += part.size;
@@ -264,9 +264,31 @@ struct GameFiles::Impl {
             for (const auto &item: cancelItems) {
                 enqueue(reinterpret_cast<void *>(item->manager + 0x20), reinterpret_cast<void *>(base + profile->cancel), item->nativeId);
             }
+            if (util::nativeLogEnabled()) {
+                auto now = GetTickCount64();
+                if (now >= logFlush) {
+                    util::flushNativeLog();
+                    logFlush = now + 1000;
+                }
+            }
             std::unique_lock lock(mutex);
-            condition.wait_for(lock, std::chrono::milliseconds(10));
+            if (items.empty()) {
+                // No native request needs polling. Sleep until the next
+                // request/stop notification instead of reading game pointers
+                // every ten milliseconds throughout the whole session.
+                if (util::nativeLogEnabled()) {
+                    lock.unlock();
+                    util::flushNativeLog();
+                    lock.lock();
+                }
+                if (util::nativeLogEnabled())
+                    condition.wait_for(lock, std::chrono::seconds(1), [this] { return stopping || !items.empty(); });
+                else
+                    condition.wait(lock, [this] { return stopping || !items.empty(); });
+            } else
+                condition.wait_for(lock, std::chrono::milliseconds(10));
         }
+        util::flushNativeLog();
     }
 };
 
@@ -371,20 +393,13 @@ bool GameFiles::readMapState(ERMapState &state) {
     uint64_t now = GetTickCount64();
     if (now >= impl_->maskRefresh || flags != impl_->lastFlags || pieceTable != impl_->lastPieceTable || reveal != impl_->lastReveal) {
         uint32_t masks[3];
-        // Mirror 0x8892C0 from PARAM/flags. The view model's +0x39C cache
-        // is useful for diagnostics, but is not an authoritative save value.
+        // Mirror the native mask calculation from PARAM/flags rather than
+        // the view model's non-authoritative cached display masks.
         if (!util::readMapPieceMasks(pieceTable, flags, reveal != 0, masks)) {
             impl_->maskRefresh = 0;
             return false;
         }
         std::copy(std::begin(masks), std::end(masks), impl_->activeMasks);
-        if (now >= impl_->maskLog) {
-            uint32_t cached[3]{};
-            bool cacheReadable = profile.layout.mapMask & 4 ? readGame(view + 0x39C, cached) : false;
-            util::nativeLog("map-progress masks=%08x,%08x,%08x cached=%08x,%08x,%08x cache-readable=%d reveal=%u\n", masks[0], masks[1], masks[2], cached[0], cached[1], cached[2],
-                            cacheReadable, reveal);
-            impl_->maskLog = now + 5000;
-        }
         impl_->lastFlags = flags;
         impl_->lastPieceTable = pieceTable;
         impl_->lastReveal = reveal;

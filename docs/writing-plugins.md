@@ -212,6 +212,26 @@ typedef struct {
 - If you share state between `update()` and `render()`, protect it with a `std::mutex`.
 - Use `std::atomic_bool` for simple cross-thread flags.
 
+Update and render callbacks remain serialized for existing plugins. A plugin
+whose data is synchronized independently can opt in to concurrent callbacks:
+
+```cpp
+PLUGIN_EXPORT bool supportsConcurrentUpdateRender() { return true; }
+```
+
+An opted-in plugin must protect every mutable object shared by the two threads.
+`createRenderer()`, `destroyRenderer()` and `uninit()` still run exclusively,
+after active update/render callbacks finish. Older cores ignore this optional
+export and keep the original serialization.
+
+The size-gated native extension in `nativeapi.h` offers `queueDdsTexture()` for
+CPU preparation on update, `beginOffscreenRegion()` for a local compositing
+target, and `textureMemoryBytes()` for the actual committed DDS allocation.
+Check `size >= offsetof(EROverlayNativeAPI, member) + sizeof(api->member)` and
+the function pointer before each optional method. GPU status queries and
+retirement stay on render; a READY view must be polled at least once in each
+frame that uses it so deferred retirement covers all draws.
+
 ---
 
 ## Config File Convention

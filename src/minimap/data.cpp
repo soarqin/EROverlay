@@ -46,7 +46,7 @@ struct SavedPlayerMarker {
     uint16_t padding;
 };
 static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map) == 12 && offsetof(SavedPlayerMarker, icon) == 13);
-[[nodiscard]] bool readPlayerMarkers(uintptr_t view, std::vector<PlayerMarkerInfo> &markers) {
+[[nodiscard]] bool readPlayerMarkers(uintptr_t view, PlayerMarkers &markers) {
     markers.clear();
     if (!view)
         return false;
@@ -67,7 +67,6 @@ static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map
         std::memcmp(records.data(), afterRecords.data(), bytes) ||
         static_cast<uint64_t>(std::count_if(records.begin(), records.begin() + first.capacity, [](const auto &record) { return record.id >= 0; })) != count)
         return false;
-    markers.reserve(PLAYER_MARKER_LIMIT);
     for (size_t slot = 0; slot < std::min<size_t>(first.capacity, PLAYER_MARKER_LIMIT); ++slot) {
         const auto &record = records[slot];
         if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon != 1)
@@ -204,6 +203,11 @@ void Data::update() {
         read(menu + 0x1C, menuState);
     next.onGUI = api->screenState() != 0 || menuState != 0;
     next.valid = !next.onGUI;
+    if (next.onGUI) {
+        std::lock_guard lock(mutex_);
+        snapshot_ = std::move(next);
+        return;
+    }
     auto camera = pointer(addresses.fieldArea);
     camera = camera ? pointer(camera + 0x20) : 0;
     camera = camera ? pointer(camera + 0x18) : 0;
@@ -212,30 +216,16 @@ void Data::update() {
     if (!std::isfinite(next.camera.yawCos) || !std::isfinite(next.camera.yawSin))
         next.camera = {};
     auto publish = [&] {
-        bool markersRead = next.valid && readPlayerMarkers(next.state.viewModel, next.playerMarkers);
+        if (next.valid)
+            (void)readPlayerMarkers(next.state.viewModel, next.playerMarkers);
         ERMapState after{};
         if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != next.state.viewModel || after.rawMapId != next.state.rawMapId ||
             after.mapId != next.state.mapId || after.underground != next.state.underground) {
             next.valid = false;
             next.state.deathValid = false;
-            next.decorations.clear();
+            next.decorations = {};
+            next.decorationStorage_.reset();
             next.playerMarkers.clear();
-        }
-        static uint64_t lastLog = 0;
-        if (GetTickCount64() >= lastLog) {
-            lastLog = GetTickCount64() + 5000;
-            char line[320];
-            std::snprintf(line, sizeof(line), "map raw=%08x map=%d position=%.2f,%.2f masks=%08x,%08x,%08x death=%d %.2f,%.2f/%d markers=%zu markers-read=%d valid=%d\n",
-                          next.state.rawMapId, next.state.mapId, next.state.x, next.state.y, next.state.activeMasks[0], next.state.activeMasks[1], next.state.activeMasks[2],
-                          int(next.state.deathValid), next.state.deathX, next.state.deathY, next.state.deathMapId, next.playerMarkers.size(), int(markersRead), int(next.valid));
-            if (nativeApi->log) {
-                nativeApi->log(line);
-                for (const auto &marker: next.playerMarkers) {
-                    std::snprintf(line, sizeof(line), "player-marker number=%u id=%d position=%.3f,%.3f map=%u\n", unsigned(marker.number), marker.id, marker.x, marker.y,
-                                  unsigned(marker.map));
-                    nativeApi->log(line);
-                }
-            }
         }
         std::lock_guard lock(mutex_);
         snapshot_ = std::move(next);
@@ -248,6 +238,7 @@ void Data::update() {
             next.roundtable = snapshot_.roundtable;
             next.homeIcon = snapshot_.homeIcon;
             next.decorations = snapshot_.decorations;
+            next.decorationStorage_ = snapshot_.decorationStorage_;
             cached = true;
         }
     }
@@ -256,6 +247,13 @@ void Data::update() {
         return;
     }
     markerRefresh_ = GetTickCount64() + 200;
+    auto decorations = std::make_shared<std::vector<DecorationInfo>>();
+    size_t previousCount = 0;
+    {
+        std::lock_guard lock(mutex_);
+        previousCount = snapshot_.decorations.size();
+    }
+    decorations->reserve(previousCount);
     const auto layout = gameLayout();
     uint32_t homeId = 0;
     auto common = nativeApi->findParamTable(141);
@@ -309,7 +307,7 @@ void Data::update() {
         marker.maps &= layout.mapMask;
         if (!marker.maps || !selected || id == homeId || !convert(view, layout.mapMask, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
             return;
-        next.decorations.push_back(marker);
+        decorations->push_back(marker);
     });
     rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
         if (id < 78500 || !row.iconId || row.iconId == 80)
@@ -339,8 +337,10 @@ void Data::update() {
         if (!marker.maps || !convert(view, layout.mapMask, raw, x, y, z, marker.x, marker.y))
             return;
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
-        next.decorations.push_back(marker);
+        decorations->push_back(marker);
     });
+    next.decorationStorage_ = std::move(decorations);
+    next.decorations = *next.decorationStorage_;
     publish();
 }
 MapSnapshot Data::snapshot() const {

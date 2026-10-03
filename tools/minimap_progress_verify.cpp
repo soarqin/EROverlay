@@ -113,21 +113,25 @@ int main() {
         if (!resources.loadDirectory(index, metadata))
             return 8;
         er::minimap::TileView view;
+        resources.prepareTextures();
         resources.beginFrame(1, 0, masks, 0);
         bool ready = resources.tile(0, 20, 20, view);
+        resources.prepareTextures();
         if (ready || requested.size() != 1 || !requested.back().ends_with(L"M00_L0_20_20_00008000.tpf.dcx"))
             return 9;
         // The two maps must have independent variants in the same frame.
         resources.beginFrame(1, 1, masks, 0);
         ready = resources.tile(0, 20, 20, view);
         ready |= resources.tile(1, 20, 20, view);
-        if (ready || requested.size() != 3 || !requested[1].ends_with(L"M00_L0_20_20_00008000.tpf.dcx") || !requested[2].ends_with(L"M01_L0_20_20_00000008.tpf.dcx"))
+        resources.prepareTextures();
+        if (ready || requested.size() != 2 || !requested[1].ends_with(L"M01_L0_20_20_00000008.tpf.dcx"))
             return 10;
         direct[1] = 0;
         if (!readMapPieceMasks(address(table), address(manager), false, masks) || masks[0] || masks[1] || masks[2])
             return 11;
         resources.beginFrame(1, 0, masks, 0);
         ready = resources.tile(0, 20, 20, view);
+        resources.prepareTextures();
         if (ready || !requested.back().ends_with(L"M00_L0_20_20_00000000.tpf.dcx"))
             return 12;
         if (!readMapPieceMasks(0, 0, true, masks) || masks[0] != UINT32_MAX || masks[1] != UINT32_MAX || masks[2] != UINT32_MAX)

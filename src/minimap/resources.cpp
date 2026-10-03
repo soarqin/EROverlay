@@ -22,6 +22,42 @@ Resources gResources;
 namespace {
 constexpr const wchar_t *PATHS[] = {L"menu:/02_120_WorldMap.gfx", L"menu:/Hi/01_Common.sblytbnd.dcx", L"menu:/71_MapTile.tpfbhd", L"menu:/71_MapTile.mtmskbnd.dcx",
                                     L"menu:/Hi/01_Common.tpf.dcx"};
+constexpr size_t TILE_CACHE_BYTES = 64 * 1024 * 1024;
+constexpr size_t TILE_CACHE_ENTRIES = 512;
+constexpr uint64_t CACHE_IDLE_MS = 10000;
+bool canQueueTextures() { return nativeApi && nativeApi->size >= offsetof(EROverlayNativeAPI, queueDdsTexture) + sizeof(nativeApi->queueDdsTexture) && nativeApi->queueDdsTexture; }
+size_t textureBytes(const util::DdsImage &image) {
+    size_t bytes = 0;
+    for (const auto &level: image.levels)
+        bytes += static_cast<size_t>(level.rowBytes) * level.rows;
+    // Committed DDS textures use at least 64 KiB; account for allocation
+    // granularity as well as compressed mip payloads when trimming the cache.
+    return (bytes + 65535) & ~size_t(65535);
+}
+bool tileKey(std::wstring_view name, TileKey &key) {
+    constexpr std::wstring_view prefix = L"MENU_MapTile_M";
+    if (!name.starts_with(prefix) || name.size() != prefix.size() + 20)
+        return false;
+    name.remove_prefix(prefix.size());
+    if (name[2] != L'_' || name[3] != L'L' || name[5] != L'_' || name[8] != L'_' || name[11] != L'_')
+        return false;
+    auto number = [&](size_t start, size_t count, uint32_t base, uint32_t &out) {
+        out = 0;
+        for (auto c: name.substr(start, count)) {
+            uint32_t digit = c >= L'0' && c <= L'9' ? c - L'0' : c >= L'a' && c <= L'f' ? c - L'a' + 10 : c >= L'A' && c <= L'F' ? c - L'A' + 10 : base;
+            if (digit >= base)
+                return false;
+            out = out * base + digit;
+        }
+        return true;
+    };
+    uint32_t map, level, x, y, variant;
+    if (!number(0, 2, 10, map) || !number(4, 1, 10, level) || !number(6, 2, 10, x) || !number(9, 2, 10, y) || !number(12, 8, 16, variant) || (map != 0 && map != 1 && map != 10) ||
+        level > 2)
+        return false;
+    key = {static_cast<uint8_t>(map), static_cast<uint8_t>(level), static_cast<uint16_t>(x), static_cast<uint16_t>(y), variant};
+    return true;
+}
 std::string narrow(std::wstring_view value) {
     if (value.empty())
         return {};
@@ -232,6 +268,17 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     std::erase_if(regions, [&](const auto &item) { return !needed.contains(item.first); });
     for (auto &[image, region]: regions)
         region.atlas = remap[region.atlas];
+    std::vector<AtlasRegion> resolved;
+    auto resolve = [&](auto &recipes) {
+        for (auto &[id, recipe]: recipes)
+            for (auto &layer: recipe.layers)
+                if (layer.bitmap()) {
+                    layer.resourceRegion = static_cast<uint32_t>(resolved.size());
+                    resolved.push_back(regions.at(layer.image));
+                }
+    };
+    resolve(icons);
+    resolve(specials);
     std::vector<AtlasFile> atlasFiles;
     for (uint32_t i = 0; i < atlases.size(); ++i) {
         auto group = std::find_if(atlasFiles.begin(), atlasFiles.end(), [&](const auto &file) { return file.path == atlases[i]->path; });
@@ -244,6 +291,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     atlases_ = std::move(atlases);
     atlasFiles_ = std::move(atlasFiles);
     regions_ = std::move(regions);
+    resolvedRegions_ = std::move(resolved);
     icons_ = std::move(icons);
     specials_ = std::move(specials);
     playerMarkerText_ = std::move(markerText);
@@ -257,12 +305,16 @@ bool Resources::loadDirectory(util::Bytes index, util::Bytes masks) {
     std::vector<util::BinderEntry> entries;
     if (!util::parseBinder(index, entries))
         return false;
-    std::unordered_set<std::string> names;
+    std::unordered_map<uint64_t, std::wstring> paths;
     for (const auto &entry: entries) {
-        auto name = narrow(entry.name);
-        if (name.ends_with(".dcx"))
-            name.resize(name.size() - 4);
-        names.insert(util::assetKey(name));
+        auto name = std::wstring_view(entry.name);
+        name = name.substr(name.find_last_of(L"/\\") == std::wstring_view::npos ? 0 : name.find_last_of(L"/\\") + 1);
+        auto extension = name.find(L'.');
+        if (extension != std::wstring_view::npos)
+            name = name.substr(0, extension);
+        TileKey key;
+        if (tileKey(name, key))
+            paths.emplace(key.value(), L"menutpfbnd:/71_MapTile/" + std::wstring(name) + L".tpf.dcx");
     }
     if (!util::parseBinder(masks, entries))
         return false;
@@ -286,7 +338,7 @@ bool Resources::loadDirectory(util::Bytes index, util::Bytes masks) {
     for (size_t i = 0; i < mapMasks.size(); ++i)
         if ((mapMask & (1u << i)) && mapMasks[i].empty())
             return false;
-    tileNames_ = std::move(names);
+    tilePaths_ = std::move(paths);
     masks_ = std::move(mapMasks);
     mapMask_ = mapMask;
     directoryReady_ = true;
@@ -328,6 +380,8 @@ void Resources::update() {
         status_ = "需要支持原生资源的 EROverlay 核心";
         return;
     }
+    if (canQueueTextures())
+        updateJobs();
     for (size_t i = 0; i < 4; ++i) {
         request(files_[i], PATHS[i], i == 1 || i == 3 ? 0x40 : 0);
         util::Bytes bytes;
@@ -358,15 +412,21 @@ void Resources::update() {
     bool requiredFailed = false;
     for (auto &group: atlasFiles_) {
         auto &file = group.file;
-        std::vector<const wchar_t *> names;
-        for (auto index: group.atlases)
-            if (!atlases_[index]->ready.load(std::memory_order_acquire))
-                names.push_back(atlases_[index]->name.c_str());
-        if (names.empty()) {
-            file.complete = true;
+        if (file.complete)
             continue;
+        if (!file.token) {
+            if (file.retry && file.retry > GetTickCount64())
+                continue;
+            std::vector<const wchar_t *> names;
+            for (auto index: group.atlases)
+                if (!atlases_[index]->ready.load(std::memory_order_acquire))
+                    names.push_back(atlases_[index]->name.c_str());
+            if (names.empty()) {
+                file.complete = true;
+                continue;
+            }
+            request(file, group.path.c_str(), 0x40, names);
         }
-        request(file, group.path.c_str(), 0x40, names);
         if (!file.token)
             continue;
         bool pending = false, failed = false;
@@ -376,7 +436,7 @@ void Resources::update() {
                 continue;
             ERFileData data{};
             auto state = nativeApi->pollFile(file.token, atlas.name.c_str(), &data);
-            if (state == ER_FILE_SUCCEEDED && data.data && data.size <= SIZE_MAX) {
+            if (state == ER_FILE_SUCCEEDED && data.data && data.size <= 32ull * 1024 * 1024) {
                 util::Bytes bytes(static_cast<const uint8_t *>(data.data), static_cast<size_t>(data.size));
                 util::DdsImage image;
                 if (util::parseDds(bytes, image)) {
@@ -420,29 +480,173 @@ void Resources::update() {
     }
 }
 
-void Resources::clearTiles() {
-    for (auto &[key, tile]: tiles_) {
-        release(tile.file);
-        if (nativeApi && tile.texture)
-            nativeApi->retireTexture(tile.texture);
+void Resources::queueJob(const std::shared_ptr<TextureJob> &job) {
+    std::lock_guard lock(jobMutex_);
+    queuedJobs_.push_back(job);
+    if (job->tile)
+        pendingTiles_.fetch_add(1, std::memory_order_relaxed);
+    jobsQueued_.store(true, std::memory_order_release);
+}
+void Resources::updateJobs() {
+    // Older cores expose only render-thread upload methods. Keep a bounded
+    // render-thread fallback there; current cores do all file/CPU work here.
+    auto queueTexture = canQueueTextures() ? nativeApi->queueDdsTexture : nativeApi->createDdsTexture;
+    if (jobsQueued_.exchange(false, std::memory_order_acquire)) {
+        std::lock_guard lock(jobMutex_);
+        incomingJobs_.swap(queuedJobs_);
     }
-    tiles_.clear();
+    activeJobs_.insert(activeJobs_.end(), std::make_move_iterator(incomingJobs_.begin()), std::make_move_iterator(incomingJobs_.end()));
+    incomingJobs_.clear();
+    size_t budget = 4 * 1024 * 1024;
+    unsigned uploads = 0;
+    size_t keep = 0;
+    for (auto &job: activeJobs_) {
+        bool done = false;
+        if (job->cancelled.load(std::memory_order_acquire)) {
+            release(job->file);
+            job->state.store(JobState::Failed, std::memory_order_release);
+            done = true;
+        } else {
+            if (job->source.empty()) {
+                request(job->file, job->path.c_str(), 0x40);
+                util::Bytes bytes;
+                if (poll(job->file, bytes)) {
+                    std::vector<util::TpfEntry> entries;
+                    util::DdsImage image;
+                    if (util::parseTpf(bytes, entries) && entries.size() == 1 && entries[0].dds.size() <= 32ull * 1024 * 1024 && util::parseDds(entries[0].dds, image)) {
+                        job->source = entries[0].dds;
+                        job->gpuBytes = textureBytes(image);
+                    } else {
+                        job->state.store(JobState::Failed, std::memory_order_release);
+                        done = true;
+                    }
+                    if (done)
+                        release(job->file);
+                }
+            }
+            auto bytes = job->source;
+            if (!done && queueTexture && !bytes.empty() && budget && uploads < 4 && (bytes.size() <= budget || !uploads) && (!job->retry || GetTickCount64() >= job->retry)) {
+                if (!job->gpuBytes) {
+                    util::DdsImage image;
+                    if (util::parseDds(bytes, image))
+                        job->gpuBytes = textureBytes(image);
+                }
+                job->texture = queueTexture(bytes.data(), bytes.size());
+                if (job->texture) {
+                    budget = bytes.size() >= budget ? 0 : budget - bytes.size();
+                    ++uploads;
+                    release(job->file);
+                    job->source = {};
+                    job->state.store(JobState::Ready, std::memory_order_release);
+                    done = true;
+                } else
+                    job->retry = GetTickCount64() + 1000;
+            }
+        }
+        if (done) {
+            if (job->tile)
+                pendingTiles_.fetch_sub(1, std::memory_order_relaxed);
+        } else {
+            if (&job != &activeJobs_[keep])
+                activeJobs_[keep] = std::move(job);
+            ++keep;
+        }
+    }
+    activeJobs_.resize(keep);
+}
+void Resources::cancelJob(std::shared_ptr<TextureJob> &job) {
+    if (!job)
+        return;
+    job->cancelled.store(true, std::memory_order_release);
+    cancelledJobs_.push_back(std::move(job));
+}
+void Resources::collectCancelledJobs() {
+    size_t keep = 0;
+    for (auto &job: cancelledJobs_) {
+        auto state = job->state.load(std::memory_order_acquire);
+        if (state == JobState::Ready) {
+            if (nativeApi && job->texture)
+                nativeApi->retireTexture(job->texture);
+        } else if (state == JobState::Pending) {
+            if (&job != &cancelledJobs_[keep])
+                cancelledJobs_[keep] = std::move(job);
+            ++keep;
+        }
+    }
+    cancelledJobs_.resize(keep);
+}
+bool Resources::finishJob(std::shared_ptr<TextureJob> &job, uint64_t &texture, size_t &gpuBytes) {
+    if (!job || job->state.load(std::memory_order_acquire) == JobState::Pending)
+        return false;
+    texture = job->texture;
+    gpuBytes = texture ? job->gpuBytes : 0;
+    job.reset();
+    return true;
+}
+void Resources::eraseTile(std::unordered_map<uint64_t, Tile>::iterator it) {
+    auto &tile = it->second;
+    cancelJob(tile.job);
+    if (nativeApi && tile.texture)
+        nativeApi->retireTexture(tile.texture);
+    tileBytes_ -= tile.gpuBytes;
+    tileLru_.erase(tile.lru);
+    tiles_.erase(it);
+}
+void Resources::clearTiles() {
+    while (!tiles_.empty())
+        eraseTile(tiles_.begin());
+    tileJobs_.clear();
 }
 void Resources::prepareTextures() {
-    if (!nativeApi || !definitionsReady_.load(std::memory_order_acquire))
+    if (!nativeApi)
         return;
-    for (auto &entry: atlases_) {
-        auto &atlas = *entry;
-        if (!atlas.ready.load(std::memory_order_acquire))
+    now_ = GetTickCount64();
+    ++atlasFrame_;
+    frameUploadBytes_ = 0;
+    frameUploads_ = 0;
+    if (nativeApi && !canQueueTextures())
+        updateJobs();
+    collectCancelledJobs();
+    size_t keep = 0;
+    for (auto id: tileJobs_) {
+        auto found = tiles_.find(id);
+        if (found == tiles_.end() || !found->second.job)
             continue;
-        if (!atlas.texture && !atlas.dds.empty() && atlas.retry <= GetTickCount64())
-            atlas.texture = nativeApi->createDdsTexture(atlas.dds.data(), atlas.dds.size());
+        auto &tile = found->second;
+        size_t bytes = 0;
+        if (finishJob(tile.job, tile.texture, bytes)) {
+            tile.gpuBytes = bytes;
+            tile.allocationKnown = false;
+            tileBytes_ += bytes;
+            if (!tile.texture)
+                tile.retry = now_ + 1000;
+        } else {
+            tileJobs_[keep++] = id;
+        }
     }
-    if (nativeApi->log && !atlasesLogged_ && std::all_of(atlases_.begin(), atlases_.end(), [](const auto &atlas) { return atlas->texture != 0; })) {
-        char line[80];
-        std::snprintf(line, sizeof(line), "minimap-atlases-enqueued=%zu\n", atlases_.size());
-        nativeApi->log(line);
-        atlasesLogged_ = true;
+    tileJobs_.resize(keep);
+    // Atlas uploads are requested only by visible recipes. Retire atlases
+    // unused for ten seconds so optional mod sets need not remain resident.
+    if (now_ >= cacheTrim_) {
+        cacheTrim_ = now_ + 1000;
+        if (definitionsReady_.load(std::memory_order_acquire))
+            for (auto &entry: atlases_) {
+                auto &atlas = *entry;
+                if (atlas.texture && now_ - atlas.touched >= CACHE_IDLE_MS) {
+                    nativeApi->retireTexture(atlas.texture);
+                    atlas.texture = 0;
+                    atlas.view = {};
+                    atlas.polled = UINT64_MAX;
+                }
+                if (atlas.job && now_ - atlas.touched >= CACHE_IDLE_MS)
+                    cancelJob(atlas.job);
+            }
+        while (!tileLru_.empty()) {
+            auto it = tiles_.find(tileLru_.front());
+            if (now_ - it->second.touched < CACHE_IDLE_MS)
+                break;
+            eraseTile(it);
+        }
     }
 }
 void Resources::resetTextures() {
@@ -453,18 +657,26 @@ void Resources::resetTextures() {
                 nativeApi->retireTexture(atlas->texture);
             atlas->texture = 0;
             atlas->retry = 0;
+            atlas->view = {};
+            atlas->polled = UINT64_MAX;
+            cancelJob(atlas->job);
         }
-    atlasesLogged_ = false;
+    collectCancelledJobs();
 }
 void Resources::stop() {
     resetTextures();
+    // Plugin shutdown excludes update/render. Finish cancellation before
+    // releasing immutable CPU atlas storage or the native API.
+    if (nativeApi)
+        updateJobs();
+    collectCancelledJobs();
     for (auto &file: files_)
         release(file);
     for (auto &file: atlasFiles_)
         release(file.file);
 }
 void Resources::beginFrame(uint64_t generation, uint32_t map, const uint32_t (&masks)[3], uint8_t level) {
-    if (generation_ != generation || map_ != map || !std::equal(activeMasks_.begin(), activeMasks_.end(), std::begin(masks)) || level_ != level)
+    if (generation_ != generation)
         clearTiles();
     generation_ = generation;
     map_ = map;
@@ -485,33 +697,37 @@ bool Resources::tile(uint32_t map, uint16_t x, uint16_t y, TileView &view) {
     if (found == masks_[map].end() || !found->second.exists)
         return false;
     TileKey tileKey{static_cast<uint8_t>(map == 2 ? 10 : map), level_, x, y, activeMasks_[map] & found->second.allowed};
-    char name[128];
-    std::snprintf(name, sizeof(name), "MENU_MapTile_M%02u_L%u_%02u_%02u_%08x", tileKey.map, tileKey.level, x, y, tileKey.variant);
-    if (!tileNames_.contains(name))
-        return false;
-    auto &tile = tiles_[tileKey.value()];
-    tile.key = tileKey;
-    tile.touched = frame_;
+    auto id = tileKey.value();
+    auto it = tiles_.find(id);
+    if (it == tiles_.end()) {
+        if (!tilePaths_.contains(id))
+            return false;
+        it = tiles_.try_emplace(id).first;
+        it->second.key = tileKey;
+        tileLru_.push_back(id);
+        it->second.lru = std::prev(tileLru_.end());
+    }
+    auto &tile = it->second;
+    tileLru_.splice(tileLru_.end(), tileLru_, tile.lru);
+    tile.touched = now_;
+    tile.frame = frame_;
     if (!tile.texture) {
-        if (!tile.file.token) {
-            size_t pending = 0;
-            for (const auto &[id, t]: tiles_)
-                if (t.file.token)
-                    ++pending;
-            if (pending < 8) {
-                std::string virtualPath = std::string("menutpfbnd:/71_MapTile/") + name + ".tpf.dcx";
-                std::wstring path(virtualPath.begin(), virtualPath.end());
-                request(tile.file, path.c_str(), 0x40);
+        size_t bytes = 0;
+        if (finishJob(tile.job, tile.texture, bytes)) {
+            if (!tile.texture)
+                tile.retry = now_ + 1000;
+            else {
+                tile.gpuBytes = bytes;
+                tile.allocationKnown = false;
+                tileBytes_ += bytes;
             }
         }
-        util::Bytes bytes;
-        if (poll(tile.file, bytes)) {
-            std::vector<util::TpfEntry> entries;
-            if (util::parseTpf(bytes, entries) && entries.size() == 1)
-                tile.texture = nativeApi->createDdsTexture(entries[0].dds.data(), entries[0].dds.size());
-            release(tile.file);
-            if (!tile.texture)
-                tile.file.retry = GetTickCount64() + 1000;
+        if (!tile.texture && !tile.job && tile.retry <= now_ && pendingTiles_.load(std::memory_order_relaxed) < 8) {
+            tile.job = std::make_shared<TextureJob>();
+            tile.job->path = tilePaths_.at(id);
+            tile.job->tile = true;
+            queueJob(tile.job);
+            tileJobs_.push_back(id);
         }
     }
     ERTextureView texture;
@@ -521,23 +737,38 @@ bool Resources::tile(uint32_t map, uint16_t x, uint16_t y, TileView &view) {
     if (state == ER_TEXTURE_FAILED || state == ER_TEXTURE_INVALID) {
         nativeApi->retireTexture(tile.texture);
         tile.texture = 0;
-        tile.file.retry = GetTickCount64() + 1000;
+        tileBytes_ -= tile.gpuBytes;
+        tile.gpuBytes = 0;
+        tile.allocationKnown = false;
+        tile.retry = now_ + 1000;
     }
     if (state != ER_TEXTURE_READY)
         return false;
+    if (!tile.allocationKnown && nativeApi->size >= offsetof(EROverlayNativeAPI, textureMemoryBytes) + sizeof(nativeApi->textureMemoryBytes) && nativeApi->textureMemoryBytes) {
+        auto bytes = nativeApi->textureMemoryBytes(tile.texture);
+        if (bytes && bytes <= SIZE_MAX) {
+            tileBytes_ = tileBytes_ - tile.gpuBytes + static_cast<size_t>(bytes);
+            tile.gpuBytes = static_cast<size_t>(bytes);
+            tile.allocationKnown = true;
+        }
+    }
     float span = SPANS[level_], top = (COUNTS[level_] - 1 - y) * span;
-    view = {tile.texture, x * span, top, (x + 1) * span, top + span};
+    view = {tile.texture, x * span, top, (x + 1) * span, top + span, texture};
     return true;
 }
 void Resources::endFrame() {
-    while (tiles_.size() > 512) {
-        auto oldest = std::min_element(tiles_.begin(), tiles_.end(), [](const auto &a, const auto &b) { return a.second.touched < b.second.touched; });
-        if (oldest == tiles_.end() || oldest->second.touched == frame_)
+    for (auto id: tileJobs_) {
+        auto tile = tiles_.find(id);
+        if (tile != tiles_.end() && tile->second.frame + 1 < frame_)
+            cancelJob(tile->second.job);
+    }
+    while (tiles_.size() > TILE_CACHE_ENTRIES || tileBytes_ > TILE_CACHE_BYTES) {
+        auto oldest = tiles_.find(tileLru_.front());
+        // A currently visible working set may exceed the cache budget at a
+        // very small zoom. Never evict an image already added to this frame.
+        if (oldest->second.frame == frame_)
             break;
-        release(oldest->second.file);
-        if (nativeApi && oldest->second.texture)
-            nativeApi->retireTexture(oldest->second.texture);
-        tiles_.erase(oldest);
+        eraseTile(oldest);
     }
 }
 const IconRecipe *Resources::icon(uint32_t id) const {
@@ -556,10 +787,16 @@ const TextLayout *Resources::playerMarkerText() const { return definitionsReady_
 bool Resources::layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view) {
     if (!definitionsReady_.load(std::memory_order_acquire))
         return false;
-    auto found = regions_.find(layer.image);
-    if (found == regions_.end() || !nativeApi)
+    if (!nativeApi)
         return false;
-    region = found->second;
+    if (layer.resourceRegion < resolvedRegions_.size())
+        region = resolvedRegions_[layer.resourceRegion];
+    else {
+        auto found = regions_.find(layer.image);
+        if (found == regions_.end())
+            return false;
+        region = found->second;
+    }
     if (region.atlas >= atlases_.size())
         return false;
     auto &atlas = *atlases_[region.atlas];
@@ -567,17 +804,38 @@ bool Resources::layerView(const IconLayer &layer, AtlasRegion &region, ERTexture
         return false;
     if (region.x + region.width > atlas.width || region.y + region.height > atlas.height)
         return false;
-    if (!atlas.texture && !atlas.dds.empty() && atlas.retry <= GetTickCount64())
-        atlas.texture = nativeApi->createDdsTexture(atlas.dds.data(), atlas.dds.size());
-    if (!atlas.texture)
-        return false;
-    auto state = nativeApi->pollTexture(atlas.texture, &view);
-    if (state == ER_TEXTURE_FAILED || state == ER_TEXTURE_INVALID) {
-        nativeApi->retireTexture(atlas.texture);
-        atlas.texture = 0;
-        atlas.retry = GetTickCount64() + 1000;
+    atlas.touched = now_;
+    if (atlas.polled != atlasFrame_) {
+        atlas.polled = atlasFrame_;
+        size_t bytes = 0;
+        if (finishJob(atlas.job, atlas.texture, bytes) && !atlas.texture)
+            atlas.retry = now_ + 1000;
+        if (!atlas.texture && !atlas.job && !atlas.dds.empty() && atlas.retry <= now_) {
+            if (canQueueTextures()) {
+                atlas.job = std::make_shared<TextureJob>();
+                atlas.job->source = atlas.dds;
+                queueJob(atlas.job);
+            } else if (frameUploads_ < 4 && (frameUploadBytes_ + atlas.dds.size() <= 4 * 1024 * 1024 || !frameUploads_)) {
+                // Compatibility with an earlier core keeps the CPU upload on
+                // render, but bounds work and never repeats it for each icon.
+                atlas.texture = nativeApi->createDdsTexture(atlas.dds.data(), atlas.dds.size());
+                if (atlas.texture) {
+                    frameUploadBytes_ += atlas.dds.size();
+                    ++frameUploads_;
+                } else
+                    atlas.retry = now_ + 1000;
+            }
+        }
+        atlas.view = {};
+        atlas.state = atlas.texture ? nativeApi->pollTexture(atlas.texture, &atlas.view) : ER_TEXTURE_PENDING;
+        if (atlas.state == ER_TEXTURE_FAILED || atlas.state == ER_TEXTURE_INVALID) {
+            nativeApi->retireTexture(atlas.texture);
+            atlas.texture = 0;
+            atlas.retry = now_ + 1000;
+        }
     }
-    return state == ER_TEXTURE_READY;
+    view = atlas.view;
+    return atlas.state == ER_TEXTURE_READY;
 }
 
 } // namespace er::minimap

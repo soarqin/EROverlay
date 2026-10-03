@@ -7,6 +7,8 @@ if errorlevel 1 (
 )
 pushd "%~dp0.."
 if not exist build\native-checks mkdir build\native-checks
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\fmt\include tools\plugin_thread_verify.cpp /Fo:build\native-checks\ /Fe:build\native-checks\plugin_thread_verify.exe /link build\native\deps\fmt\Release\fmt.lib
+if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_settings_verify.cpp src\minimap\settings.cpp src\config.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_settings_verify.exe
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\nlohmann_json\include tools\minimap_native_verify.cpp src\minimap\gfx.cpp src\minimap\resources.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_native_verify.exe /link xmllite.lib shlwapi.lib
@@ -23,6 +25,8 @@ if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_atlas_verify.cpp src\minimap\render.cpp src\minimap\settings.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_atlas_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_progress_verify.cpp src\util\gameflags.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_progress_verify.exe /link xmllite.lib shlwapi.lib
+if errorlevel 1 goto :failed
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_performance_verify.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_performance_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /LD /Isrc tools\minimap_bridge_verify.cpp src\gamefiles.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\bridge_verify.dll /link bcrypt.lib
 if errorlevel 1 goto :failed

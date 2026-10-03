@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 #### Changed
 
 - Use the game's map and icon artwork; external map images are no longer required.
+- Reduce rendering overhead and video memory use, including circular and translucent maps; release unused map resources automatically.
+- Remove repetitive debug logs. Leaving `log_file` empty skips diagnostics; enabled resource logs use buffered writes.
 - Organize settings into sections and independent named display presets, keeping all existing display options configurable. Provide clearer English instructions and separate Chinese-comment templates.
 - Enter border width directly in pixels.
 - Position the map at the center or any corner using horizontal and vertical margins. Margins support pixels, percentages and negative values, retaining the selected corner when the map changes size.

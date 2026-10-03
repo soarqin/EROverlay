@@ -29,6 +29,7 @@ uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data());
 ERMapState state{};
 const wchar_t *shape = L"rect", *rotate = L"0";
 bool offscreenUsed = false;
+bool localOffscreen = false;
 bool verifyPresets = false, separateKeys = false;
 bool verifyMargins = false;
 const wchar_t *testedBorderWidth = nullptr;
@@ -114,8 +115,10 @@ bool presetFrame(er::minimap::Renderer &renderer, int key, ImVec2 size, ImVec2 p
                     continue;
                 for (unsigned i = command.IdxOffset; i < command.IdxOffset + command.ElemCount; ++i) {
                     const auto &vertex = list->VtxBuffer[list->IdxBuffer[i] + command.VtxOffset];
-                    if (std::fabs(vertex.uv.x - (vertex.pos.x - viewportPosition.x) / viewport->Size.x) > .00001f ||
-                        std::fabs(vertex.uv.y - (vertex.pos.y - viewportPosition.y) / viewport->Size.y) > .00001f)
+                    ImVec2 sampleOrigin = localOffscreen ? position : viewportPosition;
+                    ImVec2 sampleSize = localOffscreen ? size : viewport->Size;
+                    if (std::fabs(vertex.uv.x - (vertex.pos.x - sampleOrigin.x) / sampleSize.x) > .00001f ||
+                        std::fabs(vertex.uv.y - (vertex.pos.y - sampleOrigin.y) / sampleSize.y) > .00001f)
                         return false;
                     compositeFound = true;
                 }
@@ -432,6 +435,20 @@ int main() {
             return 20;
     }
     io.DisplaySize = {1920, 1080};
+    // Use the new size-gated local-target API with the same production
+    // placement/composite path, including a nonzero viewport origin.
+    native.size = sizeof(native);
+    native.beginOffscreenRegion = [](void *, float x, float y, float width, float height) {
+        auto *window = ImGui::GetCurrentWindow();
+        offscreenUsed = true;
+        return x == window->Pos.x && y == window->Pos.y && width == window->Size.x && height == window->Size.y;
+    };
+    localOffscreen = true;
+    if (!marginFrame("local circle", {{"shape", L"circle"}, {"margin_left", L"24"}, {"margin_top", L"36"}}, {216, 216}, {24, 36}, true) ||
+        !marginFrame("local translucent rect", {{"opacity", L"50%"}, {"margin_right", L"24"}, {"margin_bottom", L"36"}}, {324, 216}, {1572, 828}, true) ||
+        !marginFrame("local rotated circle and viewport offset", {{"rotate", L"true"}, {"margin_right", L"24"}, {"margin_bottom", L"36"}}, {216, 216}, {1780, 878}, true,
+                     {100, 50}))
+        return 21;
     const wchar_t *borderWidths[] = {L"0", L"1", L"1.5", L"4", L"24", L"100", L"400"};
     for (const auto *width: borderWidths)
         if (!borderFrame("circle at screen edge", width, false, 1, true, {0, 0}) || !borderFrame("rotated circle at screen edge", width, true, 1, true, {0, 0}) ||

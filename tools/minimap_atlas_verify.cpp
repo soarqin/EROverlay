@@ -42,7 +42,7 @@ std::vector<uint32_t> usedIcons;
 std::vector<er::minimap::IconLayer> layers;
 std::vector<std::wstring> requestedTiles;
 uint64_t nextFile = 0, nextTexture = 100;
-unsigned maxNames = 0, created = 0, retired = 0;
+unsigned maxNames = 0, created = 0, retired = 0, polls = 0;
 int failTexture = -1;
 bool fullMap = false, earlierGame = false;
 std::vector<uint8_t> readFile(const char *path) {
@@ -155,6 +155,7 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
         return token;
     };
     native.pollTexture = [](uint64_t token, ERTextureView *out) {
+        ++polls;
         auto found = textures.find(token);
         if (found == textures.end())
             return ER_TEXTURE_INVALID;
@@ -169,11 +170,26 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
         textureNames.erase(token);
     };
     native.beginOffscreen = [](void *) { return true; };
+    native.queueDdsTexture = native.createDdsTexture;
     er::minimap::nativeApi = &native;
 }
 bool collectLayers(er::minimap::Resources &resources) {
     layers.clear();
     usedIcons.clear();
+    // Visible recipes request their atlases. Drive update/render publication
+    // instead of assuming every defined atlas is uploaded at startup.
+    for (unsigned frame = 0; frame < 16; ++frame) {
+        resources.prepareTextures();
+        for (uint32_t id = 1; id <= 348; ++id)
+            if (const auto *recipe = resources.icon(id))
+                for (const auto &layer: recipe->layers) {
+                    er::minimap::AtlasRegion region;
+                    ERTextureView texture;
+                    (void)resources.layerView(layer, region, texture);
+                }
+        resources.update();
+    }
+    resources.prepareTextures();
     std::array<bool, 12> used{};
     for (uint32_t id = 1; id <= 348; ++id) {
         if (id == 80) // The game/production point reader treats 80 as hidden.
@@ -230,6 +246,14 @@ bool drawAllLayers() {
         std::fprintf(stderr, "FAIL decorations=%zu expected=%zu\n", gData.snapshot().decorations.size(), usedIcons.size());
         return false;
     }
+    auto retained = gData.snapshot();
+    auto *decorations = retained.decorations.data();
+    for (unsigned sample = 0; sample < 1000; ++sample)
+        if (gData.snapshot().decorations.data() != decorations)
+            return false;
+    gData.update();
+    if (gData.snapshot().decorations.data() != decorations || retained.decorations.size() != usedIcons.size())
+        return false;
     Renderer renderer;
     renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
                   reinterpret_cast<void *>(+[](void *value, void *) { std::free(value); }), nullptr);
@@ -285,12 +309,31 @@ int main() {
         return 2;
     gResources.update();
     gResources.prepareTextures();
-    if (maxNames != 12 || !files.empty() || textures.size() != 12 || !collectLayers(gResources))
+    if (maxNames != 12 || !files.empty() || !textures.empty())
         return 3;
+    // Repeating one visible atlas uploads only that atlas and polls it once
+    // in each frame, even if hundreds of icons refer to it.
+    const auto *player = gResources.special("player");
+    if (!player || player->layers.empty())
+        return 18;
+    for (unsigned frame = 0; frame < 3; ++frame) {
+        gResources.prepareTextures();
+        unsigned before = polls;
+        for (unsigned icon = 0; icon < 500; ++icon) {
+            AtlasRegion region;
+            ERTextureView texture;
+            (void)gResources.layerView(player->layers.front(), region, texture);
+        }
+        if (polls - before > 1)
+            return 19;
+        gResources.update();
+    }
+    if (textures.size() != 1 || !collectLayers(gResources) || textures.size() != 12)
+        return 20;
     if (!drawAllLayers() || !textures.empty()) // Renderer destruction retires all.
         return 4;
     gResources.prepareTextures();
-    if (textures.size() != 12 || !collectLayers(gResources))
+    if (!textures.empty() || !collectLayers(gResources) || textures.size() != 12)
         return 5;
     gResources.stop();
     if (!files.empty() || !textures.empty() || created != retired)
@@ -302,6 +345,15 @@ int main() {
             return 7;
         partial.update();
         partial.prepareTextures();
+        for (unsigned frame = 0; frame < 16; ++frame) {
+            partial.prepareTextures();
+            for (const auto &layer: layers) {
+                AtlasRegion region;
+                ERTextureView texture;
+                (void)partial.layerView(layer, region, texture);
+            }
+            partial.update();
+        }
         if (textures.size() != 11 || !files.empty())
             return 8;
         partial.stop();
@@ -316,8 +368,10 @@ int main() {
         if (!recovery.loadDefinitions(gfx, layouts))
             return 11;
         recovery.update();
-        recovery.prepareTextures();
+        if (!collectLayers(recovery))
+            return 21;
         failTexture = 0;
+        recovery.prepareTextures();
         bool rejected = false, sibling = false;
         for (const auto &layer: layers) {
             AtlasRegion region;
@@ -331,7 +385,7 @@ int main() {
         failTexture = -1;
         recovery.resetTextures();
         recovery.prepareTextures();
-        if (textures.size() != 12 || !collectLayers(recovery))
+        if (!collectLayers(recovery) || textures.size() != 12)
             return 13;
         recovery.stop();
     }
@@ -349,6 +403,7 @@ int main() {
         requestedTiles.clear();
         (void)old.tile(0, 20, 20, tile);
         (void)old.tile(1, 20, 20, tile);
+        old.update();
         for (auto suffix: {L"M00_L0_20_20_00008400.tpf.dcx", L"M01_L0_20_20_00000008.tpf.dcx"})
             if (std::none_of(requestedTiles.begin(), requestedTiles.end(), [&](const auto &path) { return path.ends_with(suffix); }))
                 return 17;
@@ -363,4 +418,5 @@ int main() {
     ImGui::DestroyContext();
     std::puts("PASS: 12 referenced atlases in one request; 117 visible recipes draw correct texture/UVs; unused/missing/malformed atlases, GPU failure and reset/unload isolation; "
               "pre-DLC three-atlas resources without M10.");
+    std::puts("PASS: no startup GPU atlas allocations; one visible atlas uses one texture and at most one status poll per frame for 500 references.");
 }

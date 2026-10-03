@@ -76,7 +76,9 @@ typedef struct {
     uint64_t (*requestFile)(const ERFileRequest *request);
     ERFileStatus (*pollFile)(uint64_t token, const wchar_t *part, ERFileData *data);
     void (*releaseFile)(uint64_t token); // Also cancels queued/pending requests.
-    // Texture methods run on the plugin render/create/destroy renderer thread.
+    // createDdsTexture copies/queues CPU data and may also run on update with
+    // current cores. pollTexture/retireTexture remain render-thread methods.
+    // Check size for queueDdsTexture below before issuing update-thread calls.
     // CPU file methods can be used from update; poll data remains valid until
     // releaseFile(), which must not race a consumer of that data.
     uint64_t (*createDdsTexture)(const void *dds, uint64_t size);
@@ -85,11 +87,21 @@ typedef struct {
     bool (*readMapState)(ERMapState *state);
     bool (*beginOffscreen)(void *offscreen);
     uintptr_t (*findParamTable)(uint32_t repositoryGroup);
+    // Optional sink: nullptr when the diagnostic log file is disabled.
     void (*log)(const char *message);
     bool (*readEventFlag)(uint32_t id);
     // Appended to version 1. Check size before accessing this member. Older
     // cores without it support only the original latest-game layout.
     bool (*readGameLayout)(ERGameLayout *layout);
+    // Appended to version 1: thread-safe CPU preparation/queueing. The returned
+    // token is polled/retired on render just like createDdsTexture tokens.
+    uint64_t (*queueDdsTexture)(const void *dds, uint64_t size);
+    // Local offscreen target. Vertices/scissors generated between begin and
+    // end are translated internally; composite it using UV (0,0)..(1,1).
+    bool (*beginOffscreenRegion)(void *offscreen, float x, float y, float width, float height);
+    // Actual committed GPU allocation; render-thread query, nonzero after
+    // upload submission. Older cores can use a conservative DDS size estimate.
+    uint64_t (*textureMemoryBytes)(uint64_t token);
 } EROverlayNativeAPI;
 
 #define ER_NATIVE_API_V1_SIZE offsetof(EROverlayNativeAPI, readGameLayout)

@@ -18,6 +18,7 @@
 #include <MinHook.h>
 
 #include <algorithm>
+#include <cmath>
 
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -1121,12 +1122,14 @@ HRESULT WINAPI D3DRenderer::hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
 
 OffscreenContext *D3DRenderer::CreateOffscreen() {
     auto *ctx = new OffscreenContext();
+    ctx->renderer = this;
     return ctx;
 }
 
 void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
-    if (!ctx) return;
-    for (auto &target : ctx->targets) {
+    if (!ctx)
+        return;
+    for (auto &target: ctx->targets) {
         if (target.texture) {
             deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
             target.texture = nullptr;
@@ -1143,9 +1146,11 @@ void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
 }
 
 void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
-    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+        return;
     auto &target = ctx->targets[ctx->currentIndex];
-    if (target.texture && target.width == w && target.height == h) return;
+    if (target.texture && target.width == w && target.height == h)
+        return;
 
     // Release old resources
     if (target.texture) {
@@ -1179,15 +1184,18 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
     D3D12_CLEAR_VALUE clearValue = {};
     clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-    if (FAILED(device_->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &texDesc,
-                                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue,
-                                                IID_PPV_ARGS(&target.texture)))) {
+    if (FAILED(
+            device_->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &texDesc, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &clearValue, IID_PPV_ARGS(&target.texture)))) {
         target.texture = nullptr;
         return;
     }
 
     HeapDescriptorAlloc(&target.srvCpuHandle, &target.srvGpuHandle);
-    if (!target.srvCpuHandle.ptr) { target.texture->Release(); target.texture = nullptr; return; }
+    if (!target.srvCpuHandle.ptr) {
+        target.texture->Release();
+        target.texture = nullptr;
+        return;
+    }
     // Pair each offscreen RTV with its unique SRV allocation. Fixed slots per
     // back buffer collide when more than one plugin creates an offscreen target.
     auto descriptorIndex = (target.srvCpuHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / srvDescriptorSize_;
@@ -1211,11 +1219,14 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
 void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+        return;
     auto &target = ctx->targets[ctx->currentIndex];
-    if (!target.texture) return;
-    auto *cl = gD3DRenderer->commandList_;
-    if (!cl) return;
+    if (!target.texture)
+        return;
+    auto *cl = ctx->renderer ? ctx->renderer->commandList_ : nullptr;
+    if (!cl)
+        return;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1228,16 +1239,32 @@ void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd
     float clearColor[4] = {0.f, 0.f, 0.f, 0.f};
     cl->ClearRenderTargetView(target.rtvCpuHandle, clearColor, 0, nullptr);
     cl->OMSetRenderTargets(1, &target.rtvCpuHandle, FALSE, nullptr);
+    if (ctx->local) {
+        // The local vertices and clip rectangles use DisplayPos as origin,
+        // allowing the stock ImGui backend to keep handling scissors.
+        float width = ctx->displaySize.x, height = ctx->displaySize.y;
+        float matrix[4][4] = {
+            {2.f / width, 0, 0, 0}, {0, -2.f / height, 0, 0}, {0, 0, .5f, 0}, {-1.f - 2.f * ctx->displayPos.x / width, 1.f + 2.f * ctx->displayPos.y / height, .5f, 1}};
+        D3D12_VIEWPORT viewport{};
+        viewport.Width = width;
+        viewport.Height = height;
+        viewport.MaxDepth = 1;
+        cl->RSSetViewports(1, &viewport);
+        cl->SetGraphicsRoot32BitConstants(0, 16, matrix, 0);
+    }
 }
 
 void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+        return;
     auto &target = ctx->targets[ctx->currentIndex];
-    if (!target.texture) return;
-    auto *cl = gD3DRenderer->commandList_;
-    if (!cl) return;
+    if (!target.texture)
+        return;
+    auto *cl = ctx->renderer ? ctx->renderer->commandList_ : nullptr;
+    if (!cl)
+        return;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1247,16 +1274,37 @@ void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     cl->ResourceBarrier(1, &barrier);
 
-    cl->OMSetRenderTargets(1, &gD3DRenderer->currentRTV_, FALSE, nullptr);
+    cl->OMSetRenderTargets(1, &ctx->renderer->currentRTV_, FALSE, nullptr);
 }
 
 bool D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
-    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0) return false;
-
+    if (!ctx)
+        return false;
+    ctx->local = false;
     auto *vp = ImGui::GetMainViewport();
     int w = (int)vp->Size.x;
     int h = (int)vp->Size.y;
-    if (w <= 0 || h <= 0) return false;
+    return beginOffscreen(ctx, w, h);
+}
+
+bool D3DRenderer::BeginOffscreenRegion(OffscreenContext *ctx, float x, float y, float width, float height) {
+    if (!ctx || !std::isfinite(x) || !std::isfinite(y) || !std::isfinite(width) || !std::isfinite(height) || width < 1 || height < 1 || width > 16384 || height > 16384)
+        return false;
+    auto *draw = ImGui::GetWindowDrawList();
+    ctx->local = true;
+    ctx->origin = ImVec2(x, y);
+    ctx->displayPos = ImGui::GetMainViewport()->Pos;
+    ctx->displaySize = ImVec2(std::ceil(width), std::ceil(height));
+    ctx->firstVertex = draw->VtxBuffer.Size;
+    if (!beginOffscreen(ctx, static_cast<int>(ctx->displaySize.x), static_cast<int>(ctx->displaySize.y)))
+        return false;
+    ctx->firstCommand = draw->CmdBuffer.Size - 1;
+    return true;
+}
+
+bool D3DRenderer::beginOffscreen(OffscreenContext *ctx, int w, int h) {
+    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0 || w <= 0 || h <= 0)
+        return false;
 
     if (ctx->targets.size() != buffersCounts_) {
         ctx->targets.resize(buffersCounts_);
@@ -1274,7 +1322,8 @@ bool D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
     }
 
     ensureOffscreenSize(ctx, w, h);
-    if (!target.texture) return false;
+    if (!target.texture)
+        return false;
 
     auto *drawList = ImGui::GetWindowDrawList();
     drawList->AddCallback(BeginOffscreenCallback, ctx);
@@ -1282,11 +1331,29 @@ bool D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
 }
 
 void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
-    if (!ctx || ctx->currentIndex >= ctx->targets.size()) return nullptr;
+    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+        return nullptr;
     auto &target = ctx->targets[ctx->currentIndex];
-    if (!target.texture) return nullptr;
+    if (!target.texture)
+        return nullptr;
 
     auto *drawList = ImGui::GetWindowDrawList();
+    if (ctx->local) {
+        ImVec2 offset(ctx->displayPos.x - ctx->origin.x, ctx->displayPos.y - ctx->origin.y);
+        for (int i = ctx->firstVertex; i < drawList->VtxBuffer.Size; ++i) {
+            drawList->VtxBuffer[i].pos.x += offset.x;
+            drawList->VtxBuffer[i].pos.y += offset.y;
+        }
+        for (int i = ctx->firstCommand; i < drawList->CmdBuffer.Size; ++i) {
+            auto &command = drawList->CmdBuffer[i];
+            command.ClipRect.x += offset.x;
+            command.ClipRect.y += offset.y;
+            command.ClipRect.z += offset.x;
+            command.ClipRect.w += offset.y;
+        }
+        // EndOffscreen AddCallback starts a new command, restoring the draw
+        // list's original clip header for border/composite drawing.
+    }
     drawList->AddCallback(EndOffscreenCallback, ctx);
     drawList->AddCallback(ImDrawCallback_ResetRenderState, nullptr);
 

@@ -26,7 +26,6 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     ImGui::SetCurrentContext((ImGuiContext *)context);
     ImGui::SetAllocatorFunctions((ImGuiMemAllocFunc)allocFunc, (ImGuiMemFreeFunc)freeFunc, userData);
 
-    offscreen_ = api->createOffscreen();
     auto settings = loadSettings(*api);
     show_ = true;
     showDeath_ = settings.showDeath;
@@ -64,6 +63,11 @@ void Renderer::selectPreset(size_t index) {
 
 bool Renderer::render() {
     gResources.prepareTextures();
+    auto now = gResources.frameTime();
+    if (offscreen_ && now - offscreenTouched_ >= 10000) {
+        api->destroyOffscreen(offscreen_);
+        offscreen_ = nullptr;
+    }
     auto snapshot = gData.snapshot();
     if (snapshot.onGUI)
         return false;
@@ -117,17 +121,27 @@ bool Renderer::render() {
     if (ImGui::Begin("##minimap_window", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing |
                          ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoSavedSettings)) {
-        bool offscreen = offscreen_ && (currentAlpha_ < 1.f || currentRotate_ || currentShape_ != Shape::Rect);
+        bool needsOffscreen = currentAlpha_ > 0 && (currentAlpha_ < 1.f || currentRotate_ || currentShape_ != Shape::Rect);
+        if (needsOffscreen && !offscreen_)
+            offscreen_ = api->createOffscreen();
+        bool offscreen = offscreen_ && needsOffscreen;
+        if (offscreen)
+            offscreenTouched_ = now;
         float alpha = currentAlpha_;
         if (offscreen) {
-            if (!nativeApi || !nativeApi->beginOffscreen(offscreen_)) {
+            localOffscreen_ =
+                nativeApi && nativeApi->size >= offsetof(EROverlayNativeAPI, beginOffscreenRegion) + sizeof(nativeApi->beginOffscreenRegion) && nativeApi->beginOffscreenRegion;
+            auto origin = ImGui::GetWindowPos();
+            bool begun = nativeApi &&
+                         (localOffscreen_ ? nativeApi->beginOffscreenRegion(offscreen_, origin.x, origin.y, minimapWidth_, minimapHeight_) : nativeApi->beginOffscreen(offscreen_));
+            if (!begun) {
                 ImGui::End();
                 ImGui::PopStyleVar(2);
                 return false;
             }
             currentAlpha_ = 1.f;
         }
-        if (snapshot.valid)
+        if (snapshot.valid && alpha > 0)
             renderContent(snapshot);
         currentAlpha_ = alpha;
         if (offscreen)
@@ -170,15 +184,20 @@ void Renderer::drawRecipe(const IconRecipe *recipe, Point center, float scale, f
     };
     for (const auto &layer: recipe->layers) {
         if (layer.bitmap()) {
+            ImVec2 p0 = project(layer, {0, 0}), p1 = project(layer, {float(layer.width), 0});
+            ImVec2 p2 = project(layer, {float(layer.width), float(layer.height)}), p3 = project(layer, {0, float(layer.height)});
+            float left = std::min({p0.x, p1.x, p2.x, p3.x}), right = std::max({p0.x, p1.x, p2.x, p3.x});
+            float top = std::min({p0.y, p1.y, p2.y, p3.y}), bottom = std::max({p0.y, p1.y, p2.y, p3.y});
+            if (right < origin.x || bottom < origin.y || left > origin.x + minimapWidth_ || top > origin.y + minimapHeight_)
+                continue;
             AtlasRegion region;
             ERTextureView texture;
             if (!gResources.layerView(layer, region, texture))
                 continue;
             ImVec2 uv0(float(region.x) / texture.width, float(region.y) / texture.height);
             ImVec2 uv1(float(region.x + region.width) / texture.width, float(region.y + region.height) / texture.height);
-            draw->AddImageQuad((ImTextureID)texture.gpuHandle, project(layer, {0, 0}), project(layer, {float(layer.width), 0}),
-                               project(layer, {float(layer.width), float(layer.height)}), project(layer, {0, float(layer.height)}), uv0, ImVec2(uv1.x, uv0.y), uv1,
-                               ImVec2(uv0.x, uv1.y), IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
+            draw->AddImageQuad((ImTextureID)texture.gpuHandle, p0, p1, p2, p3, uv0, ImVec2(uv1.x, uv0.y), uv1, ImVec2(uv0.x, uv1.y),
+                               IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
         } else {
             Point previous;
             for (const auto &command: layer.shape.commands) {
@@ -234,8 +253,7 @@ void Renderer::drawPlayerMarker(const PlayerMarkerInfo &marker, Point center, fl
 }
 
 void Renderer::drawTile(const TileView &tile, Point player, float cosine, float sine) {
-    ERTextureView texture;
-    if (!nativeApi || nativeApi->pollTexture(tile.texture, &texture) != ER_TEXTURE_READY)
+    if (!tile.view.gpuHandle)
         return;
     auto origin = ImGui::GetWindowPos();
     auto point = [&](float x, float y) {
@@ -243,7 +261,7 @@ void Renderer::drawTile(const TileView &tile, Point player, float cosine, float 
         y = (y - player.y) * effectiveScale_;
         return origin + ImVec2(minimapWidth_ * .5f + x * cosine - y * sine, minimapHeight_ * .5f + x * sine + y * cosine);
     };
-    ImGui::GetWindowDrawList()->AddImageQuad((ImTextureID)texture.gpuHandle, point(tile.left, tile.top), point(tile.right, tile.top), point(tile.right, tile.bottom),
+    ImGui::GetWindowDrawList()->AddImageQuad((ImTextureID)tile.view.gpuHandle, point(tile.left, tile.top), point(tile.right, tile.top), point(tile.right, tile.bottom),
                                              point(tile.left, tile.bottom), ImVec2(0, 0), ImVec2(1, 0), ImVec2(1, 1), ImVec2(0, 1),
                                              IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
 }
@@ -272,14 +290,21 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
         for (size_t i = 0; i < std::size(masks); ++i)
             masks[i] = fullMap_ ? UINT32_MAX : state.activeMasks[i];
         gResources.beginFrame(state.generation, map, masks, level);
-        float radius = currentRotate_ ? std::hypot(minimapWidth_, minimapHeight_) * .5f : 0.f;
-        float halfX = (currentRotate_ ? radius : minimapWidth_ * .5f) / effectiveScale_;
-        float halfY = (currentRotate_ ? radius : minimapHeight_ * .5f) / effectiveScale_;
-        int x0 = std::max(0, int(std::floor((player.x - halfX) / span)) - 1), x1 = std::min(count - 1, int(std::floor((player.x + halfX) / span)) + 1);
-        int y0 = std::max(0, int(std::floor((player.y - halfY) / span)) - 1), y1 = std::min(count - 1, int(std::floor((player.y + halfY) / span)) + 1);
+        // A circle's visible world bounds do not expand when it rotates.
+        // Include only tiles intersecting the display, not a full extra ring.
+        float halfX = (minimapWidth_ * .5f + 1.f) / effectiveScale_;
+        float halfY = (minimapHeight_ * .5f + 1.f) / effectiveScale_;
+        int x0 = std::max(0, int(std::floor((player.x - halfX) / span))), x1 = std::min(count - 1, int(std::floor((player.x + halfX) / span)));
+        int y0 = std::max(0, int(std::floor((player.y - halfY) / span))), y1 = std::min(count - 1, int(std::floor((player.y + halfY) / span)));
         auto drawLayer = [&](uint32_t layer) {
             for (int y = y0; y <= y1; ++y)
                 for (int x = x0; x <= x1; ++x) {
+                    if (currentShape_ == Shape::Circle) {
+                        float dx = std::clamp(player.x, x * span, (x + 1) * span) - player.x;
+                        float dy = std::clamp(player.y, y * span, (y + 1) * span) - player.y;
+                        if (dx * dx + dy * dy > halfX * halfX)
+                            continue;
+                    }
                     TileView tile;
                     if (gResources.tile(layer, x, count - 1 - y, tile))
                         drawTile(tile, player, cosine, sine);
@@ -338,7 +363,8 @@ void Renderer::composite(float alpha) {
     auto *vp = ImGui::GetMainViewport();
     auto *draw = ImGui::GetWindowDrawList();
     ImVec2 far = origin + ImVec2(minimapWidth_, minimapHeight_);
-    ImVec2 uv0 = (origin - vp->Pos) / vp->Size, uv1 = (far - vp->Pos) / vp->Size;
+    ImVec2 uv0 = localOffscreen_ ? ImVec2(0, 0) : (origin - vp->Pos) / vp->Size;
+    ImVec2 uv1 = localOffscreen_ ? ImVec2(1, 1) : (far - vp->Pos) / vp->Size;
     draw->PushTexture((ImTextureID)handle);
     int first = draw->VtxBuffer.Size;
     if (currentShape_ == Shape::Circle)

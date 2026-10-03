@@ -42,6 +42,7 @@ uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data()), fieldPointer =
 uint64_t generation = 1, nextTexture = 100;
 unsigned reads = 0;
 bool valid = true, enabled = true, offscreenUsed = false;
+bool verifyTiles = false;
 int fullMapConfig = -1; // Missing key exercises the production default.
 ERGameLayout selectedLayout{sizeof(ERGameLayout), 0x80, 0x250, 0x720, 0x730, 0x350, 0x348, 1, 7, 194};
 uint32_t progressMasks[3]{};
@@ -95,12 +96,30 @@ bool frame(const char *name, const std::vector<uint8_t> &numbers, bool expectOff
     auto snapshot = er::minimap::gData.snapshot();
     er::minimap::Renderer renderer;
     renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(allocate), reinterpret_cast<void *>(deallocate), nullptr);
+    for (unsigned warmup = 0; warmup < 5; ++warmup) {
+        er::minimap::gResources.prepareTextures();
+        for (auto name: {"death", "marker", "player", "arrow", "bearing"})
+            if (const auto *recipe = er::minimap::gResources.special(name))
+                for (const auto &layer: recipe->layers) {
+                    er::minimap::AtlasRegion region;
+                    ERTextureView texture;
+                    (void)er::minimap::gResources.layerView(layer, region, texture);
+                }
+    }
+    if (verifyTiles)
+        for (unsigned warmup = 0; warmup < 8; ++warmup) {
+            ImGui::NewFrame();
+            renderer.render();
+            ImGui::Render();
+        }
     ImGui::NewFrame();
     std::array<ImFontGlyph, 5> glyphs;
     auto *baked = ImGui::GetFont()->GetFontBaked(18.f * .675f);
     for (size_t i = 0; i < glyphs.size(); ++i)
         glyphs[i] = *baked->FindGlyph(ImWchar('1' + i));
     bool cursor = renderer.render();
+    // Tile jobs are enqueued by drawing and requested on the next CPU update.
+    er::minimap::gResources.prepareTextures();
     ImGui::Render();
     const auto *recipe = er::minimap::gResources.special("marker");
     er::minimap::AtlasRegion region{};
@@ -407,8 +426,8 @@ int main(int argc, char **argv) {
     if (!frame("valid snapshot recovers on next update", {1, 2}, false))
         return 30;
     // Use the real renderer/configuration and archive metadata to inspect tile
-    // requests. Failed mock reads release immediately so both underground
-    // layers can be checked without the pending-request budget hiding one.
+    // requests. Successful local mock reads allow the bounded async queue to
+    // progress over several frames and reach both underground layers.
     auto index = file("build/ida/probes/run-26836-32694765/map-index.bin");
     auto metadata = file("build/ida/probes/run-26836-32694765/map-masks.bin");
     if (!er::minimap::gResources.loadDirectory(index, metadata))
@@ -417,7 +436,12 @@ int main(int argc, char **argv) {
         requestedTiles.emplace_back(request->path);
         return 1000 + requestedTiles.size();
     };
-    native.pollFile = [](uint64_t, const wchar_t *, ERFileData *) { return ER_FILE_FAILED; };
+    static auto tileTpf = file("build/ida/probes/run-26836-32694765/surface-v8000.tpf");
+    native.pollFile = [](uint64_t, const wchar_t *, ERFileData *out) {
+        *out = {tileTpf.data(), tileTpf.size(), 1};
+        return ER_FILE_SUCCEEDED;
+    };
+    verifyTiles = true;
     progressMasks[0] = 0x8000;
     progressMasks[2] = 1;
     put(view, 0x28, 5248.f);

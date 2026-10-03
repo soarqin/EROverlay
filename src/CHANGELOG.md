@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 #### Changed
 
 - Shortcuts support Ctrl, Alt, Shift and Win combinations. Multiple overlays can share the same key; shortcuts respond only while the game is in the foreground.
+- Reduce Minimap rendering overhead and video memory use, with unused map resources released automatically.
 
 #### Fixed
 

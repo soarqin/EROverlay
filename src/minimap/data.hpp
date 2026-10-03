@@ -1,7 +1,10 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <memory>
 #include <mutex>
+#include <span>
 #include <vector>
 
 #include "nativeapi.h"
@@ -29,6 +32,23 @@ struct PlayerMarkerInfo {
     uint8_t number = 0;
     uint8_t map = 0;
 };
+class PlayerMarkers {
+public:
+    [[nodiscard]] size_t size() const { return count_; }
+    [[nodiscard]] bool empty() const { return !count_; }
+    [[nodiscard]] const PlayerMarkerInfo *begin() const { return values_.data(); }
+    [[nodiscard]] const PlayerMarkerInfo *end() const { return values_.data() + count_; }
+    [[nodiscard]] const PlayerMarkerInfo &operator[](size_t index) const { return values_[index]; }
+    void clear() { count_ = 0; }
+    void push_back(const PlayerMarkerInfo &marker) {
+        if (count_ < values_.size())
+            values_[count_++] = marker;
+    }
+
+private:
+    std::array<PlayerMarkerInfo, 5> values_{};
+    uint8_t count_ = 0;
+};
 struct MapSnapshot {
     ERMapState state{};
     Camera camera;
@@ -36,8 +56,14 @@ struct MapSnapshot {
     bool valid = false;
     bool roundtable = false;
     uint32_t homeIcon = 48;
-    std::vector<DecorationInfo> decorations;
-    std::vector<PlayerMarkerInfo> playerMarkers;
+    std::span<const DecorationInfo> decorations;
+    PlayerMarkers playerMarkers;
+
+private:
+    friend class Data;
+    // Snapshot copies share immutable decoration storage; no per-frame vector
+    // allocation/copy is needed on either the update or render thread.
+    std::shared_ptr<const std::vector<DecorationInfo>> decorationStorage_;
 };
 
 class Data {

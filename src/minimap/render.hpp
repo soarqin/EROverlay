@@ -76,6 +76,8 @@ private:
     float effectiveBearingRatio_ = 1.f;
 
     void *offscreen_ = nullptr;
+    bool localOffscreen_ = false;
+    uint64_t offscreenTouched_ = 0;
 };
 
 } // namespace er::minimap

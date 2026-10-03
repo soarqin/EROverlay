@@ -287,6 +287,11 @@ int main() {
     native.size = sizeof(native);
     if (!checkParamFormats() || !checkPieceFormats())
         return 1;
+    native.size = offsetof(EROverlayNativeAPI, queueDdsTexture);
+    profile = &er::util::GAME_PROFILES[0];
+    if (er::minimap::gameLayout().graceStride != profile->layout.graceStride || er::minimap::gameLayout().mapMask != profile->layout.mapMask)
+        return 5;
+    native.size = sizeof(native);
     std::array<uint8_t, 32> unknown{};
     if (er::util::findGameProfile(unknown))
         return 2;
