@@ -21,6 +21,7 @@ std::array<uint8_t, 1200> view{}, menu{}, owner{}, pointTable{}, graceTable{}, c
 uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data());
 ERMapState state{};
 bool valid = true;
+bool completion = false;
 template<typename T>
 void put(std::array<uint8_t, 1200> &data, size_t offset, const T &value) {
     std::memcpy(data.data() + offset, &value, sizeof(value));
@@ -46,6 +47,7 @@ void prepare() {
     WorldMapPointParam point{};
     point.eventFlagId = 1;
     point.iconId = 3;
+    point.clearedEventFlagId = 2;
     point.areaNo = 60;
     point.gridXNo = 28;
     point.gridZNo = 64;
@@ -100,14 +102,24 @@ int main() {
         return valid && er::util::readWorldMapView(reinterpret_cast<uintptr_t>(view.data()), *out);
     };
     native.findParamTable = [](uint32_t group) -> uintptr_t { return reinterpret_cast<uintptr_t>((group == 43 ? graceTable : group == 87 ? pointTable : commonTable).data()); };
-    native.readEventFlag = [](uint32_t id) { return id == 1; };
+    native.readEventFlag = [](uint32_t id) { return id == 1 || (id == 2 && completion); };
     er::minimap::nativeApi = &native;
     er::minimap::Data data;
     data.update();
     auto first = data.snapshot();
     if (!first.valid || !first.state.deathValid || first.state.underground != 0 || first.state.deathMapId != 0 || first.decorations.size() != 1 || first.decorations[0].x != 128 ||
-        first.decorations[0].y != 128 || first.decorations[0].iconId != 3)
+        first.decorations[0].y != 128 || first.decorations[0].iconId != 3 || first.decorations[0].cleared)
         return 1;
+    completion = true;
+    ++state.generation;
+    data.update();
+    if (data.snapshot().decorations.size() != 1 || !data.snapshot().decorations[0].cleared)
+        return 7;
+    completion = false;
+    ++state.generation;
+    data.update();
+    if (data.snapshot().decorations.size() != 1 || data.snapshot().decorations[0].cleared)
+        return 8;
     view[0x30] = 1;
     put(view, 0xB4, int32_t{1});
     data.update();
@@ -123,7 +135,7 @@ int main() {
     data.update();
     if (data.snapshot().state.deathValid)
         return 2;
-    state.generation = 2;
+    ++state.generation;
     put(view, 0x14, uint32_t{0x0b0a0000});
     data.update();
     if (!data.snapshot().roundtable)

@@ -24,6 +24,8 @@ cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_compatibility
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_atlas_verify.cpp src\minimap\render.cpp src\minimap\settings.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_atlas_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\imgui tools\minimap_mod_marker_verify.cpp src\minimap\render.cpp src\minimap\settings.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_mod_marker_verify.exe /link build\native\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
+if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_progress_verify.cpp src\util\gameflags.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_progress_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_performance_verify.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_performance_verify.exe /link xmllite.lib shlwapi.lib

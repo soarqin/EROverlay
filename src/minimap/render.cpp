@@ -199,6 +199,57 @@ void Renderer::drawRecipe(const IconRecipe *recipe, Point center, float scale, f
             draw->AddImageQuad((ImTextureID)texture.gpuHandle, p0, p1, p2, p3, uv0, ImVec2(uv1.x, uv0.y), uv1, ImVec2(uv0.x, uv1.y),
                                IM_COL32(255, 255, 255, int(currentAlpha_ * 255)));
         } else {
+            // Cleared is a bitmap in the reported mod and a filled vector in
+            // vanilla GFX. Reuse ImGui's path storage for closed fill contours.
+            for (size_t fill = 0; fill < layer.shape.fills.size(); ++fill) {
+                const auto &style = layer.shape.fills[fill];
+                uint32_t color = (style.color & 0xffffff) | (uint32_t(float(style.color >> 24) * currentAlpha_) << 24);
+                if (!(color >> 24))
+                    continue;
+                auto finish = [&] {
+                    auto &path = draw->_Path;
+                    if (path.Size > 1 && ImLengthSqr(path.front() - path.back()) < .000001f)
+                        path.pop_back();
+                    if (path.Size < 3) {
+                        draw->PathClear();
+                        return;
+                    }
+                    float area = 0, turn = 0;
+                    bool convex = true;
+                    for (int i = 0; i < path.Size; ++i) {
+                        const auto &a = path[i], &b = path[(i + 1) % path.Size], &c = path[(i + 2) % path.Size];
+                        area += a.x * b.y - b.x * a.y;
+                        float cross = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+                        if (std::abs(cross) > .000001f) {
+                            convex &= turn == 0 || turn * cross > 0;
+                            turn = cross;
+                        }
+                    }
+                    if (area < 0)
+                        std::reverse(path.begin(), path.end());
+                    if (convex)
+                        draw->PathFillConvex(color);
+                    else
+                        draw->PathFillConcave(color);
+                };
+                draw->PathClear();
+                Point previous;
+                for (const auto &command: layer.shape.commands) {
+                    bool active = command.op && (command.fill0 == fill + 1 || command.fill1 == fill + 1);
+                    if (!active)
+                        finish();
+                    else {
+                        if (draw->_Path.empty())
+                            draw->PathLineTo(project(layer, previous));
+                        if (command.op == 1)
+                            draw->PathLineTo(project(layer, command.to));
+                        else
+                            draw->PathBezierQuadraticCurveTo(project(layer, command.control), project(layer, command.to));
+                    }
+                    previous = command.to;
+                }
+                finish();
+            }
             Point previous;
             for (const auto &command: layer.shape.commands) {
                 if (command.op && command.stroke && command.stroke <= layer.shape.strokes.size()) {
@@ -325,6 +376,8 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
                 continue;
             float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
             drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
+            if (marker.cleared)
+                drawRecipe(gResources.special("cleared"), screen, size, marker.rotationRad + angle);
         }
         int markerMap = map == 2 ? 10 : map;
         if (showDeath_ && state.deathValid && state.deathMapId == markerMap) {

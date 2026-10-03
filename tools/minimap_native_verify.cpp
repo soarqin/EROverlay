@@ -47,6 +47,10 @@ int main() {
     GfxMovie movie;
     if (!movie.parse(gfx))
         return 4;
+    IconRecipe cleared;
+    if (!movie.itemOverlay("Cleared", cleared) || cleared.layers.size() != 1 || cleared.layers.front().bitmap() || std::abs(cleared.layers.front().matrix[4] - 28.3f) > .001f ||
+        std::abs(cleared.layers.front().matrix[5] + 22.4f) > .001f || !resources.special("cleared") || movie.itemOverlay("missing-overlay", cleared))
+        return 8;
     nlohmann::json output;
     for (uint32_t i = 1; i <= movie.iconFrameCount(); ++i) {
         IconRecipe recipe;

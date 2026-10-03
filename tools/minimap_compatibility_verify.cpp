@@ -37,6 +37,7 @@ uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data()), gameDataPointe
 uintptr_t graceTable = 0, pointTable = 0;
 uint64_t generation = 0;
 bool alternateFlag = false;
+bool completionFlag = false;
 template<typename T>
 void put(uintptr_t address, const T &value) {
     std::memcpy(reinterpret_cast<void *>(address), &value, sizeof(value));
@@ -176,6 +177,7 @@ bool checkProfile() {
     }
     BonfireWarpParam graceRow{};
     graceRow.eventflagId = 1;
+    graceRow.clearedEventFlagId = 3;
     graceRow.iconId = 1;
     graceRow.areaNo = 60;
     graceRow.gridXNo = 28;
@@ -189,6 +191,7 @@ bool checkProfile() {
     put(graceTable + 0x40, uint64_t{111000});
     WorldMapPointParam pointRow{};
     pointRow.eventFlagId = 1;
+    pointRow.clearedEventFlagId = 3;
     pointRow.distViewEventFlagId = 2;
     pointRow.iconId = 3;
     pointRow.distViewIconId = 49;
@@ -217,18 +220,29 @@ bool checkProfile() {
     put(markerSave, 16, uint64_t{10});
     put(markerSave, 0x40, uint64_t{2});
     alternateFlag = true;
+    completionFlag = true;
     ++generation;
     er::minimap::Data data;
     data.update();
     auto first = data.snapshot();
     if (!first.valid || !first.state.deathValid || first.state.underground || first.decorations.size() != 2 || first.playerMarkers.size() != 2 ||
-        first.playerMarkers[1].number != 5 || first.decorations[0].iconId != (early ? 77 : 88) || first.decorations[1].iconId != (early ? 3 : 84))
+        first.playerMarkers[1].number != 5 || first.decorations[0].iconId != (early ? 77 : 88) || first.decorations[1].iconId != (early ? 3 : 84) ||
+        !first.decorations[0].cleared || !first.decorations[1].cleared)
         return false;
     alternateFlag = false;
+    completionFlag = false;
     ++generation;
     data.update();
     auto base = data.snapshot();
-    if (base.decorations.size() != 2 || base.decorations[0].iconId != 77 || base.decorations[1].iconId != 3)
+    if (base.decorations.size() != 2 || base.decorations[0].iconId != 77 || base.decorations[1].iconId != 3 || base.decorations[0].cleared || base.decorations[1].cleared)
+        return false;
+    completionFlag = true;
+    put(graceTable + 256 + offsetof(BonfireWarpParam, clearedEventFlagId), UINT32_MAX);
+    put(pointTable + 256 + offsetof(WorldMapPointParam, clearedEventFlagId), uint32_t{0});
+    ++generation;
+    data.update();
+    auto invalidCompletion = data.snapshot();
+    if (invalidCompletion.decorations.size() != 2 || invalidCompletion.decorations[0].cleared || invalidCompletion.decorations[1].cleared)
         return false;
     // Verify the actual menu/view chain reader at both sides of a transition.
     er::util::MapContext context;
@@ -279,7 +293,7 @@ int main() {
                er::util::readWorldMapView(context.view, *state) && er::util::mapContextUnchanged(context, profile->layout);
     };
     native.findParamTable = [](uint32_t group) -> uintptr_t { return group == 43 ? graceTable : group == 87 ? pointTable : reinterpret_cast<uintptr_t>(commonTable.data()); };
-    native.readEventFlag = [](uint32_t id) { return id == 1 || (id == 2 && alternateFlag); };
+    native.readEventFlag = [](uint32_t id) { return id == 1 || (id == 2 && alternateFlag) || (id == 3 && completionFlag); };
     er::minimap::nativeApi = &native;
     native.size = ER_NATIVE_API_V1_SIZE;
     if (er::minimap::gameLayout().graceStride != 0x350 || er::minimap::gameLayout().mapMask != 7)

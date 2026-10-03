@@ -525,6 +525,31 @@ bool GfxMovie::icon(uint32_t frame, IconRecipe &recipe) const {
     recipeBounds(recipe);
     return true;
 }
+bool GfxMovie::itemOverlay(const std::string &name, IconRecipe &recipe) const {
+    recipe = {};
+    auto item = characters_.find(worldMapItem_);
+    if (item == characters_.end() || item->second.frames.empty())
+        return false;
+    const Placement *selected = nullptr;
+    uint16_t selectedDepth = 0;
+    for (const auto &[depth, placement]: item->second.frames.front())
+        if (placement.name == name) {
+            if (selected)
+                return false;
+            selected = &placement;
+            selectedDepth = depth;
+        }
+    if (!selected || selected->effects)
+        return false;
+    // SetTo controls this child independently of Icon_0. Preserve its local
+    // placement so vanilla completion dots and mod replacements share a pivot.
+    std::vector<uint16_t> depth{selectedDepth};
+    std::vector<uint32_t> parents{worldMapItem_};
+    if (!flatten(selected->character, 1, selected->matrix, depth, parents, recipe) || recipe.layers.empty())
+        return false;
+    recipeBounds(recipe);
+    return true;
+}
 bool GfxMovie::special(const std::string &path, IconRecipe &recipe) const {
     recipe = {};
     std::vector<uint16_t> depth;

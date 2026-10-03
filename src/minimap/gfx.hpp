@@ -60,6 +60,7 @@ class GfxMovie {
 public:
     [[nodiscard]] bool parse(util::Bytes bytes);
     [[nodiscard]] bool icon(uint32_t frame, IconRecipe &recipe) const;
+    [[nodiscard]] bool itemOverlay(const std::string &name, IconRecipe &recipe) const;
     [[nodiscard]] bool special(const std::string &path, IconRecipe &recipe) const;
     [[nodiscard]] bool image(const std::string &name, IconRecipe &recipe) const;
     [[nodiscard]] bool text(const std::string &path, TextLayout &layout) const;

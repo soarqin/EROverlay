@@ -23,6 +23,11 @@ struct NativeFileVerifier {
     static inline uint32_t requestedNames = 0;
     static inline uint64_t nextTexture = 0;
     static inline std::unordered_map<uint64_t, ERTextureView> textureViews;
+    static inline std::unordered_map<std::wstring, util::Bytes> metadataSources;
+    static inline uint32_t metadataRequests = 0;
+    static inline uint32_t mapStateReads = 0;
+    static inline bool mapReady = false;
+    static inline bool gameCompatible = true;
     static void freeBuffer(void *, void *bytes) {
         ++freed;
         HeapFree(GetProcessHeap(), 0, bytes);
@@ -127,13 +132,25 @@ struct NativeFileVerifier {
         copiedBytes = 0;
         EROverlayNativeAPI native{};
         native.size = sizeof(native);
+        native.gameCompatible = [] { return gameCompatible; };
         native.requestFile = [](const ERFileRequest *request) -> uint64_t {
-            if (!request->tpfNameCount || std::wstring_view(request->path) != L"menu:/Hi/01_Common.tpf.dcx")
-                return 0;
             auto token = bridge->request(*request);
             if (!token)
                 return 0;
             auto item = bridge->impl_->items.at(token);
+            if (!request->tpfNameCount) {
+                auto source = metadataSources.find(item->path);
+                if (source == metadataSources.end() || !completeBuffer(*item, source->second)) {
+                    bridge->release(token);
+                    return 0;
+                }
+                ++metadataRequests;
+                return token;
+            }
+            if (item->path != L"menu:/hi/01_common.tpf.dcx") {
+                bridge->release(token);
+                return 0;
+            }
             if (!completeBuffer(*item, container)) {
                 bridge->release(token);
                 return 0;
@@ -163,40 +180,81 @@ struct NativeFileVerifier {
             return ER_TEXTURE_READY;
         };
         native.retireTexture = [](uint64_t token) { textureViews.erase(token); };
+        native.readMapState = [](ERMapState *state) {
+            *state = {};
+            ++mapStateReads;
+            return mapReady;
+        };
         minimap::nativeApi = &native;
         auto gfx = readFile(gfxPath);
         auto layouts = readFile(layoutsPath);
         auto index = readFile("build/ida/probes/run-26836-32694765/map-index.bin");
         auto masks = readFile("build/ida/probes/run-26836-32694765/map-masks.bin");
+        auto startupGfx = readFile("build/ida/sprite-probe/run-24636-34293203/worldmap.gfx");
+        metadataSources = {{L"menu:/02_120_worldmap.gfx", startupGfx},
+                           {L"menu:/hi/01_common.sblytbnd.dcx", layouts},
+                           {L"menu:/71_maptile.tpfbhd", index},
+                           {L"menu:/71_maptile.mtmskbnd.dcx", masks}};
+        metadataRequests = 0;
+        mapStateReads = 0;
+        mapReady = false;
+        gameCompatible = false;
         bool ok = false;
         {
             minimap::Resources resources;
-            if (resources.loadDefinitions(gfx, layouts) && resources.loadDirectory(index, masks) && (!expectedNames || resources.atlasCount() == expectedNames)) {
-                unsigned before = freed;
-                resources.update();
-                ok = resources.ready() && !*resources.status() && requestedNames == resources.atlasCount() && copiedBytes && copiedBytes <= 256ull * 1024 * 1024 &&
-                     (!expectedBytes || copiedBytes == expectedBytes) && freed == before + 1;
-                for (const char *name: {"player", "death", "marker", "home", "arrow", "bearing"}) {
-                    auto recipe = resources.special(name);
-                    if (!recipe) {
-                        ok = false;
+            resources.update();
+            if (metadataRequests || resources.ready() || resources.atlasCount() || std::strcmp(resources.status(), "当前游戏版本不支持原生资源")) {
+                std::fputs("FAIL: metadata requested/cached before gameplay resources were ready\n", stderr);
+                minimap::nativeApi = nullptr;
+                return false;
+            }
+            gameCompatible = true;
+            resources.update();
+            if (metadataRequests || std::strcmp(resources.status(), "正在等待游戏资源")) {
+                std::fputs("FAIL: unsupported startup status did not clear while waiting for gameplay\n", stderr);
+                minimap::nativeApi = nullptr;
+                return false;
+            }
+            // The loader's mod mounts become available before gameplay. A
+            // title-screen read must not freeze the vanilla 348-frame GFX.
+            metadataSources[L"menu:/02_120_worldmap.gfx"] = gfx;
+            mapReady = true;
+            unsigned before = freed;
+            resources.update();
+            ok = resources.ready() && !*resources.status() && (!expectedNames || resources.atlasCount() == expectedNames) && metadataRequests == 4 &&
+                 requestedNames == resources.atlasCount() && copiedBytes && copiedBytes <= 256ull * 1024 * 1024 && (!expectedBytes || copiedBytes == expectedBytes) &&
+                 freed == before + 5;
+            minimap::GfxMovie movie;
+            ok &= movie.parse(gfx);
+            for (auto id: {499u, 500u, 501u, 502u}) {
+                minimap::IconRecipe expected;
+                if (movie.icon(id, expected))
+                    ok &= resources.icon(id) != nullptr;
+            }
+            for (const char *name: {"player", "death", "marker", "home", "arrow", "bearing"}) {
+                auto recipe = resources.special(name);
+                if (!recipe) {
+                    ok = false;
+                    continue;
+                }
+                for (const auto &layer: recipe->layers) {
+                    if (!layer.bitmap())
                         continue;
-                    }
-                    for (const auto &layer: recipe->layers) {
-                        if (!layer.bitmap())
-                            continue;
-                        minimap::AtlasRegion region;
-                        ERTextureView view;
-                        resources.prepareTextures();
-                        (void)resources.layerView(layer, region, view);
-                        resources.update();
-                        resources.prepareTextures();
-                        ok &= resources.layerView(layer, region, view);
-                    }
+                    minimap::AtlasRegion region;
+                    ERTextureView view;
+                    resources.prepareTextures();
+                    (void)resources.layerView(layer, region, view);
+                    resources.update();
+                    resources.prepareTextures();
+                    ok &= resources.layerView(layer, region, view);
                 }
             }
+            unsigned reads = mapStateReads;
+            resources.update();
+            ok &= mapStateReads == reads;
         }
         minimap::nativeApi = nullptr;
+        metadataSources.clear();
         container = {};
         bridge = nullptr;
         ok &= textureViews.empty();
@@ -224,6 +282,27 @@ struct NativeFileVerifier {
         auto token = files.request(request);
         if (!token)
             return 2;
+        {
+            std::lock_guard lock(files.impl_->mutex);
+            if (files.impl_->items.at(token)->path != L"menu:/hi/01_common.tpf.dcx" || files.impl_->items.at(token)->names.front() != L"SB_ModMap_00") {
+                std::fputs("FAIL: virtual path is not canonical, or DDS name case changed\n", stderr);
+                return 9;
+            }
+        }
+        for (auto [path, expected]:
+             {std::pair{L"MENU:\\Hi\\01_Common.tpf.dcx", L"menu:/hi/01_common.tpf.dcx"}, std::pair{L"D:/Mods/Menu/01_Common.tpf.dcx", L"D:/Mods/Menu/01_Common.tpf.dcx"},
+              std::pair{L"D:\\Mods\\Menu\\01_Common.tpf.dcx", L"D:\\Mods\\Menu\\01_Common.tpf.dcx"}, std::pair{L"Mods/Menu/01_Common.tpf.dcx", L"Mods/Menu/01_Common.tpf.dcx"}}) {
+            ERFileRequest other{path, 0x40, nullptr, 0, 1024};
+            auto otherToken = files.request(other);
+            if (!otherToken)
+                return 9;
+            {
+                std::lock_guard lock(files.impl_->mutex);
+                if (files.impl_->items.at(otherToken)->path != expected)
+                    return 9;
+            }
+            files.release(otherToken);
+        }
         ERFileStatus status = ER_FILE_QUEUED;
         for (unsigned retry = 0; retry < 1000 && status == ER_FILE_QUEUED; ++retry) {
             ERFileData data;
@@ -242,6 +321,7 @@ struct NativeFileVerifier {
                   "unknown EXE calls.");
         std::puts("PASS: >256 MiB / 42-image container returns only 12 requested DDS; named-copy and raw-file budgets remain bounded; cancellation/failure frees buffers.");
         std::puts("PASS: production GameFiles request/completion/poll/release feeds Resources; all six special recipes become renderable with no required-atlas error.");
+        std::puts("PASS: first metadata load waits for gameplay and selects late-mounted mod GFX; canonical virtual paths preserve exact DDS names.");
         return 0;
     }
 };

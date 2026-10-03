@@ -306,6 +306,16 @@ uint64_t GameFiles::request(const ERFileRequest &request) {
     item->path = request.path;
     if (item->path.size() > 1024)
         return 0;
+    // The game's high-level GFX/CSFile callers canonicalize virtual paths
+    // before reaching this raw request layer (RVA 0x120EA0). Match that here
+    // so archive and mod VFS lookups use the same key. DDS names stay exact.
+    auto colon = item->path.find(L':');
+    if (colon != std::wstring::npos && colon > 1 && item->path.find_first_of(L"/\\") == colon + 1)
+        for (auto &character: item->path)
+            if (character >= L'A' && character <= L'Z')
+                character += L'a' - L'A';
+            else if (character == L'\\')
+                character = L'/';
     item->flags = request.flags;
     item->maxBytes = std::clamp(request.maxBytes ? request.maxBytes : 256ull * 1024 * 1024, 1ull, 256ull * 1024 * 1024);
     for (uint32_t i = 0; i < request.tpfNameCount; ++i) {

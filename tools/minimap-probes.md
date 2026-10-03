@@ -178,6 +178,8 @@ build/native-checks/minimap_texture_verify.exe
 
 文件验证也接受三个额外参数：已解压 TPF、WorldMap GFX 和已解压布局 BND。提供这些参数后，先运行上述回归，再将指定资源交给正式 Resources 检查图集状态及六组特殊图形；该步骤模拟 GPU 提交，原文件不会修改。
 
+文件验证还检查首次加载等待与虚拟路径规范化：在玩家/地图尚未就绪时不缓存原版定义，就绪后读取 Mod GFX。`minimap_mod_marker_verify.exe` 接受五个资源路径，依次为 WorldMap GFX、已解压布局 BND、已解压 TPF、BonfireWarpParam PARAM 和 WorldMapPointParam PARAM。它使用指定 Mod 的完整参数，验证 Boss 发现、完成和赐福状态进入正式 ImGui 绘制列表，分别检查底图、存活图层和独立的 `WorldMapItem/Cleared` 完成图层。提供原版前三个资源并追加 `--vanilla-completion` 时，验证原版完成圆点的填充及局部位置。详细范围见[Mod Boss 标记验证](../docs/minimap-mod-markers.md)。
+
 ## 结果边界
 
 一次请求成功不证明早于挂载的启动时机、返回标题竞态、完整游戏进度变化和跨版本适配。原生素材研究 DLL 的复跑已取得 12 条请求终态，历史试验和复跑见[精选证据](../docs/minimap-game-textures.evidence.json)。本次历史适配只运行本地验证程序，没有重新注入研究 DLL 或部署当前构建。

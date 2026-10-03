@@ -215,6 +215,9 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
             return false;
         specials.emplace(name, std::move(recipe));
     }
+    IconRecipe cleared;
+    if (movie.itemOverlay("Cleared", cleared))
+        specials.emplace("cleared", std::move(cleared));
     TextLayout markerText;
     if (!movie.text("Body/_/Base/MarkerList/Item_0/Text_0", markerText))
         return false;
@@ -231,6 +234,14 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     for (auto &layer: specials["arrow"].layers)
         for (auto &v: layer.matrix)
             v *= 2;
+    // Completion glyphs are optional decorations, not required player/map UI.
+    // An unavailable mod overlay must not disable otherwise valid resources.
+    std::erase_if(specials, [&](const auto &item) {
+        return item.first == "cleared" && std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) {
+                   auto region = regions.find(layer.image);
+                   return layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height);
+               });
+    });
     for (const auto &[name, recipe]: specials)
         for (const auto &layer: recipe.layers) {
             auto region = regions.find(layer.image);
@@ -253,7 +264,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     collect(specials);
     for (const auto &[key, recipe]: specials)
         for (const auto &layer: recipe.layers)
-            if (layer.bitmap())
+            if (key != "cleared" && layer.bitmap())
                 sources[regions.at(layer.image).atlas]->required = true;
     std::vector<std::unique_ptr<Atlas>> atlases;
     std::vector<uint32_t> remap(sources.size(), UINT32_MAX);
@@ -296,6 +307,11 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     specials_ = std::move(specials);
     playerMarkerText_ = std::move(markerText);
     definitionsReady_.store(true, std::memory_order_release);
+    if (nativeApi && nativeApi->log) {
+        char line[160];
+        std::snprintf(line, sizeof(line), "minimap-definitions frames=%u recipes=%zu atlases=%zu\n", movie.iconFrameCount(), icons_.size(), atlases_.size());
+        nativeApi->log(line);
+    }
     return true;
 }
 
@@ -382,6 +398,16 @@ void Resources::update() {
     }
     if (canQueueTextures())
         updateJobs();
+    // The mod loader may finish mounting overrides after the overlay starts.
+    // Do not permanently publish vanilla GFX/layouts from the title screen.
+    // Probe readiness only until definitions are published, not every frame.
+    if (!definitionsReady_.load(std::memory_order_acquire) && !files_[0].token && !files_[0].complete && nativeApi->readMapState) {
+        ERMapState state{};
+        if (!nativeApi->readMapState(&state)) {
+            status_ = nativeApi->gameCompatible && !nativeApi->gameCompatible() ? "当前游戏版本不支持原生资源" : "正在等待游戏资源";
+            return;
+        }
+    }
     for (size_t i = 0; i < 4; ++i) {
         request(files_[i], PATHS[i], i == 1 || i == 3 ? 0x40 : 0);
         util::Bytes bytes;

@@ -25,6 +25,7 @@ struct DecorationInfo {
     float rotationRad = 0;
     DecorationSource source = DecorationSource::Landmark;
     bool areaIcon = false;
+    bool cleared = false;
 };
 struct PlayerMarkerInfo {
     int32_t id = -1;

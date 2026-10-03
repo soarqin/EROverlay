@@ -13,6 +13,8 @@ extern "C" {
 typedef enum { ER_FILE_QUEUED, ER_FILE_PENDING, ER_FILE_SUCCEEDED, ER_FILE_FAILED, ER_FILE_CANCELLED, ER_FILE_UNSUPPORTED, ER_FILE_INVALID } ERFileStatus;
 
 typedef struct {
+    // Virtual paths use the game's lowercase ASCII and forward-slash form.
+    // Filesystem paths and named DDS entry casing are preserved.
     const wchar_t *path;
     uint32_t flags;
     // When nonempty, copy only these DDS entries from a TPF in the callback.

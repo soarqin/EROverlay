@@ -78,6 +78,9 @@ static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map
     return true;
 }
 bool flag(uint32_t id) { return nativeApi && nativeApi->readEventFlag(id); }
+// WorldMapPinData::SetTo (RVA 0x87BE10) shows Cleared only for an active,
+// nonzero completion event. Native constructors normalize -1 to zero.
+bool cleared(uint32_t id) { return id && id != UINT32_MAX && flag(id); }
 bool enabled(uint32_t id) { return !id || id == UINT32_MAX || flag(id); }
 template<typename T>
 uint32_t value(const T &row, size_t offset) {
@@ -86,29 +89,35 @@ uint32_t value(const T &row, size_t offset) {
     return v;
 }
 template<typename T>
+bool textActive(const T &row, size_t index, size_t secondEnable, size_t secondDisable) {
+    if (static_cast<int32_t>(value(row, 48 + index * 12)) < 0)
+        return false;
+    auto enable1 = value(row, 52 + index * 12), enable2 = value(row, secondEnable + index * 4);
+    if (!enabled(enable1) || !enabled(enable2))
+        return false;
+    unsigned activeDisable = 0;
+    for (auto id: {value(row, 56 + index * 12), value(row, secondDisable + index * 4)}) {
+        if (!id || id == UINT32_MAX)
+            continue;
+        if (!flag(id))
+            return true;
+        ++activeDisable;
+    }
+    return !activeDisable;
+}
+template<typename T>
 bool alternate(const T &row, size_t secondEnable, size_t secondDisable) {
     for (size_t i = 0; i < 8; ++i) {
-        int32_t text = static_cast<int32_t>(value(row, 48 + i * 12));
         const auto type = reinterpret_cast<const uint8_t *>(&row)[144 + i];
-        if (text < 0 || type != 1)
-            continue;
-        auto enable1 = value(row, 52 + i * 12), enable2 = value(row, secondEnable + i * 4);
-        auto disable1 = value(row, 56 + i * 12), disable2 = value(row, secondDisable + i * 4);
-        if (!enabled(enable1) || !enabled(enable2))
-            continue;
-        unsigned activeDisable = 0;
-        bool all = true;
-        for (auto id: {disable1, disable2}) {
-            if (!id || id == UINT32_MAX)
-                continue;
-            if (!flag(id))
-                all = false;
-            else
-                ++activeDisable;
-        }
-        if (!all || !activeDisable)
+        if (type == 1 && textActive(row, i, secondEnable, secondDisable))
             return true;
     }
+    return false;
+}
+bool hasText(const WorldMapPointParam &row) {
+    for (size_t i = 0; i < 8; ++i)
+        if (textActive(row, i, 192, 224))
+            return true;
     return false;
 }
 template<typename T, typename F>
@@ -307,6 +316,7 @@ void Data::update() {
         marker.maps &= layout.mapMask;
         if (!marker.maps || !selected || id == homeId || !convert(view, layout.mapMask, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
             return;
+        marker.cleared = cleared(row.clearedEventFlagId);
         decorations->push_back(marker);
     });
     rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
@@ -314,6 +324,11 @@ void Data::update() {
             return;
         bool opened = flag(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
         if (!opened && !distant)
+            return;
+        // WorldMapPinData::_Update (0x87BF90): ordinary points require an
+        // active text slot. Mod completion points disable theirs when the
+        // colocated grace activates, while area/no-text points remain visible.
+        if (!row.isAreaIcon && !row.isEnableNoText && !hasText(row))
             return;
         DecorationInfo marker;
         marker.id = id;
@@ -336,6 +351,7 @@ void Data::update() {
         }
         if (!marker.maps || !convert(view, layout.mapMask, raw, x, y, z, marker.x, marker.y))
             return;
+        marker.cleared = cleared(row.clearedEventFlagId);
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
         decorations->push_back(marker);
     });
