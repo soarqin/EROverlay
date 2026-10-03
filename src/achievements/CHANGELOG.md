@@ -8,9 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
-#### Notes
+#### Changed
 
-- No module-specific changes in this update. Shared loader changes are listed in the [EROverlay changelog](../CHANGELOG.md).
+- Clarify the achievement-count limit and panel-layout instructions, and provide a Chinese-comment template in `configs_CN/`.
 
 ### [0.1.1] - 2026-06-30
 

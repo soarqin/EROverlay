@@ -10,23 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Added
 
-- Native resource extension through `getEROverlayNativeAPI(1)` for asynchronous game-file reads, map snapshots, parameter tables and event flags. Executable hash and entry-byte checks disable native integration for unsupported builds.
-- Overlay-owned DDS textures with asynchronous uploads, upload/frame fences and deferred texture/SRV retirement.
-- Native resource profiles for hash-verified 1.02–1.17 historical executables and Steam 1.17.1, retaining hash/entry checks and exposing version layouts through a size-gated extension.
+- Add Chinese-comment configuration templates in `configs_CN/` alongside clearer English instructions. Copy a matching template into `configs/` to use it.
+- Expand Minimap compatibility with ELDEN RING versions 1.02–1.17.1.
 
 #### Changed
 
-- Rewrite the English INI comments for clearer units, examples and behavior. Add matching Chinese-comment templates in configs_CN/ and include relevant templates in the Boss and Minimap packages; configuration keys and defaults remain identical.
-- Minimap diagnostics use `[diagnostics] log_file` in the sectioned minimap.ini format. The former `native_log` key is no longer read.
-
-- Centralized hotkey handling using Win32 Virtual-Key codes and modifier combinations. Shortcuts activate only while the game is in the foreground, and multiple plugins can react to the same press through `inputIsKeyDown` / `inputIsKeyPressed`.
-- Parse each TPF once and publish per-DDS results, removing the eight-name limit and isolating missing entries from valid sibling atlases. PARAM reads support 12/24-byte directories and check row boundaries.
+- Shortcuts support Ctrl, Alt, Shift and Win combinations. Multiple overlays can share the same key; shortcuts respond only while the game is in the foreground.
 
 #### Fixed
 
-- Fixed offscreen composition ghosting by using a separate render target for each swap-chain back buffer.
-- Fixed game-window lookup using the ELDEN RING window title as a window class name.
-- Corrected direct-storage event-flag reads (`type=2`), allowing the minimap to read map-fragment progress correctly.
+- Fix ghosting in translucent overlays.
+- Fix overlays failing to appear due to incorrect game-window detection.
+- Fix Minimap map-fragment progress synchronization.
+
+#### Upgrade notes
+
+- Minimap uses a new configuration format. Replace the old `minimap.ini` with the supplied template and reapply custom settings; see the [Minimap changelog](minimap/CHANGELOG.md).
 
 ### [1.3.0] - 2026-06-30
 

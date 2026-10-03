@@ -8,41 +8,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
-#### Configuration format change
-
-- Replace flat keys and parallel comma-separated lists with sections and independent named display presets. All existing controls, marker switches and display adjustments remain configurable.
-- Separate position from zoom, accept border width directly in pixels, and rewrite the INI comments and configuration guides. Invalid values use field defaults without throwing.
-- Position presets at the center or using horizontal/vertical edge margins anchored to the matching map corner. Margins support pixels, screen percentages and negative values, retaining the anchor through size changes and circle mode.
-- Replace old minimap.ini files with the new template; old configuration keys are no longer read.
-
 #### Added
 
-- Native dropped-runes marker, enabled by default with `[markers] death = true`. The marker follows the game's death record and is hidden after rune recovery or on a different map layer.
-- Player-placed numbered map beacons 1–5, drawn with native downward arrows and dynamic digits. Enabled by default with `[markers] beacons = true`; placement and removal follow the game, and remaining beacons retain their numbers.
-- Optional fully revealed minimap terrain with `[map] full_map = true`, covering the surface, underground and DLC. Disabled by default; this changes only the minimap display, leaving the save and grace/landmark discovery unchanged.
+- Show dropped runes on the minimap until they are recovered. Enabled by default.
+- Show the game's numbered map beacons 1–5, following placement and removal while preserving each beacon's number. Enabled by default.
+- Add an optional fully revealed map for surface, underground and DLC areas. Disabled by default; it changes only the minimap display, without changing saves, granting fragments or discovering graces and landmarks.
 
 #### Changed
 
-- Map tiles, icon atlases and GFX layouts now load through the game's file layer and render with Overlay-owned textures. External `data/map` files are no longer required or packaged.
-- Surface, underground, DLC and Roundtable Hold rendering now uses native map coordinates, icon aliases and resource layouts.
-- Minimap shortcuts now use the loader's shared Virtual-Key input handling, including modifier combinations and shared key presses.
-- Native adapters cover hash-verified 1.02–1.17 historical EXEs and Steam 1.17.1, selecting menu, map, grace and parameter layouts by hash. Pre-DLC versions do not require M10 or DLC atlases.
-- Atlas names and counts are discovered from GFX/TextureAtlas references, supporting mods with more than three atlases. Missing or malformed individual atlases no longer block valid siblings.
+- Use the game's map and icon artwork; external map images are no longer required.
+- Organize settings into sections and independent named display presets, keeping all existing display options configurable. Provide clearer English instructions and separate Chinese-comment templates.
+- Enter border width directly in pixels.
+- Position the map at the center or any corner using horizontal and vertical margins. Margins support pixels, percentages and negative values, retaining the selected corner when the map changes size.
+- Width, height and all percentage margins use the shorter screen side. Equal percentages give equal horizontal and vertical distances; pixel margins keep their units.
+- Expand compatibility with ELDEN RING versions 1.02–1.17.1 and mods using more than three icon sets. A missing icon set no longer prevents other icons from displaying.
+- Support modifier-key shortcuts and sharing keys with other overlays.
 
 #### Fixed
 
-- Keep circular minimap borders and their antialiasing inside the map bounds, preventing the top, bottom, left and right edges from being clipped. The minimap no longer inherits ImGui's window-border clipping inset.
-- Corrected map-fragment progress synchronization and tile-variant selection so obtained fragments show explored terrain instead of the unexplored map layer.
-- Added the surface underlay beneath the translucent underground map.
-- Fixed surface death markers being hidden because padding bytes were interpreted as part of the underground flag.
-- Corrected icon pivots, layered state graphics and Roundtable Hold asset selection.
+- Fix circular borders being cut off at the top, bottom, left and right edges.
+- Fix obtained map fragments still showing unexplored terrain.
+- Fix missing background terrain on the underground map.
+- Fix dropped runes not appearing on the surface map.
+- Correct icon positioning, rotation and appearance, including Roundtable Hold.
 
-#### Testing
+#### Upgrade notes
 
-- In-game testing with the latest ELDEN RING version was confirmed successful on 2026-10-02.
-- Historical adapters passed offline checks for all 28 old directories and the latest EXE, plus three-layout, bounded short-row, death/beacon/full-map regressions. Per-version old-game testing remains pending.
-- Twelve atlases passed production callback extraction, texture/UV drawing for 117 visible icon recipes, failure isolation and reset/retirement checks.
-- Twelve BC1 atlases passed production D3D12 uploads, per-texture GPU readback comparisons and complete SRV retirement.
+- Replace the old `configs/minimap.ini` with the new template and reapply custom settings. The old flat settings and comma-separated preset lists are no longer supported.
+- Percentage margins use the shorter screen side, and map sizing on narrower screens no longer uses the former 16:9 adjustment. Review custom sizes and positions after upgrading.
+- For Chinese comments, copy the matching template from `configs_CN/` into `configs/`. Save as UTF-8 and restart the game after editing.
 
 ### [1.1.3] - 2026-06-30
 

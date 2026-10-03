@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Changed
 
-- `toggle_full_mode` now uses Win32 Virtual-Key shortcuts through the loader's shared input handling, supporting modifier combinations and allowing multiple plugins to respond to the same key press.
+- The mini/full mode shortcut supports Ctrl, Alt, Shift and Win combinations and can share a key with other overlays.
+- Clarify the `boss.ini` instructions and provide a Chinese-comment template in `configs_CN/`.
 
 ### [1.5.2] - 2026-06-30
 
