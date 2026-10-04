@@ -26,9 +26,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
-- Fix missing boss completion icons in mods, including skull-marked graces and standalone boss markers.
+- Improve minimap compatibility with modded UI assets.
 - Follow the game's rules when hiding standalone markers after their grace is activated.
-- Fix minimap atlas loading repeatedly failing with mods that use larger UI texture packs.
 - Fix circular borders being cut off at the top, bottom, left and right edges.
 
 #### Upgrade notes
