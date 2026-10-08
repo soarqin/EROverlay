@@ -163,7 +163,7 @@ Mountaintops of the Giants|3017,3018,3122,6501,6502:
 + Roundtable Knight Vyke|Lord Contender's Evergaol:1053560800
 + Death Rite Bird:1050570800
 + Commander Niall|Castle Sol:1051570800
-+ Fire Giant|Flame Peak:1052520800,6
++ Fire Giant|Flame Peak:1252520800,6
 
 Crumbling Farum Azula|1300:
 + Godskin Duo|Dragon Temple Altar:13000850

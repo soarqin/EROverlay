@@ -13,6 +13,7 @@
   + Load `EROverlay.dll` with any mod loader ([EldenModLoader](https://www.nexusmods.com/eldenring/mods/117), [ModEngine2](https://github.com/soulsmods/ModEngine2) or [me3](https://github.com/garyttierney/me3)).
   + Run `injector.exe` to inject (not recommended, because that this method is not very stable and is blocked by some security softwares).
 * Wait few seconds until the mod is fully loaded, press `=` to toggle mini/full mode.
+* To revive a defeated boss, set `allow_revive=true` in `configs/boss.ini`, restart the game, and click its checked box in the full list. Revival restores the configured primary and arena flags; travel or reload the area afterwards. See `docs/boss-revival.md` in the Boss package for shared arena and quest entry behavior.
 
 ## [LICENSE](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

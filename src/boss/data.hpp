@@ -13,12 +13,12 @@ namespace er::bosses {
 
 // Game memory offsets
 namespace offsets {
-    constexpr uintptr_t kInGameTime = 0xA0;
-    constexpr uintptr_t kDeathCount = 0x94;
-    constexpr uintptr_t kMapIdPre1_12 = 0xE4;
-    constexpr uintptr_t kMapIdPost1_12 = 0xE8;
-    constexpr uint64_t kVersionThreshold1_12 = 0x0002000200000000ULL;
-}
+constexpr uintptr_t kInGameTime = 0xA0;
+constexpr uintptr_t kDeathCount = 0x94;
+constexpr uintptr_t kMapIdPre1_12 = 0xE4;
+constexpr uintptr_t kMapIdPost1_12 = 0xE8;
+constexpr uint64_t kVersionThreshold1_12 = 0x0002000200000000ULL;
+} // namespace offsets
 
 constexpr uint32_t kStrandedGraveyardFlagId = 101;
 constexpr int kUpdateTickMask = 0x1F; // update every 32 ticks (~60Hz / 32 ≈ ~2Hz)
@@ -29,6 +29,12 @@ struct BossData {
     uint32_t flagId = 0;
     uintptr_t offset = 0;
     uint8_t bits = 0;
+    struct ReviveFlag {
+        uint32_t flagId = 0;
+        bool value = false;
+    };
+    std::vector<ReviveFlag> reviveFlags;
+    bool reviveFlagsValid = true;
     size_t index = 0;
     size_t regionIndex = 0;
 };
@@ -82,7 +88,7 @@ public:
     void load(bool hasDLC);
     void initMemoryAddresses();
     void update();
-    void revive(int index);
+    [[nodiscard]] bool revive(int index);
 
     // Immutable after load() — safe to read from any thread without synchronization.
     [[nodiscard]] int toggleFullModeKey() const { return toggleFullModeKey_; }
@@ -103,6 +109,7 @@ private:
 
 private:
     int toggleFullModeKey_ = 0;
+    bool allowRevive_ = false;
     std::vector<BossData> bosses_;
     std::vector<RegionData> regions_;
     std::map<uint32_t, int> regionMap_;
@@ -118,7 +125,6 @@ private:
     // Boss flag resolution
     uintptr_t gameDataMan_ = 0;
     uintptr_t fieldArea_ = 0;
-    bool flagResolved_ = false;
 
     // Swap buffers (avoid per-frame heap allocation in updateBosses)
     std::vector<uint8_t> deadSwapBuf_;
@@ -129,4 +135,4 @@ private:
 
 extern BossDataSet gBossDataSet;
 
-}
+} // namespace er::bosses

@@ -11,10 +11,8 @@ extern EROverlayAPI *api;
 
 namespace fmt {
 template<>
-struct formatter<er::bosses::IntProxy> : formatter<int> {
-    auto format(const er::bosses::IntProxy &value, format_context &ctx) const {
-        return formatter<int>::format(value.value, ctx);
-    }
+struct formatter<er::bosses::IntProxy>: formatter<int> {
+    auto format(const er::bosses::IntProxy &value, format_context &ctx) const { return formatter<int>::format(value.value, ctx); }
 };
 } // namespace fmt
 
@@ -40,6 +38,10 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     util::replaceAll(killTextHour_, igtPlaceholder, igtHourMinSec);
     util::replaceAll(challengeTextHour_, igtPlaceholder, igtHourMinSec);
     allowRevive_ = api->configEnabled("boss.allow_revive");
+    std::wstring language = api->configGetString("common.language", L"");
+    if (language.empty())
+        language = api->getGameLanguage();
+    chinese_ = _wcsicmp(language.c_str(), L"zhoCN") == 0 || _wcsicmp(language.c_str(), L"zhoTW") == 0;
     const auto &pos = api->configGet("boss.panel_pos");
     auto posVec = util::strSplitToFloatVec(pos);
     if (posVec.size() >= 4) {
@@ -58,9 +60,12 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
 }
 
 static float calculatePos(float w, float n) {
-    if (n >= 1.f) return n;
-    if (n >= 0.f) return w * n;
-    if (n <= -1.f) return w + n;
+    if (n >= 1.f)
+        return n;
+    if (n >= 0.f)
+        return w * n;
+    if (n <= -1.f)
+        return w + n;
     return w + w * n;
 }
 
@@ -73,8 +78,7 @@ std::string Renderer::formatStatusText(int igt, bool challengeMode) const {
 
 void Renderer::renderMini(const RenderState &state) {
     if (ImGui::Begin("##bosses_window", nullptr,
-                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav |
-                         ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
+                     ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
         auto text = formatStatusText(state.inGameTime, state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         ImGui::SameLine();
@@ -86,12 +90,8 @@ void Renderer::renderMini(const RenderState &state) {
 
 void Renderer::renderFull(const RenderState &state) {
     auto *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowSize(
-        ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))),
-        ImGuiCond_Always);
-    if (ImGui::Begin("##bosses_window", nullptr,
-                     (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove |
-                         ImGuiWindowFlags_NoSavedSettings)) {
+    ImGui::SetNextWindowSize(ImVec2(calculatePos(vp->Size.x, std::abs(width_)), calculatePos(vp->Size.y, std::abs(height_))), ImGuiCond_Always);
+    if (ImGui::Begin("##bosses_window", nullptr, (ImGuiWindowFlags_NoDecoration & ~ImGuiWindowFlags_NoScrollbar) | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings)) {
         // Auto-expand the tree node for the current region (only on region change)
         int autoExpandRegion = -1;
         if (state.regionIndex != lastRegionIndex_) {
@@ -102,8 +102,7 @@ void Renderer::renderFull(const RenderState &state) {
         auto text = formatStatusText(state.inGameTime, state.challengeMode);
         ImGui::TextUnformatted(text.c_str());
         auto &style = ImGui::GetStyle();
-        ImGui::SameLine(
-            ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
+        ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::GetFrameHeight() - style.WindowPadding.x - style.FramePadding.x);
         if (ImGui::ArrowButton("##bosses_arrow", ImGuiDir_Up)) {
             showFull_ = false;
         }
@@ -125,6 +124,7 @@ void Renderer::renderFull(const RenderState &state) {
                         bool on = state.dead[bd.index] != 0;
                         if (ImGui::Checkbox(bd.boss.c_str(), &on, on) && state.dead[bd.index] && allowRevive_) {
                             popupBossIndex_ = static_cast<int>(bd.index);
+                            reviveFailed_ = false;
                             popup = true;
                         }
                         if (ImGui::IsItemHovered()) {
@@ -139,28 +139,55 @@ void Renderer::renderFull(const RenderState &state) {
 
         if (popup) {
             ImGui::OpenPopup("##bosses_revive_confirm");
-            ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f),
-                                    ImGuiCond_Appearing, ImVec2(.5f, .5f));
+            ImGui::SetNextWindowPos(ImVec2(vp->Size.x * 0.94f, vp->Size.y / 2.0f), ImGuiCond_Appearing, ImVec2(.5f, .5f));
         }
         renderRevivePopup();
     }
 }
 
 void Renderer::renderRevivePopup() {
-    if (!allowRevive_) return;
-    if (ImGui::BeginPopupModal("##bosses_revive_confirm", nullptr,
-                               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (!allowRevive_)
+        return;
+    if (ImGui::BeginPopupModal("##bosses_revive_confirm", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize)) {
         const auto &bosses = gBossDataSet.bosses();
-        ImGui::Text("Revive %s?", bosses[popupBossIndex_].boss.c_str());
-        if (ImGui::Button("Yes!")) {
-            gBossDataSet.revive(popupBossIndex_);
+        if (popupBossIndex_ < 0 || static_cast<size_t>(popupBossIndex_) >= bosses.size()) {
+            ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+            return;
+        }
+        ImGui::Text(chinese_ ? "复活 %s？" : "Revive %s?", bosses[popupBossIndex_].boss.c_str());
+        ImGui::TextUnformatted(chinese_ ? "复活后请传送或重新加载场地。" : "Travel or reload the area after reviving.");
+        switch (bosses[popupBossIndex_].flagId) {
+            case 31000800:
+                ImGui::TextUnformatted(chinese_ ? "帕奇会返回蒙流洞窟，重置求饶与所在位置进度。" : "Patches returns to Murkwater; his surrender and quest location are reset.");
+                break;
+            case 1252380800:
+            case 1051360800:
+                ImGui::TextUnformatted(chinese_ ? "会切换红狮子城的祭典与双人战共用场地。" : "This switches Redmane Castle's shared festival/duo arena.");
+                break;
+            case 12030850:
+                ImGui::TextUnformatted(chinese_ ? "重新加载后会进入弗尔桑克斯的梦境。" : "Reloading enters Fortissax's dream.");
+                break;
+            case 2049440800:
+                ImGui::TextUnformatted(chinese_ ? "重新加载后会进入丹恩的对战场地。" : "Reloading enters Dane's duel.");
+                break;
+        }
+        if (ImGui::Button(chinese_ ? "复活" : "Yes!")) {
+            if (gBossDataSet.revive(popupBossIndex_)) {
+                ImGui::CloseCurrentPopup();
+                popupBossIndex_ = -1;
+            } else {
+                reviveFailed_ = true;
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(chinese_ ? "取消" : "NO!")) {
             ImGui::CloseCurrentPopup();
             popupBossIndex_ = -1;
         }
-        ImGui::SameLine();
-        if (ImGui::Button("NO!")) {
-            ImGui::CloseCurrentPopup();
-            popupBossIndex_ = -1;
+        if (reviveFailed_) {
+            ImGui::TextUnformatted(chinese_ ? "复活失败，未修改 flag。请查看控制台，重新加载场地后重试。"
+                                            : "Revival failed; no flags changed. Check the console, reload the area, and retry.");
         }
         ImGui::EndPopup();
     }
@@ -184,9 +211,7 @@ bool Renderer::render() {
     igt_ = std::chrono::milliseconds(renderState_.inGameTime);
 
     auto *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)),
-                            ImGuiCond_Always,
-                            ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
+    ImGui::SetNextWindowPos(ImVec2(calculatePos(vp->Size.x, posX_), calculatePos(vp->Size.y, posY_)), ImGuiCond_Always, ImVec2(posX_ >= 0 ? 0.f : 1.f, posY_ >= 0 ? 0.f : 1.f));
     ImGui::SetNextWindowFocus();
 
     if (showFull_) {
@@ -198,4 +223,4 @@ bool Renderer::render() {
     return showFull_;
 }
 
-}
+} // namespace er::bosses

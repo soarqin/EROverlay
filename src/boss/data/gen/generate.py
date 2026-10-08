@@ -5,6 +5,7 @@ import codecs
 import string
 import os
 import json
+from pathlib import Path
 
 
 idmap = {}
@@ -56,6 +57,8 @@ def generate(j, lang):
     load_text('engus', 'Place')
     load_text(lang, 'NPC')
     load_text(lang, 'Place')
+    revival_path = Path(__file__).with_name('revival.json')
+    revival = json.loads(revival_path.read_text(encoding='utf-8'))
     o = []
     for v in j:
         k = v['region_name']
@@ -69,6 +72,11 @@ def generate(j, lang):
             o3['boss'] = process(m['boss'])
             o3['place'] = process(m['place'])
             o3['flag_id'] = m['flag_id']
+            reset = revival.get(str(m['flag_id']))
+            if reset is None:
+                raise ValueError('Missing reviewed revival recipe for boss ' + str(m['flag_id']))
+            o3['flag_id'] = reset['flag_id']
+            o3['revive_flags'] = reset['revive_flags']
             if 'rememberance' in m:
                 o3['rememberance'] = m['rememberance']
             o2.append(o3)
@@ -77,7 +85,7 @@ def generate(j, lang):
             val['dlc'] = v['dlc']
         o.append(val)
     os.makedirs('../' + lang, exist_ok=True)
-    codecs.open('../' + lang + '/bosses.json', 'w', 'utf-8').write(json.dumps(o, ensure_ascii=False, indent=2))
+    codecs.open('../' + lang + '/bosses.json', 'w', 'utf-8').write(json.dumps(o, ensure_ascii=False, indent=2) + '\n')
 
 
 if __name__ == '__main__':

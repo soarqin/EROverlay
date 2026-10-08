@@ -34,8 +34,10 @@ private:
 
     bool showFull_ = false;
     bool allowRevive_ = false;
+    bool chinese_ = false;
     int lastRegionIndex_ = -1;
     int popupBossIndex_ = -1;
+    bool reviveFailed_ = false;
     float posX_ = -10.f;
     float posY_ = 10.f;
     float width_ = 0.12f;
@@ -60,4 +62,4 @@ private:
     RenderState renderState_;
 };
 
-}
+} // namespace er::bosses

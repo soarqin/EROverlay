@@ -30,7 +30,7 @@ add_project(EROverlayDLL SHARED
     util/gameflags.cpp util/gameflags.hpp
     util/mapstate.cpp util/mapstate.hpp
     util/gameprofile.hpp util/gameprofiles.inc util/paramreader.hpp
-    util/memory.hpp util/signature.hpp
+    util/memory.hpp util/signature.hpp util/eventflag.hpp
     util/steam.cpp util/steam.hpp
     util/sysfont.cpp util/sysfont.hpp
     util/ini.hpp

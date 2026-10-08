@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+#### Fixed
+
+- Revival restores per-boss arena, phase, summon and entry flags, including explicit true targets; all addresses are resolved before writing and resolution failures leave flags untouched.
+- Correct the Fire Giant's primary defeat flag from original event scripts; update all 207 boss entries, 14 languages and generation sources.
+- Re-resolve defeat flag addresses on updates and handle direct storage and absent categories correctly in the flag resolver.
+
 #### Changed
 
 - The mini/full mode shortcut supports Ctrl, Alt, Shift and Win combinations and can share a key with other overlays.

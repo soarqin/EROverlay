@@ -13,6 +13,7 @@
   + 使用Mod加载器(你可以选择[EldenModLoader](https://www.nexusmods.com/eldenring/mods/117) 或 [ModEngine2](https://github.com/soulsmods/ModEngine2) 或 [me3](https://github.com/garyttierney/me3))
   + 运行Mod附带的 `injector.exe` 注入 (不推荐，因为这种方法不太稳定且被一些安全软件阻止)
 * 等待数秒等Mod加载完成后，可以按 `=` 切换迷你/完全模式
+* 复活功能需在 `configs/boss.ini` 中设置 `allow_revive=true` 并重启游戏。在完整列表中点击已击败 Boss 的勾选框，确认后会恢复主 flag 和配置的场地 flag；随后需传送或重新加载场地。共用场地、支线入口行为和静态验证范围见 Boss 分发包内的 `docs/boss-revival.md`。
 
 ## [代码许可证](https://github.com/soarqin/EROverlay/blob/master/LICENSE)
 

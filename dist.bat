@@ -17,6 +17,9 @@ copy /y ..\..\build\bin\overlays\Boss.dll overlays\
 copy /y ..\..\src\boss\README.md .
 copy /y ..\..\src\boss\README_CN.md .
 copy /y ..\..\LICENSE .
+IF NOT EXIST docs mkdir docs
+copy /y ..\..\docs\boss-revival.md docs\
+copy /y ..\..\docs\boss-revival.evidence.json docs\
 IF NOT EXIST configs mkdir configs
 copy /y ..\..\configs\boss.ini configs\
 copy /y ..\..\configs\common.ini configs\

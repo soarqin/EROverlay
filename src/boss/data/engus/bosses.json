@@ -19,97 +19,229 @@
       {
         "boss": "Soldier of Godrick",
         "place": "Stranded Graveyard",
-        "flag_id": 18000850
+        "flag_id": 18000850,
+        "revive_flags": [
+          18002852,
+          18002855,
+          18002856
+        ]
       },
       {
         "boss": "Tree Sentinel",
         "place": "Church of Elleh",
-        "flag_id": 1042360800
+        "flag_id": 1042360800,
+        "revive_flags": []
       },
       {
         "boss": "Demi-Human Chief(x2)",
         "place": "Coastal Cave",
-        "flag_id": 31150800
+        "flag_id": 31150800,
+        "revive_flags": [
+          31150815,
+          31152805,
+          31152806,
+          31152815,
+          31152842,
+          31155005,
+          31155006
+        ]
       },
       {
         "boss": "Erdtree Burial Watchdog",
         "place": "Stormfoot Catacombs",
-        "flag_id": 30020800
+        "flag_id": 30020800,
+        "revive_flags": [
+          30020801,
+          30022802,
+          30022805,
+          30022806
+        ]
       },
       {
         "boss": "Beastman of Farum Azula",
         "place": "Groveside Cave",
-        "flag_id": 31030800
+        "flag_id": 31030800,
+        "revive_flags": [
+          31030801,
+          31032802,
+          31032805,
+          31032806
+        ]
       },
       {
         "boss": "Stonedigger Troll",
         "place": "Limgrave Tunnels",
-        "flag_id": 32010800
+        "flag_id": 32010800,
+        "revive_flags": [
+          32010801,
+          32012802,
+          32012805,
+          32012806
+        ]
       },
       {
         "boss": "Mad Pumpkin Head",
         "place": "Waypoint Ruins",
-        "flag_id": 1044360800
+        "flag_id": 1044360800,
+        "revive_flags": [
+          1044362802,
+          1044362805,
+          1044362806
+        ]
       },
       {
         "boss": "Bloodhound Knight Darriwil",
         "place": "Forlorn Hound Evergaol",
-        "flag_id": 1044350800
+        "flag_id": 1044350800,
+        "revive_flags": [
+          1044350805,
+          1044352800,
+          1044352801,
+          1044352802,
+          1044352806,
+          1044352807
+        ]
       },
       {
         "boss": "Patches",
         "place": "Murkwater Cave",
-        "flag_id": 31000800
+        "flag_id": 31000800,
+        "revive_flags": [
+          3680,
+          3681,
+          {
+            "flag_id": 3682,
+            "value": true
+          },
+          3683,
+          3684,
+          {
+            "flag_id": 3685,
+            "value": true
+          },
+          3686,
+          3687,
+          3688,
+          3689,
+          3690,
+          3691,
+          3692,
+          3693,
+          3694,
+          3695,
+          3696,
+          3697,
+          31000811,
+          31000845,
+          31002700,
+          31002701,
+          31002704,
+          31002707,
+          31002709,
+          31002713,
+          31002714,
+          31002805,
+          31002806,
+          31002840,
+          31002841,
+          31002876,
+          {
+            "flag_id": 31008521,
+            "value": true
+          },
+          31008820,
+          31008821,
+          31009810
+        ]
       },
       {
         "boss": "Grave Warden Duelist",
         "place": "Murkwater Catacombs",
-        "flag_id": 30040800
+        "flag_id": 30040800,
+        "revive_flags": [
+          30040801,
+          30042802,
+          30042805,
+          30042806
+        ]
       },
       {
         "boss": "Guardian Golem",
         "place": "Highroad Cave",
-        "flag_id": 31170800
+        "flag_id": 31170800,
+        "revive_flags": [
+          31170801,
+          31172499,
+          31172802,
+          31172805,
+          31172806
+        ]
       },
       {
         "boss": "Black Knife Assassin",
         "place": "Deathtouched Catacombs",
-        "flag_id": 30110800
+        "flag_id": 30110800,
+        "revive_flags": [
+          30112802,
+          30112805,
+          30112806
+        ]
       },
       {
         "boss": "Ulcerated Tree Spirit",
         "place": "Fringefolk Hero's Grave",
-        "flag_id": 18000800
+        "flag_id": 18000800,
+        "revive_flags": [
+          18002802,
+          18002805,
+          18002806
+        ]
       },
       {
         "boss": "Flying Dragon Agheel",
         "place": "Agheel Lake",
-        "flag_id": 1043360800
+        "flag_id": 1043360800,
+        "revive_flags": [
+          1043360340,
+          1043362379
+        ]
       },
       {
         "boss": "Tibia Mariner",
         "place": "Summonwater Village",
-        "flag_id": 1045390800
+        "flag_id": 1045390800,
+        "revive_flags": []
       },
       {
         "boss": "Crucible Knight",
         "place": "Stormhill Evergaol",
-        "flag_id": 1042370800
+        "flag_id": 1042370800,
+        "revive_flags": [
+          1042370805,
+          1042372800,
+          1042372801,
+          1042372802,
+          1042372806,
+          1042372807
+        ]
       },
       {
         "boss": "Night's Cavalry",
         "place": "",
-        "flag_id": 1043370800
+        "flag_id": 1043370800,
+        "revive_flags": []
       },
       {
         "boss": "Deathbird",
         "place": "",
-        "flag_id": 1042380800
+        "flag_id": 1042380800,
+        "revive_flags": []
       },
       {
         "boss": "Bell Bearing Hunter",
         "place": "Warmaster's Shack",
-        "flag_id": 1042380850
+        "flag_id": 1042380850,
+        "revive_flags": []
       }
     ]
   },
@@ -127,52 +259,97 @@
       {
         "boss": "Runebear",
         "place": "Earthbore Cave",
-        "flag_id": 31010800
+        "flag_id": 31010800,
+        "revive_flags": [
+          31010801,
+          31012802,
+          31012805,
+          31012806
+        ]
       },
       {
         "boss": "Scaly Misbegotten",
         "place": "Morne Tunnel",
-        "flag_id": 32000800
+        "flag_id": 32000800,
+        "revive_flags": [
+          32000801,
+          32002802,
+          32002805,
+          32002806
+        ]
       },
       {
         "boss": "Erdtree Burial Watchdog",
         "place": "Impaler's Catacombs",
-        "flag_id": 30010800
+        "flag_id": 30010800,
+        "revive_flags": [
+          30012802,
+          30012805,
+          30012806
+        ]
       },
       {
         "boss": "Cemetery Shade",
         "place": "Tombsward Catacombs",
-        "flag_id": 30000800
+        "flag_id": 30000800,
+        "revive_flags": [
+          30002802,
+          30002805,
+          30002806
+        ]
       },
       {
         "boss": "Miranda the Blighted Bloom",
         "place": "Tombsward Cave",
-        "flag_id": 31020800
+        "flag_id": 31020800,
+        "revive_flags": [
+          31020801,
+          31022802,
+          31022805,
+          31022806
+        ]
       },
       {
         "boss": "Erdtree Avatar",
         "place": "Minor Erdtree",
-        "flag_id": 1043330800
+        "flag_id": 1043330800,
+        "revive_flags": [
+          1043335003
+        ]
       },
       {
         "boss": "Ancient Hero of Zamor",
         "place": "Weeping Evergaol",
-        "flag_id": 1042330800
+        "flag_id": 1042330800,
+        "revive_flags": [
+          1042330805,
+          1042332800,
+          1042332801,
+          1042332802,
+          1042332806,
+          1042332807
+        ]
       },
       {
         "boss": "Night's Cavalry",
         "place": "Castle Morne Rampart",
-        "flag_id": 1044320850
+        "flag_id": 1044320850,
+        "revive_flags": []
       },
       {
         "boss": "Deathbird",
         "place": "",
-        "flag_id": 1044320800
+        "flag_id": 1044320800,
+        "revive_flags": []
       },
       {
         "boss": "Leonine Misbegotten",
         "place": "Morne Moangrave",
-        "flag_id": 1043300800
+        "flag_id": 1043300800,
+        "revive_flags": [
+          1043302805,
+          1043302806
+        ]
       }
     ]
   },
@@ -185,13 +362,27 @@
       {
         "boss": "Margit, the Fell Omen",
         "place": "Stormveil Castle",
-        "flag_id": 10000850
+        "flag_id": 10000850,
+        "revive_flags": [
+          10000851,
+          10002852,
+          10002855,
+          10002856,
+          10002860
+        ]
       },
       {
         "boss": "Godrick the Grafted",
         "place": "Stormveil Castle",
         "flag_id": 10000800,
-        "rememberance": 1
+        "rememberance": 1,
+        "revive_flags": [
+          10000801,
+          10000802,
+          10002802,
+          10002805,
+          10002806
+        ]
       }
     ]
   },
@@ -215,127 +406,275 @@
       {
         "boss": "Cleanrot Knight",
         "place": "Stillwater Cave",
-        "flag_id": 31040800
+        "flag_id": 31040800,
+        "revive_flags": [
+          31042802,
+          31042805,
+          31042806
+        ]
       },
       {
         "boss": "Bloodhound Knight",
         "place": "Lakeside Crystal Cave",
-        "flag_id": 31050800
+        "flag_id": 31050800,
+        "revive_flags": [
+          31050801,
+          31052802,
+          31052805,
+          31052806
+        ]
       },
       {
         "boss": "Erdtree Burial Watchdog",
         "place": "Cliffbottom Catacombs",
-        "flag_id": 30060800
+        "flag_id": 30060800,
+        "revive_flags": [
+          30062802,
+          30062805,
+          30062806
+        ]
       },
       {
         "boss": "Crystalian (Staff) & Crystalian (Spear)",
         "place": "Academy Crystal Cave",
-        "flag_id": 31060800
+        "flag_id": 31060800,
+        "revive_flags": [
+          31060801,
+          31062805,
+          31062806,
+          31062842
+        ]
       },
       {
         "boss": "Crystalian (Ringblade)",
         "place": "Raya Lucaria Crystal Tunnel",
-        "flag_id": 32020800
+        "flag_id": 32020800,
+        "revive_flags": [
+          32022802,
+          32022805,
+          32022806
+        ]
       },
       {
         "boss": "Cemetery Shade",
         "place": "Black Knife Catacombs",
-        "flag_id": 30050800
+        "flag_id": 30050800,
+        "revive_flags": [
+          30052802,
+          30052805,
+          30052806
+        ]
       },
       {
         "boss": "Black Knife Assassin",
         "place": "Black Knife Catacombs",
-        "flag_id": 30050850
+        "flag_id": 30050850,
+        "revive_flags": [
+          30050880,
+          30052805,
+          30052852,
+          30052855,
+          30052856
+        ]
       },
       {
         "boss": "Spiritcaller Snail",
         "place": "Road's End Catacombs",
-        "flag_id": 30030800
+        "flag_id": 30030800,
+        "revive_flags": [
+          30032805,
+          30032806,
+          30032812,
+          30032813,
+          30032814,
+          30032815,
+          30032816,
+          30032817,
+          30032822,
+          30032823,
+          30032824,
+          30032825,
+          30032826,
+          30032827,
+          30032828,
+          30032829,
+          30032830,
+          30032831,
+          30032832,
+          30032833,
+          30032834,
+          30032835,
+          30032836,
+          30032837,
+          30032838,
+          30032839,
+          30032860,
+          30032882,
+          30032883,
+          30032884,
+          30032885,
+          30032886,
+          30032887
+        ]
       },
       {
         "boss": "Grafted Scion",
         "place": "Chapel of Anticipation",
-        "flag_id": 10010800
+        "flag_id": 10010800,
+        "revive_flags": [
+          10010801,
+          10012802,
+          10012805,
+          10012806
+        ]
       },
       {
         "boss": "Glintstone Dragon Smarag",
         "place": "Temple Quarter",
-        "flag_id": 1034450800
+        "flag_id": 1034450800,
+        "revive_flags": [
+          1034455003
+        ]
       },
       {
         "boss": "Omenkiller",
         "place": "Village of the Albinaurics",
-        "flag_id": 1035420800
+        "flag_id": 1035420800,
+        "revive_flags": [
+          1035425014
+        ]
       },
       {
         "boss": "Royal Revenant",
         "place": "Kingsrealm Ruins",
-        "flag_id": 1034480800
+        "flag_id": 1034480800,
+        "revive_flags": [
+          1034482802,
+          1034482805,
+          1034482806
+        ]
       },
       {
         "boss": "Tibia Mariner",
         "place": "",
-        "flag_id": 1039440800
+        "flag_id": 1039440800,
+        "revive_flags": []
       },
       {
         "boss": "Erdtree Avatar",
         "place": "Converted Tower",
-        "flag_id": 1033430800
+        "flag_id": 1033430800,
+        "revive_flags": [
+          1033435002
+        ]
       },
       {
         "boss": "Erdtree Avatar",
         "place": "Mausoleum Compound",
-        "flag_id": 1038480800
+        "flag_id": 1038480800,
+        "revive_flags": []
       },
       {
         "boss": "Adan, Thief of Fire",
         "place": "Malefactor's Evergaol",
-        "flag_id": 1038410800
+        "flag_id": 1038410800,
+        "revive_flags": [
+          1038410805,
+          1038412800,
+          1038412801,
+          1038412802,
+          1038412806,
+          1038412807
+        ]
       },
       {
         "boss": "Bols, Carian Knight",
         "place": "Cuckoo's Evergaol",
-        "flag_id": 1033450800
+        "flag_id": 1033450800,
+        "revive_flags": [
+          1033450805,
+          1033452800,
+          1033452801,
+          1033452802,
+          1033452806,
+          1033452807
+        ]
       },
       {
         "boss": "Onyx Lord",
         "place": "Royal Grave Evergaol",
-        "flag_id": 1036500800
+        "flag_id": 1036500800,
+        "revive_flags": [
+          1036500805,
+          1036502800,
+          1036502801,
+          1036502802,
+          1036502806,
+          1036502807
+        ]
       },
       {
         "boss": "Night's Cavalry",
         "place": "Gate Town Bridge",
-        "flag_id": 1039430800
+        "flag_id": 1039430800,
+        "revive_flags": []
       },
       {
         "boss": "Night's Cavalry",
         "place": "Bellum Church",
-        "flag_id": 1036480800
+        "flag_id": 1036480800,
+        "revive_flags": []
       },
       {
         "boss": "Deathbird",
         "place": "Scenic Isle",
-        "flag_id": 1037420800
+        "flag_id": 1037420800,
+        "revive_flags": [
+          1037425022
+        ]
       },
       {
         "boss": "Death Rite Bird",
         "place": "Gate Town North",
-        "flag_id": 1036450800
+        "flag_id": 1036450800,
+        "revive_flags": [
+          1036455000
+        ]
       },
       {
         "boss": "Bell Bearing Hunter",
         "place": "Church of Vows",
-        "flag_id": 1037460800
+        "flag_id": 1037460800,
+        "revive_flags": []
       },
       {
         "boss": "Royal Knight Loretta",
         "place": "Caria Manor",
-        "flag_id": 1035500800
+        "flag_id": 1035500800,
+        "revive_flags": [
+          1035500801,
+          1035502805,
+          1035502806,
+          1035502810,
+          1035502821,
+          1035502822,
+          1035502823,
+          1035502824,
+          1035502825,
+          1035502826,
+          1035502839
+        ]
       },
       {
         "boss": "Magma Wyrm Makar",
         "place": "Ruin-Strewn Precipice",
-        "flag_id": 39200800
+        "flag_id": 39200800,
+        "revive_flags": [
+          39200801,
+          39202802,
+          39202805,
+          39202806
+        ]
       }
     ]
   },
@@ -348,12 +687,23 @@
       {
         "boss": "Glintstone Dragon Adula",
         "place": "Moonlight Altar",
-        "flag_id": 1034420800
+        "flag_id": 1034420800,
+        "revive_flags": [
+          1034422800
+        ]
       },
       {
         "boss": "Alecto, Black Knife Ringleader",
         "place": "Ringleader's Evergaol",
-        "flag_id": 1033420800
+        "flag_id": 1033420800,
+        "revive_flags": [
+          1033420805,
+          1033422800,
+          1033422801,
+          1033422802,
+          1033422806,
+          1033422807
+        ]
       }
     ]
   },
@@ -366,13 +716,46 @@
       {
         "boss": "Red Wolf of Radagon",
         "place": "",
-        "flag_id": 14000850
+        "flag_id": 14000850,
+        "revive_flags": [
+          14000851,
+          14000852,
+          14002855,
+          14002856
+        ]
       },
       {
         "boss": "Rennala, Queen of the Full Moon",
         "place": "",
         "flag_id": 14000800,
-        "rememberance": 2
+        "rememberance": 2,
+        "revive_flags": [
+          14000801,
+          14000804,
+          14002707,
+          14002720,
+          14002722,
+          14002802,
+          14002803,
+          14002805,
+          14002806,
+          14003800,
+          14003802,
+          14003803,
+          14003804,
+          14003806,
+          14003810,
+          14003816,
+          14003825,
+          14003920,
+          14003921,
+          14003935,
+          14003936,
+          14003960,
+          14003961,
+          14003970,
+          14003971
+        ]
       }
     ]
   },
@@ -391,78 +774,220 @@
       {
         "boss": "Magma Wyrm",
         "place": "Gael Tunnel",
-        "flag_id": 32070800
+        "flag_id": 32070800,
+        "revive_flags": [
+          32070801,
+          32072802,
+          32072805,
+          32072806
+        ]
       },
       {
         "boss": "Erdtree Burial Watchdog (Sword) & Erdtree Burial Watchdog (Scepter)",
         "place": "Minor Erdtree Catacombs",
-        "flag_id": 30140800
+        "flag_id": 30140800,
+        "revive_flags": [
+          30142802,
+          30142805,
+          30142806
+        ]
       },
       {
         "boss": "Frenzied Duelist",
         "place": "Gaol Cave",
-        "flag_id": 31210800
+        "flag_id": 31210800,
+        "revive_flags": [
+          31210801,
+          31212805,
+          31212806,
+          31212810,
+          31212852,
+          31212865,
+          31215002
+        ]
       },
       {
         "boss": "Cemetery Shade",
         "place": "Caelid Catacombs",
-        "flag_id": 30150800
+        "flag_id": 30150800,
+        "revive_flags": [
+          30152802,
+          30152805,
+          30152806
+        ]
       },
       {
         "boss": "Fallingstar Beast",
         "place": "Sellia Crystal Tunnel",
-        "flag_id": 32080800
+        "flag_id": 32080800,
+        "revive_flags": [
+          32080801,
+          32082802,
+          32082805,
+          32082806
+        ]
       },
       {
         "boss": "Putrid Crystalian (Ringblade) & Putrid Crystalian (Spear) & Putrid Crystalian (Staff)",
         "place": "Sellia Hideaway",
-        "flag_id": 31110800
+        "flag_id": 31110800,
+        "revive_flags": [
+          31112805,
+          31112806,
+          31112842
+        ]
       },
       {
         "boss": "Mad Pumpkin Head (Hammer) & Mad Pumpkin Head (Flail)",
         "place": "Caelem Ruins",
-        "flag_id": 1048400800
+        "flag_id": 1048400800,
+        "revive_flags": [
+          1048402802,
+          1048402805,
+          1048402806
+        ]
       },
       {
         "boss": "Decaying Ekzykes",
         "place": "Church of the Plague",
-        "flag_id": 1048370800
+        "flag_id": 1048370800,
+        "revive_flags": []
       },
       {
         "boss": "Nox Monk & Nox Swordstress",
         "place": "Sellia, Town of Sorcery",
-        "flag_id": 1049390800
+        "flag_id": 1049390800,
+        "revive_flags": [
+          1049392802,
+          1049392805,
+          1049392806
+        ]
       },
       {
         "boss": "Commander O'Neil",
         "place": "Swamp of Aeonia",
-        "flag_id": 1049380800
+        "flag_id": 1049380800,
+        "revive_flags": [
+          1049382300,
+          1049382301,
+          1049385017
+        ]
       },
       {
         "boss": "Putrid Avatar",
         "place": "Minor Erdtree",
-        "flag_id": 1047400800
+        "flag_id": 1047400800,
+        "revive_flags": []
       },
       {
         "boss": "Night's Cavalry",
         "place": "Caelid Highway South",
-        "flag_id": 1049370800
+        "flag_id": 1049370800,
+        "revive_flags": []
       },
       {
         "boss": "Death Rite Bird",
         "place": "Southern Aeonia Swamp Bank",
-        "flag_id": 1049370850
+        "flag_id": 1049370850,
+        "revive_flags": []
       },
       {
         "boss": "Crucible Knight & Misbegotten Warrior",
         "place": "Redmane Castle",
-        "flag_id": 1051360800
+        "flag_id": 1051360800,
+        "revive_flags": [
+          {
+            "flag_id": 9413,
+            "value": true
+          },
+          1051362802,
+          1051362805,
+          1051362806
+        ]
       },
       {
         "boss": "Starscourge Radahn",
         "place": "Wailing Dunes",
         "flag_id": 1252380800,
-        "rememberance": 3
+        "rememberance": 3,
+        "revive_flags": [
+          {
+            "flag_id": 9410,
+            "value": true
+          },
+          {
+            "flag_id": 9411,
+            "value": true
+          },
+          9412,
+          9413,
+          {
+            "flag_id": 1051369360,
+            "value": true
+          },
+          1252380801,
+          1252382100,
+          1252382102,
+          1252382106,
+          1252382108,
+          1252382109,
+          1252382112,
+          1252382113,
+          1252382114,
+          1252382116,
+          1252382117,
+          1252382118,
+          1252382119,
+          1252382121,
+          1252382123,
+          1252382124,
+          1252382125,
+          1252382129,
+          1252382135,
+          1252382136,
+          1252382138,
+          1252382140,
+          1252382141,
+          1252382143,
+          1252382144,
+          1252382145,
+          1252382147,
+          1252382148,
+          1252382151,
+          1252382152,
+          1252382153,
+          1252382154,
+          1252382155,
+          1252382157,
+          1252382159,
+          1252382162,
+          1252382166,
+          1252382168,
+          1252382173,
+          1252382175,
+          1252382178,
+          1252382179,
+          1252382180,
+          1252382181,
+          1252382182,
+          1252382183,
+          1252382184,
+          1252382185,
+          1252382186,
+          1252382187,
+          1252382190,
+          1252382191,
+          1252382192,
+          1252382193,
+          1252382194,
+          1252382195,
+          1252382196,
+          1252382197,
+          1252382699,
+          1252382815,
+          1252382890,
+          1252382895
+        ]
       }
     ]
   },
@@ -479,52 +1004,92 @@
       {
         "boss": "Cleanrot Knight (Spear) & Cleanrot Knight (Sickle)",
         "place": "Abandoned Cave",
-        "flag_id": 31200800
+        "flag_id": 31200800,
+        "revive_flags": [
+          31202805,
+          31202806,
+          31202842
+        ]
       },
       {
         "boss": "Beastman of Farum Azula (Cleaver) & Beastman of Farum Azula (Throwing Knife)",
         "place": "Dragonbarrow Cave",
-        "flag_id": 31100800
+        "flag_id": 31100800,
+        "revive_flags": [
+          31100801,
+          31102805,
+          31102806,
+          31102810,
+          31102842,
+          31102865
+        ]
       },
       {
         "boss": "Putrid Tree Spirit",
         "place": "War-Dead Catacombs",
-        "flag_id": 30160800
+        "flag_id": 30160800,
+        "revive_flags": [
+          30162802,
+          30162803,
+          30162805,
+          30162806
+        ]
       },
       {
         "boss": "Godskin Apostle",
         "place": "Divine Tower of Caelid",
-        "flag_id": 34130800
+        "flag_id": 34130800,
+        "revive_flags": [
+          34132802,
+          34132805,
+          34132806
+        ]
       },
       {
         "boss": "Black Blade Kindred",
         "place": "Bestial Sanctum",
-        "flag_id": 1051430800
+        "flag_id": 1051430800,
+        "revive_flags": [
+          1051430210,
+          1051432200
+        ]
       },
       {
         "boss": "Flying Dragon Greyll",
         "place": "Greyoll's Dragonbarrow",
-        "flag_id": 1052410800
+        "flag_id": 1052410800,
+        "revive_flags": []
       },
       {
         "boss": "Putrid Avatar",
         "place": "Minor Erdtree",
-        "flag_id": 1051400800
+        "flag_id": 1051400800,
+        "revive_flags": []
       },
       {
         "boss": "Battlemage Hugues",
         "place": "Sellia Evergaol",
-        "flag_id": 1049390850
+        "flag_id": 1049390850,
+        "revive_flags": [
+          1049390855,
+          1049392850,
+          1049392851,
+          1049392852,
+          1049392856,
+          1049392857
+        ]
       },
       {
         "boss": "Night's Cavalry",
         "place": "Lenne's Rise",
-        "flag_id": 1052410850
+        "flag_id": 1052410850,
+        "revive_flags": []
       },
       {
         "boss": "Bell Bearing Hunter",
         "place": "Isolated Merchant's Shack",
-        "flag_id": 1048410800
+        "flag_id": 1048410800,
+        "revive_flags": []
       }
     ]
   },
@@ -544,102 +1109,193 @@
       {
         "boss": "Necromancer Garris",
         "place": "Sage's Cave",
-        "flag_id": 31190850
+        "flag_id": 31190850,
+        "revive_flags": [
+          31190890,
+          31192852,
+          31192855,
+          31192856,
+          31192870,
+          31192871,
+          31192875
+        ]
       },
       {
         "boss": "Black Knife Assassin",
         "place": "Sage's Cave",
-        "flag_id": 31190800
+        "flag_id": 31190800,
+        "revive_flags": [
+          31190802,
+          31192802,
+          31192805,
+          31192806,
+          31192855
+        ]
       },
       {
         "boss": "Stonedigger Troll",
         "place": "Old Altus Tunnel",
-        "flag_id": 32040800
+        "flag_id": 32040800,
+        "revive_flags": [
+          32042802,
+          32042805,
+          32042806
+        ]
       },
       {
         "boss": "Crystalian (Spear) & Crystalian (Ringblade)",
         "place": "Altus Tunnel",
-        "flag_id": 32050800
+        "flag_id": 32050800,
+        "revive_flags": [
+          32050801,
+          32052802,
+          32052805,
+          32052806
+        ]
       },
       {
         "boss": "Black Knife Assassin",
         "place": "Sainted Hero's Grave",
-        "flag_id": 1040520800
+        "flag_id": 1040520800,
+        "revive_flags": []
       },
       {
         "boss": "Ancient Hero of Zamor",
         "place": "Sainted Hero's Grave",
-        "flag_id": 30080800
+        "flag_id": 30080800,
+        "revive_flags": [
+          30082802,
+          30082805,
+          30082806
+        ]
       },
       {
         "boss": "Omenkiller & Miranda the Blighted Bloom",
         "place": "Perfumer's Grotto",
-        "flag_id": 31180800
+        "flag_id": 31180800,
+        "revive_flags": [
+          31182805,
+          31182806,
+          31182842
+        ]
       },
       {
         "boss": "Perfumer Tricia & Misbegotten Warrior",
         "place": "Unsightly Catacombs",
-        "flag_id": 30120800
+        "flag_id": 30120800,
+        "revive_flags": [
+          30122802,
+          30122805,
+          30122806
+        ]
       },
       {
         "boss": "Erdtree Burial Watchdog",
         "place": "Wyndham Catacombs",
-        "flag_id": 30070800
+        "flag_id": 30070800,
+        "revive_flags": [
+          30072802,
+          30072805,
+          30072806
+        ]
       },
       {
         "boss": "Ancient Dragon Lansseax",
         "place": "Rampartside Path",
-        "flag_id": 1041520800
+        "flag_id": 1041520800,
+        "revive_flags": [
+          1037510800,
+          1037510810,
+          1041520820,
+          1041522810
+        ]
       },
       {
         "boss": "Demi-Human Queen Gilika",
         "place": "Lux Ruins",
-        "flag_id": 1038510800
+        "flag_id": 1038510800,
+        "revive_flags": [
+          1038512802,
+          1038512805,
+          1038512806
+        ]
       },
       {
         "boss": "Sanguine Noble",
         "place": "Writheblood Ruins",
-        "flag_id": 1040530800
+        "flag_id": 1040530800,
+        "revive_flags": [
+          1040532802,
+          1040532805,
+          1040532806
+        ]
       },
       {
         "boss": "Godskin Apostle",
         "place": "Dominula, Windmill Village",
-        "flag_id": 1042550800
+        "flag_id": 1042550800,
+        "revive_flags": [
+          1042555009
+        ]
       },
       {
         "boss": "Fallingstar Beast",
         "place": "Starfall Crater",
-        "flag_id": 1041500800
+        "flag_id": 1041500800,
+        "revive_flags": []
       },
       {
         "boss": "Tree Sentinel(x2)",
         "place": "",
-        "flag_id": 1041510800
+        "flag_id": 1041510800,
+        "revive_flags": [
+          1041512815,
+          1041515002
+        ]
       },
       {
         "boss": "Tibia Mariner",
         "place": "Wyndham Ruins",
-        "flag_id": 1038520800
+        "flag_id": 1038520800,
+        "revive_flags": [
+          1038522340,
+          1038525002
+        ]
       },
       {
         "boss": "Wormface",
         "place": "Minor Erdtree",
-        "flag_id": 1041530800
+        "flag_id": 1041530800,
+        "revive_flags": []
       },
       {
         "boss": "Godefroy the Grafted",
         "place": "Golden Lineage Evergaol",
-        "flag_id": 1039500800
+        "flag_id": 1039500800,
+        "revive_flags": [
+          1039500805,
+          1039502800,
+          1039502801,
+          1039502802,
+          1039502806,
+          1039502807
+        ]
       },
       {
         "boss": "Night's Cavalry",
         "place": "Altus Highway Junction",
-        "flag_id": 1039510800
+        "flag_id": 1039510800,
+        "revive_flags": []
       },
       {
         "boss": "Elemer of the Briar",
         "place": "The Shaded Castle",
-        "flag_id": 1039540800
+        "flag_id": 1039540800,
+        "revive_flags": [
+          1039542802,
+          1039542805,
+          1039542806
+        ]
       }
     ]
   },
@@ -655,32 +1311,51 @@
       {
         "boss": "Onyx Lord",
         "place": "Sealed Tunnel",
-        "flag_id": 34120800
+        "flag_id": 34120800,
+        "revive_flags": [
+          34120801,
+          34122802,
+          34122805,
+          34122806
+        ]
       },
       {
         "boss": "Grave Warden Duelist",
         "place": "Auriza Side Tomb",
-        "flag_id": 30130800
+        "flag_id": 30130800,
+        "revive_flags": [
+          30132802,
+          30132805,
+          30132806
+        ]
       },
       {
         "boss": "Crucible Knight & Crucible Knight Ordovis",
         "place": "Auriza Hero's Grave",
-        "flag_id": 30100800
+        "flag_id": 30100800,
+        "revive_flags": [
+          30102802,
+          30102805,
+          30102806
+        ]
       },
       {
         "boss": "Draconic Tree Sentinel",
         "place": "Capital Rampart",
-        "flag_id": 1045520800
+        "flag_id": 1045520800,
+        "revive_flags": []
       },
       {
         "boss": "Deathbird",
         "place": "",
-        "flag_id": 1044530800
+        "flag_id": 1044530800,
+        "revive_flags": []
       },
       {
         "boss": "Bell Bearing Hunter",
         "place": "Hermit Merchant's Shack",
-        "flag_id": 1043530800
+        "flag_id": 1043530800,
+        "revive_flags": []
       }
     ]
   },
@@ -696,37 +1371,66 @@
       {
         "boss": "Demi-Human Queen Margot",
         "place": "Volcano Cave",
-        "flag_id": 31090800
+        "flag_id": 31090800,
+        "revive_flags": [
+          31092802,
+          31092805,
+          31092806
+        ]
       },
       {
         "boss": "Kindred of Rot(x2)",
         "place": "Seethewater Cave",
-        "flag_id": 31070800
+        "flag_id": 31070800,
+        "revive_flags": [
+          31070801,
+          31072805,
+          31072806,
+          31072842
+        ]
       },
       {
         "boss": "Red Wolf of the Champion",
         "place": "Gelmir Hero's Grave",
-        "flag_id": 30090800
+        "flag_id": 30090800,
+        "revive_flags": [
+          30092802,
+          30092805,
+          30092806
+        ]
       },
       {
         "boss": "Magma Wyrm",
         "place": "Fort Laiedd",
-        "flag_id": 1035530800
+        "flag_id": 1035530800,
+        "revive_flags": [
+          1035535010
+        ]
       },
       {
         "boss": "Full-Grown Fallingstar Beast",
         "place": "Ninth Mt. Gelmir Campsite",
-        "flag_id": 1036540800
+        "flag_id": 1036540800,
+        "revive_flags": [
+          1036545003
+        ]
       },
       {
         "boss": "Demi-Human Queen Maggie",
         "place": "Hermit Village",
-        "flag_id": 1037530800
+        "flag_id": 1037530800,
+        "revive_flags": [
+          1037532345,
+          1037532450
+        ]
       },
       {
         "boss": "Ulcerated Tree Spirit",
         "place": "Minor Erdtree",
-        "flag_id": 1037540810
+        "flag_id": 1037540810,
+        "revive_flags": [
+          1037542255
+        ]
       }
     ]
   },
@@ -739,18 +1443,37 @@
       {
         "boss": "Abductor Virgin (Swinging Sickle) & Abductor Virgin (Wheel)",
         "place": "Subterranean Inquisition Chamber",
-        "flag_id": 16000860
+        "flag_id": 16000860,
+        "revive_flags": [
+          16002862,
+          16002865,
+          16002866
+        ]
       },
       {
         "boss": "Godskin Noble",
         "place": "Temple of Eiglay",
-        "flag_id": 16000850
+        "flag_id": 16000850,
+        "revive_flags": [
+          16000851,
+          16002852,
+          16002855,
+          16002856
+        ]
       },
       {
         "boss": "God-Devouring Serpent & Rykard, Lord of Blasphemy",
         "place": "Volcano Manor",
         "flag_id": 16000800,
-        "rememberance": 5
+        "rememberance": 5,
+        "revive_flags": [
+          16000801,
+          16002801,
+          16002802,
+          16002803,
+          16002805,
+          16002806
+        ]
       }
     ]
   },
@@ -766,28 +1489,61 @@
       {
         "boss": "Esgar, Priest of Blood",
         "place": "Leyndell Catacombs",
-        "flag_id": 35000850
+        "flag_id": 35000850,
+        "revive_flags": [
+          35002852,
+          35002855,
+          35002856
+        ]
       },
       {
         "boss": "Fell Twin(x2)",
         "place": "Divine Tower of East Altus",
-        "flag_id": 34140850
+        "flag_id": 34140850,
+        "revive_flags": [
+          34140851,
+          34140860,
+          34140865,
+          34142855,
+          34142856,
+          34142885
+        ]
       },
       {
         "boss": "Mohg, the Omen",
         "place": "Cathedral of the Forsaken",
-        "flag_id": 35000800
+        "flag_id": 35000800,
+        "revive_flags": [
+          35000801,
+          35000820,
+          35002800,
+          35002802,
+          35002805,
+          35002806
+        ]
       },
       {
         "boss": "Godfrey, First Elden Lord",
         "place": "Erdtree Sanctuary",
-        "flag_id": 11000850
+        "flag_id": 11000850,
+        "revive_flags": [
+          11000851,
+          11002852,
+          11002855,
+          11002856
+        ]
       },
       {
         "boss": "Morgott, the Omen King",
         "place": "Elden Throne",
         "flag_id": 11000800,
-        "rememberance": 4
+        "rememberance": 4,
+        "revive_flags": [
+          11000801,
+          11002802,
+          11002805,
+          11002806
+        ]
       }
     ]
   },
@@ -800,12 +1556,16 @@
       {
         "boss": "Night's Cavalry",
         "place": "",
-        "flag_id": 1048510800
+        "flag_id": 1048510800,
+        "revive_flags": []
       },
       {
         "boss": "Black Blade Kindred",
         "place": "",
-        "flag_id": 1049520800
+        "flag_id": 1049520800,
+        "revive_flags": [
+          1049522820
+        ]
       }
     ]
   },
@@ -822,48 +1582,118 @@
       {
         "boss": "Ancient Hero of Zamor",
         "place": "Giant-Conquering Hero's Grave",
-        "flag_id": 30170800
+        "flag_id": 30170800,
+        "revive_flags": [
+          30172802,
+          30172805,
+          30172806
+        ]
       },
       {
         "boss": "Ulcerated Tree Spirit",
         "place": "Giants' Mountaintop Catacombs",
-        "flag_id": 30180800
+        "flag_id": 30180800,
+        "revive_flags": [
+          30180801,
+          30182802,
+          30182803,
+          30182805,
+          30182806
+        ]
       },
       {
         "boss": "Godskin Apostle & Godskin Noble & Spiritcaller Snail",
         "place": "Spiritcaller Cave",
-        "flag_id": 31220800
+        "flag_id": 31220800,
+        "revive_flags": [
+          31222805,
+          31222806,
+          31222820,
+          31222821,
+          31222842
+        ]
       },
       {
         "boss": "Borealis the Freezing Fog",
         "place": "Freezing Lake",
-        "flag_id": 1254560800
+        "flag_id": 1254560800,
+        "revive_flags": [
+          1054562820
+        ]
       },
       {
         "boss": "Erdtree Avatar",
         "place": "Minor Erdtree",
-        "flag_id": 1052560800
+        "flag_id": 1052560800,
+        "revive_flags": [
+          1052562830
+        ]
       },
       {
         "boss": "Roundtable Knight Vyke",
         "place": "Lord Contender's Evergaol",
-        "flag_id": 1053560800
+        "flag_id": 1053560800,
+        "revive_flags": [
+          1053560805,
+          1053562800,
+          1053562801,
+          1053562802,
+          1053562806,
+          1053562807
+        ]
       },
       {
         "boss": "Death Rite Bird",
         "place": "",
-        "flag_id": 1050570800
+        "flag_id": 1050570800,
+        "revive_flags": [
+          1050572820
+        ]
       },
       {
         "boss": "Commander Niall",
         "place": "Castle Sol",
-        "flag_id": 1051570800
+        "flag_id": 1051570800,
+        "revive_flags": [
+          1051570801,
+          1051572802,
+          1051572805,
+          1051572806
+        ]
       },
       {
         "boss": "Fire Giant",
         "place": "Flame Peak",
-        "flag_id": 1052520800,
-        "rememberance": 6
+        "flag_id": 1252520800,
+        "rememberance": 6,
+        "revive_flags": [
+          1052520800,
+          1052522815,
+          1052522816,
+          1052522820,
+          1052522821,
+          1052522822,
+          1052522823,
+          1052522824,
+          1052522825,
+          1052522826,
+          1052522827,
+          1052522828,
+          1052522830,
+          1052522831,
+          1052522832,
+          1052522833,
+          1052522834,
+          1052522835,
+          1052522836,
+          1052522837,
+          1052522838,
+          1252520801,
+          1252520804,
+          1252522802,
+          1252522805,
+          1252522806
+        ]
       }
     ]
   },
@@ -876,19 +1706,51 @@
       {
         "boss": "Godskin Duo",
         "place": "Dragon Temple Altar",
-        "flag_id": 13000850
+        "flag_id": 13000850,
+        "revive_flags": [
+          13000851,
+          13002852,
+          13002854,
+          13002855,
+          13002856,
+          13002873,
+          13002874,
+          13002875,
+          13002876,
+          13002944,
+          13002945
+        ]
       },
       {
         "boss": "Dragonlord Placidusax",
         "place": "Beside the Great Bridge",
         "flag_id": 13000830,
-        "rememberance": 12
+        "rememberance": 12,
+        "revive_flags": [
+          71301,
+          13002832,
+          13002834,
+          13002835,
+          13002836
+        ]
       },
       {
         "boss": "Maliketh, the Black Blade",
         "place": "",
         "flag_id": 13000800,
-        "rememberance": 11
+        "rememberance": 11,
+        "revive_flags": [
+          13000801,
+          13002802,
+          13002803,
+          13002805,
+          13002806,
+          13002821,
+          13002822,
+          13002823,
+          13002824,
+          13002826
+        ]
       }
     ]
   },
@@ -905,42 +1767,72 @@
       {
         "boss": "Stray Mimic Tear",
         "place": "Hidden Path to the Haligtree",
-        "flag_id": 30200800
+        "flag_id": 30200800,
+        "revive_flags": [
+          30202802,
+          30202805,
+          30202806
+        ]
       },
       {
         "boss": "Putrid Grave Warden Duelist",
         "place": "Consecrated Snowfield Catacombs",
-        "flag_id": 30190800
+        "flag_id": 30190800,
+        "revive_flags": [
+          30192802,
+          30192805,
+          30192806
+        ]
       },
       {
         "boss": "Astel, Stars of Darkness",
         "place": "Yelough Anix Tunnel",
-        "flag_id": 32110800
+        "flag_id": 32110800,
+        "revive_flags": [
+          32110801,
+          32112802,
+          32112805,
+          32112806
+        ]
       },
       {
         "boss": "Misbegotten Crusader",
         "place": "Cave of the Forlorn",
-        "flag_id": 31120800
+        "flag_id": 31120800,
+        "revive_flags": [
+          31120802,
+          31122802,
+          31122805,
+          31122806
+        ]
       },
       {
         "boss": "Great Wyrm Theodorix",
         "place": "",
-        "flag_id": 1050560800
+        "flag_id": 1050560800,
+        "revive_flags": []
       },
       {
         "boss": "Putrid Avatar",
         "place": "Minor Erdtree",
-        "flag_id": 1050570850
+        "flag_id": 1050570850,
+        "revive_flags": []
       },
       {
         "boss": "Night's Cavalry (Glaive) & Night's Cavalry (Flail)",
         "place": "Inner Consecrated Snowfield",
-        "flag_id": 1248550800
+        "flag_id": 1248550800,
+        "revive_flags": [
+          1248552815
+        ]
       },
       {
         "boss": "Death Rite Bird",
         "place": "",
-        "flag_id": 1048570800
+        "flag_id": 1048570800,
+        "revive_flags": [
+          1048572820
+        ]
       }
     ]
   },
@@ -953,13 +1845,29 @@
       {
         "boss": "Loretta, Knight of the Haligtree",
         "place": "",
-        "flag_id": 15000850
+        "flag_id": 15000850,
+        "revive_flags": [
+          15000851,
+          15002852,
+          15002855,
+          15002856
+        ]
       },
       {
         "boss": "Malenia, Blade of Miquella & Malenia, Goddess of Rot",
         "place": "",
         "flag_id": 15000800,
-        "rememberance": 13
+        "rememberance": 13,
+        "revive_flags": [
+          15000801,
+          15002700,
+          15002701,
+          15002802,
+          15002803,
+          15002805,
+          15002806,
+          15002810
+        ]
       }
     ]
   },
@@ -973,28 +1881,101 @@
       {
         "boss": "Dragonkin Soldier",
         "place": "Siofra River Bank",
-        "flag_id": 12020830
+        "flag_id": 12020830,
+        "revive_flags": []
       },
       {
         "boss": "Ancestor Spirit",
         "place": "Siofra River Bank",
-        "flag_id": 12080800
+        "flag_id": 12080800,
+        "revive_flags": [
+          12082802,
+          12082805,
+          12082806
+        ]
       },
       {
         "boss": "Mimic Tear",
         "place": "",
-        "flag_id": 12020850
+        "flag_id": 12020850,
+        "revive_flags": [
+          12020851,
+          12022852,
+          12022855,
+          12022856,
+          12022858,
+          12022860,
+          12022865
+        ]
       },
       {
         "boss": "Regal Ancestor Spirit",
         "place": "Hallowhorn Grounds",
         "flag_id": 12090800,
-        "rememberance": 7
+        "rememberance": 7,
+        "revive_flags": [
+          12090805,
+          12090806,
+          12092802,
+          12092805,
+          12092806,
+          12092850,
+          12092851,
+          12092852,
+          12092853,
+          12092855,
+          12092856,
+          12092857,
+          12092858,
+          12092859,
+          12092862,
+          12092863,
+          12092870,
+          12092871,
+          12092872,
+          12092873,
+          12092874,
+          12092875,
+          12092876,
+          12092877,
+          12092878,
+          12092879,
+          12092880,
+          12092881,
+          12092882,
+          12092883,
+          12092884,
+          12092885,
+          12092886,
+          12092887,
+          12092888,
+          12092889,
+          12092890,
+          12092891,
+          12092892,
+          12092893,
+          12092894,
+          12092895,
+          12092896,
+          12092897,
+          12092901,
+          12092907,
+          12092908,
+          12092909
+        ]
       },
       {
         "boss": "Valiant Gargoyle & Valiant Gargoyle (Twinblade)",
         "place": "Siofra Aqueduct",
-        "flag_id": 12020800
+        "flag_id": 12020800,
+        "revive_flags": [
+          12020801,
+          12022802,
+          12022805,
+          12022806,
+          12022810,
+          12022820
+        ]
       }
     ]
   },
@@ -1008,7 +1989,15 @@
         "boss": "Mohg, Lord of Blood",
         "place": "",
         "flag_id": 12050800,
-        "rememberance": 10
+        "rememberance": 10,
+        "revive_flags": [
+          12050801,
+          12050802,
+          12050803,
+          12052802,
+          12052805,
+          12052806
+        ]
       }
     ]
   },
@@ -1022,18 +2011,35 @@
       {
         "boss": "Dragonkin Soldier of Nokstella",
         "place": "",
-        "flag_id": 12010800
+        "flag_id": 12010800,
+        "revive_flags": [
+          12010801,
+          12010840,
+          12012802,
+          12012803,
+          12012805,
+          12012806,
+          12012811
+        ]
       },
       {
         "boss": "Dragonkin Soldier",
         "place": "",
-        "flag_id": 12010850
+        "flag_id": 12010850,
+        "revive_flags": [
+          12015039
+        ]
       },
       {
         "boss": "Astel, Naturalborn of the Void",
         "place": "Grand Cloister",
         "flag_id": 12040800,
-        "rememberance": 8
+        "rememberance": 8,
+        "revive_flags": [
+          12042802,
+          12042805,
+          12042806
+        ]
       }
     ]
   },
@@ -1046,18 +2052,49 @@
       {
         "boss": "Crucible Knight Siluria",
         "place": "",
-        "flag_id": 12030390
+        "flag_id": 12030390,
+        "revive_flags": []
       },
       {
         "boss": "Fia's Champion & Sorcerer Rogier & Lionel the Lionhearted",
         "place": "",
-        "flag_id": 12030800
+        "flag_id": 12030800,
+        "revive_flags": [
+          12030801,
+          12032501,
+          12032502,
+          12032503,
+          12032504,
+          12032803,
+          12032805,
+          12032806,
+          12032810,
+          12032811
+        ]
       },
       {
         "boss": "Lichdragon Fortissax",
         "place": "",
         "flag_id": 12030850,
-        "rememberance": 9
+        "rememberance": 9,
+        "revive_flags": [
+          12030852,
+          12032500,
+          12032501,
+          12032502,
+          12032503,
+          12032504,
+          12032852,
+          12032856,
+          12032858,
+          {
+            "flag_id": 12032859,
+            "value": true
+          },
+          12032860,
+          12032861,
+          12032870
+        ]
       }
     ]
   },
@@ -1071,19 +2108,46 @@
       {
         "boss": "Sir Gideon Ofnir, the All-Knowing",
         "place": "Erdtree Sanctuary",
-        "flag_id": 11050850
+        "flag_id": 11050850,
+        "revive_flags": [
+          11050851,
+          11050854,
+          11052852,
+          11052855,
+          11052856,
+          11053710
+        ]
       },
       {
         "boss": "Godfrey, First Elden Lord",
         "place": "Elden Throne",
         "flag_id": 11050800,
-        "rememberance": 14
+        "rememberance": 14,
+        "revive_flags": [
+          11050801,
+          11052802,
+          11052805,
+          11052806
+        ]
       },
       {
         "boss": "Radagon of the Golden Order & Elden Beast",
         "place": "Fractured Marika",
         "flag_id": 19000800,
-        "rememberance": 15
+        "rememberance": 15,
+        "revive_flags": [
+          19000801,
+          19000802,
+          19000804,
+          19001100,
+          19002500,
+          19002801,
+          19002802,
+          19002803,
+          19002805,
+          19002806,
+          19002812
+        ]
       }
     ]
   },
@@ -1106,39 +2170,103 @@
       {
         "boss": "Ghostflame Dragon",
         "place": "",
-        "flag_id": 2045440800
+        "flag_id": 2045440800,
+        "revive_flags": [
+          2045440820,
+          2045442811
+        ]
       },
       {
         "boss": "Blackgaol Knight",
         "place": "Western Nameless Mausoleum",
-        "flag_id": 2046410800
+        "flag_id": 2046410800,
+        "revive_flags": [
+          2046412802,
+          2046412805,
+          2046412806
+        ]
       },
       {
         "boss": "Chief Bloodfiend",
         "place": "Rivermouth Cave",
-        "flag_id": 43000800
+        "flag_id": 43000800,
+        "revive_flags": [
+          43002802,
+          43002805,
+          43002806
+        ]
       },
       {
         "boss": "Lamenter",
         "place": "Lamenter's Gaol",
-        "flag_id": 41020800
+        "flag_id": 41020800,
+        "revive_flags": [
+          41020801,
+          41022802,
+          41022805,
+          41022806,
+          {
+            "flag_id": 41022820,
+            "value": true
+          },
+          41022821,
+          41022822,
+          41022823,
+          41022824,
+          41022825,
+          41022826,
+          41022827,
+          41022832,
+          41022835,
+          41022836,
+          41022837,
+          41022852,
+          41022880,
+          41022881,
+          41022882,
+          41022883,
+          41022884,
+          41022885,
+          41022886,
+          41022887
+        ]
       },
       {
         "boss": "Demi-Human Swordmaster Onze",
         "place": "Belurat Gaol",
-        "flag_id": 41000800
+        "flag_id": 41000800,
+        "revive_flags": [
+          41002802,
+          41002805,
+          41002806
+        ]
       },
       {
         "boss": "Divine Beast Dancing Lion",
         "place": "Belurat, Tower Settlement",
         "flag_id": 20000800,
-        "rememberance": 16
+        "rememberance": 16,
+        "revive_flags": [
+          20000801,
+          20002802,
+          20002805,
+          20002806,
+          20003820,
+          20003821,
+          20003822,
+          20003823
+        ]
       },
       {
         "boss": "Rellana, Twin Moon Knight",
         "place": "Castle Ensis",
         "flag_id": 2048440800,
-        "rememberance": 17
+        "rememberance": 17,
+        "revive_flags": [
+          2048442802,
+          2048442805,
+          2048442806
+        ]
       }
     ],
     "dlc": 1
@@ -1161,79 +2289,190 @@
       {
         "boss": "Ghostflame Dragon",
         "place": "",
-        "flag_id": 2049430800
+        "flag_id": 2049430800,
+        "revive_flags": [
+          2049432831
+        ]
       },
       {
         "boss": "Ralva the Great Red Bear",
         "place": "",
-        "flag_id": 2049450800
+        "flag_id": 2049450800,
+        "revive_flags": []
       },
       {
         "boss": "Rugalea the Great Red Bear",
         "place": "Rauh Base",
-        "flag_id": 2044470800
+        "flag_id": 2044470800,
+        "revive_flags": [
+          2044472802
+        ]
       },
       {
         "boss": "Dryleaf Dane",
         "place": "Moorth Ruins",
-        "flag_id": 2049440800
+        "flag_id": 2049440800,
+        "revive_flags": [
+          2049440801,
+          {
+            "flag_id": 2049442702,
+            "value": true
+          },
+          2049442805,
+          2049442810
+        ]
       },
       {
         "boss": "Black Knight Edredd",
         "place": "Fort of Reprimand",
-        "flag_id": 2049430850
+        "flag_id": 2049430850,
+        "revive_flags": [
+          2049435003
+        ]
       },
       {
         "boss": "Black Knight Garrew",
         "place": "Fog Rift Fort",
-        "flag_id": 2047450800
+        "flag_id": 2047450800,
+        "revive_flags": [
+          2047455002
+        ]
       },
       {
         "boss": "Red Bear",
         "place": "Northern Nameless Mausoleum",
-        "flag_id": 2046450800
+        "flag_id": 2046450800,
+        "revive_flags": [
+          2046452802,
+          2046452805,
+          2046452806
+        ]
       },
       {
         "boss": "Rakshasa",
         "place": "Eastern Nameless Mausoleum",
-        "flag_id": 2051440800
+        "flag_id": 2051440800,
+        "revive_flags": [
+          2051442802,
+          2051442805,
+          2051442806
+        ]
       },
       {
         "boss": "Metyr, Mother of Fingers",
         "place": "Cathedral of Manus Metyr",
         "flag_id": 25000800,
-        "rememberance": 18
+        "rememberance": 18,
+        "revive_flags": [
+          25000801,
+          25002801,
+          25002802,
+          25002803,
+          25002805,
+          25002806,
+          25002820,
+          25002821,
+          25002822,
+          25002823,
+          25002824,
+          25002825,
+          25002826,
+          25002827,
+          25002828,
+          25002829,
+          25002830,
+          25002831,
+          25002832,
+          25002833,
+          25002834,
+          2051452602
+        ]
       },
       {
         "boss": "Count Ymir, Mother of Fingers",
         "place": "Cathedral of Manus Metyr",
-        "flag_id": 2051450800
+        "flag_id": 2051450800,
+        "revive_flags": [
+          2051450839,
+          2051452300,
+          2051452301,
+          2051452302,
+          2051452303,
+          2051452304,
+          2051452305,
+          2051452306,
+          2051452307,
+          2051452308,
+          2051452309,
+          2051452312,
+          2051452313,
+          2051452314,
+          2051452315,
+          2051452316,
+          2051452424,
+          2051452706,
+          2051452709,
+          2051452805,
+          2051452806,
+          2051452811,
+          2051452813,
+          2051452820
+        ]
       },
       {
         "boss": "Death Knight",
         "place": "Fog Rift Catacombs",
-        "flag_id": 40000800
+        "flag_id": 40000800,
+        "revive_flags": [
+          40002802,
+          40002805,
+          40002806
+        ]
       },
       {
         "boss": "Death Knight",
         "place": "Scorpion River Catacombs",
-        "flag_id": 40010800
+        "flag_id": 40010800,
+        "revive_flags": [
+          40012802,
+          40012805,
+          40012806
+        ]
       },
       {
         "boss": "Curseblade Labirith",
         "place": "Bonny Gaol",
-        "flag_id": 41010800
+        "flag_id": 41010800,
+        "revive_flags": [
+          41012802,
+          41012805,
+          41012806
+        ]
       },
       {
         "boss": "Golden Hippopotamus",
         "place": "Shadow Keep",
-        "flag_id": 21000850
+        "flag_id": 21000850,
+        "revive_flags": [
+          21000851,
+          21002852,
+          21002855,
+          21002856
+        ]
       },
       {
         "boss": "Messmer the Impaler & Base Serpent Messmer",
         "place": "Shadow Keep",
         "flag_id": 21010800,
-        "rememberance": 20
+        "rememberance": 20,
+        "revive_flags": [
+          21010801,
+          21012802,
+          21012805,
+          21012806,
+          21012810,
+          21013820
+        ]
       }
     ],
     "dlc": 1
@@ -1247,13 +2486,31 @@
       {
         "boss": "Divine Beast Dancing Lion",
         "place": "",
-        "flag_id": 2046460800
+        "flag_id": 2046460800,
+        "revive_flags": [
+          2046462802,
+          2046462830,
+          2046462851,
+          2046462852,
+          2046462853,
+          2046462854,
+          2046462855,
+          2046462856,
+          2046462857,
+          2046462858,
+          2046462859
+        ]
       },
       {
         "boss": "Romina, Saint of the Bud",
         "place": "Church of the Bud",
         "flag_id": 2044450800,
-        "rememberance": 21
+        "rememberance": 21,
+        "revive_flags": [
+          2044452802,
+          2044452805,
+          2044452806
+        ]
       }
     ],
     "dlc": 1
@@ -1269,18 +2526,36 @@
       {
         "boss": "Ghostflame Dragon",
         "place": "",
-        "flag_id": 2048380850
+        "flag_id": 2048380850,
+        "revive_flags": [
+          2048380870,
+          2048382870
+        ]
       },
       {
         "boss": "Dancer of Ranah",
         "place": "Southern Nameless Mausoleum",
-        "flag_id": 2046380800
+        "flag_id": 2046380800,
+        "revive_flags": [
+          2046382802,
+          2046382805,
+          2046382806
+        ]
       },
       {
         "boss": "Putrescent Knight",
         "place": "Stone Coffin Fissure",
         "flag_id": 22000800,
-        "rememberance": 22
+        "rememberance": 22,
+        "revive_flags": [
+          22000801,
+          22000802,
+          22002801,
+          22002802,
+          22002805,
+          22002806,
+          22002815
+        ]
       }
     ],
     "dlc": 1
@@ -1294,12 +2569,14 @@
       {
         "boss": "Death Rite Bird",
         "place": "",
-        "flag_id": 2047390800
+        "flag_id": 2047390800,
+        "revive_flags": []
       },
       {
         "boss": "Demi-Human Queen Marigga",
         "place": "",
-        "flag_id": 2046400800
+        "flag_id": 2046400800,
+        "revive_flags": []
       }
     ],
     "dlc": 1
@@ -1315,27 +2592,51 @@
       {
         "boss": "Jagged Peak Drake",
         "place": "Foot of the Jagged Peak",
-        "flag_id": 2049410800
+        "flag_id": 2049410800,
+        "revive_flags": []
       },
       {
         "boss": "Jagged Peak Drake",
         "place": "Jagged Peak Mountainside",
-        "flag_id": 2052400800
+        "flag_id": 2052400800,
+        "revive_flags": []
       },
       {
         "boss": "Ancient Dragon-Man",
         "place": "Dragon's Pit",
-        "flag_id": 43010800
+        "flag_id": 43010800,
+        "revive_flags": [
+          43012802,
+          43012805,
+          43012806
+        ]
       },
       {
         "boss": "Ancient Dragon Senessax",
         "place": "Jagged Peak Mountainside",
-        "flag_id": 2054390850
+        "flag_id": 2054390850,
+        "revive_flags": []
       },
       {
         "boss": "Bayle the Dread",
         "place": "Jagged Peak Summit",
-        "flag_id": 2054390800
+        "flag_id": 2054390800,
+        "revive_flags": [
+          2054390801,
+          2054392481,
+          2054392485,
+          2054392486,
+          2054392488,
+          2054392700,
+          2054392701,
+          2054392702,
+          2054392703,
+          2054392706,
+          2054392707,
+          2054392802,
+          2054392805,
+          2054392806
+        ]
       }
     ],
     "dlc": 1
@@ -1351,29 +2652,53 @@
       {
         "boss": "Tree Sentinel",
         "place": "Hinterland",
-        "flag_id": 2050470800
+        "flag_id": 2050470800,
+        "revive_flags": [
+          2050470400,
+          2050475000
+        ]
       },
       {
         "boss": "Tree Sentinel",
         "place": "Hinterland Bridge",
-        "flag_id": 2050480860
+        "flag_id": 2050480860,
+        "revive_flags": [
+          2050470400,
+          2050475000
+        ]
       },
       {
         "boss": "Fallingstar Beast",
         "place": "Fingerstone Hill",
-        "flag_id": 2052480800
+        "flag_id": 2052480800,
+        "revive_flags": [
+          2052482202
+        ]
       },
       {
         "boss": "Commander Gaius",
         "place": "",
         "flag_id": 2049480800,
-        "rememberance": 19
+        "rememberance": 19,
+        "revive_flags": [
+          2049480801,
+          2049482802,
+          2049482805,
+          2049482806
+        ]
       },
       {
         "boss": "Scadutree Avatar",
         "place": "Scadutree Base",
         "flag_id": 2050480800,
-        "rememberance": 24
+        "rememberance": 24,
+        "revive_flags": [
+          2050480801,
+          2050482802,
+          2050482803,
+          2050482805,
+          2050482806
+        ]
       }
     ],
     "dlc": 1
@@ -1389,13 +2714,41 @@
       {
         "boss": "Jori, Elder Inquisitor",
         "place": "Darklight Catacombs",
-        "flag_id": 2052430800
+        "flag_id": 2052430800,
+        "revive_flags": [
+          2052432801,
+          2052432802,
+          2052432805,
+          2052432806,
+          2052432848
+        ]
       },
       {
         "boss": "Midra, Lord of Frenzied Flame",
         "place": "Midra's Manse",
         "flag_id": 28000800,
-        "rememberance": 23
+        "rememberance": 23,
+        "revive_flags": [
+          28000801,
+          28000814,
+          28002700,
+          28002701,
+          28002702,
+          28002703,
+          28002704,
+          28002705,
+          28002706,
+          28002707,
+          28002708,
+          28002709,
+          28002801,
+          28002802,
+          28002805,
+          28002806,
+          28002820,
+          28002823,
+          28003811
+        ]
       }
     ],
     "dlc": 1
@@ -1410,7 +2763,15 @@
         "boss": "Promised Consort Radahn & Radahn, Consort of Miquella",
         "place": "",
         "flag_id": 20010800,
-        "rememberance": 25
+        "rememberance": 25,
+        "revive_flags": [
+          20010801,
+          20012802,
+          20012805,
+          20012806,
+          20012820,
+          20012841
+        ]
       }
     ],
     "dlc": 1

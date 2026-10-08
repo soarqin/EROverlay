@@ -63,6 +63,8 @@
 | `challenge_death_count` | `0` | 挑战模式允许的最大死亡次数。 |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | 挑战模式状态的显示格式。支持 `{kills}`、`{total}`、`{deaths}`、`{igt}`、`{pb}`、`{tries}`、`$n`。 |
 
+复活会同时恢复数据文件中的场地与阶段 flag；复活后需传送或重新加载场地。拉塔恩/红狮子城和帕奇涉及共用场地或支线状态，详见[复活说明与逆向证据](docs/boss-revival.md)。
+
 ### `achievements.ini` —— 成就覆盖层
 
 | 配置项 | 默认值 | 说明 |

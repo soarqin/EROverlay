@@ -63,6 +63,8 @@ The loader reads INI files from `configs/`. Save edits as UTF-8 and restart the 
 | `challenge_death_count` | `0` | Maximum allowed deaths in challenge mode. |
 | `challenge_status_text` | `PB: {pb}/{total}  Tries: {tries}$nCurrent: {kills}/{total}` | Display format for challenge mode status. Supports `{kills}`, `{total}`, `{deaths}`, `{igt}`, `{pb}`, `{tries}`, `$n`. |
 
+Revival also restores the arena and phase flags configured for that boss. Travel or reload the area afterwards. Radahn/Redmane and Patches involve shared arena or quest state; see the [revival schema and reverse-engineering evidence](docs/boss-revival.md).
+
 ### `achievements.ini` — Achievements Overlay
 
 | Key | Default | Description |
