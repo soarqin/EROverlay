@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [Unreleased]
+
+#### Changed
+
+- Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.
+
 ### [2.0.0] - 2026-10-03
 
 #### Added

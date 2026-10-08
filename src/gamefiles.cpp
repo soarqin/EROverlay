@@ -142,6 +142,10 @@ struct GameFiles::Impl {
     uint8_t lastReveal = 0;
     uint64_t maskRefresh = 0;
     uint32_t activeMasks[3]{};
+    // Marker refreshes read thousands of flags; resolving each category once
+    // avoids a ReadProcessMemory tree walk per flag.
+    std::mutex flagMutex;
+    util::EventFlagCache flagCache;
 
     static void complete(uint32_t status, void *context, void *buffer, uint64_t size) {
         auto &item = *static_cast<Item *>(context);
@@ -390,6 +394,8 @@ bool GameFiles::readMapState(ERMapState &state) {
         impl_->lastView = view;
         impl_->lastPlayer = player;
         impl_->maskRefresh = 0;
+        std::lock_guard lock(impl_->flagMutex);
+        impl_->flagCache.reset();
     }
     state.generation = impl_->mapGeneration;
     if (!contextRead)
@@ -407,7 +413,10 @@ bool GameFiles::readMapState(ERMapState &state) {
         uint32_t masks[3];
         // Mirror the native mask calculation from PARAM/flags rather than
         // the view model's non-authoritative cached display masks.
-        if (!util::readMapPieceMasks(pieceTable, flags, reveal != 0, masks)) {
+        std::unique_lock lock(impl_->flagMutex);
+        bool masksRead = util::readMapPieceMasks(pieceTable, flags, reveal != 0, masks, &impl_->flagCache);
+        lock.unlock();
+        if (!masksRead) {
             impl_->maskRefresh = 0;
             return false;
         }
@@ -430,8 +439,12 @@ uintptr_t GameFiles::findParamTable(uint32_t group) const {
     return cap ? pointer(cap + 0x80) : 0;
 }
 bool GameFiles::readEventFlag(uint32_t id) const {
+    if (!compatible() || id == UINT32_MAX)
+        return false;
+    auto manager = pointer(impl_->base + impl_->profile->eventFlags);
     bool value = false;
-    return compatible() && id != UINT32_MAX && util::readGameEventFlag(pointer(impl_->base + impl_->profile->eventFlags), id, value) && value;
+    std::lock_guard lock(impl_->flagMutex);
+    return impl_->flagCache.read(manager, id, value) && value;
 }
 bool GameFiles::readGameLayout(ERGameLayout &layout) const {
     layout = {};

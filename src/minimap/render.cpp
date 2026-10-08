@@ -367,6 +367,7 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
             drawLayer(0);
         drawLayer(map);
         gResources.endFrame();
+        const auto *clearedRecipe = gResources.special("cleared");
         for (const auto &marker: snapshot.decorations) {
             if (!(marker.maps & (1u << map)) || (marker.source == DecorationSource::Grace ? !showGraces_ : !showLandmarks_))
                 continue;
@@ -377,7 +378,7 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
             float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
             drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
             if (marker.cleared)
-                drawRecipe(gResources.special("cleared"), screen, size, marker.rotationRad + angle);
+                drawRecipe(clearedRecipe, screen, size, marker.rotationRad + angle);
         }
         int markerMap = map == 2 ? 10 : map;
         if (showDeath_ && state.deathValid && state.deathMapId == markerMap) {
@@ -428,44 +429,5 @@ void Renderer::composite(float alpha) {
     ImGui::ShadeVertsLinearUV(draw, first, draw->VtxBuffer.Size, origin, far, uv0, uv1, false);
     draw->PopTexture();
 }
-
-bool Renderer::isPointInShape(float x, float y) const {
-    if (currentShape_ == Shape::Rect)
-        return true;
-    float cx = minimapWidth_ * 0.5f;
-    float cy = minimapHeight_ * 0.5f;
-    if (currentShape_ == Shape::Circle) {
-        float radius = cx; // Circle forces square, so cx == cy == radius
-        float dx = x - cx;
-        float dy = y - cy;
-        return dx * dx + dy * dy <= radius * radius;
-    }
-    // Shape::Rounded — use cached rounding value
-    float left = cachedRounding_;
-    float right = minimapWidth_ - cachedRounding_;
-    float top = cachedRounding_;
-    float bottom = minimapHeight_ - cachedRounding_;
-    // Inside the inner cross (no corner check needed)
-    if (x >= left && x <= right && y >= 0.f && y <= minimapHeight_)
-        return true;
-    if (y >= top && y <= bottom && x >= 0.f && x <= minimapWidth_)
-        return true;
-    // Check the four corner arcs
-    auto checkCorner = [](float px, float py, float cornerX, float cornerY, float r) {
-        float dx = px - cornerX;
-        float dy = py - cornerY;
-        return dx * dx + dy * dy <= r * r;
-    };
-    if (x < left && y < top)
-        return checkCorner(x, y, left, top, cachedRounding_);
-    if (x > right && y < top)
-        return checkCorner(x, y, right, top, cachedRounding_);
-    if (x < left && y > bottom)
-        return checkCorner(x, y, left, bottom, cachedRounding_);
-    if (x > right && y > bottom)
-        return checkCorner(x, y, right, bottom, cachedRounding_);
-    return false;
-}
-
 
 } // namespace er::minimap

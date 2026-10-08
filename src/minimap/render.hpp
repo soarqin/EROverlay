@@ -28,7 +28,6 @@ private:
     void drawTile(const TileView &tile, Point player, float cosMap, float sinMap);
     void renderContent(const MapSnapshot &snapshot);
     void composite(float alpha);
-    [[nodiscard]] bool isPointInShape(float x, float y) const;
 
 private:
     bool showDeath_ = true;

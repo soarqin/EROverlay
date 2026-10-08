@@ -27,6 +27,8 @@ public:
     };
     [[nodiscard]] bool open(uintptr_t table) {
         rows_.clear();
+        snapshot_.clear();
+        table_ = table;
         std::array<uint8_t, 48> header{};
         if (!copy(table, header.data(), header.size()) || header[0x2C])
             return false;
@@ -40,8 +42,21 @@ public:
         size_t start = format == 2 ? 0x30 : 0x40;
         bool wide = format >= 4 && (header[0x2E] & 2) && (format == 4 || (header[0x2D] & 0x80));
         size_t stride = wide ? 24 : 12, end = start + size_t(count) * stride;
+        if (end > MAX_OFFSET || table > UINTPTR_MAX - MAX_OFFSET)
+            return false;
+        // Native accessors append a sorted ID index at align16(table[-16]);
+        // the stored file length also bounds a nameless final PARAM row.
+        uint32_t fileSize = 0;
+        bool sized = table >= 16 && copy(table - 16, &fileSize, sizeof(fileSize)) && fileSize >= end && fileSize <= MAX_OFFSET;
+        // One copy of a bounded table replaces a system call per row read.
+        // Rows outside an unavailable or partial snapshot are still copied live.
+        if (sized && fileSize <= SNAPSHOT_BYTES) {
+            snapshot_.resize(fileSize);
+            if (!copy(table, snapshot_.data(), fileSize))
+                snapshot_.clear();
+        }
         std::vector<uint8_t> directory(size_t(count) * stride);
-        if (end > MAX_OFFSET || table > UINTPTR_MAX - MAX_OFFSET || !copy(table + start, directory.data(), directory.size()))
+        if (!load(table + start, directory.data(), directory.size()))
             return false;
         struct Entry {
             uint32_t id;
@@ -51,10 +66,7 @@ public:
         std::vector<uint64_t> boundaries;
         if (strings >= end && strings <= MAX_OFFSET)
             boundaries.push_back(strings);
-        // Native accessors append a sorted ID index at align16(table[-16]);
-        // the stored file length also bounds a nameless final PARAM row.
-        uint32_t fileSize = 0;
-        if (table >= 16 && copy(table - 16, &fileSize, sizeof(fileSize)) && fileSize >= end && fileSize <= MAX_OFFSET)
+        if (sized)
             boundaries.push_back(fileSize);
         for (size_t i = 0; i < count; ++i) {
             const auto *data = directory.data() + i * stride;
@@ -81,20 +93,31 @@ public:
     template<typename T>
     [[nodiscard]] bool read(const Row &row, T &value, size_t minimum = sizeof(T)) const {
         value = {};
-        return minimum <= sizeof(T) && row.size >= minimum && copy(row.address, &value, std::min(row.size, sizeof(T)));
+        return minimum <= sizeof(T) && row.size >= minimum && load(row.address, &value, std::min(row.size, sizeof(T)));
     }
     template<typename T>
     [[nodiscard]] bool field(const Row &row, size_t offset, T &value) const {
-        return offset <= row.size && sizeof(T) <= row.size - offset && row.address <= UINTPTR_MAX - offset && copy(row.address + offset, &value, sizeof(T));
+        return offset <= row.size && sizeof(T) <= row.size - offset && row.address <= UINTPTR_MAX - offset && load(row.address + offset, &value, sizeof(T));
     }
 
 private:
     static constexpr size_t MAX_OFFSET = 0x10000000;
+    static constexpr size_t SNAPSHOT_BYTES = 4 * 1024 * 1024;
     [[nodiscard]] static bool copy(uintptr_t address, void *value, size_t size) {
         SIZE_T copied = 0;
         return address && ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void *>(address), value, size, &copied) && copied == size;
     }
+    [[nodiscard]] bool load(uintptr_t address, void *value, size_t size) const {
+        size_t offset = address - table_;
+        if (address >= table_ && offset <= snapshot_.size() && size <= snapshot_.size() - offset) {
+            std::memcpy(value, snapshot_.data() + offset, size);
+            return true;
+        }
+        return copy(address, value, size);
+    }
     std::vector<Row> rows_;
+    std::vector<uint8_t> snapshot_;
+    uintptr_t table_ = 0;
 };
 
 } // namespace er::util

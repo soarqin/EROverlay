@@ -148,52 +148,99 @@ void rows(uint32_t group, size_t minimum, F function) {
     }
 }
 // Read the game's already-built legacy-conversion trees. No Scaleform calls
-// or allocations are required on the overlay update thread.
-bool convert(uintptr_t view, uint32_t mapMask, uint32_t raw, float x, float y, float z, float &mapX, float &mapY) {
-    uint64_t count = 0;
-    if (!read(view + 0x280, count) || !count || count > 8)
-        return false;
-    for (uint64_t i = 0; i < count; ++i) {
-        uintptr_t converter = view + 0xF8 + i * 48;
-        uint8_t origin[4];
-        if (!read(converter + 8, origin) || (origin[3] != 60 && (origin[3] != 61 || !(mapMask & 4))))
-            continue;
-        uint32_t target = raw;
-        float px = x, py = y, pz = z;
-        if ((raw >> 24) != 60 && (raw >> 24) != 61) {
-            uintptr_t conversion = pointer(converter + 40);
-            auto head = conversion ? pointer(conversion + 16) : 0;
-            auto node = head ? pointer(head + 8) : 0, candidate = head;
-            for (unsigned depth = 0; node && depth < 64; ++depth) {
-                uint8_t nil = 1;
-                uint32_t key;
-                if (!read(node + 25, nil) || nil || !read(node + 28, key))
-                    break;
-                if (key >= raw) {
-                    candidate = node;
-                    node = pointer(node);
-                } else
-                    node = pointer(node + 16);
-            }
-            uint32_t key = 0;
-            float offset[3];
-            if (!candidate || candidate == head || !read(candidate + 28, key) || key != raw || !read(candidate + 32, target) || !read(candidate + 36, offset))
+// or allocations are required on the overlay update thread. Converter headers
+// are read once per refresh instead of once per marker; tree lookups are kept
+// across refreshes, keyed by the tree head that a rebuilt tree would replace.
+class MapConverter {
+public:
+    MapConverter(uintptr_t view, uint32_t mapMask, MapConversionCache &cache) : cache_(cache) {
+        uint64_t count = 0;
+        if (!read(view + 0x280, count) || !count || count > 8)
+            return;
+        for (uint64_t i = 0; i < count; ++i) {
+            uintptr_t address = view + 0xF8 + i * 48;
+            Converter converter{};
+            if (!read(address + 8, converter.origin) || (converter.origin[3] != 60 && (converter.origin[3] != 61 || !(mapMask & 4))) ||
+                !read(address + 12, converter.settings))
                 continue;
-            px += offset[0];
-            py += offset[1];
-            pz += offset[2];
+            auto conversion = pointer(address + 40);
+            converter.head = conversion ? pointer(conversion + 16) : 0;
+            converters_.push_back(converter);
         }
-        if ((target >> 24) != origin[3])
-            continue;
-        float settings[6];
-        if (!read(converter + 12, settings))
-            continue;
-        mapX = (px + (int((target >> 16) & 255) - int(origin[2])) * 256.f - settings[0]) * settings[5] + settings[3];
-        mapY = -(pz + (int((target >> 8) & 255) - int(origin[1])) * 256.f - settings[2]) * settings[5] + settings[4];
-        return std::isfinite(mapX) && std::isfinite(mapY);
     }
-    return false;
-}
+    bool convert(uint32_t raw, float x, float z, float &mapX, float &mapY) {
+        for (const auto &converter: converters_) {
+            uint32_t target = raw;
+            float px = x, pz = z;
+            if ((raw >> 24) != 60 && (raw >> 24) != 61) {
+                const auto *conversion = lookup(converter.head, raw);
+                if (!conversion)
+                    continue;
+                target = conversion->target;
+                px += conversion->offset[0];
+                pz += conversion->offset[2];
+            }
+            const auto &origin = converter.origin;
+            if ((target >> 24) != origin[3])
+                continue;
+            const auto &settings = converter.settings;
+            mapX = (px + (int((target >> 16) & 255) - int(origin[2])) * 256.f - settings[0]) * settings[5] + settings[3];
+            mapY = -(pz + (int((target >> 8) & 255) - int(origin[1])) * 256.f - settings[2]) * settings[5] + settings[4];
+            return std::isfinite(mapX) && std::isfinite(mapY);
+        }
+        return false;
+    }
+
+private:
+    struct Converter {
+        uint8_t origin[4];
+        float settings[6];
+        uintptr_t head;
+    };
+    const MapConversion *lookup(uintptr_t head, uint32_t raw) {
+        if (!head)
+            return nullptr;
+        auto found = cache_.find({head, raw});
+        if (found == cache_.end()) {
+            MapConversion conversion;
+            // An unreadable tree is not cached; the next refresh retries it.
+            if (!find(head, raw, conversion))
+                return nullptr;
+            found = cache_.emplace(std::pair{head, raw}, conversion).first;
+        }
+        return found->second.found ? &found->second : nullptr;
+    }
+    // Native map lower_bound: +0 left, +16 right, +25 nil, +28 key, +32 target, +36 offset.
+    static bool find(uintptr_t head, uint32_t raw, MapConversion &conversion) {
+        uintptr_t node = pointer(head + 8), candidate = head;
+        for (unsigned depth = 0;; ++depth) {
+            uint8_t nil = 1;
+            uint32_t key = 0;
+            if (!node || depth >= 64 || !read(node + 25, nil))
+                return false;
+            if (nil)
+                break;
+            if (!read(node + 28, key))
+                return false;
+            if (key >= raw) {
+                candidate = node;
+                node = pointer(node);
+            } else
+                node = pointer(node + 16);
+        }
+        uint32_t key = 0;
+        if (candidate == head)
+            return true;
+        if (!read(candidate + 28, key))
+            return false;
+        if (key != raw)
+            return true;
+        conversion.found = read(candidate + 32, conversion.target) && read(candidate + 36, conversion.offset);
+        return conversion.found;
+    }
+    MapConversionCache &cache_;
+    std::vector<Converter> converters_;
+};
 uint32_t rawMap(uint8_t area, uint8_t x, uint8_t z) { return (uint32_t(area) << 24) | (uint32_t(x) << 16) | (uint32_t(z) << 8); }
 } // namespace
 
@@ -278,22 +325,44 @@ void Data::update() {
     };
     std::unordered_map<uint64_t, GraceIcons> nativeGraceIcons;
     auto view = next.state.viewModel;
+    if (conversionGeneration_ != next.state.generation || conversions_.size() > 4096) {
+        conversions_.clear();
+        conversionGeneration_ = next.state.generation;
+    }
+    MapConverter converter(view, layout.mapMask, conversions_);
     uintptr_t graces = pointer(view + 0x2E8), end = pointer(view + 0x2F0);
     if (graces && end >= graces && layout.graceStride && (end - graces) % layout.graceStride == 0 && (end - graces) / layout.graceStride < 2000) {
+        // Copy the native grace array once; fields past its end, or an
+        // unreadable copy, fall back to individual reads.
+        std::vector<uint8_t> graceBytes(end - graces);
+        bool copied = readBytes(graces, graceBytes.data(), graceBytes.size());
+        auto field = [&](uintptr_t address, auto &value) {
+            size_t offset = address - graces;
+            if (copied && offset <= graceBytes.size() && sizeof(value) <= graceBytes.size() - offset) {
+                std::memcpy(&value, graceBytes.data() + offset, sizeof(value));
+                return true;
+            }
+            return read(address, value);
+        };
         for (auto entry = graces; entry < end; entry += layout.graceStride) {
             uint32_t id;
             uint8_t normal = 1;
-            if (!read(entry + 0x238, id) || !read(entry + layout.graceNormalOffset, normal))
+            if (!field(entry + 0x238, id) || !field(entry + layout.graceNormalOffset, normal))
                 continue;
             GraceIcons icons{};
-            if (read(entry + (normal ? 0x248 : 0x288), icons.base)) {
+            if (field(entry + (normal ? 0x248 : 0x288), icons.base)) {
                 if (layout.alternateIcons)
-                    (void)read(entry + (normal ? 0x2C8 : 0x308), icons.alternate);
+                    (void)field(entry + (normal ? 0x2C8 : 0x308), icons.alternate);
                 nativeGraceIcons[id] = icons;
             }
         }
     }
     rows<BonfireWarpParam>(43, 48, [&](uint64_t id, const BonfireWarpParam &row, size_t size) {
+        // Only the home grace and discovered graces need an icon, so skip
+        // the alternate-text flag reads for every undiscovered grace.
+        bool home = id == homeId, discovered = flag(row.eventflagId);
+        if (!home && !discovered)
+            return;
         uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
         uint32_t selected = row.iconId;
         auto game = nativeGraceIcons.find(id);
@@ -302,11 +371,11 @@ void Data::update() {
             selected = alt ? game->second.alternate : game->second.base;
         else if (alt && row.altIconId)
             selected = row.altIconId;
-        if (id == homeId) {
+        if (home) {
             next.roundtable = next.state.rawMapId == raw;
             next.homeIcon = selected;
         }
-        if (!flag(row.eventflagId))
+        if (!discovered)
             return;
         DecorationInfo marker;
         marker.id = id;
@@ -314,7 +383,7 @@ void Data::update() {
         marker.source = DecorationSource::Grace;
         marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
         marker.maps &= layout.mapMask;
-        if (!marker.maps || !selected || id == homeId || !convert(view, layout.mapMask, raw, row.posX, row.posY, row.posZ, marker.x, marker.y))
+        if (!marker.maps || !selected || home || !converter.convert(raw, row.posX, row.posZ, marker.x, marker.y))
             return;
         marker.cleared = cleared(row.clearedEventFlagId);
         decorations->push_back(marker);
@@ -342,14 +411,13 @@ void Data::update() {
         else if (layout.alternateIcons && size >= sizeof(row) && alternate(row, 192, 224) && row.altIconId)
             marker.iconId = row.altIconId;
         uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
-        float x = row.posX, y = row.posY, z = row.posZ;
+        float x = row.posX, z = row.posZ;
         if (distant && row.isOverrideDistViewMarkPos) {
             raw = rawMap(row.areaNo_forDistViewMark, row.gridXNo_forDistViewMark, row.gridZNo_forDistViewMark);
             x = row.posX_forDistViewMark;
-            y = row.posY_forDistViewMark;
             z = row.posZ_forDistViewMark;
         }
-        if (!marker.maps || !convert(view, layout.mapMask, raw, x, y, z, marker.x, marker.y))
+        if (!marker.maps || !converter.convert(raw, x, z, marker.x, marker.y))
             return;
         marker.cleared = cleared(row.clearedEventFlagId);
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;

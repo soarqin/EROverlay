@@ -2,9 +2,11 @@
 
 #include <array>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "nativeapi.h"
@@ -67,6 +69,14 @@ private:
     std::shared_ptr<const std::vector<DecorationInfo>> decorationStorage_;
 };
 
+// A legacy-map conversion found in a native tree, keyed by tree head and raw map.
+struct MapConversion {
+    bool found = false;
+    uint32_t target = 0;
+    float offset[3]{};
+};
+using MapConversionCache = std::map<std::pair<uintptr_t, uint32_t>, MapConversion>;
+
 class Data {
 public:
     void update();
@@ -76,6 +86,9 @@ private:
     mutable std::mutex mutex_;
     MapSnapshot snapshot_;
     uint64_t markerRefresh_ = 0;
+    // Update-thread only: conversion trees are static within a game context.
+    MapConversionCache conversions_;
+    uint64_t conversionGeneration_ = 0;
 };
 extern Data gData;
 } // namespace er::minimap
