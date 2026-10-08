@@ -36,11 +36,13 @@ enum :int {
 bool D3DRenderer::hook() {
     if (hooksInstalled_) return true;
 
-    if (!createDevice()) {
+    // Find the game window first: retries while it is missing must not
+    // create a throwaway D3D12 device and swap chain every time.
+    if (!initOverlay()) {
         return false;
     }
 
-    if (!initOverlay()) {
+    if (!createDevice()) {
         return false;
     }
 
@@ -67,7 +69,6 @@ bool D3DRenderer::hook() {
         !createAndEnableHook("Present", fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_)) ||
         !createAndEnableHook("Present1", fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_)) ||
         !createAndEnableHook("ResizeBuffers", fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_)) ||
-        !createAndEnableHook("SetSourceSize", fnSetSourceSize_, reinterpret_cast<void*>(&hkSetSourceSize), reinterpret_cast<void**>(&oSetSourceSize_)) ||
         !createAndEnableHook("ResizeBuffers1", fnResizeBuffers1_, reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_)) ||
         !installExecuteCommandListsHook()) {
         disableAll();
@@ -109,7 +110,6 @@ void D3DRenderer::disableAll() {
     disableAndRemoveHook(fnPresent1_);
 
     disableAndRemoveHook(fnResizeBuffers_);
-    disableAndRemoveHook(fnSetSourceSize_);
     disableAndRemoveHook(fnResizeBuffers1_);
 
     releaseExecuteCommandListsHook();
@@ -121,6 +121,7 @@ void D3DRenderer::releaseCommandQueue() {
         commandQueue_->Release();
         commandQueue_ = nullptr;
     }
+    boundQueue_ = nullptr;
 }
 
 bool D3DRenderer::captureCommandQueue(IUnknown *pDevice) {
@@ -194,11 +195,12 @@ void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
     drawingFrame_ = false;
     waitForFrames();
     pluginsDestroyRenderers();
-    releaseTextureUploads();
 
+    // ImGui uploads its textures on uploadQueue_; shut it down first.
     if (ImGui::GetCurrentContext() && ImGui::GetIO().BackendRendererUserData) {
         ImGui_ImplDX12_Shutdown();
     }
+    releaseTextureUploads();
 
     CleanupRenderTarget();
 
@@ -234,6 +236,7 @@ void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
         swapChainIdentity_->Release();
         swapChainIdentity_ = nullptr;
     }
+    boundQueue_ = nullptr;
     renderTargets_.clear();
     freeDescriptors_.clear();
     buffersCounts_ = 0;
@@ -349,7 +352,6 @@ bool D3DRenderer::createDevice() {
         fnPresent1_ = swapChainVTable[22];
 
         fnResizeBuffers_ = swapChainVTable[13];
-        fnSetSourceSize_ = swapChainVTable[29];
         fnResizeBuffers1_ = swapChainVTable[39];
 
         fnExecuteCommandLists_ = commandQueueVTable[10];
@@ -445,30 +447,45 @@ void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle,
 
 void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
     std::lock_guard lock(deviceMutex_);
+    if (commandQueue_ == nullptr || !ImGui::GetCurrentContext())
+        return;
+    // Validate only a new swap-chain/queue pair. Creation, resize and loss
+    // hooks reset the binding, so steady frames skip COM identity queries.
+    if ((pSwapChain != boundSwapChain_ || commandQueue_ != boundQueue_) && !bindSwapChain(pSwapChain))
+        return;
+    renderFrame(pSwapChain);
+}
+
+bool D3DRenderer::queueUsesDevice(IUnknown *deviceIdentity) const {
+    ID3D12Device *queueDevice = nullptr;
+    IUnknown *queueDeviceIdentity = nullptr;
+    bool matches = false;
+    if (SUCCEEDED(commandQueue_->GetDevice(IID_PPV_ARGS(&queueDevice)))) {
+        if (SUCCEEDED(queueDevice->QueryInterface(IID_PPV_ARGS(&queueDeviceIdentity)))) {
+            matches = queueDeviceIdentity == deviceIdentity;
+            queueDeviceIdentity->Release();
+        }
+        queueDevice->Release();
+    }
+    return matches;
+}
+
+bool D3DRenderer::bindSwapChain(IDXGISwapChain3 *pSwapChain) {
     DXGI_SWAP_CHAIN_DESC sd;
-    if (FAILED(pSwapChain->GetDesc(&sd)))
-        return;
-
-    if (gameWindow_ != nullptr && sd.OutputWindow != nullptr && sd.OutputWindow != gameWindow_)
-        return;
-
-    if (commandQueue_ == nullptr)
-        return;
-
-    if (!ImGui::GetCurrentContext())
-        return;
+    if (FAILED(pSwapChain->GetDesc(&sd)) || (gameWindow_ != nullptr && sd.OutputWindow != nullptr && sd.OutputWindow != gameWindow_))
+        return false;
 
     if (swapChainIdentity_) {
         IUnknown *currentIdentity = nullptr;
         if (FAILED(pSwapChain->QueryInterface(IID_PPV_ARGS(&currentIdentity))))
-            return;
+            return false;
 
         bool replaced = currentIdentity != swapChainIdentity_;
         currentIdentity->Release();
         if (replaced) {
             releaseDeviceResources(L"swap-chain replacement");
             resetCommandQueueCapture();
-            return;
+            return false;
         }
     }
 
@@ -478,252 +495,258 @@ void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
         if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
             handleDeviceLost(L"IDXGISwapChain::GetDevice", hr);
         }
-        return;
+        return false;
     }
 
     IUnknown *currentDeviceIdentity = nullptr;
     if (FAILED(currentDevice->QueryInterface(IID_PPV_ARGS(&currentDeviceIdentity)))) {
         currentDevice->Release();
-        return;
+        return false;
     }
 
-    if (deviceIdentity_ && currentDeviceIdentity != deviceIdentity_) {
+    bool replaced = deviceIdentity_ && currentDeviceIdentity != deviceIdentity_;
+    bool queueMatches = !replaced && queueUsesDevice(currentDeviceIdentity);
+    hr = queueMatches && device_ ? device_->GetDeviceRemovedReason() : S_OK;
+    if (replaced || !queueMatches || hr != S_OK) {
         currentDeviceIdentity->Release();
         currentDevice->Release();
-        releaseDeviceResources(L"swap-chain device replacement");
-        resetCommandQueueCapture();
-        return;
-    }
-
-    ID3D12Device *queueDevice = nullptr;
-    IUnknown *queueDeviceIdentity = nullptr;
-    bool queueMatchesDevice = false;
-    if (SUCCEEDED(commandQueue_->GetDevice(IID_PPV_ARGS(&queueDevice)))) {
-        if (SUCCEEDED(queueDevice->QueryInterface(IID_PPV_ARGS(&queueDeviceIdentity)))) {
-            queueMatchesDevice = queueDeviceIdentity == currentDeviceIdentity;
-            queueDeviceIdentity->Release();
-        }
-        queueDevice->Release();
-    }
-    if (!queueMatchesDevice) {
-        currentDeviceIdentity->Release();
-        currentDevice->Release();
-        resetCommandQueueCapture();
-        return;
-    }
-
-    if (device_) {
-        hr = device_->GetDeviceRemovedReason();
-        if (hr != S_OK) {
-            currentDeviceIdentity->Release();
-            currentDevice->Release();
+        if (replaced) {
+            releaseDeviceResources(L"swap-chain device replacement");
+            resetCommandQueueCapture();
+        } else if (!queueMatches) {
+            resetCommandQueueCapture();
+        } else {
             handleDeviceLost(L"GetDeviceRemovedReason", hr);
-            return;
         }
+        return false;
     }
 
     if (!ImGui::GetIO().BackendRendererUserData) {
-        ID3D12Device *device = currentDevice;
-        IUnknown *deviceIdentity = currentDeviceIdentity;
-        currentDevice = nullptr;
-        currentDeviceIdentity = nullptr;
-
-        IUnknown *swapChainIdentity = nullptr;
-        if (FAILED(pSwapChain->QueryInterface(IID_PPV_ARGS(&swapChainIdentity)))) {
-            deviceIdentity->Release();
-            device->Release();
-            return;
-        }
-
-        device_ = device;
-        deviceIdentity_ = deviceIdentity;
-        swapChainIdentity_ = swapChainIdentity;
-        buffersCounts_ = sd.BufferCount;
-
-        renderTargets_.clear();
-
-        enum {
-            DESCRIPTOR_COUNT = 1024,
-        };
-
-        {
-            D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-            desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            desc.NumDescriptors = DESCRIPTOR_COUNT;
-            desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap_)) != S_OK) {
-                releaseDeviceResources(L"SRV descriptor heap creation failure");
-                return;
-            }
-            srvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        }
-
-        freeDescriptors_.clear();
-        {
-            D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-            desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-            desc.NumDescriptors = buffersCounts_ + DESCRIPTOR_COUNT;
-            desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-            desc.NodeMask = 1;
-            if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap_)) != S_OK) {
-                releaseDeviceResources(L"RTV descriptor heap creation failure");
-                return;
-            }
-
-            rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(
-                D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-            D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-            commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_]();
-            freeDescriptors_.resize(DESCRIPTOR_COUNT);
-            for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
-                freeDescriptors_[DESCRIPTOR_COUNT - i] = i - 1;
-            }
-            for (uint32_t i = 0; i < buffersCounts_; ++i) {
-                renderTargets_.push_back(rtvHandle);
-                rtvHandle.ptr += rtvDescriptorSize_;
-            }
-        }
-
-        for (UINT i = 0; i < sd.BufferCount; ++i) {
-            if (device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                                IID_PPV_ARGS(&commandAllocator_[i])) != S_OK) {
-                releaseDeviceResources(L"command allocator creation failure");
-                return;
-            }
-        }
-
-        if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_[0], nullptr,
-                                        IID_PPV_ARGS(&commandList_)) != S_OK ||
-            commandList_->Close() != S_OK) {
-            releaseDeviceResources(L"command list creation failure");
-            return;
-        }
-        if (!initializeTextureUpload()) {
-            releaseDeviceResources(L"texture upload initialization failure");
-            return;
-        }
-
-        loadFont();
-        ImGui_ImplDX12_InitInfo init_info = {};
-        init_info.Device = device;
-        init_info.NumFramesInFlight = static_cast<int>(buffersCounts_);
-        init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-        init_info.SrvDescriptorHeap = descriptorHeap_;
-        init_info.CommandQueue = commandQueue_;
-        init_info.SrvDescriptorAllocFn = SrvDescriptorAlloc;
-        init_info.SrvDescriptorFreeFn = SrvDescriptorFree;
-        init_info.UserData = this;
-        if (!ImGui_ImplDX12_Init(&init_info)) {
-            releaseDeviceResources(L"ImGui DX12 initialization failure");
-            return;
-        }
-        ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
-        if (!oldWndProc_) {
-            oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
-        }
-
-        ImGuiMemAllocFunc allocFunc;
-        ImGuiMemFreeFunc freeFunc;
-        void *userData;
-        ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &userData);
-        pluginsLoadRenderers(ImGui::GetCurrentContext(), (void*)allocFunc, (void*)freeFunc, userData);
-    }
-
-    if (currentDeviceIdentity) {
+        if (!createDeviceObjects(pSwapChain, sd, currentDevice, currentDeviceIdentity))
+            return false;
+    } else {
         currentDeviceIdentity->Release();
-    }
-    if (currentDevice) {
         currentDevice->Release();
     }
 
-    if (!backBuffer_) {
-        if (device_ == nullptr)
-            return;
-        backBuffer_ = new ID3D12Resource *[buffersCounts_]();
-        for (UINT i = 0; i < buffersCounts_; i++) {
-            ID3D12Resource *buffer;
-            if (pSwapChain->GetBuffer(i, IID_PPV_ARGS(&buffer)) != S_OK) {
-                continue;
-            }
-            D3D12_RENDER_TARGET_VIEW_DESC desc = {};
-            desc.Format = static_cast<DXGI_FORMAT>(GetCorrectDXGIFormat(sd.BufferDesc.Format));
-            desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            device_->CreateRenderTargetView(buffer, &desc, renderTargets_[i]);
-            backBuffer_[i] = buffer;
+    if (!backBuffer_ && !createRenderTargets(pSwapChain, sd))
+        return false;
+    boundSwapChain_ = pSwapChain;
+    boundQueue_ = commandQueue_;
+    return true;
+}
+
+bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd, ID3D12Device *device, IUnknown *deviceIdentity) {
+    IUnknown *swapChainIdentity = nullptr;
+    if (FAILED(pSwapChain->QueryInterface(IID_PPV_ARGS(&swapChainIdentity)))) {
+        deviceIdentity->Release();
+        device->Release();
+        return false;
+    }
+
+    // Owned from here on; every failure path releases them with the rest.
+    device_ = device;
+    deviceIdentity_ = deviceIdentity;
+    swapChainIdentity_ = swapChainIdentity;
+    buffersCounts_ = sd.BufferCount;
+
+    renderTargets_.clear();
+
+    enum {
+        DESCRIPTOR_COUNT = 1024,
+    };
+
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        desc.NumDescriptors = DESCRIPTOR_COUNT;
+        desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap_)) != S_OK) {
+            releaseDeviceResources(L"SRV descriptor heap creation failure");
+            return false;
         }
-        if (backBuffer_[0] == nullptr) {
-            for (UINT i = 0; i < buffersCounts_; ++i) {
-                if (backBuffer_[i])
-                    backBuffer_[i]->Release();
-            }
-            delete[] backBuffer_;
-            backBuffer_ = nullptr;
+        srvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    }
+
+    freeDescriptors_.clear();
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+        desc.NumDescriptors = buffersCounts_ + DESCRIPTOR_COUNT;
+        desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        desc.NodeMask = 1;
+        if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap_)) != S_OK) {
+            releaseDeviceResources(L"RTV descriptor heap creation failure");
+            return false;
+        }
+
+        rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+        commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_]();
+        freeDescriptors_.resize(DESCRIPTOR_COUNT);
+        for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
+            freeDescriptors_[DESCRIPTOR_COUNT - i] = i - 1;
+        }
+        for (uint32_t i = 0; i < buffersCounts_; ++i) {
+            renderTargets_.push_back(rtvHandle);
+            rtvHandle.ptr += rtvDescriptorSize_;
         }
     }
 
-    if (ImGui::GetCurrentContext()) {
-        currentBackBufferIndex_ = pSwapChain->GetCurrentBackBufferIndex();
-        if (deviceLost_) { handleDeviceLost(L"frame submission", DXGI_ERROR_DEVICE_REMOVED); return; }
-        if (currentBackBufferIndex_ >= buffersCounts_ || !backBuffer_ || !backBuffer_[currentBackBufferIndex_] || !frameFence_) return;
-        uint64_t completed = frameFence_->GetCompletedValue();
-        if (allocatorFences_[currentBackBufferIndex_] > completed || imguiFences_[frameValue_ % imguiFences_.size()] > completed) return;
-        processTextureUploads();
-        if (deviceLost_) { handleDeviceLost(L"native texture upload", DXGI_ERROR_DEVICE_REMOVED); return; }
-
-        ImGui_ImplDX12_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
-
-        er::input::beginFrame();
-        drawingFrame_ = true;
-        bool oldShowMenu = gShowMenu;
-        gShowMenu = pluginsRender();
-        if (gShowMenu != oldShowMenu) {
-            gHooking->showMouseCursor(gShowMenu);
+    for (UINT i = 0; i < buffersCounts_; ++i) {
+        if (device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_[i])) != S_OK) {
+            releaseDeviceResources(L"command allocator creation failure");
+            return false;
         }
-
-        ImGui::EndFrame();
-        ImGui::Render();
-        if (ImGui::GetDrawData()->DisplaySize.x <= 0 || ImGui::GetDrawData()->DisplaySize.y <= 0) { drawingFrame_ = false; return; }
-
-        UINT bufferIndex = currentBackBufferIndex_;
-        currentRTV_ = renderTargets_[bufferIndex];
-        ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
-        if (FAILED(commandAllocator->Reset())) {
-            handleDeviceLost(L"ID3D12CommandAllocator::Reset", DXGI_ERROR_DEVICE_REMOVED);
-            return;
-        }
-
-        D3D12_RESOURCE_BARRIER barrier = {};
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = backBuffer_[bufferIndex];
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-        if (FAILED(commandList_->Reset(commandAllocator, nullptr))) {
-            handleDeviceLost(L"ID3D12GraphicsCommandList::Reset", DXGI_ERROR_DEVICE_REMOVED);
-            return;
-        }
-        commandList_->ResourceBarrier(1, &barrier);
-        commandList_->OMSetRenderTargets(1, &renderTargets_[bufferIndex], FALSE, nullptr);
-        commandList_->SetDescriptorHeaps(1, &descriptorHeap_);
-
-        ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList_);
-
-        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-        commandList_->ResourceBarrier(1, &barrier);
-        if (FAILED(commandList_->Close())) {
-            handleDeviceLost(L"ID3D12GraphicsCommandList::Close", DXGI_ERROR_DEVICE_REMOVED);
-            return;
-        }
-
-        ID3D12CommandList *commandLists[] = { commandList_ };
-        commandQueue_->ExecuteCommandLists(1, commandLists);
-        finishTextureFrame();
     }
+
+    if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_[0], nullptr, IID_PPV_ARGS(&commandList_)) != S_OK ||
+        commandList_->Close() != S_OK) {
+        releaseDeviceResources(L"command list creation failure");
+        return false;
+    }
+    if (!initializeTextureUpload()) {
+        releaseDeviceResources(L"texture upload initialization failure");
+        return false;
+    }
+
+    // Fonts belong to the ImGui context and survive backend rebuilds: the atlas
+    // keeps its pixels and is re-uploaded. Reloading on every resize would
+    // re-read the font files and append duplicate fonts each time.
+    if (ImGui::GetIO().Fonts->Fonts.empty())
+        loadFont();
+    ImGui_ImplDX12_InitInfo init_info = {};
+    init_info.Device = device;
+    init_info.NumFramesInFlight = static_cast<int>(buffersCounts_);
+    init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    init_info.SrvDescriptorHeap = descriptorHeap_;
+    // ImGui blocks until each font atlas upload completes. Waiting on the
+    // game's queue would also drain the game's frame, so use the upload queue.
+    init_info.CommandQueue = uploadQueue_;
+    init_info.SrvDescriptorAllocFn = SrvDescriptorAlloc;
+    init_info.SrvDescriptorFreeFn = SrvDescriptorFree;
+    init_info.UserData = this;
+    if (!ImGui_ImplDX12_Init(&init_info)) {
+        releaseDeviceResources(L"ImGui DX12 initialization failure");
+        return false;
+    }
+    ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
+    if (!oldWndProc_) {
+        oldWndProc_ = SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, (LONG_PTR)WndProc);
+    }
+
+    ImGuiMemAllocFunc allocFunc;
+    ImGuiMemFreeFunc freeFunc;
+    void *userData;
+    ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &userData);
+    pluginsLoadRenderers(ImGui::GetCurrentContext(), (void*)allocFunc, (void*)freeFunc, userData);
+    return true;
+}
+
+bool D3DRenderer::createRenderTargets(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd) {
+    if (device_ == nullptr)
+        return false;
+    backBuffer_ = new ID3D12Resource *[buffersCounts_]();
+    for (UINT i = 0; i < buffersCounts_; i++) {
+        ID3D12Resource *buffer;
+        if (pSwapChain->GetBuffer(i, IID_PPV_ARGS(&buffer)) != S_OK) {
+            continue;
+        }
+        D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+        desc.Format = static_cast<DXGI_FORMAT>(GetCorrectDXGIFormat(sd.BufferDesc.Format));
+        desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+        device_->CreateRenderTargetView(buffer, &desc, renderTargets_[i]);
+        backBuffer_[i] = buffer;
+    }
+    if (backBuffer_[0] != nullptr)
+        return true;
+    CleanupRenderTarget();
+    return false;
+}
+
+void D3DRenderer::renderFrame(IDXGISwapChain3 *pSwapChain) {
+    currentBackBufferIndex_ = pSwapChain->GetCurrentBackBufferIndex();
+    if (deviceLost_) {
+        handleDeviceLost(L"frame submission", DXGI_ERROR_DEVICE_REMOVED);
+        return;
+    }
+    UINT bufferIndex = currentBackBufferIndex_;
+    if (bufferIndex >= buffersCounts_ || !backBuffer_[bufferIndex] || !frameFence_)
+        return;
+    // Reuse this back buffer's allocator and ImGui's next vertex buffers only
+    // after the frame that last used them has completed on the GPU.
+    uint64_t completed = frameFence_->GetCompletedValue();
+    if (allocatorFences_[bufferIndex] > completed || imguiFences_[imguiFrame_ % imguiFences_.size()] > completed)
+        return;
+    processTextureUploads();
+    if (deviceLost_) {
+        handleDeviceLost(L"native texture upload", DXGI_ERROR_DEVICE_REMOVED);
+        return;
+    }
+
+    ImGui_ImplDX12_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
+    er::input::beginFrame();
+    drawingFrame_ = true;
+    bool oldShowMenu = gShowMenu;
+    gShowMenu = pluginsRender();
+    if (gShowMenu != oldShowMenu) {
+        gHooking->showMouseCursor(gShowMenu);
+    }
+
+    ImGui::Render();
+    auto *drawData = ImGui::GetDrawData();
+    bool texturesPending = false;
+    if (drawData->Textures != nullptr)
+        for (const auto *texture: *drawData->Textures)
+            texturesPending |= texture->Status != ImTextureStatus_OK;
+    // With nothing visible, leave the back buffer and the game's queue alone:
+    // no allocator reset, barriers or ExecuteCommandLists for an empty frame.
+    if (drawData->DisplaySize.x <= 0 || drawData->DisplaySize.y <= 0 || (drawData->TotalVtxCount == 0 && !texturesPending)) {
+        finishTextureFrame(false);
+        return;
+    }
+
+    currentRTV_ = renderTargets_[bufferIndex];
+    ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
+    if (FAILED(commandAllocator->Reset()) || FAILED(commandList_->Reset(commandAllocator, nullptr))) {
+        handleDeviceLost(L"overlay command list reset", DXGI_ERROR_DEVICE_REMOVED);
+        return;
+    }
+
+    D3D12_RESOURCE_BARRIER barrier = {};
+    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    barrier.Transition.pResource = backBuffer_[bufferIndex];
+    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    commandList_->ResourceBarrier(1, &barrier);
+    commandList_->OMSetRenderTargets(1, &currentRTV_, FALSE, nullptr);
+    commandList_->SetDescriptorHeaps(1, &descriptorHeap_);
+
+    // Atlas uploads transition textures that earlier overlay frames may still
+    // sample on the game's queue. Order them after those frames on the GPU.
+    if (texturesPending && frameFence_->GetCompletedValue() < frameValue_ && FAILED(uploadQueue_->Wait(frameFence_, frameValue_))) {
+        commandList_->Close();
+        handleDeviceLost(L"ID3D12CommandQueue::Wait", DXGI_ERROR_DEVICE_REMOVED);
+        return;
+    }
+    ImGui_ImplDX12_RenderDrawData(drawData, commandList_);
+
+    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    commandList_->ResourceBarrier(1, &barrier);
+    if (FAILED(commandList_->Close())) {
+        handleDeviceLost(L"ID3D12GraphicsCommandList::Close", DXGI_ERROR_DEVICE_REMOVED);
+        return;
+    }
+
+    ID3D12CommandList *commandLists[] = { commandList_ };
+    commandQueue_->ExecuteCommandLists(1, commandLists);
+    finishTextureFrame();
 }
 
 LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -744,39 +767,13 @@ LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 
 D3DRenderer::~D3DRenderer() noexcept {
     unhook();
-    pluginsDestroyRenderers();
 }
-
-/*
-bool D3DRenderer::WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight) {
-    //Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
-    Vector4 clipCoords = {
-        .x = pos.x * matrix[0] + pos.y * matrix[1] + pos.z * matrix[2] + matrix[3],
-        .y = pos.x * matrix[4] + pos.y * matrix[5] + pos.z * matrix[6] + matrix[7],
-        .z = pos.x * matrix[8] + pos.y * matrix[9] + pos.z * matrix[10] + matrix[11],
-        .w = pos.x * matrix[12] + pos.y * matrix[13] + pos.z * matrix[14] + matrix[15],
-    };
-
-    if (clipCoords.w < 0.1f)
-        return false;
-
-    //perspective division, dividing by clip.W = Normalized Device Coordinates
-    Vector3 NDC;
-    NDC.x = clipCoords.x / clipCoords.w;
-    NDC.y = clipCoords.y / clipCoords.w;
-    NDC.z = clipCoords.z / clipCoords.w;
-
-    screen.x = ((float)windowWidth * .5f * NDC.x) + (NDC.x + (float)windowWidth * .5f);
-    screen.y = -((float)windowHeight * .5f * NDC.y) + (NDC.y + (float)windowHeight * .5f);
-    return true;
-}
-*/
 
 void D3DRenderer::loadFont() {
     void *data = nullptr;
     size_t fontSize = 0;
-    fontSize_ = strtof(gConfig.get("common.font_size", "20.0").c_str(), nullptr);
-    if (fontSize_ == 0.0f) fontSize_ = 20.0f;
+    fontSize_ = gConfig.get("common.font_size", 20.0f);
+    if (!(fontSize_ > 0.0f && fontSize_ <= 512.0f)) fontSize_ = 20.0f;
     const auto& fontFile = gConfig.getw("common.font", L"");
     if (!fontFile.empty()) {
         std::wstring prefix;
@@ -895,15 +892,19 @@ void D3DRenderer::loadFont() {
 
 static inline ImVec4 extractColor(const std::string &s, const ImVec4 &defVal) {
     auto parts = util::splitString(s, ',');
-    if (parts.size() == 4) {
-        return ImVec4 {
-            std::clamp(float(std::stoi(parts[0])) / 255.0f, 0.0f, 1.0f),
-            std::clamp(float(std::stoi(parts[1])) / 255.0f, 0.0f, 1.0f),
-            std::clamp(float(std::stoi(parts[2])) / 255.0f, 0.0f, 1.0f),
-            std::clamp(float(std::stoi(parts[3])) / 255.0f, 0.0f, 1.0f)
-        };
+    if (parts.size() != 4) {
+        return defVal;
     }
-    return defVal;
+    float channels[4];
+    for (size_t i = 0; i < 4; ++i) {
+        long long value;
+        // Malformed style text keeps the default instead of throwing.
+        if (!parseConfigNumber(parts[i], value)) {
+            return defVal;
+        }
+        channels[i] = std::clamp(float(value) / 255.0f, 0.0f, 1.0f);
+    }
+    return ImVec4(channels[0], channels[1], channels[2], channels[3]);
 }
 
 void D3DRenderer::initStyle() {
@@ -924,8 +925,8 @@ void D3DRenderer::initStyle() {
     auto scrollColor = extractColor(gConfig["style.scroll_color"], ImVec4(0.34f, 0.34f, 0.34f, 0.44f));
     auto scrollHoverColor = extractColor(gConfig["style.scroll_hover_color"], ImVec4(0.40f, 0.40f, 0.40f, 0.44f));
     auto scrollPressColor = extractColor(gConfig["style.scroll_press_color"], ImVec4(0.56f, 0.56f, 0.56f, 0.44f));
-    auto borderWidth = std::stof(gConfig.get("style.border_width", "1.0"));
-    auto rounding = std::stof(gConfig.get("style.rounding", "7.0"));
+    auto borderWidth = gConfig.get("style.border_width", 1.0f);
+    auto rounding = gConfig.get("style.rounding", 7.0f);
 
     colors[ImGuiCol_Text] = txtColor;
     colors[ImGuiCol_TextDisabled] = colors[ImGuiCol_Text];//ImVec4(0.86f, 0.93f, 0.89f, 0.28f);
@@ -1017,6 +1018,7 @@ void D3DRenderer::initStyle() {
 
 void D3DRenderer::CleanupRenderTarget() {
     std::lock_guard lock(deviceMutex_);
+    boundSwapChain_ = nullptr;
     waitForFrames();
     if (!backBuffer_) return;
     for (UINT i = 0; i < buffersCounts_; ++i) {
@@ -1061,11 +1063,6 @@ HRESULT WINAPI D3DRenderer::hkResizeBuffers(IDXGISwapChain *pSwapChain,
     HRESULT hr = gD3DRenderer->oResizeBuffers_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
     gD3DRenderer->installExecuteCommandListsHook();
     return hr;
-}
-
-HRESULT WINAPI D3DRenderer::hkSetSourceSize(IDXGISwapChain2 *pSwapChain, UINT Width, UINT Height) {
-    gD3DRenderer->CleanupRenderTarget();
-    return gD3DRenderer->oSetSourceSize_(pSwapChain, Width, Height);
 }
 
 HRESULT WINAPI D3DRenderer::hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,
@@ -1309,18 +1306,13 @@ bool D3DRenderer::beginOffscreen(OffscreenContext *ctx, int w, int h) {
     if (ctx->targets.size() != buffersCounts_) {
         ctx->targets.resize(buffersCounts_);
     }
-    ctx->currentIndex = currentBackBufferIndex_ % buffersCounts_;
-    auto &target = ctx->targets[ctx->currentIndex];
-
     // Use one offscreen render target per swap-chain back buffer. Reusing a single offscreen
     // texture across frames can race with the previous frame still sampling it, which shows up
     // as ghosted minimap decorations from other frames.
-    if (target.rtvCpuHandle.ptr == 0) {
-        auto rtvStart = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-        rtvStart.ptr += rtvDescriptorSize_ * (buffersCounts_ + ctx->currentIndex);
-        target.rtvCpuHandle = rtvStart;
-    }
+    ctx->currentIndex = currentBackBufferIndex_ % buffersCounts_;
+    auto &target = ctx->targets[ctx->currentIndex];
 
+    // ensureOffscreenSize pairs the RTV with the target's unique SRV slot.
     ensureOffscreenSize(ctx, w, h);
     if (!target.texture)
         return false;
@@ -1362,178 +1354,117 @@ void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
 
 // ---- Texture loading ----
 
+// Synchronous image upload for the legacy loadTexture() API. It runs on the
+// overlay upload queue, so it waits only for its own copy, never game work.
 bool D3DRenderer::LoadTextureFromMemory(const void *data, size_t dataSize, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource,
                            int *outWidth, int *outHeight) {
-    // Load from disk into a raw RGBA buffer
-    int image_width = 0;
-    int image_height = 0;
-    unsigned char *image_data = stbi_load_from_memory((const unsigned char *)data, (int)dataSize, &image_width, &image_height, NULL, 4);
-    if (image_data == NULL)
+    if (!device_ || !uploadQueue_ || !uploadFence_ || !srvCpuHandle.ptr || !data || dataSize > INT_MAX)
+        return false;
+    int width = 0;
+    int height = 0;
+    unsigned char *pixels = stbi_load_from_memory(static_cast<const unsigned char *>(data), static_cast<int>(dataSize), &width, &height, nullptr, 4);
+    if (pixels == nullptr)
         return false;
 
-    // Create texture resource
-    D3D12_HEAP_PROPERTIES props;
-    memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
-    props.Type = D3D12_HEAP_TYPE_DEFAULT;
-    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-
-    D3D12_RESOURCE_DESC desc;
-    ZeroMemory(&desc, sizeof(desc));
+    D3D12_HEAP_PROPERTIES heap = {};
+    heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+    D3D12_RESOURCE_DESC desc = {};
     desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    desc.Alignment = 0;
-    desc.Width = image_width;
-    desc.Height = image_height;
+    desc.Width = width;
+    desc.Height = height;
     desc.DepthOrArraySize = 1;
     desc.MipLevels = 1;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     desc.SampleDesc.Count = 1;
-    desc.SampleDesc.Quality = 0;
-    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-    ID3D12Resource *pTexture = NULL;
-    device_->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+    UINT uploadPitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+    D3D12_HEAP_PROPERTIES uploadHeap = {};
+    uploadHeap.Type = D3D12_HEAP_TYPE_UPLOAD;
+    D3D12_RESOURCE_DESC buffer = {};
+    buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    buffer.Width = UINT64(uploadPitch) * height;
+    buffer.Height = 1;
+    buffer.DepthOrArraySize = 1;
+    buffer.MipLevels = 1;
+    buffer.SampleDesc.Count = 1;
+    buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-    // Create a temporary upload resource to move the data in
-    UINT uploadPitch = (image_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
-    UINT uploadSize = image_height * uploadPitch;
-    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    desc.Alignment = 0;
-    desc.Width = uploadSize;
-    desc.Height = 1;
-    desc.DepthOrArraySize = 1;
-    desc.MipLevels = 1;
-    desc.Format = DXGI_FORMAT_UNKNOWN;
-    desc.SampleDesc.Count = 1;
-    desc.SampleDesc.Quality = 0;
-    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+    ID3D12Resource *texture = nullptr;
+    ID3D12Resource *upload = nullptr;
+    ID3D12CommandAllocator *allocator = nullptr;
+    ID3D12GraphicsCommandList *list = nullptr;
+    void *mapped = nullptr;
+    bool ok = SUCCEEDED(device_->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&texture))) &&
+              SUCCEEDED(device_->CreateCommittedResource(&uploadHeap, D3D12_HEAP_FLAG_NONE, &buffer, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload))) &&
+              SUCCEEDED(upload->Map(0, nullptr, &mapped));
+    if (ok) {
+        for (int y = 0; y < height; y++)
+            memcpy(static_cast<uint8_t *>(mapped) + size_t(y) * uploadPitch, pixels + size_t(y) * width * 4, size_t(width) * 4);
+        upload->Unmap(0, nullptr);
+        ok = SUCCEEDED(device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator))) &&
+             SUCCEEDED(device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator, nullptr, IID_PPV_ARGS(&list)));
+    }
+    stbi_image_free(pixels);
 
-    props.Type = D3D12_HEAP_TYPE_UPLOAD;
-    props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    if (ok) {
+        D3D12_TEXTURE_COPY_LOCATION source = {};
+        source.pResource = upload;
+        source.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+        source.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        source.PlacedFootprint.Footprint.Width = width;
+        source.PlacedFootprint.Footprint.Height = height;
+        source.PlacedFootprint.Footprint.Depth = 1;
+        source.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+        D3D12_TEXTURE_COPY_LOCATION destination = {};
+        destination.pResource = texture;
+        destination.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        list->CopyTextureRegion(&destination, 0, 0, 0, &source, nullptr);
 
-    ID3D12Resource *uploadBuffer = NULL;
-    HRESULT hr = device_->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
-    IM_ASSERT(SUCCEEDED(hr));
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Transition.pResource = texture;
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+        barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        list->ResourceBarrier(1, &barrier);
+        ok = SUCCEEDED(list->Close());
+    }
+    if (ok) {
+        ID3D12CommandList *lists[] = {list};
+        uploadQueue_->ExecuteCommandLists(1, lists);
+        // A null event makes SetEventOnCompletion block until the copy completes.
+        ok = SUCCEEDED(uploadQueue_->Signal(uploadFence_, uploadValue_ + 1)) && SUCCEEDED(uploadFence_->SetEventOnCompletion(++uploadValue_, nullptr));
+    }
+    if (list) list->Release();
+    if (allocator) allocator->Release();
+    if (upload) upload->Release();
+    if (!ok) {
+        if (texture) texture->Release();
+        return false;
+    }
 
-    // Write pixels into the upload resource
-    void *mapped = NULL;
-    D3D12_RANGE range = {0, uploadSize};
-    hr = uploadBuffer->Map(0, &range, &mapped);
-    IM_ASSERT(SUCCEEDED(hr));
-    for (int y = 0; y < image_height; y++)
-        memcpy((void *)((uintptr_t)mapped + y * uploadPitch), image_data + y * image_width * 4, image_width * 4);
-    uploadBuffer->Unmap(0, &range);
-    stbi_image_free(image_data);
-
-    // Copy the upload resource content into the real resource
-    D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
-    srcLocation.pResource = uploadBuffer;
-    srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-    srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srcLocation.PlacedFootprint.Footprint.Width = image_width;
-    srcLocation.PlacedFootprint.Footprint.Height = image_height;
-    srcLocation.PlacedFootprint.Footprint.Depth = 1;
-    srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
-
-    D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
-    dstLocation.pResource = pTexture;
-    dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-    dstLocation.SubresourceIndex = 0;
-
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = pTexture;
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-
-    // Create a temporary command queue to do the copy with
-    ID3D12Fence *fence = NULL;
-    hr = device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-    IM_ASSERT(SUCCEEDED(hr));
-
-    HANDLE event = CreateEvent(0, 0, 0, 0);
-    IM_ASSERT(event != NULL);
-
-    D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-    queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-    queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-    queueDesc.NodeMask = 1;
-
-    ID3D12CommandQueue *cmdQueue = NULL;
-    hr = device_->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
-    IM_ASSERT(SUCCEEDED(hr));
-
-    ID3D12CommandAllocator *cmdAlloc = NULL;
-    hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
-    IM_ASSERT(SUCCEEDED(hr));
-
-    ID3D12GraphicsCommandList *cmdList = NULL;
-    hr = device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
-    IM_ASSERT(SUCCEEDED(hr));
-
-    cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
-    cmdList->ResourceBarrier(1, &barrier);
-
-    hr = cmdList->Close();
-    IM_ASSERT(SUCCEEDED(hr));
-
-    // Execute the copy
-    cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList *const *)&cmdList);
-    hr = cmdQueue->Signal(fence, 1);
-    IM_ASSERT(SUCCEEDED(hr));
-
-    // Wait for everything to complete
-    fence->SetEventOnCompletion(1, event);
-    WaitForSingleObject(event, INFINITE);
-
-    // Tear down our temporary command queue and release the upload resource
-    cmdList->Release();
-    cmdAlloc->Release();
-    cmdQueue->Release();
-    CloseHandle(event);
-    fence->Release();
-    uploadBuffer->Release();
-
-    // Create a shader resource view for the texture
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = desc.MipLevels;
-    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    device_->CreateShaderResourceView(pTexture, &srvDesc, srvCpuHandle);
+    device_->CreateShaderResourceView(texture, &srvDesc, srvCpuHandle);
 
-    // Return results
-    *outTexResource = pTexture;
-    *outWidth = image_width;
-    *outHeight = image_height;
-
+    *outTexResource = texture;
+    *outWidth = width;
+    *outHeight = height;
     return true;
 }
 
 // Open and read a file, then forward to LoadTextureFromMemory()
 bool D3DRenderer::LoadTextureFromFile(const wchar_t *filename, D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle, ID3D12Resource **outTexResource,
                                       int *outWidth, int *outHeight) {
-    HANDLE file = CreateFileW(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (file == INVALID_HANDLE_VALUE)
+    size_t size = 0;
+    void *data = util::getFileContent(filename, size, ImGui::MemAlloc);
+    if (data == nullptr)
         return false;
-    DWORD file_size = GetFileSize(file, NULL);
-    if (file_size == INVALID_FILE_SIZE) {
-        CloseHandle(file);
-        return false;
-    }
-    void *file_data = IM_ALLOC(file_size);
-    DWORD bytes_read = 0;
-    ReadFile(file, file_data, file_size, &bytes_read, NULL);
-    CloseHandle(file);
-    bool ret = LoadTextureFromMemory(file_data, file_size, srvCpuHandle, outTexResource, outWidth, outHeight);
-    IM_FREE(file_data);
+    bool ret = LoadTextureFromMemory(data, size, srvCpuHandle, outTexResource, outWidth, outHeight);
+    ImGui::MemFree(data);
     return ret;
 }
 

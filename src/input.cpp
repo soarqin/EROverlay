@@ -60,18 +60,14 @@ DWORD gRenderThreadId = 0;
     const auto fixedKeyChord = fixupKeyChord(keyChord);
     const auto mods = fixedKeyChord & KEY_MOD_MASK;
     const auto vk = fixedKeyChord & KEY_CODE_MASK;
-    const bool ctrlDown = isVirtualKeyDown(VK_CONTROL);
-    const bool shiftDown = isVirtualKeyDown(VK_SHIFT);
-    const bool altDown = isVirtualKeyDown(VK_MENU);
-    const bool superDown = isVirtualKeyDown(VK_LWIN) || isVirtualKeyDown(VK_RWIN);
-
-    if (((mods & KEY_MOD_CTRL) != 0) != ctrlDown) return false;
-    if (((mods & KEY_MOD_SHIFT) != 0) != shiftDown) return false;
-    if (((mods & KEY_MOD_ALT) != 0) != altDown) return false;
-    if (((mods & KEY_MOD_SUPER) != 0) != superDown) return false;
-
-    if (vk == 0) return mods != 0;
-    return isVirtualKeyDown(vk);
+    // Hotkeys are polled every frame and are almost always up: test the main
+    // key before querying the modifiers.
+    if (vk != 0 && !isVirtualKeyDown(vk)) return false;
+    if (((mods & KEY_MOD_CTRL) != 0) != isVirtualKeyDown(VK_CONTROL)) return false;
+    if (((mods & KEY_MOD_SHIFT) != 0) != isVirtualKeyDown(VK_SHIFT)) return false;
+    if (((mods & KEY_MOD_ALT) != 0) != isVirtualKeyDown(VK_MENU)) return false;
+    if (((mods & KEY_MOD_SUPER) != 0) != (isVirtualKeyDown(VK_LWIN) || isVirtualKeyDown(VK_RWIN))) return false;
+    return vk != 0 || mods != 0;
 }
 
 [[nodiscard]] bool isRenderThread() {
@@ -97,8 +93,7 @@ void beginFrame() {
 }
 
 bool isKeyChordDown(int keyChord) {
-    if (keyChord == 0 || !isGameWindowForeground()) return false;
-    return isWin32KeyChordDown(keyChord);
+    return keyChord != 0 && isWin32KeyChordDown(keyChord) && isGameWindowForeground();
 }
 
 bool isKeyChordPressed(int keyChord) {

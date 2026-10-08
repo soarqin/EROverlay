@@ -17,7 +17,10 @@ const wchar_t *getGameLanguage() {
         return gameLanguage.c_str();
     if (!sapps)
         sapps = SteamAPI_SteamApps();
-    const char *lang = SteamAPI_ISteamApps_GetCurrentGameLanguage(sapps);
+    // Steam may not be initialized yet: report the default without caching it.
+    const char *lang = sapps ? SteamAPI_ISteamApps_GetCurrentGameLanguage(sapps) : nullptr;
+    if (!lang)
+        return L"engUS";
 
 #define LANG_CHECK_AND_SET(str, str2) else if (lstrcmpA(lang, #str) == 0) { gameLanguage = L ## #str2; }
     if (false) {}
@@ -45,8 +48,8 @@ const wchar_t *getGameLanguage() {
 
 bool isDLCInstalled(unsigned int dlc) {
     if (!sapps)
-        sapps = SteamAPI_SteamApps_v008();
-    return SteamAPI_ISteamApps_BIsDlcInstalled(sapps, dlc);
+        sapps = SteamAPI_SteamApps();
+    return sapps && SteamAPI_ISteamApps_BIsDlcInstalled(sapps, dlc);
 }
 
 }

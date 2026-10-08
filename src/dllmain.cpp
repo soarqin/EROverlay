@@ -117,7 +117,7 @@ void init() {
 bool waitForRendererHook() {
     using namespace std::chrono_literals;
 
-    for (int attempt = 1; er::gRunning; ++attempt) {
+    while (er::gRunning) {
         er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
         if (er::Hooking::hook()) {
             return true;
@@ -134,6 +134,8 @@ void mainThread() {
 
     er::gShowMenu = false;
 
+    using namespace std::chrono_literals;
+    constexpr auto tick = 1000000us / 60;
     er::pluginsUpdate();
     while (er::gRunning) {
         if (unloadKey != 0 && er::input::isKeyChordPressed(unloadKey)) {
@@ -142,9 +144,6 @@ void mainThread() {
             er::gHooking->showMouseCursor(false);
             break;
         }
-        std::this_thread::yield();
-        using namespace std::chrono_literals;
-        static auto tick = 1000000us / 60;
         std::this_thread::sleep_for(tick);
 
         er::pluginsUpdate();

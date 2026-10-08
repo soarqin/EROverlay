@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+### [Unreleased]
+
+#### Changed
+
+- Reduce overlay work on the game's render thread: frames with nothing to display submit no GPU commands, font atlas updates no longer wait for the game's submitted GPU work, and controller input is no longer polled.
+
+#### Fixed
+
+- Fix crashes caused by empty or malformed numbers and colors in INI files; the defaults are used instead.
+- Fix fonts being loaded again and duplicated after changing resolution or window mode.
+
 ### [1.4.0] - 2026-10-03
 
 #### Added

@@ -272,15 +272,21 @@ void D3DRenderer::processTextureUploads() {
     }
 }
 
-void D3DRenderer::finishTextureFrame() {
-    HRESULT hr = commandQueue_->Signal(frameFence_, ++frameValue_);
+void D3DRenderer::finishTextureFrame(bool submitted) {
     drawingFrame_ = false;
-    if (FAILED(hr)) {
+    // A frame without overlay commands signals only to let pending texture
+    // retirements complete; otherwise nothing is queued on the game's queue.
+    if (!submitted && textureWork_.empty() && retiredTextures_.empty())
+        return;
+    if (FAILED(commandQueue_->Signal(frameFence_, frameValue_ + 1))) {
         deviceLost_ = true;
         return;
     }
-    allocatorFences_[currentBackBufferIndex_] = frameValue_;
-    imguiFences_[(frameValue_ - 1) % imguiFences_.size()] = frameValue_;
+    ++frameValue_;
+    if (submitted) {
+        allocatorFences_[currentBackBufferIndex_] = frameValue_;
+        imguiFences_[imguiFrame_++ % imguiFences_.size()] = frameValue_;
+    }
 }
 
 void D3DRenderer::waitForFrames() {
@@ -338,7 +344,7 @@ void D3DRenderer::releaseTextureUploads() {
     releaseCom(uploadQueue_);
     releaseCom(uploadFence_);
     releaseCom(frameFence_);
-    uploadValue_ = frameValue_ = 0;
+    uploadValue_ = frameValue_ = imguiFrame_ = 0;
     drawingFrame_ = false;
     allocatorFences_.clear();
     imguiFences_.clear();

@@ -18,3 +18,6 @@ target_include_directories(imgui PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(imgui_dx12_backend PUBLIC imgui dxgi d3dcompiler)
+# Overlays never enable gamepad navigation; skip per-frame XInput polling on
+# the game's Present thread.
+target_compile_definitions(imgui_dx12_backend PRIVATE IMGUI_IMPL_WIN32_DISABLE_GAMEPAD)

@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <cctype>
+#include <cstdlib>
 
 namespace er::util {
 
@@ -51,6 +52,9 @@ inline int replaceAll(T &str, const T &from, const T &to) {
     return count;
 }
 
+// std::stof throws on invalid configuration text; strtof yields 0 instead.
+inline float parseFloat(const std::string &s) { return std::strtof(s.c_str(), nullptr); }
+
 inline std::vector<float> strSplitToFloatVec(const std::string &s) {
     std::vector<float> elems;
     std::stringstream ss(s);
@@ -62,10 +66,10 @@ inline std::vector<float> strSplitToFloatVec(const std::string &s) {
         }
         if (item.back() == '%') {
             item.pop_back();
-            elems.push_back(std::clamp(std::stof(item) / 100.f, -1.f, 1.f));
+            elems.push_back(std::clamp(parseFloat(item) / 100.f, -1.f, 1.f));
             continue;
         }
-        elems.push_back(std::stof(item));
+        elems.push_back(parseFloat(item));
     }
     return elems;
 }
@@ -81,9 +85,9 @@ inline std::vector<float> strSplitToFloatVec(const std::wstring &s) {
 inline float strToFloat(const std::string &s) {
     if (s.empty()) return 0.f;
     if (s.back() == '%') {
-        return std::stof(s.substr(0, s.size() - 1)) / 100.f;
+        return parseFloat(s.substr(0, s.size() - 1)) / 100.f;
     }
-    return std::stof(s);
+    return parseFloat(s);
 }
 
 }

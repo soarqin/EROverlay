@@ -5,6 +5,7 @@
 #include "util/ini.hpp"
 #include "util/string.hpp"
 
+#include <charconv>
 #include <filesystem>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -12,6 +13,33 @@
 #include <cwchar>
 
 namespace er {
+
+namespace {
+std::string_view numberText(std::string_view text) {
+    while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front())))
+        text.remove_prefix(1);
+    if (!text.empty() && text.front() == '+')
+        text.remove_prefix(1);
+    return text;
+}
+} // namespace
+
+bool parseConfigNumber(std::string_view text, long long &value) {
+    text = numberText(text);
+    return std::from_chars(text.data(), text.data() + text.size(), value).ec == std::errc{};
+}
+
+bool parseConfigNumber(std::string_view text, double &value) {
+    bool percent = !text.empty() && text.back() == '%';
+    if (percent)
+        text.remove_suffix(1);
+    text = numberText(text);
+    if (std::from_chars(text.data(), text.data() + text.size(), value).ec != std::errc{})
+        return false;
+    if (percent)
+        value /= 100.0;
+    return true;
+}
 
 int mapStringToVirtualKey(const std::string &name) {
     static const std::map<std::string, int> sVKeyMap = {
@@ -260,7 +288,6 @@ void Config::loadDir(const wchar_t *dir) {
     std::error_code ec;
     std::filesystem::path path = er::gModulePath;
     for (const auto &entry: std::filesystem::directory_iterator(path / dir, ec)) {
-        fflush(stderr);
         if (entry.is_regular_file() && entry.path().extension() == L".ini") {
             loadSingleFile(entry.path().wstring(), entry.path().stem().string());
         }

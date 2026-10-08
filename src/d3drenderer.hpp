@@ -3,7 +3,6 @@
 #include "imgui.h"
 #include "nativeapi.h"
 #include "util/assets.hpp"
-#include "util/vector.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #include <d3d12.h>
@@ -42,13 +41,6 @@ struct OffscreenContext {
 };
 
 class D3DRenderer {
-    /*
-        struct FrameContext {
-            ID3D12CommandAllocator *commandAllocator;
-            ID3D12Resource *resource;
-            D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
-        };
-    */
     friend class EROverlayAPIWrapper;
     friend struct NativeTextureVerifier;
 
@@ -74,10 +66,6 @@ public:
     void overlay(IDXGISwapChain3 *pSwapChain);
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-    /*
-        static bool WorldToScreen(Vector3 pos, Vector2 &screen, const float matrix[16], int windowWidth, int windowHeight);
-    */
 
     void loadFont();
     static void initStyle();
@@ -129,12 +117,17 @@ private:
     [[nodiscard]] bool initializeTextureUpload();
     [[nodiscard]] bool submitTextureUpload(NativeTexture &texture);
     void processTextureUploads();
-    void finishTextureFrame();
+    void finishTextureFrame(bool submitted = true);
     void releaseTextureUploads();
     void waitForFrames();
     void deferTexture(ID3D12Resource *texture, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
 
 private:
+    [[nodiscard]] bool bindSwapChain(IDXGISwapChain3 *pSwapChain);
+    [[nodiscard]] bool queueUsesDevice(IUnknown *deviceIdentity) const;
+    [[nodiscard]] bool createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd, ID3D12Device *device, IUnknown *deviceIdentity);
+    [[nodiscard]] bool createRenderTargets(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd);
+    void renderFrame(IDXGISwapChain3 *pSwapChain);
     void releaseDeviceResources(const wchar_t *reason);
     void releaseCommandQueue();
     bool captureCommandQueue(IUnknown *pDevice);
@@ -148,7 +141,6 @@ private:
     static HRESULT WINAPI hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags);
     static HRESULT WINAPI hkPresent1(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS *pPresentParameters);
     static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
-    static HRESULT WINAPI hkSetSourceSize(IDXGISwapChain2 *pSwapChain, UINT Width, UINT Height);
     static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3 *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags,
                                            const UINT *pCreationNodeMask, IUnknown *const *ppPresentQueue);
     static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *const *ppCommandLists);
@@ -165,7 +157,6 @@ private:
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT)> oPresent_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, const DXGI_PRESENT_PARAMETERS *)> oPresent1_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain *, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain2 *, UINT, UINT)> oSetSourceSize_;
     std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
     std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
     std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
@@ -180,7 +171,6 @@ private:
     void *fnPresent1_ = nullptr;
 
     void *fnResizeBuffers_ = nullptr;
-    void *fnSetSourceSize_ = nullptr;
     void *fnResizeBuffers1_ = nullptr;
 
     void *fnExecuteCommandLists_ = nullptr;
@@ -189,6 +179,9 @@ private:
 
     IUnknown *swapChainIdentity_ = nullptr;
     IUnknown *deviceIdentity_ = nullptr;
+    // Last validated Present target; not owned. Compared only by address.
+    IDXGISwapChain3 *boundSwapChain_ = nullptr;
+    ID3D12CommandQueue *boundQueue_ = nullptr;
     ID3D12Device *device_ = nullptr;
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
@@ -202,9 +195,6 @@ private:
     size_t rtvDescriptorSize_ = 0;
     size_t srvDescriptorSize_ = 0;
 
-    /*
-        FrameContext *frameContext_ = nullptr;
-    */
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
@@ -217,6 +207,8 @@ private:
     ID3D12Fence *frameFence_ = nullptr;
     uint64_t uploadValue_ = 0;
     uint64_t frameValue_ = 0;
+    // ImGui_ImplDX12_RenderDrawData calls; selects ImGui's per-frame buffers.
+    uint64_t imguiFrame_ = 0;
     uint64_t nextTextureToken_ = 1;
     std::atomic_size_t queuedTextureBytes_{0};
     std::atomic_size_t nativeTextureCount_{0};

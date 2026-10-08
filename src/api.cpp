@@ -71,23 +71,32 @@ public:
             return (const void *)er::params::paramFindTable(name);
         },
         [](const wchar_t *filename)->TextureContext {
-            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-            D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-            er::gD3DRenderer->HeapDescriptorAlloc(&cpuHandle, &gpuHandle);
+            // A failed load is still reported as loaded, as documented, so
+            // callers do not repeat the synchronous file decode every frame.
             TextureContext texture = {};
-            texture.cpuHandle = (void *)cpuHandle.ptr;
-            texture.gpuHandle = (void *)gpuHandle.ptr;
             texture.loaded = true;
-            if (er::gD3DRenderer->LoadTextureFromFile(filename, cpuHandle, (ID3D12Resource **)&texture.texture, &texture.width, &texture.height)) {
+            auto *renderer = er::gD3DRenderer.get();
+            if (renderer == nullptr || filename == nullptr) {
                 return texture;
             }
-            er::gD3DRenderer->HeapDescriptorFree(cpuHandle, gpuHandle);
-            return {};
+            // Descriptor and upload state belong to the render thread.
+            std::lock_guard lock(renderer->deviceMutex_);
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+            D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
+            renderer->HeapDescriptorAlloc(&cpuHandle, &gpuHandle);
+            if (cpuHandle.ptr != 0 && renderer->LoadTextureFromFile(filename, cpuHandle, (ID3D12Resource **)&texture.texture, &texture.width, &texture.height)) {
+                texture.cpuHandle = (void *)cpuHandle.ptr;
+                texture.gpuHandle = (void *)gpuHandle.ptr;
+                return texture;
+            }
+            renderer->HeapDescriptorFree(cpuHandle, gpuHandle);
+            return texture;
         },
         [](TextureContext *texture) {
-            if (texture->texture == nullptr) {
+            if (texture == nullptr || texture->texture == nullptr || !er::gD3DRenderer) {
                 return;
             }
+            std::lock_guard lock(er::gD3DRenderer->deviceMutex_);
             D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
             D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
             cpuHandle.ptr = (uintptr_t)texture->cpuHandle;
