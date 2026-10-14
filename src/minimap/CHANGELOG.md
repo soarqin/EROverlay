@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+#### Added
+
+- Add `[markers] others` to show NPCs, quest targets, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
+
 #### Changed
 
 - Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.

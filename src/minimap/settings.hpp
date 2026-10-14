@@ -52,6 +52,7 @@ struct Settings {
     bool showLandmarks = true;
     bool showDeath = true;
     bool showBeacons = true;
+    bool showOthers = false;
     bool fullMap = false;
     uint32_t borderColor = 0x64FFFFFF; // ABGR: white with alpha 100.
     float borderWidth = 1.5f;

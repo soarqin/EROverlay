@@ -220,6 +220,7 @@ Settings loadSettings(const EROverlayAPI &api) {
     result.showLandmarks = reader.boolean("minimap.markers.landmarks", result.showLandmarks);
     result.showDeath = reader.boolean("minimap.markers.death", result.showDeath);
     result.showBeacons = reader.boolean("minimap.markers.beacons", result.showBeacons);
+    result.showOthers = reader.boolean("minimap.markers.others", result.showOthers);
     result.fullMap = reader.boolean("minimap.map.full_map", result.fullMap);
     result.borderColor = color(reader, result.borderColor);
     result.borderWidth = reader.scalar("minimap.border.width", result.borderWidth, nullptr, false);

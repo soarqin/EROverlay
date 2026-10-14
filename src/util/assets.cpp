@@ -85,7 +85,7 @@ bool parseDds(Bytes bytes, DdsImage &image) {
     if (fields[0] != 124 || fields[18] != 32 || !width || !height || width > 16384 || height > 16384 || mips > static_cast<uint32_t>(std::bit_width(std::max(width, height))) ||
         fields[5] > 1 || fields[27])
         return false;
-    uint32_t fourcc = fields[20], format = 0, blockBytes = 0;
+    uint32_t fourcc = fields[20], format = 0, blockBytes = 0, pixelBytes = 0;
     size_t offset = 128;
     if (fourcc == 0x30315844) {
         if (bytes.size() < 148)
@@ -105,6 +105,10 @@ bool parseDds(Bytes bytes, DdsImage &image) {
     else
         return false;
     switch (format) {
+        case 28:
+        case 29:
+            pixelBytes = 4;
+            break;
         case 71:
         case 72:
             blockBytes = 8;
@@ -124,7 +128,8 @@ bool parseDds(Bytes bytes, DdsImage &image) {
     image.height = height;
     image.format = format;
     for (uint32_t i = 0; i < mips; ++i) {
-        uint32_t rows = std::max(1u, (height + 3) / 4), rowBytes = std::max(1u, (width + 3) / 4) * blockBytes;
+        uint32_t rows = blockBytes ? std::max(1u, (height + 3) / 4) : height;
+        uint32_t rowBytes = blockBytes ? std::max(1u, (width + 3) / 4) * blockBytes : width * pixelBytes;
         size_t size = static_cast<size_t>(rows) * rowBytes;
         if (offset > bytes.size() || size > bytes.size() - offset) {
             image = {};

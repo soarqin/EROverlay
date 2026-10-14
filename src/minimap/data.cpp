@@ -46,34 +46,61 @@ struct SavedPlayerMarker {
     uint16_t padding;
 };
 static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map) == 12 && offsetof(SavedPlayerMarker, icon) == 13);
-[[nodiscard]] bool readPlayerMarkers(uintptr_t view, PlayerMarkers &markers) {
-    markers.clear();
+template<size_t Capacity>
+[[nodiscard]] bool readSavedMarkers(uintptr_t view, size_t saveOffset, std::array<SavedPlayerMarker, Capacity> &records, size_t &capacity) {
+    capacity = 0;
     if (!view)
         return false;
     struct Header {
         uintptr_t slots;
         uint64_t capacity;
     } first{}, after{};
-    auto save = pointer(view + 0x338); // WorldMapMarkerDataList +0x38.
+    auto save = pointer(view + saveOffset); // WorldMapMarkerDataList +0x38.
     uint64_t count = 0, afterCount = 0;
-    std::array<SavedPlayerMarker, PLAYER_MARKER_CAPACITY> records{}, afterRecords{};
+    std::array<SavedPlayerMarker, Capacity> afterRecords{};
     if (!save || !read(save + 8, first) || !first.slots || !first.capacity || first.capacity > records.size() || !read(save + 0x40, count) || count > first.capacity)
         return false;
     size_t bytes = static_cast<size_t>(first.capacity) * sizeof(SavedPlayerMarker);
     // Copy values, never retain game-owned slots. A concurrent insertion,
     // deletion or load discards this sample and is retried on the next update.
     if (!readBytes(first.slots, records.data(), bytes) || !readBytes(first.slots, afterRecords.data(), bytes) || !read(save + 8, after) || !read(save + 0x40, afterCount) ||
-        pointer(view + 0x338) != save || first.slots != after.slots || first.capacity != after.capacity || count != afterCount ||
+        pointer(view + saveOffset) != save || first.slots != after.slots || first.capacity != after.capacity || count != afterCount ||
         std::memcmp(records.data(), afterRecords.data(), bytes) ||
         static_cast<uint64_t>(std::count_if(records.begin(), records.begin() + first.capacity, [](const auto &record) { return record.id >= 0; })) != count)
         return false;
-    for (size_t slot = 0; slot < std::min<size_t>(first.capacity, PLAYER_MARKER_LIMIT); ++slot) {
+    capacity = static_cast<size_t>(first.capacity);
+    return true;
+}
+[[nodiscard]] bool readPlayerMarkers(uintptr_t view, PlayerMarkers &markers) {
+    markers.clear();
+    std::array<SavedPlayerMarker, PLAYER_MARKER_CAPACITY> records{};
+    size_t capacity;
+    if (!readSavedMarkers(view, 0x338, records, capacity))
+        return false;
+    for (size_t slot = 0; slot < std::min(capacity, PLAYER_MARKER_LIMIT); ++slot) {
         const auto &record = records[slot];
         if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon != 1)
             continue;
         // 0x879330 formats Text_0 with slot+1, independent of the save ID
         // and of the active list's ordering. These are already map coordinates.
         markers.push_back({record.id, record.x, record.y, static_cast<uint8_t>(slot + 1), record.map});
+    }
+    return true;
+}
+[[nodiscard]] bool readMemoMarkers(uintptr_t view, MemoMarkers &markers) {
+    markers.clear();
+    std::array<SavedPlayerMarker, 100> records{};
+    size_t capacity;
+    // MemoList binds view+0x340; the same saved-record layout is used for
+    // up to 100 stamps. Icon_0 selects the stored one-based frame directly.
+    if (!readSavedMarkers(view, 0x378, records, capacity))
+        return false;
+    for (size_t slot = 0; slot < capacity; ++slot) {
+        const auto &record = records[slot];
+        if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon < 1 ||
+            record.icon > 10)
+            continue;
+        markers.push_back({record.id, record.x, record.y, record.icon, record.map});
     }
     return true;
 }
@@ -160,8 +187,7 @@ public:
         for (uint64_t i = 0; i < count; ++i) {
             uintptr_t address = view + 0xF8 + i * 48;
             Converter converter{};
-            if (!read(address + 8, converter.origin) || (converter.origin[3] != 60 && (converter.origin[3] != 61 || !(mapMask & 4))) ||
-                !read(address + 12, converter.settings))
+            if (!read(address + 8, converter.origin) || (converter.origin[3] != 60 && (converter.origin[3] != 61 || !(mapMask & 4))) || !read(address + 12, converter.settings))
                 continue;
             auto conversion = pointer(address + 40);
             converter.head = conversion ? pointer(conversion + 16) : 0;
@@ -246,6 +272,7 @@ uint32_t rawMap(uint8_t area, uint8_t x, uint8_t z) { return (uint32_t(area) << 
 
 void Data::update() {
     MapSnapshot next;
+    const bool showOthers = showOthers_.load(std::memory_order_relaxed);
     if (!nativeApi || !nativeApi->readMapState(&next.state)) {
         next.onGUI = api->screenState() != 0;
         std::lock_guard lock(mutex_);
@@ -274,6 +301,8 @@ void Data::update() {
     auto publish = [&] {
         if (next.valid)
             (void)readPlayerMarkers(next.state.viewModel, next.playerMarkers);
+        if (next.valid && showOthers)
+            (void)readMemoMarkers(next.state.viewModel, next.memoMarkers);
         ERMapState after{};
         if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != next.state.viewModel || after.rawMapId != next.state.rawMapId ||
             after.mapId != next.state.mapId || after.underground != next.state.underground) {
@@ -282,6 +311,7 @@ void Data::update() {
             next.decorations = {};
             next.decorationStorage_.reset();
             next.playerMarkers.clear();
+            next.memoMarkers.clear();
         }
         std::lock_guard lock(mutex_);
         snapshot_ = std::move(next);
@@ -289,8 +319,8 @@ void Data::update() {
     bool cached = false;
     {
         std::lock_guard lock(mutex_);
-        if (GetTickCount64() < markerRefresh_ && snapshot_.valid && snapshot_.state.generation == next.state.generation && snapshot_.state.rawMapId == next.state.rawMapId &&
-            snapshot_.state.viewModel == next.state.viewModel) {
+        if (GetTickCount64() < markerRefresh_ && collectedOthers_ == showOthers && snapshot_.valid && snapshot_.state.generation == next.state.generation &&
+            snapshot_.state.rawMapId == next.state.rawMapId && snapshot_.state.viewModel == next.state.viewModel) {
             next.roundtable = snapshot_.roundtable;
             next.homeIcon = snapshot_.homeIcon;
             next.decorations = snapshot_.decorations;
@@ -303,6 +333,7 @@ void Data::update() {
         return;
     }
     markerRefresh_ = GetTickCount64() + 200;
+    collectedOthers_ = showOthers;
     auto decorations = std::make_shared<std::vector<DecorationInfo>>();
     size_t previousCount = 0;
     {
@@ -389,9 +420,14 @@ void Data::update() {
         decorations->push_back(marker);
     });
     rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
-        if (id < 78500 || !row.iconId || row.iconId == 80)
+        // Keep ordinary landmarks in their existing group. NPC and quest
+        // pins, plus the low-ID points used by map mods, have a separate switch.
+        const bool other = id < 78500 || row.iconId == 80 || row.iconId == 87 || row.iconId == 88;
+        if ((other && !showOthers) || (!row.iconId && !row.distViewIconId && (!layout.alternateIcons || !row.altIconId)))
             return;
-        bool opened = flag(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
+        // A missing opening condition is always enabled. Map for Goblins
+        // uses zero here and controls visibility through the active text flags.
+        bool opened = enabled(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
         if (!opened && !distant)
             return;
         // WorldMapPinData::_Update (0x87BF90): ordinary points require an
@@ -402,7 +438,7 @@ void Data::update() {
         DecorationInfo marker;
         marker.id = id;
         marker.iconId = row.iconId;
-        marker.source = DecorationSource::Landmark;
+        marker.source = other ? DecorationSource::Other : DecorationSource::Landmark;
         marker.areaIcon = row.isAreaIcon;
         marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
         marker.maps &= layout.mapMask;
@@ -417,7 +453,7 @@ void Data::update() {
             x = row.posX_forDistViewMark;
             z = row.posZ_forDistViewMark;
         }
-        if (!marker.maps || !converter.convert(raw, x, z, marker.x, marker.y))
+        if (!marker.maps || !marker.iconId || !converter.convert(raw, x, z, marker.x, marker.y))
             return;
         marker.cleared = cleared(row.clearedEventFlagId);
         marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;

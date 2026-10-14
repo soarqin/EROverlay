@@ -55,23 +55,19 @@ bool readMatrix(util::AssetReader &reader, Matrix &matrix) {
         return false;
     return bits.get(5, count) && bits.signedValue(count, 20, matrix[4]) && bits.signedValue(count, 20, matrix[5]) && reader.seek(bits.position());
 }
-bool readColorTransform(util::AssetReader &reader, bool &effects) {
+bool readColorTransform(util::AssetReader &reader, ColorTransform &color) {
+    color = {};
     Bits bits(reader.bytes(), reader.position());
     uint32_t add, mult, count;
     if (!bits.get(1, add) || !bits.get(1, mult) || !bits.get(4, count))
         return false;
-    float value;
     for (int i = 0; mult && i < 4; ++i) {
-        if (!bits.signedValue(count, 256, value))
+        if (!bits.signedValue(count, 256, color.multiply[i]))
             return false;
-        if (value != 1)
-            effects = true;
     }
     for (int i = 0; add && i < 4; ++i) {
-        if (!bits.signedValue(count, 1, value))
+        if (!bits.signedValue(count, 1, color.add[i]))
             return false;
-        if (value != 0)
-            effects = true;
     }
     return reader.seek(bits.position());
 }
@@ -340,7 +336,7 @@ bool GfxMovie::parseTimeline(util::Bytes bytes, uint32_t count, Character &chara
             }
             if ((flags & 4) && !readMatrix(current, value.matrix))
                 return false;
-            if ((flags & 8) && !readColorTransform(current, value.effects))
+            if ((flags & 8) && !readColorTransform(current, value.color))
                 return false;
             if (flags & 16) {
                 uint16_t ratio;
@@ -364,7 +360,10 @@ bool GfxMovie::parseTimeline(util::Bytes bytes, uint32_t count, Character &chara
                 uint8_t blend;
                 if (!current.read(blend))
                     return false;
-                value.effects |= blend != 1;
+                // Layer mode uses normal compositing here; filters and color
+                // transforms are still checked separately. Map mods use it
+                // for plain bitmap backgrounds (Map for Goblins frame 371).
+                value.effects |= blend != 1 && blend != 2;
             }
             if (extra & 4) {
                 uint8_t cache;
@@ -475,7 +474,9 @@ uint32_t GfxMovie::named(const std::string &path, Matrix *placementMatrix) const
     }
     return identity;
 }
-bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe) const {
+uint8_t ColorTransform::apply(uint8_t value, size_t channel) const { return static_cast<uint8_t>(std::clamp(std::round(value * multiply[channel] + add[channel]), 0.f, 255.f)); }
+bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe,
+                       const ColorTransform &color) const {
     auto found = characters_.find(identity);
     if (found == characters_.end() || parents.size() >= 32 || std::find(parents.begin(), parents.end(), identity) != parents.end())
         return false;
@@ -486,6 +487,7 @@ bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, 
         layer.width = character.width;
         layer.height = character.height;
         layer.matrix = matrix;
+        layer.color = color;
         layer.depth = depth;
         recipe.layers.push_back(std::move(layer));
         return true;
@@ -497,6 +499,13 @@ bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, 
         layer.depth = depth;
         if (raw == shapeBytes_.end() || !readShape(raw->second.second, raw->second.first, layer.shape))
             return false;
+        for (auto *styles: {&layer.shape.fills, &layer.shape.strokes})
+            for (auto &style: *styles) {
+                uint32_t transformed = 0;
+                for (size_t channel = 0; channel < 4; ++channel)
+                    transformed |= uint32_t(color.apply(static_cast<uint8_t>(style.color >> (channel * 8)), channel)) << (channel * 8);
+                style.color = transformed;
+            }
         recipe.layers.push_back(std::move(layer));
         return true;
     }
@@ -508,8 +517,15 @@ bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, 
             continue;
         if (placement.effects)
             return false;
+        ColorTransform child;
+        for (size_t channel = 0; channel < 4; ++channel) {
+            child.multiply[channel] = color.multiply[channel] * placement.color.multiply[channel];
+            child.add[channel] = color.add[channel] + color.multiply[channel] * placement.color.add[channel];
+            if (!std::isfinite(child.multiply[channel]) || !std::isfinite(child.add[channel]))
+                return false;
+        }
         depth.push_back(localDepth);
-        if (!flatten(placement.character, 1, multiply(matrix, placement.matrix), depth, parents, recipe))
+        if (!flatten(placement.character, 1, multiply(matrix, placement.matrix), depth, parents, recipe, child))
             return false;
         depth.pop_back();
     }
@@ -545,17 +561,17 @@ bool GfxMovie::itemOverlay(const std::string &name, IconRecipe &recipe) const {
     // placement so vanilla completion dots and mod replacements share a pivot.
     std::vector<uint16_t> depth{selectedDepth};
     std::vector<uint32_t> parents{worldMapItem_};
-    if (!flatten(selected->character, 1, selected->matrix, depth, parents, recipe) || recipe.layers.empty())
+    if (!flatten(selected->character, 1, selected->matrix, depth, parents, recipe, selected->color) || recipe.layers.empty())
         return false;
     recipeBounds(recipe);
     return true;
 }
-bool GfxMovie::special(const std::string &path, IconRecipe &recipe) const {
+bool GfxMovie::special(const std::string &path, IconRecipe &recipe, uint32_t frame) const {
     recipe = {};
     std::vector<uint16_t> depth;
     std::vector<uint32_t> parents;
     uint32_t identity = named(path);
-    if (!identity || !flatten(identity, 1, IDENTITY_MATRIX, depth, parents, recipe) || recipe.layers.empty())
+    if (!identity || !flatten(identity, frame, IDENTITY_MATRIX, depth, parents, recipe) || recipe.layers.empty())
         return false;
     recipeBounds(recipe);
     return true;

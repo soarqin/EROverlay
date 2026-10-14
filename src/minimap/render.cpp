@@ -37,6 +37,8 @@ void Renderer::init(void *context, void *allocFunc, void *freeFunc, void *userDa
     showGraces_ = settings.showGraces;
     landmarksKey_ = settings.landmarksKey;
     showLandmarks_ = settings.showLandmarks;
+    showOthers_ = settings.showOthers;
+    gData.setShowOthers(showOthers_);
     borderColor_ = settings.borderColor;
     borderWidth_ = settings.borderWidth;
     presets_ = std::move(settings.presets);
@@ -369,7 +371,8 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
         gResources.endFrame();
         const auto *clearedRecipe = gResources.special("cleared");
         for (const auto &marker: snapshot.decorations) {
-            if (!(marker.maps & (1u << map)) || (marker.source == DecorationSource::Grace ? !showGraces_ : !showLandmarks_))
+            bool visible = marker.source == DecorationSource::Grace ? showGraces_ : marker.source == DecorationSource::Landmark ? showLandmarks_ : showOthers_;
+            if (!(marker.maps & (1u << map)) || !visible)
                 continue;
             float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
             Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
@@ -381,6 +384,14 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
                 drawRecipe(clearedRecipe, screen, size, marker.rotationRad + angle);
         }
         int markerMap = map == 2 ? 10 : map;
+        if (showOthers_)
+            for (const auto &marker: snapshot.memoMarkers) {
+                if (marker.map != markerMap)
+                    continue;
+                float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
+                Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
+                drawRecipe(gResources.memoIcon(marker.icon), screen, effectiveDecorationScale_ * effectiveScale_ * 2.f);
+            }
         if (showDeath_ && state.deathValid && state.deathMapId == markerMap) {
             float x = (state.deathX - player.x) * effectiveScale_, y = (state.deathY - player.y) * effectiveScale_;
             Point death{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};

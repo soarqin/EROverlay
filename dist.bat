@@ -42,6 +42,7 @@ copy /y ..\..\build\bin\overlays\Minimap.dll overlays\
 copy /y ..\..\src\minimap\README.md .
 copy /y ..\..\src\minimap\README_CN.md .
 copy /y ..\..\LICENSE .
+copy /y ..\..\deps\bcdec\LICENSE LICENSE_bcdec.txt
 IF NOT EXIST configs mkdir configs
 copy /y ..\..\configs\minimap.ini configs\
 copy /y ..\..\configs\common.ini configs\
@@ -53,7 +54,7 @@ copy /y ..\..\configs_CN\common.ini configs_CN\
 copy /y ..\..\configs_CN\input.ini configs_CN\
 copy /y ..\..\configs_CN\style.ini configs_CN\
 IF EXIST ..\Minimap.zip 7z d -r ..\Minimap.zip data
-7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs configs_CN README.md README_CN.md LICENSE
+7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs configs_CN README.md README_CN.md LICENSE LICENSE_bcdec.txt
 popd
 
 endlocal

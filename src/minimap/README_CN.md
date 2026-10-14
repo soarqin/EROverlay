@@ -18,6 +18,7 @@
 - 按 **N** 同时显示或隐藏赐福和地标。
 - 死亡标记和编号标记默认显示；回收卢恩、删除标记时随游戏清除。
 - 地图底图默认跟随已获得的地图碎片。
+- NPC、剧情目标点、手动图章和地图 Mod 添加的其他标记默认隐藏；在 `[markers]` 中设置 `others = true` 开启。
 
 用文本编辑器修改 `configs/minimap.ini`，使用 UTF-8 保存，然后重启游戏。核心在加载时读取文件；修改后仅重建渲染器不会重新读取文件。注释放在单独一行，以 `#` 或 `;` 开头。布尔值推荐使用 `true` 和 `false`。
 
@@ -29,7 +30,7 @@
 |---|---|
 | `[controls]` | 显示、预设切换和标记快捷键 |
 | `[map]` | 是否显示全开底图 |
-| `[markers]` | 四类标记的显示开关 |
+| `[markers]` | 五类标记的显示开关 |
 | `[border]` | 所有预设共用的边框颜色和像素宽度 |
 | `[presets]` | 启动预设和切换顺序 |
 | `[preset.名称]` | 一套完整的尺寸、位置、缩放、透明度和形状 |
@@ -65,8 +66,13 @@ cycle = F8
 | `[markers] landmarks` | `true` | 显示游戏允许显示的地标，包括已发现的远眺标记 |
 | `[markers] death` | `true` | 在对应地图层显示尚未回收的卢恩位置 |
 | `[markers] beacons` | `true` | 显示在游戏大地图放置的编号标记 1～5，保留各自编号 |
+| `[markers] others` | `false` | 显示 NPC、剧情目标点、手动图章及地图 Mod 添加的其他地图点，遵循游戏显示条件 |
 
 全开选项只改变小地图底图，不授予碎片、不修改存档，也不自动发现赐福或地标。编号标记仍在游戏大地图中放置和删除；小地图负责同步显示。
+
+`others` 独立于赐福和地标开关，使用预设的 `decoration_scale` 调整大小。兼容 `Map for Goblins` 添加的标记：需同时加载该 Mod，并在其赐福菜单中开启所需的标记类别。小地图读取 Mod 的图标和显示条件，拾取物品、击败敌人或关闭类别后，相关标记按 Mod 规则消失。
+
+手动图章仍在游戏大地图中放置和删除，小地图同步其图案、位置和地图层。更新此功能时，请同时更新 `EROverlay.dll` 和 `overlays/Minimap.dll`，以支持 Mod 图标的颜色处理。
 
 ### 边框
 
@@ -92,7 +98,7 @@ cycle = F8
 | `shape` | `rect` | `rect` 矩形、`rounded` 圆角矩形、`circle` 圆形；圆形边长取宽高中较小值 |
 | `rounding` | `20%` | 仅用于圆角矩形；百分比相对于较短边的一半，也可填 `30px` 或 `30` |
 | `map_scale` | `1` | 与 `zoom` 相乘，调整底图及跟随地图缩放的图标；有效缩放限制在 0.01～16 |
-| `decoration_scale` | `1` | 调整赐福、普通地标和圆桌厅图标；范围型地标仍随底图缩放 |
+| `decoration_scale` | `1` | 调整赐福、普通地标、其他地图点和圆桌厅图标；范围型标记仍随底图缩放 |
 | `player_scale` | `1` | 调整玩家点/箭头、死亡标记和编号标记 |
 | `compass_scale` | `1` | 调整方位指示，仅在旋转模式中显示 |
 
@@ -180,4 +186,4 @@ player_scale = 1.25
 
 ## 许可证与鸣谢
 
-[MIT 许可证](https://github.com/soarqin/EROverlay/blob/master/LICENSE)。项目使用 [ELDEN RING Internal Menu](https://github.com/NightFyre/ELDENRING-INTERNAL)、[minhook](https://github.com/TsudaKageyu/minhook)、[ImGui](https://github.com/ocornut/imgui)、[stb](https://github.com/nothings/stb)、[JSON for Modern C++](https://github.com/nlohmann/json) 和 [Pattern16](https://github.com/Dasaav-dsv/Pattern16)。
+[MIT 许可证](https://github.com/soarqin/EROverlay/blob/master/LICENSE)。项目使用 [ELDEN RING Internal Menu](https://github.com/NightFyre/ELDENRING-INTERNAL)、[minhook](https://github.com/TsudaKageyu/minhook)、[ImGui](https://github.com/ocornut/imgui)、[stb](https://github.com/nothings/stb)、[bcdec](https://github.com/iOrange/bcdec)、[JSON for Modern C++](https://github.com/nlohmann/json) 和 [Pattern16](https://github.com/Dasaav-dsv/Pattern16)。

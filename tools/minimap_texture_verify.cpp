@@ -349,7 +349,7 @@ struct NativeTextureVerifier {
         renderer.processTextureUploads();
         return same && renderer.nativeTextures_.empty() && renderer.freeDescriptors_.size() == 1024;
     }
-    static int run(D3DRenderer &renderer) {
+    static int run(D3DRenderer &renderer, const char *ddsPath = nullptr) {
         const auto *native = getEROverlayNativeAPI(1);
         if (!native || native->log)
             return 18;
@@ -371,7 +371,7 @@ struct NativeTextureVerifier {
             renderer.freeDescriptors_.push_back(i - 1);
         if (!renderer.initializeTextureUpload())
             return 4;
-        std::ifstream stream("build/ida/probes/run-26836-32694765/surface-v8000.tpf", std::ios::binary | std::ios::ate);
+        std::ifstream stream(ddsPath ? ddsPath : "build/ida/probes/run-26836-32694765/surface-v8000.tpf", std::ios::binary | std::ios::ate);
         auto size = stream.tellg();
         if (size <= 0)
             return 5;
@@ -379,7 +379,12 @@ struct NativeTextureVerifier {
         stream.seekg(0);
         stream.read(reinterpret_cast<char *>(bytes.data()), size);
         std::vector<util::TpfEntry> entries;
-        if (!util::parseTpf(bytes, entries) || entries.size() != 1)
+        if (ddsPath)
+            entries.push_back({L"sprite", bytes});
+        else if (!util::parseTpf(bytes, entries) || entries.size() != 1)
+            return 6;
+        util::DdsImage expected;
+        if (!util::parseDds(entries[0].dds, expected))
             return 6;
         auto token = renderer.createDdsTexture(entries[0].dds.data(), entries[0].dds.size());
         if (!token)
@@ -388,7 +393,7 @@ struct NativeTextureVerifier {
         renderer.waitForFrames();
         renderer.processTextureUploads();
         ERTextureView view;
-        if (renderer.pollTexture(token, view) != ER_TEXTURE_READY || view.width != 256 || view.height != 256 || renderer.textureMemoryBytes(token) < 65536)
+        if (renderer.pollTexture(token, view) != ER_TEXTURE_READY || view.width != expected.width || view.height != expected.height || renderer.textureMemoryBytes(token) < 65536)
             return 8;
         auto &texture = renderer.nativeTextures_.at(token);
         auto desc = texture.texture->GetDesc();
@@ -475,6 +480,10 @@ struct NativeTextureVerifier {
         renderer.processTextureUploads();
         if (!same || !gone || !renderer.nativeTextures_.empty())
             return 12;
+        if (ddsPath) {
+            std::puts("PASS: production sprite DDS upload/readback matches every pixel, with frame fences and SRV retirement.");
+            return 0;
+        }
         if (!verifyMultipleAtlases(renderer))
             return 15;
         if (!verifyConcurrentQueue(renderer, entries[0].dds))
@@ -502,9 +511,13 @@ struct NativeTextureVerifier {
     }
 };
 } // namespace er
-int main() {
+int main(int argc, char **argv) {
+    if (argc > 2) {
+        std::fputs("Usage: minimap_texture_verify.exe [sprite.dds]\n", stderr);
+        return 1;
+    }
     er::D3DRenderer renderer;
-    int result = er::NativeTextureVerifier::run(renderer);
+    int result = er::NativeTextureVerifier::run(renderer, argc == 2 ? argv[1] : nullptr);
     std::printf("texture-verification=%d\n", result);
     return result;
 }

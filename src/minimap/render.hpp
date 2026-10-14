@@ -44,6 +44,7 @@ private:
     bool showGraces_ = true;
     int landmarksKey_ = 0;
     bool showLandmarks_ = true;
+    bool showOthers_ = false;
     std::vector<Preset> presets_;
     size_t currentScaleIndex_ = 0;
 

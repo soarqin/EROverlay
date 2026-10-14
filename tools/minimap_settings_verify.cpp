@@ -64,7 +64,8 @@ int main() {
     auto defaults = er::minimap::loadSettings(api);
     if (!check(defaults.presets.size() == 3, "shipped compact, large and automatic hidden cycle") ||
         !check(defaults.toggleKey == 'M' && defaults.cycleKey == 'M' && defaults.gracesKey == 'N' && defaults.landmarksKey == 'N', "shipped keys") ||
-        !check(defaults.showGraces && defaults.showLandmarks && defaults.showDeath && defaults.showBeacons && !defaults.fullMap, "shipped marker and terrain switches") ||
+        !check(defaults.showGraces && defaults.showLandmarks && defaults.showDeath && defaults.showBeacons && !defaults.showOthers && !defaults.fullMap,
+               "shipped marker and terrain switches") ||
         !check(close(defaults.borderWidth, 1.5f) && defaults.borderColor == 0x64FFFFFF, "pixel border and spaced RGBA color"))
         return 2;
     const auto &small = defaults.presets[0], &large = defaults.presets[1];
@@ -93,6 +94,7 @@ graces = false
 landmarks = 0
 death = no
 beacons = off
+others = yes
 [border]
 width = 2.75
 color = 10, 20, 30, 40
@@ -120,7 +122,8 @@ zoom = 9
     if (!check(custom.presets.size() == 2 && custom.presets[0].name == "overview" && custom.presets[1].name == "close-up", "order, duplicate and unused preset handling") ||
         !check(custom.toggleKey == ('M' | er::input::KEY_MOD_CTRL) && custom.cycleKey == ('N' | er::input::KEY_MOD_ALT) && !custom.gracesKey && !custom.landmarksKey,
                "separate shortcut chords and explicit disabled shortcuts") ||
-        !check(!custom.showGraces && !custom.showLandmarks && !custom.showDeath && !custom.showBeacons && custom.fullMap, "all switches accept boolean spellings") ||
+        !check(!custom.showGraces && !custom.showLandmarks && !custom.showDeath && !custom.showBeacons && custom.showOthers && custom.fullMap,
+               "all switches accept boolean spellings") ||
         !check(custom.borderColor == 0x281E140A && close(custom.borderWidth, 2.75f), "all border channels and direct pixel units"))
         return 4;
     const auto &overview = custom.presets[0];
@@ -160,6 +163,8 @@ zoom = 1
 [controls]
 toggle = M
 cycle = N
+[markers]
+others = maybe
 [border]
 color = 255, wrong, 0, 100
 width = -2
@@ -185,7 +190,7 @@ compass_scale = 1e999
                    close(invalid.presets[0].opacity, 0.8f) && !invalid.presets[0].rotate && !invalid.presets[0].position.centered &&
                    invalid.presets[0].shape == er::minimap::Shape::Rect && close(invalid.presets[0].rounding, 0.2f) && close(invalid.presets[0].mapScale, 1) &&
                    close(invalid.presets[0].decorationScale, 1) && invalid.presets[0].playerScale == 0 && close(invalid.presets[0].compassScale, 1) &&
-                   close(invalid.borderWidth, 1.5f) && invalid.borderColor == 0x64FFFFFF,
+                   close(invalid.borderWidth, 1.5f) && invalid.borderColor == 0x64FFFFFF && !invalid.showOthers,
                "invalid, nonfinite and old list values fall back without exceptions"))
         return 8;
     auto old = fixture(R"ini(
@@ -202,8 +207,8 @@ alpha = 0.1
 border_width_x10 = 100
 )ini",
                        api);
-    if (!check(old.toggleKey == 'M' && old.cycleKey == 'M' && old.presets.size() == 3 && old.showGraces && old.showLandmarks && old.showDeath && old.showBeacons && !old.fullMap &&
-                   close(old.presets[0].widthRatio, 0.3f) && close(old.presets[0].zoom, 0.75f) && close(old.borderWidth, 1.5f),
+    if (!check(old.toggleKey == 'M' && old.cycleKey == 'M' && old.presets.size() == 3 && old.showGraces && old.showLandmarks && old.showDeath && old.showBeacons &&
+                   !old.showOthers && !old.fullMap && close(old.presets[0].widthRatio, 0.3f) && close(old.presets[0].zoom, 0.75f) && close(old.borderWidth, 1.5f),
                "old flat keys are ignored"))
         return 9;
 

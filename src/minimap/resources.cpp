@@ -12,6 +12,11 @@
 #include <cstring>
 #include <functional>
 #include <map>
+#include <tuple>
+
+#define BCDEC_STATIC
+#define BCDEC_IMPLEMENTATION
+#include "../../deps/bcdec/bcdec.h"
 
 #include "layout.hpp"
 #include "resources.hpp"
@@ -149,6 +154,78 @@ bool number(const Attributes &attributes, const char *key, uint32_t &value) {
     auto [end, error] = std::from_chars(s.data(), s.data() + s.size(), value);
     return error == std::errc{} && end == s.data() + s.size();
 }
+bool coloredSprite(util::Bytes bytes, const util::DdsImage &image, const AtlasRegion &region, const ColorTransform &color, std::vector<uint8_t> &dds) {
+    // Decode only the sprite's blocks, once on the update thread. Plain icons
+    // keep their original compressed atlas. This preserves additive GFX colors
+    // that ImGui's per-vertex multiplication cannot represent.
+    if (!region.width || !region.height || region.x > image.width || region.y > image.height || region.width > image.width - region.x || region.height > image.height - region.y ||
+        uint64_t(region.width) * region.height > 4 * 1024 * 1024 || image.levels.empty())
+        return false;
+    const bool rgba = image.format == 28 || image.format == 29;
+    void (*decode)(const void *, void *, int) = nullptr;
+    uint32_t blockBytes = 16;
+    switch (image.format) {
+        case 71:
+        case 72:
+            decode = bcdec_bc1;
+            blockBytes = 8;
+            break;
+        case 74:
+        case 75:
+            decode = bcdec_bc2;
+            break;
+        case 77:
+        case 78:
+            decode = bcdec_bc3;
+            break;
+        case 98:
+        case 99:
+            decode = bcdec_bc7;
+            break;
+        default:
+            if (!rgba)
+                return false;
+    }
+    dds.assign(148 + size_t(region.width) * region.height * 4, 0);
+    std::memcpy(dds.data(), "DDS ", 4);
+    auto put = [&](size_t offset, uint32_t value) { std::memcpy(dds.data() + offset, &value, sizeof(value)); };
+    put(4, 124);
+    put(8, 0x100F);
+    put(12, region.height);
+    put(16, region.width);
+    put(20, region.width * 4);
+    put(28, 1);
+    put(76, 32);
+    put(80, 4);
+    put(84, 0x30315844); // DX10
+    put(108, 0x1000);
+    put(128, image.format == 29 || image.format == 72 || image.format == 75 || image.format == 78 || image.format == 99 ? 29 : 28);
+    put(132, 3);
+    put(140, 1);
+    const auto &level = image.levels.front();
+    std::array<uint8_t, 64> block{};
+    uint32_t previousX = UINT32_MAX, previousY = UINT32_MAX;
+    for (uint32_t y = 0; y < region.height; ++y)
+        for (uint32_t x = 0; x < region.width; ++x) {
+            uint32_t sourceX = region.x + x, sourceY = region.y + y;
+            const uint8_t *pixel;
+            if (rgba)
+                pixel = bytes.data() + level.offset + size_t(sourceY) * level.rowBytes + size_t(sourceX) * 4;
+            else {
+                uint32_t bx = sourceX / 4, by = sourceY / 4;
+                if (bx != previousX || by != previousY) {
+                    decode(bytes.data() + level.offset + size_t(by) * level.rowBytes + size_t(bx) * blockBytes, block.data(), 16);
+                    previousX = bx;
+                    previousY = by;
+                }
+                pixel = block.data() + ((sourceY % 4) * 4 + sourceX % 4) * 4;
+            }
+            auto *target = dds.data() + 148 + (size_t(y) * region.width + x) * 4;
+            for (size_t channel = 0; channel < 4; ++channel)
+                target[channel] = color.apply(pixel[channel], channel);
+        }
+    return true;
+}
 } // namespace
 
 Resources::~Resources() noexcept { stop(); }
@@ -207,6 +284,12 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     }
     if (icons.empty())
         return false;
+    std::unordered_map<uint32_t, IconRecipe> memos;
+    for (uint32_t frame = 1; frame <= 10; ++frame) {
+        IconRecipe recipe;
+        if (movie.special("Body/_/Base/MemoList/Item_0/Icon_0", recipe, frame))
+            memos.emplace(frame, std::move(recipe));
+    }
     std::unordered_map<std::string, IconRecipe> specials;
     for (auto [name, path]: {std::pair{"home", "Body/_/Base/Home"}, std::pair{"arrow", "Body/_/Base/Player/Rotate"}, std::pair{"death", "Body/_/Base/Dead"},
                              std::pair{"marker", "Body/_/Base/MarkerList/Item_0/Icon_0"}}) {
@@ -253,6 +336,12 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     std::erase_if(icons, [&](const auto &item) {
         return std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) { return layer.bitmap() && !regions.contains(layer.image); });
     });
+    std::erase_if(memos, [&](const auto &item) {
+        return std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) {
+            auto region = regions.find(layer.image);
+            return layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height);
+        });
+    });
     std::unordered_set<std::string> needed;
     auto collect = [&](const auto &recipes) {
         for (const auto &[key, recipe]: recipes)
@@ -261,6 +350,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
                     needed.insert(layer.image);
     };
     collect(icons);
+    collect(memos);
     collect(specials);
     for (const auto &[key, recipe]: specials)
         for (const auto &layer: recipe.layers)
@@ -280,15 +370,34 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     for (auto &[image, region]: regions)
         region.atlas = remap[region.atlas];
     std::vector<AtlasRegion> resolved;
+    using ColoredKey = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::array<float, 4>, std::array<float, 4>>;
+    std::map<ColoredKey, uint32_t> colored;
     auto resolve = [&](auto &recipes) {
         for (auto &[id, recipe]: recipes)
             for (auto &layer: recipe.layers)
                 if (layer.bitmap()) {
+                    auto region = regions.at(layer.image);
+                    if (!layer.color.identity()) {
+                        ColoredKey key{region.atlas, region.x, region.y, region.width, region.height, layer.color.multiply, layer.color.add};
+                        auto found = colored.find(key);
+                        if (found == colored.end()) {
+                            auto atlas = std::make_unique<Atlas>();
+                            atlas->name = atlases[region.atlas]->name;
+                            atlas->path = atlases[region.atlas]->path;
+                            atlas->sourceRegion = region;
+                            atlas->color = layer.color;
+                            found = colored.emplace(key, static_cast<uint32_t>(atlases.size())).first;
+                            atlases.push_back(std::move(atlas));
+                        }
+                        region.atlas = found->second;
+                        region.x = region.y = 0;
+                    }
                     layer.resourceRegion = static_cast<uint32_t>(resolved.size());
-                    resolved.push_back(regions.at(layer.image));
+                    resolved.push_back(region);
                 }
     };
     resolve(icons);
+    resolve(memos);
     resolve(specials);
     std::vector<AtlasFile> atlasFiles;
     for (uint32_t i = 0; i < atlases.size(); ++i) {
@@ -304,6 +413,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     regions_ = std::move(regions);
     resolvedRegions_ = std::move(resolved);
     icons_ = std::move(icons);
+    memoIcons_ = std::move(memos);
     specials_ = std::move(specials);
     playerMarkerText_ = std::move(markerText);
     definitionsReady_.store(true, std::memory_order_release);
@@ -446,7 +556,8 @@ void Resources::update() {
             std::vector<const wchar_t *> names;
             for (auto index: group.atlases)
                 if (!atlases_[index]->ready.load(std::memory_order_acquire))
-                    names.push_back(atlases_[index]->name.c_str());
+                    if (std::none_of(names.begin(), names.end(), [&](const auto *name) { return atlases_[index]->name == name; }))
+                        names.push_back(atlases_[index]->name.c_str());
             if (names.empty()) {
                 file.complete = true;
                 continue;
@@ -466,11 +577,16 @@ void Resources::update() {
                 util::Bytes bytes(static_cast<const uint8_t *>(data.data), static_cast<size_t>(data.size));
                 util::DdsImage image;
                 if (util::parseDds(bytes, image)) {
-                    atlas.dds.assign(bytes.begin(), bytes.end());
-                    atlas.width = image.width;
-                    atlas.height = image.height;
-                    atlas.ready.store(true, std::memory_order_release);
-                    continue;
+                    if (atlas.color.identity())
+                        atlas.dds.assign(bytes.begin(), bytes.end());
+                    else if (!coloredSprite(bytes, image, atlas.sourceRegion, atlas.color, atlas.dds))
+                        atlas.dds.clear();
+                    if (!atlas.dds.empty()) {
+                        atlas.width = atlas.color.identity() ? image.width : atlas.sourceRegion.width;
+                        atlas.height = atlas.color.identity() ? image.height : atlas.sourceRegion.height;
+                        atlas.ready.store(true, std::memory_order_release);
+                        continue;
+                    }
                 }
                 status_ = "图集 DDS 格式不受支持，正在重试";
             }
@@ -802,6 +918,12 @@ const IconRecipe *Resources::icon(uint32_t id) const {
         return nullptr;
     auto it = icons_.find(id);
     return it == icons_.end() ? nullptr : &it->second;
+}
+const IconRecipe *Resources::memoIcon(uint8_t frame) const {
+    if (!definitionsReady_.load(std::memory_order_acquire))
+        return nullptr;
+    auto it = memoIcons_.find(frame);
+    return it == memoIcons_.end() ? nullptr : &it->second;
 }
 const IconRecipe *Resources::special(const std::string &name) const {
     if (!definitionsReady_.load(std::memory_order_acquire))

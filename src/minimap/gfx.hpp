@@ -33,10 +33,17 @@ struct VectorShape {
     std::vector<VectorStyle> fills, strokes;
     std::vector<VectorCommand> commands;
 };
+struct ColorTransform {
+    std::array<float, 4> multiply{1, 1, 1, 1};
+    std::array<float, 4> add{};
+    [[nodiscard]] bool identity() const { return multiply == std::array<float, 4>{1, 1, 1, 1} && add == std::array<float, 4>{}; }
+    [[nodiscard]] uint8_t apply(uint8_t value, size_t channel) const;
+};
 struct IconLayer {
     std::string image;
     uint32_t width = 0, height = 0;
     Matrix matrix = IDENTITY_MATRIX;
+    ColorTransform color;
     VectorShape shape;
     std::vector<uint16_t> depth;
     uint32_t resourceRegion = UINT32_MAX; // Resolved once by Resources.
@@ -61,7 +68,7 @@ public:
     [[nodiscard]] bool parse(util::Bytes bytes);
     [[nodiscard]] bool icon(uint32_t frame, IconRecipe &recipe) const;
     [[nodiscard]] bool itemOverlay(const std::string &name, IconRecipe &recipe) const;
-    [[nodiscard]] bool special(const std::string &path, IconRecipe &recipe) const;
+    [[nodiscard]] bool special(const std::string &path, IconRecipe &recipe, uint32_t frame = 1) const;
     [[nodiscard]] bool image(const std::string &name, IconRecipe &recipe) const;
     [[nodiscard]] bool text(const std::string &path, TextLayout &layout) const;
     [[nodiscard]] uint32_t iconFrameCount() const;
@@ -71,6 +78,7 @@ private:
     struct Placement {
         uint32_t character = 0;
         Matrix matrix = IDENTITY_MATRIX;
+        ColorTransform color;
         std::string name;
         bool visible = true;
         bool effects = false;
@@ -83,7 +91,8 @@ private:
         std::vector<std::map<uint16_t, Placement>> frames;
     };
     [[nodiscard]] bool parseTimeline(util::Bytes bytes, uint32_t count, Character &character, unsigned nesting);
-    [[nodiscard]] bool flatten(uint32_t character, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe) const;
+    [[nodiscard]] bool flatten(uint32_t character, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe,
+                               const ColorTransform &color = {}) const;
     [[nodiscard]] uint32_t named(const std::string &path, Matrix *placementMatrix = nullptr) const;
     std::unordered_map<uint32_t, Character> characters_;
     std::unordered_map<uint32_t, std::pair<uint16_t, std::vector<uint8_t>>> shapeBytes_;

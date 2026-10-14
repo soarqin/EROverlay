@@ -49,6 +49,7 @@ public:
     [[nodiscard]] bool tile(uint32_t map, uint16_t x, uint16_t y, TileView &view);
     void endFrame();
     [[nodiscard]] const IconRecipe *icon(uint32_t id) const;
+    [[nodiscard]] const IconRecipe *memoIcon(uint8_t frame) const;
     [[nodiscard]] const IconRecipe *special(const std::string &name) const;
     [[nodiscard]] const TextLayout *playerMarkerText() const;
     [[nodiscard]] bool layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view);
@@ -83,6 +84,8 @@ private:
         std::wstring name;
         std::wstring path;
         bool required = false;
+        ColorTransform color;
+        AtlasRegion sourceRegion{};
         std::vector<uint8_t> dds;
         uint64_t texture = 0;
         uint32_t width = 0, height = 0;
@@ -131,6 +134,7 @@ private:
     std::unordered_map<std::string, AtlasRegion> regions_;
     std::vector<AtlasRegion> resolvedRegions_;
     std::unordered_map<uint32_t, IconRecipe> icons_;
+    std::unordered_map<uint32_t, IconRecipe> memoIcons_;
     std::unordered_map<std::string, IconRecipe> specials_;
     TextLayout playerMarkerText_;
     std::unordered_map<uint64_t, std::wstring> tilePaths_;

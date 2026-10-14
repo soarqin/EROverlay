@@ -16,6 +16,7 @@ The minimap reads game archives and renders its own textures. External `data/map
 - Press **N** to show or hide grace and landmark markers together.
 - Death and numbered beacon markers are enabled, following rune recovery and in-game removal.
 - Terrain follows your obtained map fragments.
+- NPCs, quest targets, placed stamps and other points added by map mods are hidden by default; set `others = true` in `[markers]` to show them.
 
 Edit `configs/minimap.ini` with a text editor, save as UTF-8 and restart the game. The core reads the file when loading; rebuilding the renderer alone does not reload the file. Put comments on separate lines starting with `#` or `;`. Use `true` and `false` for switches.
 
@@ -27,7 +28,7 @@ English comments are in `configs/`; Chinese-comment templates are in `configs_CN
 |---|---|
 | `[controls]` | Show/hide, preset cycling and marker shortcuts |
 | `[map]` | Fully revealed terrain |
-| `[markers]` | Four marker visibility switches |
+| `[markers]` | Five marker visibility switches |
 | `[border]` | Border color and pixel width shared by all presets |
 | `[presets]` | Startup preset and cycling order |
 | `[preset.name]` | One complete size, position, zoom, opacity and shape setup |
@@ -63,8 +64,13 @@ cycle = F8
 | `[markers] landmarks` | `true` | Show landmarks allowed by the game, including discovered distant-view markers |
 | `[markers] death` | `true` | Show uncollected dropped runes on their map layer |
 | `[markers] beacons` | `true` | Show world-map beacons 1–5, preserving their numbers |
+| `[markers] others` | `false` | Show NPCs, quest targets, placed stamps and other points added by map mods, following the game's display conditions |
 
 Fully revealed terrain changes only the minimap display. It does not grant fragments, edit saves or discover graces and landmarks. Place and delete beacons in the game's world map; the minimap follows them.
+
+`others` is independent of the grace and landmark switches and uses the preset's `decoration_scale`. It supports markers added by `Map for Goblins`: load that mod too and enable the desired marker categories in its grace menu. The minimap reads the mod's icons and display conditions, so collecting items, defeating enemies or disabling a category removes the relevant markers according to the mod's rules.
+
+Place and delete stamps in the game's world map; the minimap follows their icon, coordinates and map layer. Update both `EROverlay.dll` and `overlays/Minimap.dll` for this feature, including mod icon color handling.
 
 ### Border
 
@@ -90,7 +96,7 @@ Each preset is independent, with one value per setting. There is no inheritance 
 | `shape` | `rect` | `rect`, `rounded` or `circle`; circles use the smaller width/height |
 | `rounding` | `20%` | Rounded rectangles only: percentage of half the shorter side, or pixels such as `30px` or `30` |
 | `map_scale` | `1` | Multiplies zoom, including icons that follow terrain zoom; effective zoom is limited to 0.01–16 |
-| `decoration_scale` | `1` | Grace, ordinary landmark and Roundtable icons; area symbols still follow terrain zoom |
+| `decoration_scale` | `1` | Grace, ordinary landmark, other map point and Roundtable icons; area symbols still follow terrain zoom |
 | `player_scale` | `1` | Player dot/arrow, death marker and numbered beacons |
 | `compass_scale` | `1` | Compass size, visible only when rotation is enabled |
 
@@ -178,4 +184,4 @@ Resources load asynchronously. Newly needed tiles or icons may take a few frames
 
 ## License and credits
 
-[MIT License](https://github.com/soarqin/EROverlay/blob/master/LICENSE). Uses [ELDEN RING Internal Menu](https://github.com/NightFyre/ELDENRING-INTERNAL), [minhook](https://github.com/TsudaKageyu/minhook), [ImGui](https://github.com/ocornut/imgui), [stb](https://github.com/nothings/stb), [JSON for Modern C++](https://github.com/nlohmann/json) and [Pattern16](https://github.com/Dasaav-dsv/Pattern16).
+[MIT License](https://github.com/soarqin/EROverlay/blob/master/LICENSE). Uses [ELDEN RING Internal Menu](https://github.com/NightFyre/ELDENRING-INTERNAL), [minhook](https://github.com/TsudaKageyu/minhook), [ImGui](https://github.com/ocornut/imgui), [stb](https://github.com/nothings/stb), [bcdec](https://github.com/iOrange/bcdec), [JSON for Modern C++](https://github.com/nlohmann/json) and [Pattern16](https://github.com/Dasaav-dsv/Pattern16).

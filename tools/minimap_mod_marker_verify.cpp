@@ -15,12 +15,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "minimap/defs/BonfireWarpParam.h"
+#include "minimap/defs/WorldMapPointParam.h"
 #include "minimap/render.hpp"
 #include "util/mapstate.hpp"
 #include "util/paramreader.hpp"
@@ -36,9 +38,10 @@ std::vector<uint8_t> graces, points, tpf;
 std::unordered_set<uint32_t> flags;
 std::unordered_map<std::wstring, er::util::Bytes> images;
 std::unordered_map<uint64_t, ERTextureView> textures;
+std::vector<std::vector<uint8_t>> coloredSprites;
 uint64_t generation = 1, nextTexture = 0;
 const wchar_t *shape = L"rect", *rotate = L"false";
-bool showGraces = true, showLandmarks = true;
+bool showGraces = true, showLandmarks = true, showOthers = false;
 bool vanillaCompletion = false;
 
 std::vector<uint8_t> readFile(const char *path) {
@@ -85,6 +88,8 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
             return showGraces ? L"true" : L"false";
         if (!std::strcmp(key, "minimap.markers.landmarks"))
             return showLandmarks ? L"true" : L"false";
+        if (!std::strcmp(key, "minimap.markers.others") && showOthers)
+            return L"true";
         return fallback;
     };
     legacy.inputIsKeyPressed = [](int) { return false; };
@@ -118,6 +123,12 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
         er::util::DdsImage image;
         if (!er::util::parseDds({static_cast<const uint8_t *>(data), static_cast<size_t>(size)}, image))
             return 0;
+        if (image.format == 28 || image.format == 29) {
+            const auto *bytes = static_cast<const uint8_t *>(data);
+            std::vector<uint8_t> sprite(bytes, bytes + size);
+            if (std::find(coloredSprites.begin(), coloredSprites.end(), sprite) == coloredSprites.end())
+                coloredSprites.push_back(std::move(sprite));
+        }
         auto token = ++nextTexture;
         textures.emplace(token, ERTextureView{reinterpret_cast<void *>(uintptr_t(token)), image.width, image.height});
         return token;
@@ -133,7 +144,7 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
     native.beginOffscreen = [](void *) { return true; };
     nativeApi = &native;
 }
-bool drawn(const IconLayer &layer) {
+bool drawn(const IconLayer &layer, const ImVec2 *position = nullptr) {
     AtlasRegion region{};
     ERTextureView texture{};
     if (!gResources.layerView(layer, region, texture))
@@ -144,11 +155,250 @@ bool drawn(const IconLayer &layer) {
                 continue;
             for (unsigned index = command.IdxOffset; index < command.IdxOffset + command.ElemCount; ++index) {
                 const auto &vertex = list->VtxBuffer[list->IdxBuffer[index] + command.VtxOffset];
-                if (std::abs(vertex.uv.x - float(region.x) / texture.width) < .00001f && std::abs(vertex.uv.y - float(region.y) / texture.height) < .00001f)
+                if (std::abs(vertex.uv.x - float(region.x) / texture.width) < .00001f && std::abs(vertex.uv.y - float(region.y) / texture.height) < .00001f &&
+                    (!position || (std::abs(vertex.pos.x - position->x) < .02f && std::abs(vertex.pos.y - position->y) < .02f)))
                     return true;
             }
         }
     return false;
+}
+bool otherMarkers() {
+    struct Sample {
+        uint32_t id;
+        WorldMapPointParam row;
+        size_t text;
+    };
+    er::util::ParamRows params;
+    if (!params.open(reinterpret_cast<uintptr_t>(points.data() + 16)))
+        return false;
+    std::map<uint32_t, Sample> samples;
+    auto field = [](const WorldMapPointParam &row, size_t offset) {
+        uint32_t value;
+        std::memcpy(&value, reinterpret_cast<const uint8_t *>(&row) + offset, sizeof(value));
+        return value;
+    };
+    for (const auto &entry: params.rows()) {
+        WorldMapPointParam row{};
+        if (!params.read(entry, row) || !(row.dispMask00 || row.dispMask01 || row.dispMask02) ||
+            !(row.iconId == 80 || row.iconId == 87 || row.iconId == 88 || (entry.id < 78500 && row.iconId >= 349 && row.iconId <= 376)))
+            continue;
+        size_t text = 0;
+        while (text < 8 && static_cast<int32_t>(field(row, 48 + text * 12)) < 0)
+            ++text;
+        if (text == 8)
+            continue;
+        auto found = samples.find(row.iconId);
+        if (found == samples.end() || (found->second.row.areaNo < 60 && row.areaNo >= 60))
+            samples.insert_or_assign(row.iconId, Sample{entry.id, row, text});
+    }
+    if (!samples.contains(80) || !samples.contains(87) || !samples.contains(88)) {
+        std::fputs("FAIL: fixture lacks NPC and quest markers\n", stderr);
+        return false;
+    }
+    ImGui::CreateContext();
+    auto &io = ImGui::GetIO();
+    io.DisplaySize = {1920, 1080};
+    io.DeltaTime = 1.f / 60;
+    io.IniFilename = io.LogFilename = nullptr;
+    unsigned char *pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+    io.Fonts->SetTexID(1);
+    showGraces = showLandmarks = false;
+    unsigned layers = 0, removals = 0;
+    bool ok = true;
+    auto setFlag = [](uint32_t flag) {
+        if (flag && flag != UINT32_MAX)
+            flags.insert(flag);
+    };
+    for (const auto &[baseIcon, sample]: samples) {
+        const auto &row = sample.row;
+        uint32_t raw = (uint32_t(row.areaNo) << 24) | (uint32_t(row.gridXNo) << 16) | (uint32_t(row.gridZNo) << 8);
+        bool world = row.areaNo == 60 || row.areaNo == 61;
+        uint8_t origin[]{0, world ? row.gridZNo : uint8_t{64}, world ? row.gridXNo : uint8_t{28}, world ? row.areaNo : uint8_t{60}};
+        uint32_t map = row.dispMask00 ? 0 : row.dispMask01 ? 1 : 10;
+        put(view.data(), 0x14, raw);
+        put(view.data(), 0x24, map == 1 ? uint32_t{0} : map);
+        put(view.data(), 0x30, static_cast<uint8_t>(map == 1));
+        put(view.data(), 0x28, row.posX + 128.f);
+        put(view.data(), 0x2C, 128.f - row.posZ);
+        put(view.data(), 0x280, uint64_t{1});
+        std::memcpy(view.data() + 0x100, origin, sizeof(origin));
+        const float settings[]{0, 0, 0, 128, 128, 1};
+        std::memcpy(view.data() + 0x104, settings, sizeof(settings));
+        put(view.data(), 0xF8 + 40, reinterpret_cast<uintptr_t>(conversion.data()));
+        put(conversion.data(), 16, reinterpret_cast<uintptr_t>(head.data()));
+        put(head.data(), 8, reinterpret_cast<uintptr_t>(node.data()));
+        head[25] = 1;
+        put(node.data(), 0, reinterpret_cast<uintptr_t>(head.data()));
+        put(node.data(), 16, reinterpret_cast<uintptr_t>(head.data()));
+        put(node.data(), 28, raw);
+        put(node.data(), 32, uint32_t{0x3C1C4000});
+        flags.clear();
+        setFlag(row.eventFlagId);
+        setFlag(field(row, 52 + sample.text * 12));
+        setFlag(field(row, 192 + sample.text * 4));
+        uint32_t icon = reinterpret_cast<const uint8_t *>(&row)[144 + sample.text] == 1 && row.altIconId ? row.altIconId : row.iconId;
+        const auto *recipe = gResources.icon(icon);
+        if (!recipe || recipe->layers.empty()) {
+            std::fprintf(stderr, "FAIL: actual icon %u has no resolved recipe\n", icon);
+            ok = false;
+            break;
+        }
+        auto frame = [&](bool expected, bool update = true) {
+            Renderer renderer;
+            renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
+                          reinterpret_cast<void *>(+[](void *data, void *) { std::free(data); }), nullptr);
+            if (update) {
+                ++generation;
+                gData.update();
+            }
+            auto snapshot = gData.snapshot();
+            auto marker = std::find_if(snapshot.decorations.begin(), snapshot.decorations.end(),
+                                       [&](const auto &entry) { return entry.source == DecorationSource::Other && entry.id == sample.id; });
+            if (update && ((marker != snapshot.decorations.end()) != expected || (expected && marker->iconId != icon))) {
+                std::fprintf(stderr, "FAIL: other point %u / icon %u visibility=%d expected=%d\n", sample.id, icon, marker != snapshot.decorations.end(), expected);
+                return false;
+            }
+            for (unsigned i = 0; i < 8; ++i) {
+                ImGui::NewFrame();
+                renderer.render();
+                ImGui::Render();
+                // Warm hidden recipes too, so absent drawing cannot be caused
+                // by an unavailable texture. All layers use actual mod assets.
+                for (const auto &layer: recipe->layers) {
+                    AtlasRegion region{};
+                    ERTextureView texture{};
+                    (void)gResources.layerView(layer, region, texture);
+                }
+                gResources.update();
+            }
+            gResources.prepareTextures();
+            ImGui::NewFrame();
+            renderer.render();
+            ImGui::Render();
+            auto *window = ImGui::FindWindowByName("##minimap_window");
+            const float angle = row.angle * 3.14159265358979323846f / 180.f;
+            for (const auto &layer: recipe->layers) {
+                if (!layer.bitmap())
+                    continue;
+                Point local = transform(layer.matrix, {0, 0});
+                ImVec2 position =
+                    window->Pos + window->Size * .5f + ImVec2(local.x * std::cos(angle) - local.y * std::sin(angle), local.x * std::sin(angle) + local.y * std::cos(angle)) * .375f;
+                if (drawn(layer, &position) != expected) {
+                    std::fprintf(stderr, "FAIL: point %u / icon %u layer %s drawing, expected=%d\n", sample.id, icon, layer.image.c_str(), expected);
+                    return false;
+                }
+                layers += expected;
+            }
+            return true;
+        };
+        showOthers = false;
+        ok = frame(false);
+        showOthers = true;
+        ok = ok && frame(true);
+        showOthers = false;
+        ok = ok && frame(false, false); // Also hide a previously published snapshot.
+        showOthers = true;
+        uint32_t category = field(row, 192 + sample.text * 4);
+        if (!category || category == UINT32_MAX)
+            category = field(row, 52 + sample.text * 12);
+        if (category && category != UINT32_MAX) {
+            flags.erase(category);
+            ok = ok && frame(false);
+            flags.insert(category);
+        }
+        bool removable = false;
+        for (size_t text = 0; text < 8; ++text)
+            for (auto flag: {field(row, 56 + text * 12), field(row, 224 + text * 4)})
+                if (flag && flag != UINT32_MAX) {
+                    setFlag(flag);
+                    removable = true;
+                }
+        if (removable) {
+            ok = ok && frame(false);
+            ++removals;
+        }
+        if (!ok)
+            break;
+        std::printf("PASS: point %u / icon %u, other switch, independent drawing and native text conditions\n", sample.id, icon);
+    }
+    if (ok && samples.contains(349)) {
+        const auto *mapItem = gResources.icon(349), *material = gResources.icon(376);
+        if (!mapItem || !material || mapItem->layers.front().color.add[1] != 100 || material->layers.front().color.add[1] != 150 || coloredSprites.empty()) {
+            std::fprintf(stderr, "FAIL: actual additive green backgrounds were not preserved (%zu converted images)\n", coloredSprites.size());
+            ok = false;
+        } else {
+            CreateDirectoryW(L"build/native-checks/colored-sprites", nullptr);
+            for (size_t index = 0; index < coloredSprites.size(); ++index) {
+                std::ofstream stream("build/native-checks/colored-sprites/" + std::to_string(index) + ".dds", std::ios::binary);
+                stream.write(reinterpret_cast<const char *>(coloredSprites[index].data()), coloredSprites[index].size());
+            }
+        }
+    }
+    // Saved stamps use a separate list, map layer and one-based GFX timeline.
+    std::array<uint8_t, 96> save{};
+    std::array<uint8_t, 1600> slots{};
+    for (size_t slot = 0; slot < 100; ++slot)
+        put(slots.data(), slot * 16, int32_t{-1});
+    put(view.data(), 0x24, uint32_t{0});
+    put(view.data(), 0x30, uint8_t{0});
+    put(view.data(), 0x378, reinterpret_cast<uintptr_t>(save.data()));
+    put(save.data(), 8, reinterpret_cast<uintptr_t>(slots.data()));
+    put(save.data(), 16, uint64_t{100});
+    put(save.data(), 0x40, uint64_t{1});
+    put(slots.data(), 0, int32_t{123});
+    float playerX, playerY;
+    std::memcpy(&playerX, view.data() + 0x28, 4);
+    std::memcpy(&playerY, view.data() + 0x2C, 4);
+    put(slots.data(), 4, playerX + 16);
+    put(slots.data(), 8, playerY + 10);
+    flags.clear();
+    showOthers = true;
+    for (uint8_t icon = 1; ok && icon <= 10; ++icon) {
+        const auto *recipe = gResources.memoIcon(icon);
+        if (!recipe || recipe->layers.empty()) {
+            ok = false;
+            break;
+        }
+        put(slots.data(), 13, icon);
+        Renderer renderer;
+        renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
+                      reinterpret_cast<void *>(+[](void *data, void *) { std::free(data); }), nullptr);
+        gData.update();
+        if (gData.snapshot().memoMarkers.size() != 1 || gData.snapshot().memoMarkers[0].icon != icon) {
+            ok = false;
+            break;
+        }
+        for (unsigned i = 0; i < 8; ++i) {
+            ImGui::NewFrame();
+            renderer.render();
+            ImGui::Render();
+            gResources.update();
+        }
+        auto *window = ImGui::FindWindowByName("##minimap_window");
+        for (const auto &layer: recipe->layers) {
+            Point local = transform(layer.matrix, {0, 0});
+            ImVec2 position = window->Pos + window->Size * .5f + ImVec2(12, 7.5f) + ImVec2(local.x, local.y) * .375f;
+            if (!drawn(layer, &position)) {
+                std::fprintf(stderr, "FAIL: stamp frame %u actual bitmap drawing\n", icon);
+                ok = false;
+            }
+        }
+    }
+    if (ok) {
+        // Removal is sampled every update, including while points are cached.
+        put(slots.data(), 0, int32_t{-1});
+        put(save.data(), 0x40, uint64_t{0});
+        gData.update();
+        ok = gData.snapshot().memoMarkers.empty();
+    }
+    if (ok)
+        std::puts("PASS: all 10 native stamp frames, saved coordinates and removal");
+    gResources.stop();
+    ImGui::DestroyContext();
+    std::printf("Other marker verification: %zu icon groups, %u drawn bitmap layers, %u removal cases\n", samples.size(), layers, removals);
+    return ok;
 }
 bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_t graceIcon, uint32_t bossIcon, bool graceCleared = false, bool bossCleared = false) {
     flags = enabled;
@@ -239,11 +489,13 @@ bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_
 }
 } // namespace
 int main(int argc, char **argv) {
-    if ((argc != 6 && argc != 7) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion"))) {
-        std::fputs("Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param [--vanilla-completion]\n", stderr);
+    if ((argc != 6 && argc != 7) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion") && std::strcmp(argv[6], "--other-markers"))) {
+        std::fputs(
+            "Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param [--vanilla-completion|--other-markers]\n",
+            stderr);
         return 1;
     }
-    vanillaCompletion = argc == 7;
+    vanillaCompletion = argc == 7 && !std::strcmp(argv[6], "--vanilla-completion");
     showLandmarks = !vanillaCompletion;
     auto gfx = readFile(argv[1]), layouts = readFile(argv[2]);
     tpf = readFile(argv[3]);
@@ -259,6 +511,8 @@ int main(int argc, char **argv) {
     configure(legacy, native);
     if (!gResources.loadDefinitions(gfx, layouts))
         return 3;
+    if (argc == 7 && !std::strcmp(argv[6], "--other-markers"))
+        return otherMarkers() ? 0 : 8;
     auto cleared = gResources.special("cleared");
     if (!cleared || cleared->layers.size() != 1 || (!vanillaCompletion && cleared->layers.front().image != "MENU_MAP_Boss_Dead") ||
         (vanillaCompletion && (cleared->layers.front().bitmap() || cleared->layers.front().shape.fills.empty()))) {
