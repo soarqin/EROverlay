@@ -640,5 +640,20 @@ uint32_t GfxMovie::iconLayerCount(uint32_t frame) const {
     auto found = characters_.find(icons_);
     return found == characters_.end() || !frame || frame > found->second.frames.size() ? 0 : static_cast<uint32_t>(found->second.frames[frame - 1].size());
 }
+std::vector<MapLayer> GfxMovie::markerLayers() const {
+    std::vector<MapLayer> layers;
+    auto base = characters_.find(named("Body/_/Base"));
+    if (base == characters_.end() || base->second.frames.empty())
+        return layers;
+    // These are separate native containers. A visibility category such as
+    // others is not a container and must not acquire its own draw priority.
+    for (const auto &[depth, placement]: base->second.frames.front())
+        for (auto [name, layer]:
+             {std::pair{"AreaList", MapLayer::Area}, std::pair{"ItemList", MapLayer::Item}, std::pair{"WarpList", MapLayer::Warp}, std::pair{"MemoList", MapLayer::Memo},
+              std::pair{"MarkerList", MapLayer::Marker}, std::pair{"Dead", MapLayer::Dead}, std::pair{"Player", MapLayer::Player}})
+            if (placement.name == name)
+                layers.push_back(layer);
+    return layers;
+}
 
 } // namespace er::minimap

@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <numbers>
 #include <unordered_map>
 
@@ -142,18 +143,18 @@ bool hasText(const WorldMapPointParam &row) {
     return false;
 }
 template<typename T, typename F>
-void rows(uint32_t group, size_t minimum, F function) {
+size_t rows(uint32_t group, size_t minimum, F function) {
     auto table = nativeApi->findParamTable(group);
     util::ParamRows reader;
     if (!table)
-        return;
+        return 0;
     if (!reader.open(table)) {
         if (nativeApi->log) {
             char line[120];
             std::snprintf(line, sizeof(line), "minimap-param group=%u invalid-directory\n", group);
             nativeApi->log(line);
         }
-        return;
+        return 0;
     }
     for (const auto &entry: reader.rows()) {
         T row{};
@@ -167,6 +168,7 @@ void rows(uint32_t group, size_t minimum, F function) {
         }
         function(entry.id, row, entry.size);
     }
+    return reader.rows().size();
 }
 // Read the game's already-built legacy-conversion trees. No Scaleform calls
 // or allocations are required on the overlay update thread. Converter headers
@@ -412,46 +414,71 @@ void Data::update() {
         marker.cleared = cleared(row.clearedEventFlagId);
         decorations->push_back(marker);
     });
-    rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
-        // NPC pins and the low-ID points used by map mods have a separate
-        // switch. Other points, including quest pins (87/88), stay landmarks.
-        const bool other = id < 78500 || row.iconId == 80;
-        if ((other && !showOthers) || (!row.iconId && !row.distViewIconId && (!layout.alternateIcons || !row.altIconId)))
-            return;
-        // A missing opening condition is always enabled. Map for Goblins
-        // uses zero here and controls visibility through the active text flags.
-        bool opened = enabled(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
-        if (!opened && !distant)
-            return;
-        // WorldMapPinData::_Update (0x87BF90): ordinary points require an
-        // active text slot. Mod completion points disable theirs when the
-        // colocated grace activates, while area/no-text points remain visible.
-        if (!row.isAreaIcon && !row.isEnableNoText && !hasText(row))
-            return;
-        DecorationInfo marker;
-        marker.id = id;
-        marker.iconId = row.iconId;
-        marker.source = other ? DecorationSource::Other : DecorationSource::Landmark;
-        marker.areaIcon = row.isAreaIcon;
-        marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
-        marker.maps &= layout.mapMask;
-        if (!opened && distant && row.distViewIconId)
-            marker.iconId = row.distViewIconId;
-        else if (layout.alternateIcons && size >= sizeof(row) && alternate(row, 192, 224) && row.altIconId)
-            marker.iconId = row.altIconId;
-        uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
-        float x = row.posX, z = row.posZ;
-        if (distant && row.isOverrideDistViewMarkPos) {
-            raw = rawMap(row.areaNo_forDistViewMark, row.gridXNo_forDistViewMark, row.gridZNo_forDistViewMark);
-            x = row.posX_forDistViewMark;
-            z = row.posZ_forDistViewMark;
+    size_t pointStart = decorations->size();
+    size_t pointRows =
+        rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
+            // NPC pins and the low-ID points used by map mods have a separate
+            // switch. Other points, including quest pins (87/88), stay landmarks.
+            const bool other = id < 78500 || row.iconId == 80;
+            if ((other && !showOthers) || (!row.iconId && !row.distViewIconId && (!layout.alternateIcons || !row.altIconId)))
+                return;
+            // A missing opening condition is always enabled. Map for Goblins
+            // uses zero here and controls visibility through the active text flags.
+            bool opened = enabled(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
+            if (!opened && !distant)
+                return;
+            // WorldMapPinData::_Update (0x87BF90): ordinary points require an
+            // active text slot. Mod completion points disable theirs when the
+            // colocated grace activates, while area/no-text points remain visible.
+            if (!row.isAreaIcon && !row.isEnableNoText && !hasText(row))
+                return;
+            DecorationInfo marker;
+            marker.id = id;
+            marker.iconId = row.iconId;
+            marker.source = other ? DecorationSource::Other : DecorationSource::Landmark;
+            marker.areaIcon = row.isAreaIcon;
+            marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
+            marker.maps &= layout.mapMask;
+            if (!opened && distant && row.distViewIconId)
+                marker.iconId = row.distViewIconId;
+            else if (layout.alternateIcons && size >= sizeof(row) && alternate(row, 192, 224) && row.altIconId)
+                marker.iconId = row.altIconId;
+            uint32_t raw = rawMap(row.areaNo, row.gridXNo, row.gridZNo);
+            float x = row.posX, z = row.posZ;
+            if (distant && row.isOverrideDistViewMarkPos) {
+                raw = rawMap(row.areaNo_forDistViewMark, row.gridXNo_forDistViewMark, row.gridZNo_forDistViewMark);
+                x = row.posX_forDistViewMark;
+                z = row.posZ_forDistViewMark;
+            }
+            if (!marker.maps || !marker.iconId || !converter.convert(raw, x, z, marker.x, marker.y))
+                return;
+            marker.cleared = cleared(row.clearedEventFlagId);
+            marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
+            decorations->push_back(marker);
+        });
+    // Native Item_i clones are inserted at the template's child index
+    // (0x74C0D0). Earlier entries in the ascending-ID pin list are on top.
+    // Preserve that order for all points, independent of icon/category.
+    auto points = std::span(*decorations).subspan(pointStart);
+    if (std::ranges::is_sorted(points, {}, &DecorationInfo::id))
+        std::ranges::reverse(points);
+    else
+        std::ranges::sort(points, std::greater{}, &DecorationInfo::id);
+    if (nativeApi->log) {
+        uint64_t others = 0, missingIcons = 0;
+        for (const auto &marker: *decorations) {
+            others += marker.source == DecorationSource::Other;
+            missingIcons += !gResources.icon(marker.iconId);
         }
-        if (!marker.maps || !marker.iconId || !converter.convert(raw, x, z, marker.x, marker.y))
-            return;
-        marker.cleared = cleared(row.clearedEventFlagId);
-        marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
-        decorations->push_back(marker);
-    });
+        std::array<uint64_t, 7> counts{next.state.generation, pointRows, points.size(), others, missingIcons, gResources.iconCount(), uint64_t(showOthers)};
+        if (counts != diagnosticCounts_) {
+            char line[220];
+            std::snprintf(line, sizeof(line), "minimap-markers others=%d point-rows=%zu visible-points=%zu visible-others=%llu missing-icons=%llu recipes=%zu\n", showOthers,
+                          pointRows, points.size(), static_cast<unsigned long long>(others), static_cast<unsigned long long>(missingIcons), gResources.iconCount());
+            nativeApi->log(line);
+            diagnosticCounts_ = counts;
+        }
+    }
     next.decorationStorage_ = std::move(decorations);
     next.decorations = *next.decorationStorage_;
     publish();

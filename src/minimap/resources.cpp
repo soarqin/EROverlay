@@ -24,8 +24,10 @@ namespace er::minimap {
 const EROverlayNativeAPI *nativeApi = nullptr;
 Resources gResources;
 namespace {
-constexpr const wchar_t *PATHS[] = {L"menu:/02_120_WorldMap.gfx", L"menu:/Hi/01_Common.sblytbnd.dcx", L"menu:/71_MapTile.tpfbhd", L"menu:/71_MapTile.mtmskbnd.dcx",
-                                    L"menu:/Hi/01_Common.tpf.dcx"};
+// Match the canonical keys used by the game and mod VFS even when an older
+// native API forwards paths without normalizing their case.
+constexpr const wchar_t *PATHS[] = {L"menu:/02_120_worldmap.gfx", L"menu:/hi/01_common.sblytbnd.dcx", L"menu:/71_maptile.tpfbhd", L"menu:/71_maptile.mtmskbnd.dcx",
+                                    L"menu:/hi/01_common.tpf.dcx"};
 constexpr size_t TILE_CACHE_BYTES = 64 * 1024 * 1024;
 constexpr size_t TILE_CACHE_ENTRIES = 512;
 constexpr uint64_t CACHE_IDLE_MS = 10000;
@@ -279,6 +281,9 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
             return false;
     }
     std::unordered_map<uint32_t, IconRecipe> icons;
+    auto markerLayers = movie.markerLayers();
+    if (markerLayers.empty())
+        return false;
     for (uint32_t i = 1; i <= movie.iconFrameCount(); ++i) {
         IconRecipe recipe;
         if (movie.icon(i, recipe))
@@ -413,6 +418,7 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     memoIcons_ = std::move(memos);
     specials_ = std::move(specials);
     playerMarkerText_ = std::move(markerText);
+    markerLayers_ = std::move(markerLayers);
     definitionsReady_.store(true, std::memory_order_release);
     if (nativeApi && nativeApi->log) {
         char line[160];

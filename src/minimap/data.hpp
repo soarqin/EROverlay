@@ -104,6 +104,7 @@ private:
     // Update-thread only: conversion trees are static within a game context.
     MapConversionCache conversions_;
     uint64_t conversionGeneration_ = 0;
+    std::array<uint64_t, 7> diagnosticCounts_{}; // Update-thread only; log changed marker/resource counts.
 };
 extern Data gData;
 } // namespace er::minimap

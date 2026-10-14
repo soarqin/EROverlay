@@ -326,9 +326,14 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
     float angle = currentRotate_ ? std::atan2(snapshot.camera.yawSin, snapshot.camera.yawCos) : 0.f;
     float cosine = std::cos(angle), sine = std::sin(angle);
     int map = state.mapId == 10 ? 2 : state.mapId == 0 ? ((state.underground & 1) ? 1 : 0) : -1;
+    auto drawPlayer = [&] {
+        drawRecipe(gResources.special("player"), center, effectiveScale_ * effectivePlayerScale_);
+        drawRecipe(gResources.special("arrow"), center, effectiveScale_ * effectivePlayerScale_, state.oriDeg * std::numbers::pi_v<float> / 180.f + angle);
+    };
     if (snapshot.roundtable) {
         drawRecipe(gResources.special("home"), center, currentScale_ * currentExtraTileScale_, angle);
         drawRecipe(gResources.icon(snapshot.homeIcon), center, effectiveDecorationScale_ * effectiveScale_ * 2.f, angle);
+        drawPlayer();
     } else if (map >= 0) {
         // Keep L0 as the default until native L1/L2 seam and position acceptance
         // is complete. Coarser assets and spans are already supported below.
@@ -376,36 +381,56 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
         };
         auto outside = [&](Point point) { return point.x < -200 || point.y < -200 || point.x > minimapWidth_ + 200 || point.y > minimapHeight_ + 200; };
         const auto *clearedRecipe = gResources.special("cleared");
-        for (const auto &marker: snapshot.decorations) {
-            bool visible = marker.source == DecorationSource::Grace ? showGraces_ : marker.source == DecorationSource::Landmark ? showLandmarks_ : showOthers_;
-            if (!(marker.maps & (1u << map)) || !visible)
-                continue;
-            auto screen = screenPoint(marker.x, marker.y);
-            if (outside(screen))
-                continue;
-            float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
-            drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
-            if (marker.cleared)
-                drawRecipe(clearedRecipe, screen, size, marker.rotationRad + angle);
-        }
         int markerMap = map == 2 ? 10 : map;
-        if (showOthers_)
-            for (const auto &marker: snapshot.memoMarkers) {
-                auto screen = screenPoint(marker.x, marker.y);
-                if (marker.map == markerMap && !outside(screen))
-                    drawRecipe(gResources.memoIcon(marker.icon), screen, effectiveDecorationScale_ * effectiveScale_ * 2.f);
+        for (auto layer: gResources.markerLayers())
+            switch (layer) {
+                case MapLayer::Area:
+                case MapLayer::Item:
+                case MapLayer::Warp:
+                    if (layer == MapLayer::Warp ? !showGraces_ : !(showLandmarks_ || showOthers_))
+                        break;
+                    for (const auto &marker: snapshot.decorations) {
+                        auto markerLayer = marker.source == DecorationSource::Grace ? MapLayer::Warp : marker.areaIcon ? MapLayer::Area : MapLayer::Item;
+                        if (markerLayer != layer || !(marker.maps & (1u << map)))
+                            continue;
+                        bool visible = marker.source == DecorationSource::Grace ? showGraces_ : marker.source == DecorationSource::Landmark ? showLandmarks_ : showOthers_;
+                        if (!visible)
+                            continue;
+                        auto screen = screenPoint(marker.x, marker.y);
+                        if (outside(screen))
+                            continue;
+                        float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
+                        drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
+                        if (marker.cleared)
+                            drawRecipe(clearedRecipe, screen, size, marker.rotationRad + angle);
+                    }
+                    break;
+                case MapLayer::Memo:
+                    if (showOthers_)
+                        for (const auto &marker: snapshot.memoMarkers) {
+                            auto screen = screenPoint(marker.x, marker.y);
+                            if (marker.map == markerMap && !outside(screen))
+                                drawRecipe(gResources.memoIcon(marker.icon), screen, effectiveDecorationScale_ * effectiveScale_ * 2.f);
+                        }
+                    break;
+                case MapLayer::Marker:
+                    if (showPlayerMarkers_)
+                        for (const auto &marker: snapshot.playerMarkers) {
+                            auto screen = screenPoint(marker.x, marker.y);
+                            if (marker.map == markerMap && !outside(screen))
+                                drawPlayerMarker(marker, screen, effectiveScale_ * 2.f * effectivePlayerScale_);
+                        }
+                    break;
+                case MapLayer::Dead:
+                    if (showDeath_ && state.deathValid && state.deathMapId == markerMap)
+                        drawRecipe(gResources.special("death"), screenPoint(state.deathX, state.deathY), effectiveScale_ * 2.f * effectivePlayerScale_, angle);
+                    break;
+                case MapLayer::Player:
+                    drawPlayer();
+                    break;
             }
-        if (showDeath_ && state.deathValid && state.deathMapId == markerMap)
-            drawRecipe(gResources.special("death"), screenPoint(state.deathX, state.deathY), effectiveScale_ * 2.f * effectivePlayerScale_, angle);
-        if (showPlayerMarkers_)
-            for (const auto &marker: snapshot.playerMarkers) {
-                auto screen = screenPoint(marker.x, marker.y);
-                if (marker.map == markerMap && !outside(screen))
-                    drawPlayerMarker(marker, screen, effectiveScale_ * 2.f * effectivePlayerScale_);
-            }
-    }
-    drawRecipe(gResources.special("player"), center, effectiveScale_ * effectivePlayerScale_);
-    drawRecipe(gResources.special("arrow"), center, effectiveScale_ * effectivePlayerScale_, state.oriDeg * std::numbers::pi_v<float> / 180.f + angle);
+    } else
+        drawPlayer();
     if (currentRotate_) {
         float size = std::min(minimapWidth_, minimapHeight_) * effectiveBearingRatio_;
         const auto *bearing = gResources.special("bearing");

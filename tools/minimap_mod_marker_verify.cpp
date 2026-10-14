@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cwchar>
 #include <fstream>
 #include <map>
 #include <string>
@@ -43,6 +44,7 @@ uint64_t generation = 1, nextTexture = 0;
 const wchar_t *shape = L"rect", *rotate = L"false";
 bool showGraces = true, showLandmarks = true, showOthers = false;
 bool vanillaCompletion = false;
+bool warpAboveItems = true;
 
 std::vector<uint8_t> readFile(const char *path) {
     std::ifstream stream(path, std::ios::binary | std::ios::ate);
@@ -144,12 +146,13 @@ void configure(EROverlayAPI &legacy, EROverlayNativeAPI &native) {
     native.beginOffscreen = [](void *) { return true; };
     nativeApi = &native;
 }
-bool drawn(const IconLayer &layer, const ImVec2 *position = nullptr) {
+uint64_t drawIndex(const IconLayer &layer, const ImVec2 *position = nullptr) {
     AtlasRegion region{};
     ERTextureView texture{};
     if (!gResources.layerView(layer, region, texture))
-        return false;
-    for (const auto *list: ImGui::GetDrawData()->CmdLists)
+        return UINT64_MAX;
+    uint64_t offset = 0;
+    for (const auto *list: ImGui::GetDrawData()->CmdLists) {
         for (const auto &command: list->CmdBuffer) {
             if (command.UserCallback || command.GetTexID() != reinterpret_cast<ImTextureID>(texture.gpuHandle))
                 continue;
@@ -157,10 +160,185 @@ bool drawn(const IconLayer &layer, const ImVec2 *position = nullptr) {
                 const auto &vertex = list->VtxBuffer[list->IdxBuffer[index] + command.VtxOffset];
                 if (std::abs(vertex.uv.x - float(region.x) / texture.width) < .00001f && std::abs(vertex.uv.y - float(region.y) / texture.height) < .00001f &&
                     (!position || (std::abs(vertex.pos.x - position->x) < .02f && std::abs(vertex.pos.y - position->y) < .02f)))
-                    return true;
+                    return offset + index;
             }
         }
-    return false;
+        offset += list->IdxBuffer.Size;
+    }
+    return UINT64_MAX;
+}
+bool drawn(const IconLayer &layer, const ImVec2 *position = nullptr) { return drawIndex(layer, position) != UINT64_MAX; }
+bool startupDefinitions(er::util::Bytes gfx, er::util::Bytes layouts) {
+    auto *previous = nativeApi;
+    EROverlayNativeAPI gateway = *previous;
+    static er::util::Bytes startupGfx, startupLayouts;
+    startupGfx = gfx;
+    startupLayouts = layouts;
+    static bool requestedMod = false;
+    requestedMod = false;
+    // Forward paths unchanged, as older cores did. A mod VFS lookup must
+    // receive the canonical lowercase GFX key directly from Resources.
+    gateway.readMapState = [](ERMapState *state) {
+        *state = {};
+        return true;
+    };
+    gateway.requestFile = [](const ERFileRequest *request) -> uint64_t {
+        if (request->tpfNameCount)
+            return 1;
+        if (!std::wcscmp(request->path, L"menu:/02_120_worldmap.gfx")) {
+            requestedMod = true;
+            return 2;
+        }
+        if (!std::wcscmp(request->path, L"menu:/hi/01_common.sblytbnd.dcx"))
+            return 3;
+        return 4;
+    };
+    gateway.pollFile = [](uint64_t token, const wchar_t *name, ERFileData *data) {
+        *data = {};
+        if (token == 1) {
+            auto found = name ? images.find(name) : images.end();
+            if (found == images.end())
+                return ER_FILE_FAILED;
+            *data = {found->second.data(), found->second.size(), 1};
+        } else if (token == 2 || token == 3) {
+            auto bytes = token == 2 ? startupGfx : startupLayouts;
+            *data = {bytes.data(), bytes.size(), 1};
+        } else
+            return ER_FILE_FAILED;
+        return ER_FILE_SUCCEEDED;
+    };
+    nativeApi = &gateway;
+    bool ok;
+    {
+        Resources resources;
+        resources.update();
+        GfxMovie movie;
+        ok = requestedMod && movie.parse(gfx) && resources.iconCount() > 0 && resources.markerLayers().size() == 7;
+        if (ok && movie.iconFrameCount() == 376)
+            ok = resources.icon(349) && resources.icon(366) && resources.icon(376);
+    }
+    nativeApi = previous;
+    if (ok)
+        std::puts("PASS: actual GFX definitions and mod-only frames load through an unmodified VFS request path");
+    else
+        std::fputs("FAIL: canonical mod GFX request or startup definitions\n", stderr);
+    return ok;
+}
+template<typename T>
+std::vector<uint8_t> paramRows(std::initializer_list<std::pair<uint32_t, T>> rows, bool reversed = false) {
+    size_t start = 0x40 + rows.size() * 24, size = start + rows.size() * sizeof(T);
+    std::vector<uint8_t> storage(16 + size);
+    put(storage.data(), 0, static_cast<uint32_t>(size));
+    auto *table = storage.data() + 16;
+    put(table, 0, static_cast<uint32_t>(size));
+    put(table, 0xA, static_cast<uint16_t>(rows.size()));
+    table[0x2D] = 4;
+    table[0x2E] = 2;
+    size_t index = 0;
+    for (const auto &[id, row]: rows) {
+        size_t destination = reversed ? rows.size() - 1 - index : index;
+        put(table, 0x40 + destination * 24, id);
+        put(table, 0x48 + destination * 24, static_cast<uint64_t>(start + destination * sizeof(T)));
+        put(table, start + destination * sizeof(T), row);
+        ++index;
+    }
+    return storage;
+}
+bool overlappingMarkers() {
+    // Use real GFX/atlas recipes with several simultaneous pins. Per-icon
+    // presence checks cannot detect an opaque landmark covering a boss/grace.
+    const auto *mine = gResources.icon(25), *grace = gResources.icon(1), *boss = gResources.icon(366);
+    if (!boss)
+        boss = gResources.icon(80); // Vanilla fixture still exercises the same overlap.
+    if (!mine || !grace || !boss)
+        return false;
+    std::array expected{MapLayer::Area, MapLayer::Item, MapLayer::Warp, MapLayer::Memo, MapLayer::Marker, MapLayer::Dead, MapLayer::Player};
+    if (!warpAboveItems)
+        std::swap(expected[1], expected[2]);
+    auto layers = gResources.markerLayers();
+    if (layers.size() != expected.size() || !std::equal(layers.begin(), layers.end(), expected.begin())) {
+        std::fputs("FAIL: marker containers do not follow this fixture's GFX depths\n", stderr);
+        return false;
+    }
+    auto savedGraces = std::move(graces), savedPoints = std::move(points);
+    WorldMapPointParam landmark{};
+    landmark.iconId = 25;
+    landmark.areaNo = 60;
+    landmark.gridXNo = 28;
+    landmark.gridZNo = 64;
+    landmark.dispMask00 = 1;
+    for (size_t text = 1; text < 8; ++text)
+        put(reinterpret_cast<uint8_t *>(&landmark), 48 + text * 12, int32_t{-1});
+    auto bossPoint = landmark;
+    bossPoint.iconId = gResources.icon(366) ? 366 : 80;
+    BonfireWarpParam bonfire{};
+    bonfire.eventflagId = 1;
+    bonfire.iconId = 1;
+    bonfire.areaNo = 60;
+    bonfire.gridXNo = 28;
+    bonfire.gridZNo = 64;
+    bonfire.dispMask00 = 1;
+    graces = paramRows<BonfireWarpParam>({{500000, bonfire}});
+    view.fill(0);
+    put(view.data(), 0x14, uint32_t{0x3C1C4000});
+    put(view.data(), 0x28, 128.f);
+    put(view.data(), 0x2C, 128.f);
+    put(view.data(), 0x280, uint64_t{1});
+    const uint8_t origin[]{0, 64, 28, 60};
+    const float settings[]{0, 0, 0, 128, 128, 1};
+    std::memcpy(view.data() + 0x100, origin, sizeof(origin));
+    std::memcpy(view.data() + 0x104, settings, sizeof(settings));
+    flags = {1};
+    showOthers = showLandmarks = true;
+    bool ok = true;
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        const bool bossFirst = !(scenario & 1), reversed = scenario & 2;
+        // Swap the IDs without changing the artwork: the game's list order
+        // can put either icon on top. Boss art has no special priority.
+        points = bossFirst ? paramRows<WorldMapPointParam>({{100, bossPoint}, {27783, landmark}, {61433100, landmark}}, reversed)
+                           : paramRows<WorldMapPointParam>({{100, landmark}, {27783, landmark}, {61433100, bossPoint}}, reversed);
+        for (bool showGrace: {false, true}) {
+            showGraces = showGrace;
+            Renderer renderer;
+            renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
+                          reinterpret_cast<void *>(+[](void *data, void *) { std::free(data); }), nullptr);
+            ++generation;
+            gData.update();
+            for (unsigned i = 0; i < 8; ++i) {
+                ImGui::NewFrame();
+                renderer.render();
+                ImGui::Render();
+                gResources.update();
+            }
+            auto *window = ImGui::FindWindowByName("##minimap_window");
+            if (!window) {
+                std::fputs("FAIL: overlapping marker window was not rendered\n", stderr);
+                ok = false;
+                break;
+            }
+            auto at = [&](const IconLayer &layer) {
+                Point local = transform(layer.matrix, {0, 0});
+                ImVec2 position = window->Pos + window->Size * .5f + ImVec2(local.x, local.y) * .375f;
+                return drawIndex(layer, &position);
+            };
+            uint64_t mineIndex = at(mine->layers.front()), bossIndex = at(boss->layers.front()), graceIndex = at(grace->layers.front());
+            if (mineIndex == UINT64_MAX || bossIndex == UINT64_MAX || ((mineIndex < bossIndex) != bossFirst) ||
+                (showGrace && (graceIndex == UINT64_MAX || (warpAboveItems ? graceIndex <= std::max(mineIndex, bossIndex) : graceIndex >= std::min(mineIndex, bossIndex)))) ||
+                (!showGrace && graceIndex != UINT64_MAX)) {
+                std::fprintf(stderr, "FAIL: overlapping landmark/mod boss/grace draw order: scenario=%u mine=%llu boss=%llu grace=%llu enabled=%d\n", scenario,
+                             static_cast<unsigned long long>(mineIndex), static_cast<unsigned long long>(bossIndex), static_cast<unsigned long long>(graceIndex), showGrace);
+                ok = false;
+                break;
+            }
+        }
+    }
+    graces = std::move(savedGraces);
+    points = std::move(savedPoints);
+    showGraces = showLandmarks = false;
+    ++generation;
+    if (ok)
+        std::puts("PASS: native container and point order, including boss art below a landmark when the game's IDs require it");
+    return ok;
 }
 bool otherMarkers() {
     struct Sample {
@@ -353,6 +531,8 @@ bool otherMarkers() {
             }
         }
     }
+    if (ok)
+        ok = overlappingMarkers();
     // Saved stamps use a separate list, map layer and one-based GFX timeline.
     std::array<uint8_t, 96> save{};
     std::array<uint8_t, 1600> slots{};
@@ -506,13 +686,15 @@ bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_
 }
 } // namespace
 int main(int argc, char **argv) {
-    if ((argc != 6 && argc != 7) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion") && std::strcmp(argv[6], "--other-markers"))) {
-        std::fputs(
-            "Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param [--vanilla-completion|--other-markers]\n",
-            stderr);
+    if ((argc != 6 && argc != 7 && argc != 8) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion") && std::strcmp(argv[6], "--other-markers")) ||
+        (argc == 8 && (std::strcmp(argv[6], "--other-markers") || std::strcmp(argv[7], "--grace-below-items")))) {
+        std::fputs("Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param "
+                   "[--vanilla-completion|--other-markers [--grace-below-items]]\n",
+                   stderr);
         return 1;
     }
     vanillaCompletion = argc == 7 && !std::strcmp(argv[6], "--vanilla-completion");
+    warpAboveItems = argc != 8;
     showLandmarks = !vanillaCompletion;
     auto gfx = readFile(argv[1]), layouts = readFile(argv[2]);
     tpf = readFile(argv[3]);
@@ -526,9 +708,11 @@ int main(int argc, char **argv) {
     EROverlayAPI legacy{};
     EROverlayNativeAPI native{};
     configure(legacy, native);
+    if (!startupDefinitions(gfx, layouts))
+        return 9;
     if (!gResources.loadDefinitions(gfx, layouts))
         return 3;
-    if (argc == 7 && !std::strcmp(argv[6], "--other-markers"))
+    if (argc >= 7 && !std::strcmp(argv[6], "--other-markers"))
         return otherMarkers() ? 0 : 8;
     auto cleared = gResources.special("cleared");
     if (!cleared || cleared->layers.size() != 1 || (!vanillaCompletion && cleared->layers.front().image != "MENU_MAP_Boss_Dead") ||

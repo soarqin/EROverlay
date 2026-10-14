@@ -11,6 +11,8 @@
 
 namespace er::minimap {
 
+enum class MapLayer : uint8_t { Area, Item, Warp, Memo, Marker, Dead, Player };
+
 struct Point {
     float x = 0, y = 0;
 };
@@ -76,6 +78,7 @@ public:
     [[nodiscard]] bool text(const std::string &path, TextLayout &layout) const;
     [[nodiscard]] uint32_t iconFrameCount() const;
     [[nodiscard]] uint32_t iconLayerCount(uint32_t frame) const;
+    [[nodiscard]] std::vector<MapLayer> markerLayers() const;
 
 private:
     struct Placement {

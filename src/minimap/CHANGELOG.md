@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.
 
+#### Fixed
+
+- Follow the loaded game's GFX container depths and native point ordering when markers overlap, including graces and mod icons. Reverse already ordered points and skip disabled marker layers. Request resources with canonical lowercase paths for older cores. Record changed marker counts in the optional diagnostic log.
+
 ### [2.0.0] - 2026-10-03
 
 #### Added

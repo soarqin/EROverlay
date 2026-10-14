@@ -6,6 +6,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -53,6 +54,9 @@ public:
     [[nodiscard]] const IconRecipe *memoIcon(uint8_t frame) const;
     [[nodiscard]] const IconRecipe *special(const std::string &name) const;
     [[nodiscard]] const TextLayout *playerMarkerText() const;
+    [[nodiscard]] std::span<const MapLayer> markerLayers() const {
+        return definitionsReady_.load(std::memory_order_acquire) ? std::span<const MapLayer>(markerLayers_) : std::span<const MapLayer>{};
+    }
     [[nodiscard]] bool layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view);
     [[nodiscard]] const char *status() const { return status_.load(std::memory_order_acquire); }
     [[nodiscard]] uint64_t frameTime() const { return now_; } // Render thread only.
@@ -138,6 +142,7 @@ private:
     std::unordered_map<uint32_t, IconRecipe> memoIcons_;
     std::unordered_map<std::string, IconRecipe> specials_;
     TextLayout playerMarkerText_;
+    std::vector<MapLayer> markerLayers_;
     std::unordered_map<uint64_t, std::wstring> tilePaths_;
     std::array<std::unordered_map<uint32_t, Mask>, 3> masks_;
     std::unordered_map<uint64_t, Tile> tiles_;
