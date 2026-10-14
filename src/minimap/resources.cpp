@@ -31,6 +31,7 @@ constexpr const wchar_t *PATHS[] = {L"menu:/02_120_worldmap.gfx", L"menu:/hi/01_
 constexpr size_t TILE_CACHE_BYTES = 64 * 1024 * 1024;
 constexpr size_t TILE_CACHE_ENTRIES = 512;
 constexpr uint64_t CACHE_IDLE_MS = 10000;
+constexpr uint32_t RUNTIME_REGION = 0x80000000;
 bool canQueueTextures() { return nativeApi && nativeApi->size >= offsetof(EROverlayNativeAPI, queueDdsTexture) + sizeof(nativeApi->queueDdsTexture) && nativeApi->queueDdsTexture; }
 size_t textureBytes(const util::DdsImage &image) {
     size_t bytes = 0;
@@ -777,18 +778,16 @@ void Resources::prepareTextures() {
     // unused for ten seconds so optional mod sets need not remain resident.
     if (now_ >= cacheTrim_) {
         cacheTrim_ = now_ + 1000;
-        if (definitionsReady_.load(std::memory_order_acquire))
-            for (auto &entry: atlases_) {
-                auto &atlas = *entry;
-                if (atlas.texture && now_ - atlas.touched >= CACHE_IDLE_MS) {
-                    nativeApi->retireTexture(atlas.texture);
-                    atlas.texture = 0;
-                    atlas.view = {};
-                    atlas.polled = UINT64_MAX;
-                }
-                if (atlas.job && now_ - atlas.touched >= CACHE_IDLE_MS)
-                    cancelJob(atlas.job);
+        forEachAtlas([&](Atlas &atlas) {
+            if (atlas.texture && now_ - atlas.touched >= CACHE_IDLE_MS) {
+                nativeApi->retireTexture(atlas.texture);
+                atlas.texture = 0;
+                atlas.view = {};
+                atlas.polled = UINT64_MAX;
             }
+            if (atlas.job && now_ - atlas.touched >= CACHE_IDLE_MS)
+                cancelJob(atlas.job);
+        });
         while (!tileLru_.empty()) {
             auto it = tiles_.find(tileLru_.front());
             if (now_ - it->second.touched < CACHE_IDLE_MS)
@@ -799,16 +798,15 @@ void Resources::prepareTextures() {
 }
 void Resources::resetTextures() {
     clearTiles();
-    if (definitionsReady_.load(std::memory_order_acquire))
-        for (auto &atlas: atlases_) {
-            if (nativeApi && atlas->texture)
-                nativeApi->retireTexture(atlas->texture);
-            atlas->texture = 0;
-            atlas->retry = 0;
-            atlas->view = {};
-            atlas->polled = UINT64_MAX;
-            cancelJob(atlas->job);
-        }
+    forEachAtlas([&](Atlas &atlas) {
+        if (nativeApi && atlas.texture)
+            nativeApi->retireTexture(atlas.texture);
+        atlas.texture = 0;
+        atlas.retry = 0;
+        atlas.view = {};
+        atlas.polled = UINT64_MAX;
+        cancelJob(atlas.job);
+    });
     collectCancelledJobs();
 }
 void Resources::stop() {
@@ -925,6 +923,40 @@ const IconRecipe *Resources::icon(uint32_t id) const {
     auto it = icons_.find(id);
     return it == icons_.end() ? nullptr : &it->second;
 }
+bool Resources::loadRuntimeIcons(std::span<const RuntimeIcon> sources) {
+    if (runtimeReady_.load(std::memory_order_acquire))
+        return true;
+    if (sources.empty() || sources.size() > 512)
+        return false;
+    std::vector<std::unique_ptr<Atlas>> atlases;
+    std::unordered_map<uint32_t, IconRecipe> icons;
+    size_t remaining = 64 * 1024 * 1024;
+    for (const auto &source: sources) {
+        auto atlas = std::make_unique<Atlas>();
+        IconRecipe recipe;
+        if (!decodeRuntimeIcon(source, recipe, atlas->dds, remaining))
+            return false;
+        remaining -= atlas->dds.size();
+        auto &layer = recipe.layers.front();
+        atlas->width = layer.width;
+        atlas->height = layer.height;
+        atlas->ready.store(true, std::memory_order_relaxed);
+        layer.resourceRegion = RUNTIME_REGION | static_cast<uint32_t>(atlases.size());
+        if (!icons.emplace(source.id, std::move(recipe)).second)
+            return false;
+        atlases.push_back(std::move(atlas));
+    }
+    runtimeIcons_ = std::move(icons);
+    runtimeAtlases_ = std::move(atlases);
+    runtimeReady_.store(true, std::memory_order_release);
+    return true;
+}
+const IconRecipe *Resources::runtimeIcon(uint32_t id) const {
+    if (!runtimeReady_.load(std::memory_order_acquire))
+        return nullptr;
+    auto it = runtimeIcons_.find(id);
+    return it == runtimeIcons_.end() ? nullptr : &it->second;
+}
 const IconRecipe *Resources::memoIcon(uint8_t frame) const {
     if (!definitionsReady_.load(std::memory_order_acquire))
         return nullptr;
@@ -939,21 +971,31 @@ const IconRecipe *Resources::special(const std::string &name) const {
 }
 const TextLayout *Resources::playerMarkerText() const { return definitionsReady_.load(std::memory_order_acquire) ? &playerMarkerText_ : nullptr; }
 bool Resources::layerView(const IconLayer &layer, AtlasRegion &region, ERTextureView &view) {
-    if (!definitionsReady_.load(std::memory_order_acquire))
-        return false;
     if (!nativeApi)
         return false;
-    if (layer.resourceRegion < resolvedRegions_.size())
-        region = resolvedRegions_[layer.resourceRegion];
-    else {
-        auto found = regions_.find(layer.image);
-        if (found == regions_.end())
+    Atlas *selected = nullptr;
+    if (layer.resourceRegion != UINT32_MAX && (layer.resourceRegion & RUNTIME_REGION)) {
+        uint32_t index = layer.resourceRegion & ~RUNTIME_REGION;
+        if (!runtimeReady_.load(std::memory_order_acquire) || index >= runtimeAtlases_.size())
             return false;
-        region = found->second;
+        selected = runtimeAtlases_[index].get();
+        region = {index, 0, 0, selected->width, selected->height};
+    } else {
+        if (!definitionsReady_.load(std::memory_order_acquire))
+            return false;
+        if (layer.resourceRegion < resolvedRegions_.size())
+            region = resolvedRegions_[layer.resourceRegion];
+        else {
+            auto found = regions_.find(layer.image);
+            if (found == regions_.end())
+                return false;
+            region = found->second;
+        }
+        if (region.atlas >= atlases_.size())
+            return false;
+        selected = atlases_[region.atlas].get();
     }
-    if (region.atlas >= atlases_.size())
-        return false;
-    auto &atlas = *atlases_[region.atlas];
+    auto &atlas = *selected;
     if (!atlas.ready.load(std::memory_order_acquire))
         return false;
     if (region.x + region.width > atlas.width || region.y + region.height > atlas.height)

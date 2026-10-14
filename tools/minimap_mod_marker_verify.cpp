@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <string>
@@ -24,6 +25,7 @@
 
 #include "minimap/defs/BonfireWarpParam.h"
 #include "minimap/defs/WorldMapPointParam.h"
+#include "minimap/goblins.hpp"
 #include "minimap/render.hpp"
 #include "util/mapstate.hpp"
 #include "util/paramreader.hpp"
@@ -338,6 +340,131 @@ bool overlappingMarkers() {
     ++generation;
     if (ok)
         std::puts("PASS: native container and point order, including boss art below a landmark when the game's IDs require it");
+    return ok;
+}
+bool goblinsDLL(const char *path) {
+    const auto dllPath = std::filesystem::u8path(path);
+    auto module = LoadLibraryW(dllPath.c_str());
+    const auto setScenario = module ? reinterpret_cast<void (*)(uint32_t)>(GetProcAddress(module, "setTestScenario")) : nullptr;
+    const auto calls = module ? reinterpret_cast<uint32_t (*)()>(GetProcAddress(module, "testCalls")) : nullptr;
+    const auto get = module ? reinterpret_cast<MfgGetMapAPIFn>(GetProcAddress(module, "MfgGetMapAPI")) : nullptr;
+    if (!setScenario || !calls || !get) {
+        std::fputs("FAIL: provide the test provider, not the shipping mod DLL\n", stderr);
+        if (module)
+            FreeLibrary(module);
+        return false;
+    }
+    ImGui::CreateContext();
+    auto &io = ImGui::GetIO();
+    io.DisplaySize = {1920, 1080};
+    io.DeltaTime = 1.f / 60;
+    io.IniFilename = io.LogFilename = nullptr;
+    unsigned char *pixels;
+    int width, height;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+    io.Fonts->SetTexID(1);
+    showOthers = showLandmarks = showGraces = true;
+    const auto *nativeSix = gResources.icon(6);
+    auto containers = gResources.markerLayers();
+    const bool warpAbove = std::find(containers.begin(), containers.end(), MapLayer::Warp) > std::find(containers.begin(), containers.end(), MapLayer::Item);
+    bool ok = true;
+    for (uint32_t layer = 0; layer < 3; ++layer) {
+        const uint8_t area = layer == 2 ? 61 : 60;
+        WorldMapPointParam mine{};
+        mine.iconId = 25;
+        mine.areaNo = area;
+        mine.gridXNo = 28;
+        mine.gridZNo = 64;
+        mine.dispMask00 = mine.dispMask01 = mine.dispMask02 = 1;
+        mine.posX = 141;
+        mine.posZ = 129;
+        BonfireWarpParam grace{};
+        grace.eventflagId = 1;
+        grace.iconId = 1;
+        grace.areaNo = area;
+        grace.gridXNo = 28;
+        grace.gridZNo = 64;
+        grace.dispMask00 = grace.dispMask01 = grace.dispMask02 = 1;
+        grace.posX = 141;
+        grace.posZ = 129;
+        auto masked = mine;
+        masked.dispMask00 = masked.dispMask01 = masked.dispMask02 = 0;
+        masked.iconId = 60000; // Runtime remapped frame must never be used as a source ID.
+        points = paramRows<WorldMapPointParam>({{20, masked}, {78501, mine}});
+        graces = paramRows<BonfireWarpParam>({{500000, grace}});
+        flags = {1};
+        view.fill(0);
+        put(view.data(), 0x14, (uint32_t(area) << 24) | 0x1C4000);
+        put(view.data(), 0x24, layer == 2 ? 10u : 0u);
+        put(view.data(), 0x30, static_cast<uint8_t>(layer == 1));
+        put(view.data(), 0x28, 269.f);
+        put(view.data(), 0x2C, -1.f);
+        put(view.data(), 0x280, uint64_t{1});
+        const uint8_t origin[]{0, 64, 28, area};
+        const float settings[]{0, 0, 0, 128, 128, 1};
+        std::memcpy(view.data() + 0x100, origin, sizeof(origin));
+        std::memcpy(view.data() + 0x104, settings, sizeof(settings));
+        for (uint32_t scenario: {0u, 1u, 2u, 3u, 4u}) {
+            setScenario(scenario);
+            ++generation;
+            gData.setShowOthers(true);
+            gData.update();
+            auto snapshot = gData.snapshot();
+            size_t runtimeCount = 0;
+            for (const auto &marker: snapshot.decorations)
+                if (marker.runtimeIcon) {
+                    ++runtimeCount;
+                    ok &= marker.source == DecorationSource::Other && marker.maps == (1u << layer) && marker.x == 269 && marker.y == -1;
+                }
+            const size_t expected = scenario == 1 || scenario == 2 ? 0 : scenario == 3 ? 603 : 3;
+            ok &= snapshot.valid && runtimeCount == expected && snapshot.decorations.size() == expected + 2;
+            if (scenario == 0 || scenario == 4) {
+                Renderer renderer;
+                renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
+                              reinterpret_cast<void *>(+[](void *data, void *) { std::free(data); }), nullptr);
+                for (unsigned i = 0; i < 8; ++i) {
+                    ImGui::NewFrame();
+                    renderer.render();
+                    ImGui::Render();
+                    gResources.update();
+                }
+                const auto *base = gResources.runtimeIcon(6), *badge = gResources.runtimeIcon(8), *ring = gResources.runtimeIcon(26);
+                if (!base || !badge || !ring) {
+                    ok = false;
+                    break;
+                }
+                auto baseIndex = drawIndex(base->layers.front()), badgeIndex = drawIndex(badge->layers.front()), ringIndex = drawIndex(ring->layers.front());
+                auto mineIndex = drawIndex(gResources.icon(25)->layers.front()), graceIndex = drawIndex(gResources.icon(1)->layers.front());
+                ok &= baseIndex != UINT64_MAX && badgeIndex != UINT64_MAX && ringIndex != UINT64_MAX && mineIndex < std::min(baseIndex, badgeIndex) &&
+                      std::max(baseIndex, badgeIndex) < ringIndex && (warpAbove ? ringIndex < graceIndex : graceIndex < mineIndex);
+                // The provider can report badge-before-base; never override it to improve Boss art.
+                ok &= scenario == 4 ? badgeIndex < baseIndex : true;
+            }
+        }
+        const auto before = calls();
+        gData.setShowOthers(false);
+        ++generation;
+        gData.update();
+        auto disabled = gData.snapshot();
+        ok &= calls() == before && std::none_of(disabled.decorations.begin(), disabled.decorations.end(), [](const auto &m) { return m.runtimeIcon; });
+    }
+    const auto *bridge = get(1);
+    for (uint32_t index = 0; index < bridge->icon_count; ++index) {
+        MfgMapIcon icon{};
+        ok &= bridge->get_icon(index, &icon) == MFG_MAP_OK;
+        const auto *recipe = gResources.runtimeIcon(icon.source_icon_id);
+        ok &= recipe && recipe->layers.size() == 1 && recipe->bounds.left < 0 && recipe->bounds.top < 0 && recipe->bounds.right > 0 && recipe->bounds.bottom > 0;
+    }
+    ok &= gResources.icon(6) == nativeSix && gResources.runtimeIcon(6) != nativeSix;
+    gResources.stop();
+    FreeLibrary(module);
+    ok &= GetModuleHandleW(L"MapForGoblins.dll") != nullptr;
+    gGoblins.stop();
+    ok &= GetModuleHandleW(L"MapForGoblins.dll") == nullptr && textures.empty();
+    ImGui::DestroyContext();
+    std::puts(ok ? "PASS: real DLL bridge through Data/Resources/ImGui; all embedded icons; native layers; source ID collisions; masks; buffer growth; provider "
+                   "visibility/failure; optional switch; module/texture lifetime."
+                 : "FAIL: DLL bridge replay");
     return ok;
 }
 bool otherMarkers() {
@@ -687,14 +814,14 @@ bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_
 } // namespace
 int main(int argc, char **argv) {
     if ((argc != 6 && argc != 7 && argc != 8) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion") && std::strcmp(argv[6], "--other-markers")) ||
-        (argc == 8 && (std::strcmp(argv[6], "--other-markers") || std::strcmp(argv[7], "--grace-below-items")))) {
+        (argc == 8 && std::strcmp(argv[6], "--goblins-dll") && (std::strcmp(argv[6], "--other-markers") || std::strcmp(argv[7], "--grace-below-items")))) {
         std::fputs("Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param "
-                   "[--vanilla-completion|--other-markers [--grace-below-items]]\n",
+                   "[--vanilla-completion|--other-markers [--grace-below-items]|--goblins-dll provider-fixture.dll]\n",
                    stderr);
         return 1;
     }
     vanillaCompletion = argc == 7 && !std::strcmp(argv[6], "--vanilla-completion");
-    warpAboveItems = argc != 8;
+    warpAboveItems = argc != 8 || !std::strcmp(argv[6], "--goblins-dll");
     showLandmarks = !vanillaCompletion;
     auto gfx = readFile(argv[1]), layouts = readFile(argv[2]);
     tpf = readFile(argv[3]);
@@ -712,6 +839,8 @@ int main(int argc, char **argv) {
         return 9;
     if (!gResources.loadDefinitions(gfx, layouts))
         return 3;
+    if (argc == 8 && !std::strcmp(argv[6], "--goblins-dll"))
+        return goblinsDLL(argv[7]) ? 0 : 10;
     if (argc >= 7 && !std::strcmp(argv[6], "--other-markers"))
         return otherMarkers() ? 0 : 8;
     auto cleared = gResources.special("cleared");

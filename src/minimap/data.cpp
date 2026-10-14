@@ -15,6 +15,7 @@
 #include "data.hpp"
 #include "defs/BonfireWarpParam.h"
 #include "defs/WorldMapPointParam.h"
+#include "goblins.hpp"
 #include "layout.hpp"
 #include "resources.hpp"
 #include "util/paramreader.hpp"
@@ -421,6 +422,9 @@ void Data::update() {
             const bool other = id < 78500 || row.iconId == 80;
             if ((other && !showOthers) || (!row.iconId && !row.distViewIconId && (!layout.alternateIcons || !row.altIconId)))
                 return;
+            const uint32_t maps = ((row.dispMask00 ? 1u : 0u) | (row.dispMask01 ? 2u : 0u) | (row.dispMask02 ? 4u : 0u)) & layout.mapMask;
+            if (!maps)
+                return; // Runtime DLL markers zero these masks and use their own visibility.
             // A missing opening condition is always enabled. Map for Goblins
             // uses zero here and controls visibility through the active text flags.
             bool opened = enabled(row.eventFlagId), distant = !opened && flag(row.distViewEventFlagId);
@@ -436,8 +440,7 @@ void Data::update() {
             marker.iconId = row.iconId;
             marker.source = other ? DecorationSource::Other : DecorationSource::Landmark;
             marker.areaIcon = row.isAreaIcon;
-            marker.maps = (row.dispMask00 ? 1 : 0) | (row.dispMask01 ? 2 : 0) | (row.dispMask02 ? 4 : 0);
-            marker.maps &= layout.mapMask;
+            marker.maps = maps;
             if (!opened && distant && row.distViewIconId)
                 marker.iconId = row.distViewIconId;
             else if (layout.alternateIcons && size >= sizeof(row) && alternate(row, 192, 224) && row.altIconId)
@@ -449,7 +452,7 @@ void Data::update() {
                 x = row.posX_forDistViewMark;
                 z = row.posZ_forDistViewMark;
             }
-            if (!marker.maps || !marker.iconId || !converter.convert(raw, x, z, marker.x, marker.y))
+            if (!marker.iconId || !converter.convert(raw, x, z, marker.x, marker.y))
                 return;
             marker.cleared = cleared(row.clearedEventFlagId);
             marker.rotationRad = row.angle * std::numbers::pi_v<float> / 180.f;
@@ -458,22 +461,40 @@ void Data::update() {
     // Native Item_i clones are inserted at the template's child index
     // (0x74C0D0). Earlier entries in the ascending-ID pin list are on top.
     // Preserve that order for all points, independent of icon/category.
-    auto points = std::span(*decorations).subspan(pointStart);
-    if (std::ranges::is_sorted(points, {}, &DecorationInfo::id))
-        std::ranges::reverse(points);
-    else
-        std::ranges::sort(points, std::greater{}, &DecorationInfo::id);
+    {
+        auto points = std::span(*decorations).subspan(pointStart);
+        if (std::ranges::is_sorted(points, {}, &DecorationInfo::id))
+            std::ranges::reverse(points);
+        else
+            std::ranges::sort(points, std::greater{}, &DecorationInfo::id);
+    }
+    if (showOthers && !next.roundtable && (next.state.mapId == 0 || next.state.mapId == 10)) {
+        const uint32_t layer = next.state.mapId == 10 ? 2 : (next.state.underground & 1) ? 1 : 0;
+        // The DLL adds native children to ItemList after the game's pins.
+        // Its API supplies their own child depths, not category priorities.
+        for (const auto &point: gGoblins.points(layer)) {
+            DecorationInfo marker;
+            marker.id = point.id;
+            marker.iconId = point.icon_id;
+            marker.maps = (1u << layer) & layout.mapMask;
+            marker.source = DecorationSource::Other;
+            marker.runtimeIcon = true;
+            if (marker.maps && converter.convert(point.raw_map_id, point.x, point.z, marker.x, marker.y))
+                decorations->push_back(marker);
+        }
+    }
     if (nativeApi->log) {
         uint64_t others = 0, missingIcons = 0;
         for (const auto &marker: *decorations) {
             others += marker.source == DecorationSource::Other;
-            missingIcons += !gResources.icon(marker.iconId);
+            missingIcons += !(marker.runtimeIcon ? gResources.runtimeIcon(marker.iconId) : gResources.icon(marker.iconId));
         }
-        std::array<uint64_t, 7> counts{next.state.generation, pointRows, points.size(), others, missingIcons, gResources.iconCount(), uint64_t(showOthers)};
+        std::array<uint64_t, 7> counts{next.state.generation, pointRows, decorations->size() - pointStart, others, missingIcons, gResources.iconCount(), uint64_t(showOthers)};
         if (counts != diagnosticCounts_) {
             char line[220];
             std::snprintf(line, sizeof(line), "minimap-markers others=%d point-rows=%zu visible-points=%zu visible-others=%llu missing-icons=%llu recipes=%zu\n", showOthers,
-                          pointRows, points.size(), static_cast<unsigned long long>(others), static_cast<unsigned long long>(missingIcons), gResources.iconCount());
+                          pointRows, decorations->size() - pointStart, static_cast<unsigned long long>(others), static_cast<unsigned long long>(missingIcons),
+                          gResources.iconCount());
             nativeApi->log(line);
             diagnosticCounts_ = counts;
         }

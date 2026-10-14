@@ -1,0 +1,230 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 49a6632..87f00bb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -99,2 +99,5 @@ target_include_directories(mini INTERFACE ${mini_SOURCE_DIR}/src)
+ add_library( MapForGoblins SHARED
++  src/goblin_map_api.cpp
++  src/goblin_map_api.hpp
++  sdk/mfg_map_api.h
+   src/from/params.hpp
+diff --git a/sdk/mfg_map_api.h b/sdk/mfg_map_api.h
+new file mode 100644
+index 0000000..3a33389
+--- /dev/null
++++ b/sdk/mfg_map_api.h
+@@ -0,0 +1,56 @@
++/* Optional read-only MapForGoblins bridge. MIT, Copyright (c) 2026 EROverlay contributors.
++ * ABI 1, Windows x64, default packing and calling convention.
++ * Caller retains the provider module until all returned icon bytes are copied.
++ * No STL objects, heap ownership or exceptions cross the DLL boundary.
++ */
++#pragma once
++
++#include <stdint.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++enum { MFG_MAP_ABI = 1, MFG_MAP_MAX_POINTS = 32768, MFG_MAP_MAX_ICONS = 512 };
++enum { MFG_MAP_OK = 0, MFG_MAP_SMALL_BUFFER = 1, MFG_MAP_INVALID = 2, MFG_MAP_FAILED = 3 };
++
++typedef struct MfgMapPoint {
++    uint64_t id;
++    uint32_t icon_id; /* Stable source id, independent of runtime GFX frame ids. */
++    uint32_t raw_map_id; /* area/gridX/gridZ/variant, matching the game's map id. */
++    float x, z; /* Display coordinates, including the provider's de-overlap. */
++    uint32_t draw_order; /* Ascending child depth inside the native ItemList. */
++    uint32_t reserved;
++} MfgMapPoint;
++
++typedef struct MfgMapIcon {
++    const uint8_t *lossless2; /* Immutable SWF DefineBitsLossless2 body. */
++    uint32_t lossless2_size;
++    uint32_t source_icon_id;
++    const uint8_t *matrix; /* Immutable SWF placement MATRIX. */
++    uint32_t matrix_size;
++    uint32_t reserved;
++} MfgMapIcon;
++
++typedef struct MfgMapAPI {
++    uint32_t size;
++    uint32_t abi_version;
++    uint32_t point_size;
++    uint32_t icon_size;
++    uint32_t icon_count; /* Immutable enumeration, valid indices [0, icon_count). */
++    uint32_t reserved;
++    /* Update thread only. layer: surface=0, underground=1, DLC=2.
++     * Only visible points are copied, including completion badges and focus rings.
++     * *count receives the required count; SMALL_BUFFER writes no partial output.
++     * Before a native child exists, draw_order follows the provider's snapshot
++     * order in its normal/ring depth bands. Existing children use actual depths.
++     */
++    int (*copy_points)(uint32_t layer, MfgMapPoint *points, uint32_t capacity, uint32_t *count);
++    int (*get_icon)(uint32_t index, MfgMapIcon *icon);
++} MfgMapAPI;
++
++typedef const MfgMapAPI *(*MfgGetMapAPIFn)(uint32_t abi_version);
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/src/goblin_inject.cpp b/src/goblin_inject.cpp
+index 9a3af6e..e00d926 100644
+--- a/src/goblin_inject.cpp
++++ b/src/goblin_inject.cpp
+@@ -6,2 +6,3 @@
+ #include "goblin_logic.hpp"
++#include "goblin_map_api.hpp"
+ #include "goblin_config.hpp"
+@@ -1588,2 +1589,3 @@ void goblin::inject_map_entries()
+     spdlog::debug("Map entries complete: {} total rows", total_rows);
++    goblin::map_api::publish_rows();
+ }
+diff --git a/src/goblin_map_api.cpp b/src/goblin_map_api.cpp
+new file mode 100644
+index 0000000..dda3035
+--- /dev/null
++++ b/src/goblin_map_api.cpp
+@@ -0,0 +1,103 @@
++#include <atomic>
++#include <cmath>
++#include <mutex>
++#include <unordered_map>
++
++#include "../sdk/mfg_map_api.h"
++#include "generated_shared/goblin_map_icons.hpp"
++#include "goblin_build_variants.hpp"
++#include "goblin_inject.hpp"
++#include "goblin_map_api.hpp"
++
++namespace {
++std::mutex depth_mutex;
++std::unordered_map<uint64_t, uint16_t> depths;
++bool reset_pending = false;
++std::atomic_bool rows_ready{false};
++
++bool usable(const goblin::NativeMarkerPoint &point) {
++    return point.visible && point.source_icon_id >= 0 && point.gx <= 255 && point.gz <= 255 && std::isfinite(point.px) && std::isfinite(point.pz);
++}
++
++int copyPoints(uint32_t layer, MfgMapPoint *output, uint32_t capacity, uint32_t *count) noexcept {
++    if (!count)
++        return MFG_MAP_INVALID;
++    *count = 0;
++    if (layer > 2 || (capacity && !output))
++        return MFG_MAP_INVALID;
++    if (!rows_ready.load(std::memory_order_acquire))
++        return MFG_MAP_OK;
++    try {
++        // Reuse the same locked visibility/layout calculation as native markers.
++        // This changes neither parameter rows nor event flags.
++        const auto points = goblin::native_marker_snapshot(static_cast<int>(layer));
++        for (const auto &point: points)
++            *count += usable(point);
++        if (*count > MFG_MAP_MAX_POINTS)
++            return MFG_MAP_FAILED;
++        if (*count > capacity)
++            return MFG_MAP_SMALL_BUFFER;
++        std::lock_guard lock(depth_mutex);
++        uint32_t order = 24;
++        for (const auto &point: points) {
++            const uint32_t fallback =
++                (point.original_row_id & goblin::NATIVE_HIGHLIGHT_KEY_BIT) ? 50000 + static_cast<uint32_t>(point.original_row_id & ~goblin::NATIVE_HIGHLIGHT_KEY_BIT) : order++;
++            if (!usable(point))
++                continue;
++            const auto depth = depths.find(point.original_row_id);
++            *output++ = {point.original_row_id,
++                         static_cast<uint32_t>(point.source_icon_id),
++                         (uint32_t(point.area) << 24) | (uint32_t(point.gx) << 16) | (uint32_t(point.gz) << 8),
++                         point.px,
++                         point.pz,
++                         depth != depths.end() ? depth->second : fallback,
++                         0};
++        }
++        return MFG_MAP_OK;
++    } catch (...) {
++        *count = 0;
++        return MFG_MAP_FAILED;
++    }
++}
++
++int getIcon(uint32_t index, MfgMapIcon *output) noexcept {
++    if (!output)
++        return MFG_MAP_INVALID;
++    *output = {};
++    if (index >= static_cast<uint32_t>(goblin::generated::MAP_ICON_TAG_COUNT))
++        return MFG_MAP_INVALID;
++    const auto &icon = goblin::generated::MAP_ICON_TAGS[index];
++    if (icon.srcIconId < 0)
++        return MFG_MAP_INVALID;
++    *output = {icon.tag, icon.tagLen, static_cast<uint32_t>(icon.srcIconId), icon.matrix, icon.matrixLen, 0};
++    return MFG_MAP_OK;
++}
++} // namespace
++
++void goblin::map_api::publish_rows() noexcept { rows_ready.store(true, std::memory_order_release); }
++
++void goblin::map_api::record_depth(uint64_t id, uint16_t depth) noexcept {
++    try {
++        std::lock_guard lock(depth_mutex);
++        if (reset_pending) {
++            depths.clear();
++            reset_pending = false;
++        }
++        depths[id] = depth;
++    } catch (...) {
++        // An optional client must not affect native marker creation.
++    }
++}
++
++void goblin::map_api::reset_depths() noexcept {
++    std::lock_guard lock(depth_mutex);
++    // Keep the last native order while the map is closed. Replace it when
++    // the next generation actually starts creating children.
++    reset_pending = true;
++}
++
++extern "C" __declspec(dllexport) const MfgMapAPI *MfgGetMapAPI(uint32_t version) noexcept {
++    static const MfgMapAPI api{sizeof(MfgMapAPI), MFG_MAP_ABI, sizeof(MfgMapPoint), sizeof(MfgMapIcon), static_cast<uint32_t>(goblin::generated::MAP_ICON_TAG_COUNT), 0,
++                               copyPoints,        getIcon};
++    return goblin::variants::kNativeMarkers && version == MFG_MAP_ABI ? &api : nullptr;
++}
+diff --git a/src/goblin_map_api.hpp b/src/goblin_map_api.hpp
+new file mode 100644
+index 0000000..675cc6e
+--- /dev/null
++++ b/src/goblin_map_api.hpp
+@@ -0,0 +1,11 @@
++#pragma once
++
++#include <cstdint>
++
++namespace goblin::map_api {
++// Injection is a one-time initialization. Publish only after every row exists.
++void publish_rows() noexcept;
++// Called only when the native manager creates or discards its own children.
++void record_depth(uint64_t id, uint16_t depth) noexcept;
++void reset_depths() noexcept;
++} // namespace goblin::map_api
+diff --git a/src/goblin_stall_probe.cpp b/src/goblin_stall_probe.cpp
+index bcc0c68..38e5f39 100644
+--- a/src/goblin_stall_probe.cpp
++++ b/src/goblin_stall_probe.cpp
+@@ -3,2 +3,3 @@
+ #include "goblin_config.hpp"
++#include "goblin_map_api.hpp"
+ #include "goblin_guarded.hpp" // faults we ask for must not be recorded as crashes
+@@ -3435,2 +3436,3 @@ namespace
+         g_v3_native = V3NativeManager{};
++        goblin::map_api::reset_depths();
+         v3_pulse_counters_reset(); // per generation, like the manager itself
+@@ -9978,2 +9980,3 @@ namespace
+                 g_v3_native.objects.push_back(obj);
++                goblin::map_api::record_depth(s.point.original_row_id, s.depth);
+                 const size_t created = g_v3_native.objects.size();
+@@ -12095,2 +12098,3 @@ uint32_t goblin::stall_probe::v3_detach_all_children()
+     g_v3_native.objects.clear();
++    goblin::map_api::reset_depths();
+     g_v3_native.by_row.clear();

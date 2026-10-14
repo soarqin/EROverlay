@@ -29,6 +29,7 @@ struct DecorationInfo {
     DecorationSource source = DecorationSource::Landmark;
     bool areaIcon = false;
     bool cleared = false;
+    bool runtimeIcon = false;
 };
 struct PlayerMarkerInfo {
     int32_t id = -1;

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Added
 
+- Support the runtime DLL edition of Map for Goblins through an optional read-only map API. Requires its companion source patch and rebuilt `MapForGoblins.dll`; enable `[markers] others`. Imports embedded icons, display positions, visibility and native child depths. See [the compatibility patch](../../tools/compat/mapforgoblins/README.md).
 - Add `[markers] others` to show NPCs, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
 
 #### Changed

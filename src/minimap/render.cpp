@@ -402,7 +402,7 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
                         if (outside(screen))
                             continue;
                         float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
-                        drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
+                        drawRecipe(marker.runtimeIcon ? gResources.runtimeIcon(marker.iconId) : gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
                         if (marker.cleared)
                             drawRecipe(clearedRecipe, screen, size, marker.rotationRad + angle);
                     }

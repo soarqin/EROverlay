@@ -1,4 +1,5 @@
 #include "data.hpp"
+#include "goblins.hpp"
 #include "render.hpp"
 #include "resources.hpp"
 
@@ -50,6 +51,7 @@ bool render() {
 void uninit() {
     destroyRenderer();
     er::minimap::gResources.stop();
+    er::minimap::gGoblins.stop();
     er::minimap::nativeApi = nullptr;
 }
 

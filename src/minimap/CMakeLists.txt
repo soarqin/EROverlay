@@ -5,6 +5,8 @@ add_project(minimap SHARED
     settings.cpp settings.hpp
     gfx.cpp gfx.hpp
     resources.cpp resources.hpp
+    runtimeicons.cpp runtimeicons.hpp
+    goblins.cpp goblins.hpp compat/mfg_map_api.h
     layout.hpp ../util/paramreader.hpp
     ../util/assets.cpp ../util/assets.hpp
     defs/BonfireWarpParam.h

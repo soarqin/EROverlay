@@ -632,6 +632,10 @@ bool GfxMovie::text(const std::string &path, TextLayout &layout) const {
     return std::isfinite(layout.fontHeight) && layout.fontHeight > 0 && layout.fontHeight <= 1024 && layout.bounds.right > layout.bounds.left &&
            layout.bounds.bottom > layout.bounds.top;
 }
+bool parseGfxMatrix(util::Bytes bytes, Matrix &matrix) {
+    util::AssetReader reader(bytes);
+    return readMatrix(reader, matrix) && reader.finished();
+}
 uint32_t GfxMovie::iconFrameCount() const {
     auto found = characters_.find(icons_);
     return found == characters_.end() ? 0 : static_cast<uint32_t>(found->second.frames.size());

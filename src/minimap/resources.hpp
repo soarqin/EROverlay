@@ -14,6 +14,7 @@
 
 #include "gfx.hpp"
 #include "nativeapi.h"
+#include "runtimeicons.hpp"
 
 namespace er::minimap {
 
@@ -51,6 +52,7 @@ public:
     [[nodiscard]] bool tile(uint32_t map, uint16_t x, uint16_t y, TileView &view);
     void endFrame();
     [[nodiscard]] const IconRecipe *icon(uint32_t id) const;
+    [[nodiscard]] const IconRecipe *runtimeIcon(uint32_t id) const;
     [[nodiscard]] const IconRecipe *memoIcon(uint8_t frame) const;
     [[nodiscard]] const IconRecipe *special(const std::string &name) const;
     [[nodiscard]] const TextLayout *playerMarkerText() const;
@@ -63,6 +65,8 @@ public:
     [[nodiscard]] bool ready() const { return definitionsReady_.load(std::memory_order_acquire) && directoryReady_.load(std::memory_order_acquire); }
     [[nodiscard]] bool loadDefinitions(util::Bytes gfx, util::Bytes layouts);
     [[nodiscard]] bool loadDirectory(util::Bytes index, util::Bytes masks);
+    // Update thread, once: publish a complete immutable optional icon catalog.
+    [[nodiscard]] bool loadRuntimeIcons(std::span<const RuntimeIcon> icons);
     [[nodiscard]] size_t iconCount() const { return icons_.size(); }
     [[nodiscard]] size_t atlasCount() const { return definitionsReady_.load(std::memory_order_acquire) ? atlases_.size() : 0; }
 
@@ -132,7 +136,19 @@ private:
     void collectCancelledJobs();
     [[nodiscard]] bool finishJob(std::shared_ptr<TextureJob> &job, uint64_t &texture, size_t &gpuBytes);
     void eraseTile(std::unordered_map<uint64_t, Tile>::iterator tile);
+    template<typename F>
+    void forEachAtlas(F &&action) {
+        if (definitionsReady_.load(std::memory_order_acquire))
+            for (auto &atlas: atlases_)
+                action(*atlas);
+        if (runtimeReady_.load(std::memory_order_acquire))
+            for (auto &atlas: runtimeAtlases_)
+                action(*atlas);
+    }
     std::vector<std::unique_ptr<Atlas>> atlases_;
+    std::vector<std::unique_ptr<Atlas>> runtimeAtlases_;
+    std::unordered_map<uint32_t, IconRecipe> runtimeIcons_;
+    std::atomic_bool runtimeReady_{false};
     std::vector<AtlasFile> atlasFiles_;
     std::array<File, 4> files_;
     std::array<std::vector<uint8_t>, 4> metadata_;

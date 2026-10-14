@@ -109,5 +109,6 @@ private:
 
 [[nodiscard]] Point transform(const Matrix &matrix, Point point);
 [[nodiscard]] Matrix multiply(const Matrix &outer, const Matrix &inner);
+[[nodiscard]] bool parseGfxMatrix(util::Bytes bytes, Matrix &matrix);
 
 } // namespace er::minimap
