@@ -10,7 +10,7 @@
 
 #### 新增
 
-- 新增 `[markers] others` 选项，显示 NPC、剧情目标点、手动图章和地图 Mod 添加的其他标记；默认关闭。兼容 `Map for Goblins` 的复合图标、绿色底色、类别开关和标记消失条件；需同时更新 `EROverlay.dll`。
+- 新增 `[markers] others` 选项，显示 NPC、手动图章和地图 Mod 添加的其他标记；默认关闭。兼容 `Map for Goblins` 的复合图标、绿色底色、类别开关和标记消失条件；需同时更新 `EROverlay.dll`。
 
 #### 变更
 

@@ -20,6 +20,7 @@ extern const EROverlayNativeAPI *nativeApi;
 struct AtlasRegion {
     uint32_t atlas;
     uint32_t x, y, width, height;
+    [[nodiscard]] bool operator==(const AtlasRegion &) const = default;
 };
 struct TileKey {
     uint8_t map = 0, level = 0;

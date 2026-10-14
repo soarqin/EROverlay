@@ -80,7 +80,7 @@
 |---|---|
 | `[controls]` | 显示/切换默认 M，赐福/地标默认 N；留空禁用快捷键。 |
 | `[map]` | `full_map = true` 显示全开底图，不修改存档。 |
-| `[markers]` | `graces`、`landmarks`、`death`、`beacons` 默认 `true`。 |
+| `[markers]` | `graces`、`landmarks`、`death`、`beacons` 默认 `true`；`others`（NPC、手动图章和地图 Mod 标记）默认 `false`。 |
 | `[border]` | RGBA 颜色 `color` 和直接像素宽度 `width`，默认 1.5 像素。 |
 | `[presets]` | `order = compact, large` 决定启动预设与切换顺序。 |
 | `[preset.名称]` | 尺寸、居中或四向边距定位、缩放、透明度、旋转、形状、圆角与四类元素倍率，每项一个值。 |

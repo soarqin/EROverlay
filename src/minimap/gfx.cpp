@@ -360,10 +360,11 @@ bool GfxMovie::parseTimeline(util::Bytes bytes, uint32_t count, Character &chara
                 uint8_t blend;
                 if (!current.read(blend))
                     return false;
-                // Layer mode uses normal compositing here; filters and color
-                // transforms are still checked separately. Map mods use it
-                // for plain bitmap backgrounds (Map for Goblins frame 371).
-                value.effects |= blend != 1 && blend != 2;
+                // SWF modes 0 and 1 are normal, and layer (2) composites
+                // normally here too; filters and color transforms are still
+                // checked separately. Map mods use layer mode for plain bitmap
+                // backgrounds (Map for Goblins frame 371).
+                value.effects |= blend > 2;
             }
             if (extra & 4) {
                 uint8_t cache;
@@ -474,7 +475,14 @@ uint32_t GfxMovie::named(const std::string &path, Matrix *placementMatrix) const
     }
     return identity;
 }
-uint8_t ColorTransform::apply(uint8_t value, size_t channel) const { return static_cast<uint8_t>(std::clamp(std::round(value * multiply[channel] + add[channel]), 0.f, 255.f)); }
+uint32_t ColorTransform::apply(uint32_t rgba) const {
+    uint32_t result = 0;
+    for (size_t channel = 0; channel < 4; ++channel) {
+        float value = std::round(static_cast<float>((rgba >> (channel * 8)) & 255) * multiply[channel] + add[channel]);
+        result |= static_cast<uint32_t>(std::clamp(value, 0.f, 255.f)) << (channel * 8);
+    }
+    return result;
+}
 bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, std::vector<uint16_t> &depth, std::vector<uint32_t> &parents, IconRecipe &recipe,
                        const ColorTransform &color) const {
     auto found = characters_.find(identity);
@@ -500,12 +508,8 @@ bool GfxMovie::flatten(uint32_t identity, uint32_t frame, const Matrix &matrix, 
         if (raw == shapeBytes_.end() || !readShape(raw->second.second, raw->second.first, layer.shape))
             return false;
         for (auto *styles: {&layer.shape.fills, &layer.shape.strokes})
-            for (auto &style: *styles) {
-                uint32_t transformed = 0;
-                for (size_t channel = 0; channel < 4; ++channel)
-                    transformed |= uint32_t(color.apply(static_cast<uint8_t>(style.color >> (channel * 8)), channel)) << (channel * 8);
-                style.color = transformed;
-            }
+            for (auto &style: *styles)
+                style.color = color.apply(style.color);
         recipe.layers.push_back(std::move(layer));
         return true;
     }

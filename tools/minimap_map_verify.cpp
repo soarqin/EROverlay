@@ -187,18 +187,24 @@ int main() {
         return 11;
     completion = false;
     put(pointTable, 0x40, er::params::ParamEntryOffset{90000, 128, 0});
-    for (uint16_t icon: {80, 87, 88}) {
-        put(pointTable, 128 + offsetof(WorldMapPointParam, iconId), icon);
-        ++state.generation;
-        data.update();
-        if (data.snapshot().decorations.size() != 1 || data.snapshot().decorations[0].source != er::minimap::DecorationSource::Other ||
-            data.snapshot().decorations[0].iconId != icon)
-            return 12;
-    }
+    put(pointTable, 128 + offsetof(WorldMapPointParam, iconId), uint16_t{80});
+    ++state.generation;
+    data.update();
+    if (data.snapshot().decorations.size() != 1 || data.snapshot().decorations[0].source != er::minimap::DecorationSource::Other || data.snapshot().decorations[0].iconId != 80)
+        return 12;
     data.setShowOthers(false);
     data.update();
     if (!data.snapshot().decorations.empty() || !data.snapshot().memoMarkers.empty())
         return 13;
+    // Quest pins stay ordinary landmarks, independent of the other switch.
+    for (uint16_t icon: {87, 88}) {
+        put(pointTable, 128 + offsetof(WorldMapPointParam, iconId), icon);
+        ++state.generation;
+        data.update();
+        if (data.snapshot().decorations.size() != 1 || data.snapshot().decorations[0].source != er::minimap::DecorationSource::Landmark ||
+            data.snapshot().decorations[0].iconId != icon)
+            return 18;
+    }
     put(pointTable, 128 + offsetof(WorldMapPointParam, iconId), uint16_t{3});
     ++state.generation;
     view[0x30] = 1;
@@ -226,5 +232,6 @@ int main() {
     if (data.snapshot().valid || !data.snapshot().decorations.empty() || !data.snapshot().memoMarkers.empty())
         return 4;
     er::minimap::nativeApi = nullptr;
-    std::puts("PASS: production view reads, deaths, marker conversion, NPC/quest/mod point visibility, text-driven removal, cache reconfiguration, Home and invalidation.");
+    std::puts(
+        "PASS: production view reads, deaths, marker conversion, NPC/mod point visibility, quest landmarks, text-driven removal, cache reconfiguration, Home and invalidation.");
 }

@@ -80,7 +80,7 @@ The new file groups shortcuts, terrain, markers and borders into sections, with 
 |---|---|
 | `[controls]` | `toggle` / `cycle` default to M; grace/landmark toggles default to N. Empty values disable shortcuts. |
 | `[map]` | `full_map = true` shows fully revealed terrain without editing the save. |
-| `[markers]` | `graces`, `landmarks`, `death` and `beacons` default to `true`. |
+| `[markers]` | `graces`, `landmarks`, `death` and `beacons` default to `true`; `others` (NPCs, placed stamps and map mod points) defaults to `false`. |
 | `[border]` | RGBA `color` and direct pixel `width` (default `1.5`). |
 | `[presets]` | `order = compact, large` controls startup and cycling order. |
 | `[preset.name]` | Size, centered or edge-margin position, zoom, opacity, rotation, shape, rounding and four element-size multipliers. |

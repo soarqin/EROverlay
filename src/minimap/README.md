@@ -16,7 +16,7 @@ The minimap reads game archives and renders its own textures. External `data/map
 - Press **N** to show or hide grace and landmark markers together.
 - Death and numbered beacon markers are enabled, following rune recovery and in-game removal.
 - Terrain follows your obtained map fragments.
-- NPCs, quest targets, placed stamps and other points added by map mods are hidden by default; set `others = true` in `[markers]` to show them.
+- NPCs, placed stamps and other points added by map mods are hidden by default; set `others = true` in `[markers]` to show them.
 
 Edit `configs/minimap.ini` with a text editor, save as UTF-8 and restart the game. The core reads the file when loading; rebuilding the renderer alone does not reload the file. Put comments on separate lines starting with `#` or `;`. Use `true` and `false` for switches.
 
@@ -64,7 +64,7 @@ cycle = F8
 | `[markers] landmarks` | `true` | Show landmarks allowed by the game, including discovered distant-view markers |
 | `[markers] death` | `true` | Show uncollected dropped runes on their map layer |
 | `[markers] beacons` | `true` | Show world-map beacons 1–5, preserving their numbers |
-| `[markers] others` | `false` | Show NPCs, quest targets, placed stamps and other points added by map mods, following the game's display conditions |
+| `[markers] others` | `false` | Show NPCs, placed stamps and other points added by map mods, following the game's display conditions |
 
 Fully revealed terrain changes only the minimap display. It does not grant fragments, edit saves or discover graces and landmarks. Place and delete beacons in the game's world map; the minimap follows them.
 

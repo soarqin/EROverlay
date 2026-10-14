@@ -205,7 +205,7 @@ bool otherMarkers() {
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
     io.Fonts->SetTexID(1);
     showGraces = showLandmarks = false;
-    unsigned layers = 0, removals = 0;
+    unsigned layers = 0, removals = 0, quests = 0;
     bool ok = true;
     auto setFlag = [](uint32_t flag) {
         if (flag && flag != UINT32_MAX)
@@ -244,6 +244,23 @@ bool otherMarkers() {
             std::fprintf(stderr, "FAIL: actual icon %u has no resolved recipe\n", icon);
             ok = false;
             break;
+        }
+        if (sample.id >= 78500 && baseIcon != 80) {
+            // High-ID quest pins (87/88) stay ordinary landmarks, independent
+            // of the other switch; low-ID mod points use the other group.
+            gData.setShowOthers(false);
+            ++generation;
+            gData.update();
+            auto snapshot = gData.snapshot();
+            if (std::none_of(snapshot.decorations.begin(), snapshot.decorations.end(),
+                             [&](const auto &entry) { return entry.source == DecorationSource::Landmark && entry.id == sample.id && entry.iconId == icon; })) {
+                std::fprintf(stderr, "FAIL: quest point %u / icon %u is not an ordinary landmark\n", sample.id, icon);
+                ok = false;
+                break;
+            }
+            ++quests;
+            std::printf("PASS: quest point %u / icon %u stays an ordinary landmark\n", sample.id, icon);
+            continue;
         }
         auto frame = [&](bool expected, bool update = true) {
             Renderer renderer;
@@ -397,7 +414,7 @@ bool otherMarkers() {
         std::puts("PASS: all 10 native stamp frames, saved coordinates and removal");
     gResources.stop();
     ImGui::DestroyContext();
-    std::printf("Other marker verification: %zu icon groups, %u drawn bitmap layers, %u removal cases\n", samples.size(), layers, removals);
+    std::printf("Other marker verification: %zu icon groups, %u drawn bitmap layers, %u removal cases, %u quest landmarks\n", samples.size() - quests, layers, removals, quests);
     return ok;
 }
 bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_t graceIcon, uint32_t bossIcon, bool graceCleared = false, bool bossCleared = false) {

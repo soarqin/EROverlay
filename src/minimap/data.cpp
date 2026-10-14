@@ -46,11 +46,11 @@ struct SavedPlayerMarker {
     uint16_t padding;
 };
 static_assert(sizeof(SavedPlayerMarker) == 16 && offsetof(SavedPlayerMarker, map) == 12 && offsetof(SavedPlayerMarker, icon) == 13);
+// Returns the copied list capacity, or 0 when the list is unreadable or changes.
 template<size_t Capacity>
-[[nodiscard]] bool readSavedMarkers(uintptr_t view, size_t saveOffset, std::array<SavedPlayerMarker, Capacity> &records, size_t &capacity) {
-    capacity = 0;
+[[nodiscard]] size_t readSavedMarkers(uintptr_t view, size_t saveOffset, std::array<SavedPlayerMarker, Capacity> &records) {
     if (!view)
-        return false;
+        return 0;
     struct Header {
         uintptr_t slots;
         uint64_t capacity;
@@ -59,7 +59,7 @@ template<size_t Capacity>
     uint64_t count = 0, afterCount = 0;
     std::array<SavedPlayerMarker, Capacity> afterRecords{};
     if (!save || !read(save + 8, first) || !first.slots || !first.capacity || first.capacity > records.size() || !read(save + 0x40, count) || count > first.capacity)
-        return false;
+        return 0;
     size_t bytes = static_cast<size_t>(first.capacity) * sizeof(SavedPlayerMarker);
     // Copy values, never retain game-owned slots. A concurrent insertion,
     // deletion or load discards this sample and is retried on the next update.
@@ -67,42 +67,36 @@ template<size_t Capacity>
         pointer(view + saveOffset) != save || first.slots != after.slots || first.capacity != after.capacity || count != afterCount ||
         std::memcmp(records.data(), afterRecords.data(), bytes) ||
         static_cast<uint64_t>(std::count_if(records.begin(), records.begin() + first.capacity, [](const auto &record) { return record.id >= 0; })) != count)
-        return false;
-    capacity = static_cast<size_t>(first.capacity);
-    return true;
+        return 0;
+    return static_cast<size_t>(first.capacity);
 }
-[[nodiscard]] bool readPlayerMarkers(uintptr_t view, PlayerMarkers &markers) {
+// A live record at finite map coordinates on the surface, underground or DLC map.
+bool placed(const SavedPlayerMarker &record) {
+    return record.id >= 0 && std::isfinite(record.x) && std::isfinite(record.y) && (record.map == 0 || record.map == 1 || record.map == 10);
+}
+void readPlayerMarkers(uintptr_t view, PlayerMarkers &markers) {
     markers.clear();
     std::array<SavedPlayerMarker, PLAYER_MARKER_CAPACITY> records{};
-    size_t capacity;
-    if (!readSavedMarkers(view, 0x338, records, capacity))
-        return false;
+    size_t capacity = readSavedMarkers(view, 0x338, records);
     for (size_t slot = 0; slot < std::min(capacity, PLAYER_MARKER_LIMIT); ++slot) {
         const auto &record = records[slot];
-        if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon != 1)
-            continue;
         // 0x879330 formats Text_0 with slot+1, independent of the save ID
         // and of the active list's ordering. These are already map coordinates.
-        markers.push_back({record.id, record.x, record.y, static_cast<uint8_t>(slot + 1), record.map});
+        if (placed(record) && record.icon == 1)
+            markers.push_back({record.id, record.x, record.y, static_cast<uint8_t>(slot + 1), record.map});
     }
-    return true;
 }
-[[nodiscard]] bool readMemoMarkers(uintptr_t view, MemoMarkers &markers) {
+void readMemoMarkers(uintptr_t view, MemoMarkers &markers) {
     markers.clear();
     std::array<SavedPlayerMarker, 100> records{};
-    size_t capacity;
     // MemoList binds view+0x340; the same saved-record layout is used for
     // up to 100 stamps. Icon_0 selects the stored one-based frame directly.
-    if (!readSavedMarkers(view, 0x378, records, capacity))
-        return false;
+    size_t capacity = readSavedMarkers(view, 0x378, records);
     for (size_t slot = 0; slot < capacity; ++slot) {
         const auto &record = records[slot];
-        if (record.id < 0 || !std::isfinite(record.x) || !std::isfinite(record.y) || (record.map != 0 && record.map != 1 && record.map != 10) || record.icon < 1 ||
-            record.icon > 10)
-            continue;
-        markers.push_back({record.id, record.x, record.y, record.icon, record.map});
+        if (placed(record) && record.icon >= 1 && record.icon <= 10)
+            markers.push_back({record.id, record.x, record.y, record.icon, record.map});
     }
-    return true;
 }
 bool flag(uint32_t id) { return nativeApi && nativeApi->readEventFlag(id); }
 // WorldMapPinData::SetTo (RVA 0x87BE10) shows Cleared only for an active,
@@ -299,10 +293,9 @@ void Data::update() {
     if (!std::isfinite(next.camera.yawCos) || !std::isfinite(next.camera.yawSin))
         next.camera = {};
     auto publish = [&] {
-        if (next.valid)
-            (void)readPlayerMarkers(next.state.viewModel, next.playerMarkers);
-        if (next.valid && showOthers)
-            (void)readMemoMarkers(next.state.viewModel, next.memoMarkers);
+        readPlayerMarkers(next.state.viewModel, next.playerMarkers);
+        if (showOthers)
+            readMemoMarkers(next.state.viewModel, next.memoMarkers);
         ERMapState after{};
         if (!nativeApi->readMapState(&after) || after.generation != next.state.generation || after.viewModel != next.state.viewModel || after.rawMapId != next.state.rawMapId ||
             after.mapId != next.state.mapId || after.underground != next.state.underground) {
@@ -420,9 +413,9 @@ void Data::update() {
         decorations->push_back(marker);
     });
     rows<WorldMapPointParam>(87, offsetof(WorldMapPointParam, posZ_forDistViewMark) + sizeof(float), [&](uint64_t id, const WorldMapPointParam &row, size_t size) {
-        // Keep ordinary landmarks in their existing group. NPC and quest
-        // pins, plus the low-ID points used by map mods, have a separate switch.
-        const bool other = id < 78500 || row.iconId == 80 || row.iconId == 87 || row.iconId == 88;
+        // NPC pins and the low-ID points used by map mods have a separate
+        // switch. Other points, including quest pins (87/88), stay landmarks.
+        const bool other = id < 78500 || row.iconId == 80;
         if ((other && !showOthers) || (!row.iconId && !row.distViewIconId && (!layout.alternateIcons || !row.altIconId)))
             return;
         // A missing opening condition is always enabled. Map for Goblins

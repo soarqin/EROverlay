@@ -36,8 +36,11 @@ struct VectorShape {
 struct ColorTransform {
     std::array<float, 4> multiply{1, 1, 1, 1};
     std::array<float, 4> add{};
-    [[nodiscard]] bool identity() const { return multiply == std::array<float, 4>{1, 1, 1, 1} && add == std::array<float, 4>{}; }
-    [[nodiscard]] uint8_t apply(uint8_t value, size_t channel) const;
+    [[nodiscard]] bool operator==(const ColorTransform &) const = default;
+    [[nodiscard]] bool identity() const { return *this == ColorTransform{}; }
+    // Packed RGBA, the byte order of SWF styles and RGBA8 texels. Each channel
+    // is rounded and clamped to 0-255.
+    [[nodiscard]] uint32_t apply(uint32_t rgba) const;
 };
 struct IconLayer {
     std::string image;

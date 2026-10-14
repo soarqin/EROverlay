@@ -12,7 +12,6 @@
 #include <cstring>
 #include <functional>
 #include <map>
-#include <tuple>
 
 #define BCDEC_STATIC
 #define BCDEC_IMPLEMENTATION
@@ -203,27 +202,32 @@ bool coloredSprite(util::Bytes bytes, const util::DdsImage &image, const AtlasRe
     put(132, 3);
     put(140, 1);
     const auto &level = image.levels.front();
-    std::array<uint8_t, 64> block{};
-    uint32_t previousX = UINT32_MAX, previousY = UINT32_MAX;
-    for (uint32_t y = 0; y < region.height; ++y)
-        for (uint32_t x = 0; x < region.width; ++x) {
-            uint32_t sourceX = region.x + x, sourceY = region.y + y;
-            const uint8_t *pixel;
-            if (rgba)
-                pixel = bytes.data() + level.offset + size_t(sourceY) * level.rowBytes + size_t(sourceX) * 4;
-            else {
-                uint32_t bx = sourceX / 4, by = sourceY / 4;
-                if (bx != previousX || by != previousY) {
-                    decode(bytes.data() + level.offset + size_t(by) * level.rowBytes + size_t(bx) * blockBytes, block.data(), 16);
-                    previousX = bx;
-                    previousY = by;
-                }
-                pixel = block.data() + ((sourceY % 4) * 4 + sourceX % 4) * 4;
-            }
-            auto *target = dds.data() + 148 + (size_t(y) * region.width + x) * 4;
-            for (size_t channel = 0; channel < 4; ++channel)
-                target[channel] = color.apply(pixel[channel], channel);
+    const uint8_t *source = bytes.data() + level.offset;
+    // Decode each block row under the sprite once into an RGBA strip; RGBA
+    // atlases are read in place.
+    const uint32_t firstBlock = region.x / 4, blocks = (region.x + region.width + 3) / 4 - firstBlock;
+    const size_t stripPitch = size_t(blocks) * 16;
+    std::vector<uint8_t> strip(rgba ? 0 : stripPitch * 4);
+    for (uint32_t y = 0; y < region.height; ++y) {
+        uint32_t sourceY = region.y + y;
+        const uint8_t *row;
+        if (rgba)
+            row = source + size_t(sourceY) * level.rowBytes + size_t(region.x) * 4;
+        else {
+            if (!y || sourceY % 4 == 0)
+                for (uint32_t block = 0; block < blocks; ++block)
+                    decode(source + size_t(sourceY / 4) * level.rowBytes + size_t(firstBlock + block) * blockBytes, strip.data() + size_t(block) * 16,
+                           static_cast<int>(stripPitch));
+            row = strip.data() + (sourceY % 4) * stripPitch + (region.x % 4) * 4;
         }
+        auto *target = dds.data() + 148 + size_t(y) * region.width * 4;
+        for (uint32_t x = 0; x < region.width; ++x) {
+            uint32_t pixel;
+            std::memcpy(&pixel, row + size_t(x) * 4, sizeof(pixel));
+            pixel = color.apply(pixel);
+            std::memcpy(target + size_t(x) * 4, &pixel, sizeof(pixel));
+        }
+    }
     return true;
 }
 } // namespace
@@ -317,30 +321,24 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     for (auto &layer: specials["arrow"].layers)
         for (auto &v: layer.matrix)
             v *= 2;
-    // Completion glyphs are optional decorations, not required player/map UI.
-    // An unavailable mod overlay must not disable otherwise valid resources.
-    std::erase_if(specials, [&](const auto &item) {
-        return item.first == "cleared" && std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) {
-                   auto region = regions.find(layer.image);
-                   return layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height);
-               });
-    });
-    for (const auto &[name, recipe]: specials)
-        for (const auto &layer: recipe.layers) {
+    // A bitmap layer needs an atlas region of exactly its own size.
+    auto unresolved = [&](const IconRecipe &recipe) {
+        return std::any_of(recipe.layers.begin(), recipe.layers.end(), [&](const auto &layer) {
             auto region = regions.find(layer.image);
-            if (layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height))
-                return false;
-        }
+            return layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height);
+        });
+    };
+    // Completion glyphs and stamps are optional decorations, not required
+    // player/map UI. An unavailable mod overlay must not disable otherwise
+    // valid resources.
+    std::erase_if(specials, [&](const auto &item) { return item.first == "cleared" && unresolved(item.second); });
+    std::erase_if(memos, [&](const auto &item) { return unresolved(item.second); });
+    if (std::any_of(specials.begin(), specials.end(), [&](const auto &item) { return unresolved(item.second); }))
+        return false;
     // Old resources need not define DLC frames that the game never requests.
     // Keep complete recipes; do not fabricate a fallback for missing aliases.
     std::erase_if(icons, [&](const auto &item) {
         return std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) { return layer.bitmap() && !regions.contains(layer.image); });
-    });
-    std::erase_if(memos, [&](const auto &item) {
-        return std::any_of(item.second.layers.begin(), item.second.layers.end(), [&](const auto &layer) {
-            auto region = regions.find(layer.image);
-            return layer.bitmap() && (region == regions.end() || region->second.width != layer.width || region->second.height != layer.height);
-        });
     });
     std::unordered_set<std::string> needed;
     auto collect = [&](const auto &recipes) {
@@ -370,27 +368,26 @@ bool Resources::loadDefinitions(util::Bytes gfx, util::Bytes layouts) {
     for (auto &[image, region]: regions)
         region.atlas = remap[region.atlas];
     std::vector<AtlasRegion> resolved;
-    using ColoredKey = std::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::array<float, 4>, std::array<float, 4>>;
-    std::map<ColoredKey, uint32_t> colored;
+    const size_t sourceAtlases = atlases.size();
     auto resolve = [&](auto &recipes) {
         for (auto &[id, recipe]: recipes)
             for (auto &layer: recipe.layers)
                 if (layer.bitmap()) {
                     auto region = regions.at(layer.image);
                     if (!layer.color.identity()) {
-                        ColoredKey key{region.atlas, region.x, region.y, region.width, region.height, layer.color.multiply, layer.color.add};
-                        auto found = colored.find(key);
-                        if (found == colored.end()) {
+                        // A recolored sprite becomes a one-region atlas decoded
+                        // from its source, shared by layers with equal colors.
+                        auto found = std::find_if(atlases.begin() + sourceAtlases, atlases.end(),
+                                                  [&](const auto &atlas) { return atlas->sourceRegion == region && atlas->color == layer.color; });
+                        if (found == atlases.end()) {
                             auto atlas = std::make_unique<Atlas>();
                             atlas->name = atlases[region.atlas]->name;
                             atlas->path = atlases[region.atlas]->path;
                             atlas->sourceRegion = region;
                             atlas->color = layer.color;
-                            found = colored.emplace(key, static_cast<uint32_t>(atlases.size())).first;
-                            atlases.push_back(std::move(atlas));
+                            found = atlases.insert(atlases.end(), std::move(atlas));
                         }
-                        region.atlas = found->second;
-                        region.x = region.y = 0;
+                        region = {static_cast<uint32_t>(found - atlases.begin()), 0, 0, region.width, region.height};
                     }
                     layer.resourceRegion = static_cast<uint32_t>(resolved.size());
                     resolved.push_back(region);
@@ -577,16 +574,19 @@ void Resources::update() {
                 util::Bytes bytes(static_cast<const uint8_t *>(data.data), static_cast<size_t>(data.size));
                 util::DdsImage image;
                 if (util::parseDds(bytes, image)) {
-                    if (atlas.color.identity())
+                    // Like a plain region outside its atlas, a sprite that
+                    // cannot be recolored is never drawn. Publish it without
+                    // pixels instead of rereading the container every retry.
+                    if (atlas.color.identity()) {
                         atlas.dds.assign(bytes.begin(), bytes.end());
-                    else if (!coloredSprite(bytes, image, atlas.sourceRegion, atlas.color, atlas.dds))
-                        atlas.dds.clear();
-                    if (!atlas.dds.empty()) {
-                        atlas.width = atlas.color.identity() ? image.width : atlas.sourceRegion.width;
-                        atlas.height = atlas.color.identity() ? image.height : atlas.sourceRegion.height;
-                        atlas.ready.store(true, std::memory_order_release);
-                        continue;
+                        atlas.width = image.width;
+                        atlas.height = image.height;
+                    } else if (coloredSprite(bytes, image, atlas.sourceRegion, atlas.color, atlas.dds)) {
+                        atlas.width = atlas.sourceRegion.width;
+                        atlas.height = atlas.sourceRegion.height;
                     }
+                    atlas.ready.store(true, std::memory_order_release);
+                    continue;
                 }
                 status_ = "图集 DDS 格式不受支持，正在重试";
             }

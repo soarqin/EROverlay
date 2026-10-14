@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Added
 
-- Add `[markers] others` to show NPCs, quest targets, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
+- Add `[markers] others` to show NPCs, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
 
 #### Changed
 

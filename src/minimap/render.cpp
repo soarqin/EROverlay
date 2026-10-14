@@ -369,14 +369,19 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
             drawLayer(0);
         drawLayer(map);
         gResources.endFrame();
+        // Map coordinates to window coordinates, rotated around the player.
+        auto screenPoint = [&](float mapX, float mapY) {
+            float x = (mapX - player.x) * effectiveScale_, y = (mapY - player.y) * effectiveScale_;
+            return Point{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
+        };
+        auto outside = [&](Point point) { return point.x < -200 || point.y < -200 || point.x > minimapWidth_ + 200 || point.y > minimapHeight_ + 200; };
         const auto *clearedRecipe = gResources.special("cleared");
         for (const auto &marker: snapshot.decorations) {
             bool visible = marker.source == DecorationSource::Grace ? showGraces_ : marker.source == DecorationSource::Landmark ? showLandmarks_ : showOthers_;
             if (!(marker.maps & (1u << map)) || !visible)
                 continue;
-            float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
-            Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
-            if (screen.x < -200 || screen.y < -200 || screen.x > minimapWidth_ + 200 || screen.y > minimapHeight_ + 200)
+            auto screen = screenPoint(marker.x, marker.y);
+            if (outside(screen))
                 continue;
             float size = marker.areaIcon ? effectiveScale_ : effectiveDecorationScale_ * effectiveScale_ * 2.f;
             drawRecipe(gResources.icon(marker.iconId), screen, size, marker.rotationRad + angle);
@@ -386,26 +391,17 @@ void Renderer::renderContent(const MapSnapshot &snapshot) {
         int markerMap = map == 2 ? 10 : map;
         if (showOthers_)
             for (const auto &marker: snapshot.memoMarkers) {
-                if (marker.map != markerMap)
-                    continue;
-                float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
-                Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
-                drawRecipe(gResources.memoIcon(marker.icon), screen, effectiveDecorationScale_ * effectiveScale_ * 2.f);
+                auto screen = screenPoint(marker.x, marker.y);
+                if (marker.map == markerMap && !outside(screen))
+                    drawRecipe(gResources.memoIcon(marker.icon), screen, effectiveDecorationScale_ * effectiveScale_ * 2.f);
             }
-        if (showDeath_ && state.deathValid && state.deathMapId == markerMap) {
-            float x = (state.deathX - player.x) * effectiveScale_, y = (state.deathY - player.y) * effectiveScale_;
-            Point death{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
-            drawRecipe(gResources.special("death"), death, effectiveScale_ * 2.f * effectivePlayerScale_, angle);
-        }
+        if (showDeath_ && state.deathValid && state.deathMapId == markerMap)
+            drawRecipe(gResources.special("death"), screenPoint(state.deathX, state.deathY), effectiveScale_ * 2.f * effectivePlayerScale_, angle);
         if (showPlayerMarkers_)
             for (const auto &marker: snapshot.playerMarkers) {
-                if (marker.map != markerMap)
-                    continue;
-                float x = (marker.x - player.x) * effectiveScale_, y = (marker.y - player.y) * effectiveScale_;
-                Point screen{center.x + x * cosine - y * sine, center.y + x * sine + y * cosine};
-                if (screen.x < -200 || screen.y < -200 || screen.x > minimapWidth_ + 200 || screen.y > minimapHeight_ + 200)
-                    continue;
-                drawPlayerMarker(marker, screen, effectiveScale_ * 2.f * effectivePlayerScale_);
+                auto screen = screenPoint(marker.x, marker.y);
+                if (marker.map == markerMap && !outside(screen))
+                    drawPlayerMarker(marker, screen, effectiveScale_ * 2.f * effectivePlayerScale_);
             }
     }
     drawRecipe(gResources.special("player"), center, effectiveScale_ * effectivePlayerScale_);
