@@ -41,8 +41,10 @@ Produces `dist/Boss.zip` and `dist/Minimap.zip` with all required files.
 | `RELEASE_USE_LTO` | OFF | Link-time optimization |
 | `RELEASE_USE_STATIC_CRT` | ON | Static MSVC runtime |
 
-### No Test Suite
-There is no automated test suite. Testing is done by injecting the built DLL into Elden Ring and verifying behavior in-game.
+### Offline Checks and In-game Testing
+After building Release, run `cmd /d /c tools\build_ui_scene_checks.bat` to build the offline rendering, scanning, plugin lifecycle and minimap visibility checks. Run `python tools/ui_scene_evidence.py D:\Games\EldenRingExe` to execute them against the archived EXEs and record results under `build/ui-scene/`. See `docs/ui-scene-prototype.md` for individual commands and the optional native SDR compositor check.
+
+These checks do not launch the game. Verify visual behavior in-game after renderer changes; static signature coverage does not prove that every archived version renders correctly.
 
 ---
 
@@ -128,7 +130,7 @@ Use `er::gConfig` (global `Config` instance). Config keys use dot notation: `"co
 ### Threading
 - Main overlay logic runs in a dedicated thread spawned from `DllMain`
 - Plugin `update()` is called at ~60 Hz in the main overlay thread
-- Plugin `render()` is called from the DX12 Present hook thread
+- Plugin `render()` is called from the native UI_SCENE game render-queue callback
 - Use `std::mutex` to protect shared state between update and render threads (see `BossDataSet::mutex_`)
 - Use `std::atomic_bool` for cross-thread flags (e.g., `gRunning`)
 

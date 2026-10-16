@@ -1,9 +1,11 @@
 #include "config.hpp"
 #include "d3drenderer.hpp"
+#include "drawlayers.hpp"
 #include "global.hpp"
 #include "hooking.hpp"
 #include "input.hpp"
 #include "plugin.hpp"
+#include "uiscene.hpp"
 
 #include "util/file.hpp"
 #include "util/steam.hpp"
@@ -15,7 +17,6 @@
 
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
-#include <MinHook.h>
 
 #include <algorithm>
 #include <cmath>
@@ -29,63 +30,29 @@ extern unsigned char embedded_font[];
 
 namespace er {
 
-enum :int {
-    NUM_BACK_BUFFERS = 3,
-};
+D3DRenderer::D3DRenderer() : drawLayers_(std::make_unique<DrawLayers>()) {}
 
 bool D3DRenderer::hook() {
-    if (hooksInstalled_) return true;
-
-    // Find the game window first: retries while it is missing must not
-    // create a throwaway D3D12 device and swap chain every time.
-    if (!initOverlay()) {
-        return false;
-    }
-
-    if (!createDevice()) {
-        return false;
-    }
-
-    auto createAndEnableHook = [](const char *name, void *target, void *detour, void **original) {
-        if (target == nullptr) {
-            fwprintf(stderr, L"[EROverlay] %hs hook target is null\n", name);
-            return false;
-        }
-        MH_STATUS status = MH_CreateHook(target, detour, original);
-        if (status != MH_OK) {
-            fwprintf(stderr, L"[EROverlay] MH_CreateHook failed for %hs: %d\n", name, status);
-            return false;
-        }
-        status = MH_EnableHook(target);
-        if (status != MH_OK) {
-            fwprintf(stderr, L"[EROverlay] MH_EnableHook failed for %hs: %d\n", name, status);
-            return false;
-        }
+    if (uiScene_)
         return true;
-    };
-
-    if (!createAndEnableHook("CreateSwapChain", fnCreateSwapChain_, reinterpret_cast<void*>(&hkCreateSwapChain), reinterpret_cast<void**>(&oCreateSwapChain_)) ||
-        !createAndEnableHook("CreateSwapChainForHwnd", fnCreateSwapChainForHwndChain_, reinterpret_cast<void*>(&hkCreateSwapChainForHwnd), reinterpret_cast<void**>(&oCreateSwapChainForHwnd_)) ||
-        !createAndEnableHook("Present", fnPresent_, reinterpret_cast<void*>(&hkPresent), reinterpret_cast<void**>(&oPresent_)) ||
-        !createAndEnableHook("Present1", fnPresent1_, reinterpret_cast<void*>(&hkPresent1), reinterpret_cast<void**>(&oPresent1_)) ||
-        !createAndEnableHook("ResizeBuffers", fnResizeBuffers_, reinterpret_cast<void*>(&hkResizeBuffers), reinterpret_cast<void**>(&oResizeBuffers_)) ||
-        !createAndEnableHook("ResizeBuffers1", fnResizeBuffers1_, reinterpret_cast<void*>(&hkResizeBuffers1), reinterpret_cast<void**>(&oResizeBuffers1_)) ||
-        !installExecuteCommandListsHook()) {
-        disableAll();
+    if (!initOverlay())
         return false;
-    }
-
-    hooksInstalled_ = true;
+    auto scene = std::make_unique<UiSceneBridge>(*this);
+    if (!scene->install())
+        return false;
+    uiScene_ = std::move(scene);
     return true;
 }
 
 void D3DRenderer::unhook() {
     input::resetKeyChordStates();
-    disableAll();
-    releaseDeviceResources(L"unhook");
+    // Drain synchronous game callbacks before destroying renderers or GPU resources.
+    uiScene_.reset();
+    releaseDeviceResources();
     releaseCommandQueue();
     if (oldWndProc_) {
-        SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
+        if (IsWindow(gameWindow_) && !windowDestroyed_.load(std::memory_order_acquire))
+            SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
         oldWndProc_ = 0;
     }
     if (ImGui::GetCurrentContext()) {
@@ -96,105 +63,20 @@ void D3DRenderer::unhook() {
     }
 }
 
-void D3DRenderer::disableAll() {
-    auto disableAndRemoveHook = [](void *target) {
-        if (target == nullptr) return;
-        MH_DisableHook(target);
-        MH_RemoveHook(target);
-    };
-
-    disableAndRemoveHook(fnCreateSwapChain_);
-    disableAndRemoveHook(fnCreateSwapChainForHwndChain_);
-
-    disableAndRemoveHook(fnPresent_);
-    disableAndRemoveHook(fnPresent1_);
-
-    disableAndRemoveHook(fnResizeBuffers_);
-    disableAndRemoveHook(fnResizeBuffers1_);
-
-    releaseExecuteCommandListsHook();
-    hooksInstalled_ = false;
-}
-
 void D3DRenderer::releaseCommandQueue() {
     if (commandQueue_) {
         commandQueue_->Release();
         commandQueue_ = nullptr;
     }
-    boundQueue_ = nullptr;
 }
 
-bool D3DRenderer::captureCommandQueue(IUnknown *pDevice) {
+void D3DRenderer::releaseDeviceResources() {
     std::lock_guard lock(deviceMutex_);
-    if (pDevice == nullptr) return false;
-
-    ID3D12CommandQueue *commandQueue = nullptr;
-    if (FAILED(pDevice->QueryInterface(IID_PPV_ARGS(&commandQueue)))) return false;
-
-    D3D12_COMMAND_QUEUE_DESC desc = commandQueue->GetDesc();
-    if (desc.Type != D3D12_COMMAND_LIST_TYPE_DIRECT) {
-        commandQueue->Release();
-        return false;
-    }
-
-    releaseCommandQueue();
-    commandQueue_ = commandQueue;
-    return true;
-}
-
-void D3DRenderer::handleSwapChainCreated(HWND hwnd, IUnknown *pDevice, HRESULT hr) {
-    if (FAILED(hr)) return;
-    if (gameWindow_ != nullptr && hwnd != gameWindow_) return;
-
-    releaseDeviceResources(L"game swap-chain creation");
-    if (captureCommandQueue(pDevice)) {
-        releaseExecuteCommandListsHook();
-    }
-}
-
-bool D3DRenderer::installExecuteCommandListsHook() {
-    if (commandQueue_) return true;
-    if (eclHookInstalled_) return true;
-    if (fnExecuteCommandLists_ == nullptr) {
-        fwprintf(stderr, L"[EROverlay] ExecuteCommandLists hook target is null\n");
-        return false;
-    }
-
-    MH_STATUS status = MH_CreateHook(fnExecuteCommandLists_, reinterpret_cast<void*>(&hkExecuteCommandLists), reinterpret_cast<void**>(&oExecuteCommandLists_));
-    if (status != MH_OK) {
-        fwprintf(stderr, L"[EROverlay] MH_CreateHook failed for ExecuteCommandLists: %d\n", status);
-        return false;
-    }
-    status = MH_EnableHook(fnExecuteCommandLists_);
-    if (status != MH_OK) {
-        fwprintf(stderr, L"[EROverlay] MH_EnableHook failed for ExecuteCommandLists: %d\n", status);
-        MH_RemoveHook(fnExecuteCommandLists_);
-        return false;
-    }
-
-    eclHookInstalled_ = true;
-    return true;
-}
-
-void D3DRenderer::releaseExecuteCommandListsHook() {
-    if (!eclHookInstalled_) return;
-
-    MH_DisableHook(fnExecuteCommandLists_);
-    MH_RemoveHook(fnExecuteCommandLists_);
-    eclHookInstalled_ = false;
-}
-
-void D3DRenderer::resetCommandQueueCapture() {
-    releaseCommandQueue();
-    if (hooksInstalled_) installExecuteCommandListsHook();
-}
-
-void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
-    std::lock_guard lock(deviceMutex_);
-    (void)reason;
     drawingFrame_ = false;
+    drawLayers_->discard();
     waitForFrames();
     pluginsDestroyRenderers();
+    destroyOffscreenTarget(sceneUnderlay_);
 
     // ImGui uploads its textures on uploadQueue_; shut it down first.
     if (ImGui::GetCurrentContext() && ImGui::GetIO().BackendRendererUserData) {
@@ -202,15 +84,16 @@ void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
     }
     releaseTextureUploads();
 
-    CleanupRenderTarget();
+    boundSwapChain_ = nullptr;
 
     if (commandList_) {
         commandList_->Release();
         commandList_ = nullptr;
     }
     if (commandAllocator_) {
-        for (UINT i = 0; i < buffersCounts_; ++i) {
-            if (commandAllocator_[i]) commandAllocator_[i]->Release();
+        for (UINT i = 0; i < frameCount_; ++i) {
+            if (commandAllocator_[i])
+                commandAllocator_[i]->Release();
         }
         delete[] commandAllocator_;
         commandAllocator_ = nullptr;
@@ -232,164 +115,21 @@ void D3DRenderer::releaseDeviceResources(const wchar_t *reason) {
         deviceIdentity_ = nullptr;
     }
 
-    if (swapChainIdentity_) {
-        swapChainIdentity_->Release();
-        swapChainIdentity_ = nullptr;
-    }
-    boundQueue_ = nullptr;
-    renderTargets_.clear();
     freeDescriptors_.clear();
-    buffersCounts_ = 0;
+    frameCount_ = 0;
     rtvDescriptorSize_ = 0;
     srvDescriptorSize_ = 0;
     currentRTV_ = {};
-    currentBackBufferIndex_ = 0;
+    frameIndex_ = 0;
+    targetFormat_ = DXGI_FORMAT_UNKNOWN;
+    sceneFirstDrawPending_ = {};
     deviceLost_ = false;
 }
 
 void D3DRenderer::handleDeviceLost(const wchar_t *where, HRESULT hr) {
     fwprintf(stderr, L"[EROverlay] D3D12 device lost at %ls: 0x%08lX; waiting for a new device\n", where, hr);
-    releaseDeviceResources(L"device loss");
-    resetCommandQueueCapture();
-}
-
-bool D3DRenderer::createDevice() {
-    WNDCLASSEXW cls {};
-    cls.cbSize = sizeof(WNDCLASSEX);
-    cls.style = CS_HREDRAW | CS_VREDRAW;
-    cls.lpfnWndProc = DefWindowProcW;
-    cls.cbClsExtra = 0;
-    cls.cbWndExtra = 0;
-    cls.hInstance = GetModuleHandle(nullptr);
-    cls.hIcon = nullptr;
-    cls.hCursor = nullptr;
-    cls.hbrBackground = nullptr;
-    cls.lpszMenuName = nullptr;
-    cls.lpszClassName = L"MJ";
-    cls.hIconSm = nullptr;
-    RegisterClassExW(&cls);
-    HWND hwnd = CreateWindowW(cls.lpszClassName, L"DirectX Window", WS_OVERLAPPEDWINDOW, 0, 0, 100, 100,
-                             nullptr, nullptr, cls.hInstance, nullptr);
-    if (hwnd == nullptr) {
-        UnregisterClassW(cls.lpszClassName, cls.hInstance);
-        return false;
-    }
-
-    ID3D12Device* d3dDevice = nullptr;
-    ID3D12CommandQueue* d3dCommandQueue = nullptr;
-    IDXGIFactory4* dxgiFactory = nullptr;
-    IDXGISwapChain3* swapChain = nullptr;
-
-    const HMODULE D3D12Module = GetModuleHandleW(L"d3d12.dll");
-    const HMODULE DXGIModule = GetModuleHandleW(L"dxgi.dll");
-    void *CreateDXGIFactory1;
-    void *D3D12CreateDevice;
-    if (D3D12Module == nullptr || DXGIModule == nullptr) {
-        goto failed;
-    }
-
-    CreateDXGIFactory1 = reinterpret_cast<void *>(GetProcAddress(DXGIModule, "CreateDXGIFactory1"));
-    if (CreateDXGIFactory1 == nullptr) {
-        goto failed;
-    }
-
-    if (reinterpret_cast<long (__stdcall *)(const IID &, void **)>(CreateDXGIFactory1)(IID_PPV_ARGS(&dxgiFactory)) != S_OK) {
-        goto failed;
-    }
-
-    D3D12CreateDevice = reinterpret_cast<void *>(GetProcAddress(D3D12Module, "D3D12CreateDevice"));
-    if (D3D12CreateDevice == nullptr) {
-        goto failed;
-    }
-
-    if (reinterpret_cast<long (__stdcall *)(IUnknown *, D3D_FEATURE_LEVEL, const IID &, void **)>(D3D12CreateDevice)(
-        nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&d3dDevice)) != S_OK) {
-        goto failed;
-    }
-
-    {
-        D3D12_COMMAND_QUEUE_DESC QueueDesc;
-        QueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        QueueDesc.Priority = 0;
-        QueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-        QueueDesc.NodeMask = 0;
-
-        if (d3dDevice->CreateCommandQueue(&QueueDesc, __uuidof(ID3D12CommandQueue), (void **)&d3dCommandQueue) != S_OK) {
-            goto failed;
-        }
-
-        DXGI_SWAP_CHAIN_DESC1 sd = {};
-        sd.BufferCount = NUM_BACK_BUFFERS;
-        sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-        sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        sd.SampleDesc.Count = 1;
-        sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
-        IDXGISwapChain1 *SwapChain;
-        if (dxgiFactory->CreateSwapChainForHwnd(d3dCommandQueue, hwnd, &sd, NULL, NULL, &SwapChain) != S_OK) {
-            goto failed;
-        }
-        if (SwapChain->QueryInterface(IID_PPV_ARGS(&swapChain)) != S_OK) {
-            SwapChain->Release();
-            goto failed;
-        }
-        SwapChain->Release();
-    }
-
-    DestroyWindow(hwnd);
-    UnregisterClassW(cls.lpszClassName, cls.hInstance);
-
-    {
-        void **swapChainVTable = *reinterpret_cast<void ***>(swapChain);
-        void **commandQueueVTable = *reinterpret_cast<void ***>(d3dCommandQueue);
-        void **dxgiFactoryVTable = *reinterpret_cast<void ***>(dxgiFactory);
-
-        fnCreateSwapChain_ = dxgiFactoryVTable[10];
-        fnCreateSwapChainForHwndChain_ = dxgiFactoryVTable[15];
-
-        fnPresent_ = swapChainVTable[8];
-        fnPresent1_ = swapChainVTable[22];
-
-        fnResizeBuffers_ = swapChainVTable[13];
-        fnResizeBuffers1_ = swapChainVTable[39];
-
-        fnExecuteCommandLists_ = commandQueueVTable[10];
-    }
-
-    swapChain->Release();
-    d3dCommandQueue->Release();
-    dxgiFactory->Release();
-    d3dDevice->Release();
-
-    return true;
-
-failed:
-    DestroyWindow(hwnd);
-    UnregisterClassW(cls.lpszClassName, cls.hInstance);
-    if (swapChain) {
-        swapChain->Release();
-    }
-    if (d3dCommandQueue) {
-        d3dCommandQueue->Release();
-    }
-    if (dxgiFactory) {
-        dxgiFactory->Release();
-    }
-    if (d3dDevice) {
-        d3dDevice->Release();
-        d3dDevice = nullptr;
-    }
-    return false;
-}
-
-static inline int GetCorrectDXGIFormat(int eCurrentFormat) {
-    switch (eCurrentFormat) {
-        case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
-            return DXGI_FORMAT_R8G8B8A8_UNORM;
-        default:
-            return eCurrentFormat;
-    }
+    releaseDeviceResources();
+    releaseCommandQueue();
 }
 
 bool D3DRenderer::initOverlay() {
@@ -445,15 +185,73 @@ void D3DRenderer::HeapDescriptorFree(D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle,
     freeDescriptors_.push_back(static_cast<uint32_t>(cpuIdx));
 }
 
-void D3DRenderer::overlay(IDXGISwapChain3 *pSwapChain) {
+void D3DRenderer::overlayScene(const UiSceneFrame &frame) {
     std::lock_guard lock(deviceMutex_);
-    if (commandQueue_ == nullptr || !ImGui::GetCurrentContext())
+    if (!frame.device || !frame.queue || !frame.swapChain || !frame.target.ptr || !isUiSceneFormatSupported(frame.format, frame.layer) || !ImGui::GetCurrentContext())
         return;
-    // Validate only a new swap-chain/queue pair. Creation, resize and loss
-    // hooks reset the binding, so steady frames skip COM identity queries.
-    if ((pSwapChain != boundSwapChain_ || commandQueue_ != boundQueue_) && !bindSwapChain(pSwapChain))
+    HRESULT removed = frame.device->GetDeviceRemovedReason();
+    if (FAILED(removed)) {
+        if (device_) handleDeviceLost(L"UI_SCENE device", removed);
         return;
-    renderFrame(pSwapChain);
+    }
+    DXGI_SWAP_CHAIN_DESC sd{};
+    if (FAILED(frame.swapChain->GetDesc(&sd)) || !sd.OutputWindow || !IsWindow(sd.OutputWindow) || sd.BufferCount == 0 || sd.BufferCount > 8 ||
+        !std::isfinite(frame.viewport.Width) || !std::isfinite(frame.viewport.Height) || frame.viewport.TopLeftX != 0 || frame.viewport.TopLeftY != 0 ||
+        frame.viewport.Width <= 0 || frame.viewport.Height <= 0 || frame.viewport.Width > 16384 || frame.viewport.Height > 16384)
+        return;
+    if (sd.OutputWindow != gameWindow_ || windowDestroyed_.load(std::memory_order_acquire) || !ImGui::GetIO().BackendPlatformUserData) {
+        // Ignore auxiliary game windows while the existing main window lives.
+        if (sd.OutputWindow != gameWindow_ && IsWindow(gameWindow_) && !windowDestroyed_.load(std::memory_order_acquire)) return;
+        releaseDeviceResources();
+        if (oldWndProc_ && IsWindow(gameWindow_) && !windowDestroyed_.load(std::memory_order_acquire))
+            SetWindowLongPtrW(gameWindow_, GWLP_WNDPROC, static_cast<LONG_PTR>(oldWndProc_));
+        oldWndProc_ = 0;
+        if (ImGui::GetIO().BackendPlatformUserData) ImGui_ImplWin32_Shutdown();
+        gameWindow_ = sd.OutputWindow;
+        if (!ImGui_ImplWin32_Init(gameWindow_)) return;
+        windowDestroyed_.store(false, std::memory_order_release);
+        input::resetKeyChordStates();
+    }
+    IUnknown *identity = nullptr;
+    if (FAILED(frame.device->QueryInterface(IID_PPV_ARGS(&identity)))) return;
+    UINT width = sd.BufferDesc.Width, height = sd.BufferDesc.Height;
+    // There may be two RenderDrawData submissions per game frame. Allocators
+    // and ImGui vertex/index buffers share the same submission ring.
+    const UINT frameCount = 2 * sd.BufferCount;
+    bool changed = identity != deviceIdentity_ || frame.queue != commandQueue_ || frame.swapChain != boundSwapChain_ || sceneWidth_ != width || sceneHeight_ != height ||
+                   sceneFormat_ != sd.BufferDesc.Format || frameCount_ != frameCount || !ImGui::GetIO().BackendRendererUserData;
+    if (changed) {
+        releaseDeviceResources();
+        releaseCommandQueue();
+        frame.queue->AddRef();
+        commandQueue_ = frame.queue;
+        if (!queueUsesDevice(identity)) {
+            identity->Release();
+            releaseCommandQueue();
+            return;
+        }
+        frame.device->AddRef();
+        if (!createDeviceObjects(frameCount, frame.device, identity))
+            return;
+        boundSwapChain_ = frame.swapChain;
+        sceneWidth_ = width;
+        sceneHeight_ = height;
+        sceneFormat_ = sd.BufferDesc.Format;
+        sceneFirstDrawPending_ = {true, true};
+        fwprintf(stderr, L"[EROverlay] UI_SCENE generation %llu: %ux%u format=%u swapchain-format=%u offscreen-format=%u HWND=%p layer=%ls; borrowing game RTV\n",
+                 ++sceneGeneration_, width, height, unsigned(frame.format), unsigned(sd.BufferDesc.Format), unsigned(DXGI_FORMAT_R8G8B8A8_UNORM), gameWindow_,
+                 frame.layer == RenderLayer::BelowUI ? L"below-ui" : L"above-ui");
+    } else {
+        identity->Release();
+    }
+    // Frame resources belong to Overlay; no game back-buffer is retained.
+    if (sceneSequence_ != frame.sequence) {
+        drawLayers_->discard();
+        sceneSequence_ = frame.sequence;
+    }
+    frameIndex_ = static_cast<UINT>(imguiFrame_ % frameCount_);
+    targetFormat_ = frame.format;
+    renderCommands(frame.target, frame.viewport, frame.layer);
 }
 
 bool D3DRenderer::queueUsesDevice(IUnknown *deviceIdentity) const {
@@ -470,87 +268,12 @@ bool D3DRenderer::queueUsesDevice(IUnknown *deviceIdentity) const {
     return matches;
 }
 
-bool D3DRenderer::bindSwapChain(IDXGISwapChain3 *pSwapChain) {
-    DXGI_SWAP_CHAIN_DESC sd;
-    if (FAILED(pSwapChain->GetDesc(&sd)) || (gameWindow_ != nullptr && sd.OutputWindow != nullptr && sd.OutputWindow != gameWindow_))
-        return false;
-
-    if (swapChainIdentity_) {
-        IUnknown *currentIdentity = nullptr;
-        if (FAILED(pSwapChain->QueryInterface(IID_PPV_ARGS(&currentIdentity))))
-            return false;
-
-        bool replaced = currentIdentity != swapChainIdentity_;
-        currentIdentity->Release();
-        if (replaced) {
-            releaseDeviceResources(L"swap-chain replacement");
-            resetCommandQueueCapture();
-            return false;
-        }
-    }
-
-    ID3D12Device *currentDevice = nullptr;
-    HRESULT hr = pSwapChain->GetDevice(IID_PPV_ARGS(&currentDevice));
-    if (FAILED(hr)) {
-        if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-            handleDeviceLost(L"IDXGISwapChain::GetDevice", hr);
-        }
-        return false;
-    }
-
-    IUnknown *currentDeviceIdentity = nullptr;
-    if (FAILED(currentDevice->QueryInterface(IID_PPV_ARGS(&currentDeviceIdentity)))) {
-        currentDevice->Release();
-        return false;
-    }
-
-    bool replaced = deviceIdentity_ && currentDeviceIdentity != deviceIdentity_;
-    bool queueMatches = !replaced && queueUsesDevice(currentDeviceIdentity);
-    hr = queueMatches && device_ ? device_->GetDeviceRemovedReason() : S_OK;
-    if (replaced || !queueMatches || hr != S_OK) {
-        currentDeviceIdentity->Release();
-        currentDevice->Release();
-        if (replaced) {
-            releaseDeviceResources(L"swap-chain device replacement");
-            resetCommandQueueCapture();
-        } else if (!queueMatches) {
-            resetCommandQueueCapture();
-        } else {
-            handleDeviceLost(L"GetDeviceRemovedReason", hr);
-        }
-        return false;
-    }
-
-    if (!ImGui::GetIO().BackendRendererUserData) {
-        if (!createDeviceObjects(pSwapChain, sd, currentDevice, currentDeviceIdentity))
-            return false;
-    } else {
-        currentDeviceIdentity->Release();
-        currentDevice->Release();
-    }
-
-    if (!backBuffer_ && !createRenderTargets(pSwapChain, sd))
-        return false;
-    boundSwapChain_ = pSwapChain;
-    boundQueue_ = commandQueue_;
-    return true;
-}
-
-bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd, ID3D12Device *device, IUnknown *deviceIdentity) {
-    IUnknown *swapChainIdentity = nullptr;
-    if (FAILED(pSwapChain->QueryInterface(IID_PPV_ARGS(&swapChainIdentity)))) {
-        deviceIdentity->Release();
-        device->Release();
-        return false;
-    }
-
+bool D3DRenderer::createDeviceObjects(UINT frameCount, ID3D12Device *device, IUnknown *deviceIdentity) {
     // Owned from here on; every failure path releases them with the rest.
     device_ = device;
     deviceIdentity_ = deviceIdentity;
-    swapChainIdentity_ = swapChainIdentity;
-    buffersCounts_ = sd.BufferCount;
-
-    renderTargets_.clear();
+    frameCount_ = frameCount;
+    targetFormat_ = DXGI_FORMAT_R10G10B10A2_UNORM;
 
     enum {
         DESCRIPTOR_COUNT = 1024,
@@ -562,7 +285,7 @@ bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SW
         desc.NumDescriptors = DESCRIPTOR_COUNT;
         desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&descriptorHeap_)) != S_OK) {
-            releaseDeviceResources(L"SRV descriptor heap creation failure");
+            releaseDeviceResources();
             return false;
         }
         srvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -572,41 +295,36 @@ bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SW
     {
         D3D12_DESCRIPTOR_HEAP_DESC desc = {};
         desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        desc.NumDescriptors = buffersCounts_ + DESCRIPTOR_COUNT;
+        desc.NumDescriptors = DESCRIPTOR_COUNT;
         desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
         desc.NodeMask = 1;
         if (device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvDescriptorHeap_)) != S_OK) {
-            releaseDeviceResources(L"RTV descriptor heap creation failure");
+            releaseDeviceResources();
             return false;
         }
 
         rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-        commandAllocator_ = new ID3D12CommandAllocator *[buffersCounts_]();
+        commandAllocator_ = new ID3D12CommandAllocator *[frameCount_]();
         freeDescriptors_.resize(DESCRIPTOR_COUNT);
         for (int i = DESCRIPTOR_COUNT; i > 0; i--) {
             freeDescriptors_[DESCRIPTOR_COUNT - i] = i - 1;
         }
-        for (uint32_t i = 0; i < buffersCounts_; ++i) {
-            renderTargets_.push_back(rtvHandle);
-            rtvHandle.ptr += rtvDescriptorSize_;
-        }
     }
 
-    for (UINT i = 0; i < buffersCounts_; ++i) {
+    for (UINT i = 0; i < frameCount_; ++i) {
         if (device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator_[i])) != S_OK) {
-            releaseDeviceResources(L"command allocator creation failure");
+            releaseDeviceResources();
             return false;
         }
     }
 
     if (device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator_[0], nullptr, IID_PPV_ARGS(&commandList_)) != S_OK ||
         commandList_->Close() != S_OK) {
-        releaseDeviceResources(L"command list creation failure");
+        releaseDeviceResources();
         return false;
     }
     if (!initializeTextureUpload()) {
-        releaseDeviceResources(L"texture upload initialization failure");
+        releaseDeviceResources();
         return false;
     }
 
@@ -617,8 +335,8 @@ bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SW
         loadFont();
     ImGui_ImplDX12_InitInfo init_info = {};
     init_info.Device = device;
-    init_info.NumFramesInFlight = static_cast<int>(buffersCounts_);
-    init_info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    init_info.NumFramesInFlight = static_cast<int>(frameCount_);
+    init_info.RTVFormat = DXGI_FORMAT_R10G10B10A2_UNORM;
     init_info.SrvDescriptorHeap = descriptorHeap_;
     // ImGui blocks until each font atlas upload completes. Waiting on the
     // game's queue would also drain the game's frame, so use the upload queue.
@@ -626,8 +344,8 @@ bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SW
     init_info.SrvDescriptorAllocFn = SrvDescriptorAlloc;
     init_info.SrvDescriptorFreeFn = SrvDescriptorFree;
     init_info.UserData = this;
-    if (!ImGui_ImplDX12_Init(&init_info)) {
-        releaseDeviceResources(L"ImGui DX12 initialization failure");
+    if (!ImGui_ImplDX12_Init(&init_info) || !ImGui_ImplDX12_CreateDeviceObjects()) {
+        releaseDeviceResources();
         return false;
     }
     ImGui::GetMainViewport()->PlatformHandleRaw = gameWindow_;
@@ -643,40 +361,22 @@ bool D3DRenderer::createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SW
     return true;
 }
 
-bool D3DRenderer::createRenderTargets(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd) {
-    if (device_ == nullptr)
-        return false;
-    backBuffer_ = new ID3D12Resource *[buffersCounts_]();
-    for (UINT i = 0; i < buffersCounts_; i++) {
-        ID3D12Resource *buffer;
-        if (pSwapChain->GetBuffer(i, IID_PPV_ARGS(&buffer)) != S_OK) {
-            continue;
-        }
-        D3D12_RENDER_TARGET_VIEW_DESC desc = {};
-        desc.Format = static_cast<DXGI_FORMAT>(GetCorrectDXGIFormat(sd.BufferDesc.Format));
-        desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-        device_->CreateRenderTargetView(buffer, &desc, renderTargets_[i]);
-        backBuffer_[i] = buffer;
-    }
-    if (backBuffer_[0] != nullptr)
-        return true;
-    CleanupRenderTarget();
-    return false;
-}
-
-void D3DRenderer::renderFrame(IDXGISwapChain3 *pSwapChain) {
-    currentBackBufferIndex_ = pSwapChain->GetCurrentBackBufferIndex();
+void D3DRenderer::renderCommands(D3D12_CPU_DESCRIPTOR_HANDLE target, const D3D12_VIEWPORT &viewport, RenderLayer layer) {
     if (deviceLost_) {
         handleDeviceLost(L"frame submission", DXGI_ERROR_DEVICE_REMOVED);
         return;
     }
-    UINT bufferIndex = currentBackBufferIndex_;
-    if (bufferIndex >= buffersCounts_ || !backBuffer_[bufferIndex] || !frameFence_)
+    UINT bufferIndex = frameIndex_;
+    if (bufferIndex >= frameCount_ || !target.ptr || !frameFence_)
         return;
-    // Reuse this back buffer's allocator and ImGui's next vertex buffers only
+    // Reuse this frame slot's allocator and ImGui's next vertex buffers only
     // after the frame that last used them has completed on the GPU.
     uint64_t completed = frameFence_->GetCompletedValue();
-    if (allocatorFences_[bufferIndex] > completed || imguiFences_[imguiFrame_ % imguiFences_.size()] > completed)
+    if (allocatorFences_[bufferIndex] > completed)
+        return;
+    // Reserve the following slot for the upper layer before building a shared
+    // frame. If only one slot is free, the upper callback may still use it.
+    if (layer == RenderLayer::BelowUI && allocatorFences_[(bufferIndex + 1) % frameCount_] > completed)
         return;
     processTextureUploads();
     if (deviceLost_) {
@@ -684,46 +384,69 @@ void D3DRenderer::renderFrame(IDXGISwapChain3 *pSwapChain) {
         return;
     }
 
-    ImGui_ImplDX12_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
+    if (layer == RenderLayer::BelowUI || !drawLayers_->pending()) {
+        drawLayers_->begin();
+        ImGui_ImplDX12_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::GetIO().DisplaySize = {viewport.Width, viewport.Height};
+        ImGui::NewFrame();
 
-    er::input::beginFrame();
-    drawingFrame_ = true;
-    bool oldShowMenu = gShowMenu;
-    gShowMenu = pluginsRender();
-    if (gShowMenu != oldShowMenu) {
-        gHooking->showMouseCursor(gShowMenu);
+        er::input::beginFrame();
+        drawingFrame_ = true;
+        textureDrawFence_ = frameValue_ + (layer == RenderLayer::BelowUI ? 2 : 1);
+        bool oldShowMenu = gShowMenu;
+        gShowMenu = pluginsRender(&DrawLayers::observe, drawLayers_.get());
+        if (gShowMenu != oldShowMenu && gHooking) {
+            gHooking->showMouseCursor(gShowMenu);
+        }
+        ImGui::Render();
+        drawLayers_->finish(ImGui::GetDrawData());
     }
-
-    ImGui::Render();
-    auto *drawData = ImGui::GetDrawData();
+    auto *drawData = drawLayers_->select(layer);
+    struct RestoreLayer {
+        DrawLayers *layers;
+        bool last;
+        ~RestoreLayer() noexcept {
+            layers->restore();
+            if (last)
+                layers->discard();
+        }
+    } restore{drawLayers_.get(), layer == RenderLayer::AboveUI};
     bool texturesPending = false;
     if (drawData->Textures != nullptr)
         for (const auto *texture: *drawData->Textures)
             texturesPending |= texture->Status != ImTextureStatus_OK;
-    // With nothing visible, leave the back buffer and the game's queue alone:
+    // With nothing visible, leave the game target and queue alone:
     // no allocator reset, barriers or ExecuteCommandLists for an empty frame.
-    if (drawData->DisplaySize.x <= 0 || drawData->DisplaySize.y <= 0 || (drawData->TotalVtxCount == 0 && !texturesPending)) {
+    if (drawData->DisplaySize.x <= 0 || drawData->DisplaySize.y <= 0 || (drawData->CmdListsCount == 0 && !texturesPending)) {
         finishTextureFrame(false);
         return;
     }
 
-    currentRTV_ = renderTargets_[bufferIndex];
+    OffscreenTarget *underlay = nullptr;
+    if (layer == RenderLayer::BelowUI && drawData->CmdListsCount > 0) {
+        ensureOffscreenSize(sceneUnderlay_, int(drawData->DisplaySize.x), int(drawData->DisplaySize.y));
+        underlay = &sceneUnderlay_;
+        if (!underlay->texture) {
+            finishTextureFrame(false);
+            return;
+        }
+    }
+    currentRTV_ = underlay ? underlay->rtvCpuHandle : target;
     ID3D12CommandAllocator *commandAllocator = commandAllocator_[bufferIndex];
     if (FAILED(commandAllocator->Reset()) || FAILED(commandList_->Reset(commandAllocator, nullptr))) {
         handleDeviceLost(L"overlay command list reset", DXGI_ERROR_DEVICE_REMOVED);
         return;
     }
 
-    D3D12_RESOURCE_BARRIER barrier = {};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = backBuffer_[bufferIndex];
-    barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    commandList_->ResourceBarrier(1, &barrier);
+    if (underlay) {
+        D3D12_RESOURCE_BARRIER transition{};
+        transition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        transition.Transition = {underlay->texture, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET};
+        commandList_->ResourceBarrier(1, &transition);
+        const float transparent[4]{};
+        commandList_->ClearRenderTargetView(currentRTV_, transparent, 0, nullptr);
+    }
     commandList_->OMSetRenderTargets(1, &currentRTV_, FALSE, nullptr);
     commandList_->SetDescriptorHeaps(1, &descriptorHeap_);
 
@@ -734,11 +457,20 @@ void D3DRenderer::renderFrame(IDXGISwapChain3 *pSwapChain) {
         handleDeviceLost(L"ID3D12CommandQueue::Wait", DXGI_ERROR_DEVICE_REMOVED);
         return;
     }
-    ImGui_ImplDX12_RenderDrawData(drawData, commandList_);
+    const auto gameFormat = targetFormat_;
+    if (underlay) targetFormat_ = DXGI_FORMAT_R8G8B8A8_UNORM;
+    ImGui_ImplDX12_RenderDrawData(drawData, commandList_, targetFormat_);
+    targetFormat_ = gameFormat;
+    if (underlay) {
+        D3D12_RESOURCE_BARRIER transition{};
+        transition.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        transition.Transition = {underlay->texture, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE};
+        commandList_->ResourceBarrier(1, &transition);
+        currentRTV_ = target;
+        commandList_->OMSetRenderTargets(1, &currentRTV_, FALSE, nullptr);
+        ImGui_ImplDX12_CompositeUnderlay(commandList_, underlay->srvGpuHandle, gameFormat, drawData->DisplaySize.x, drawData->DisplaySize.y);
+    }
 
-    barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-    commandList_->ResourceBarrier(1, &barrier);
     if (FAILED(commandList_->Close())) {
         handleDeviceLost(L"ID3D12GraphicsCommandList::Close", DXGI_ERROR_DEVICE_REMOVED);
         return;
@@ -747,9 +479,16 @@ void D3DRenderer::renderFrame(IDXGISwapChain3 *pSwapChain) {
     ID3D12CommandList *commandLists[] = { commandList_ };
     commandQueue_->ExecuteCommandLists(1, commandLists);
     finishTextureFrame();
+    auto layerIndex = layer == RenderLayer::BelowUI ? 1 : 0;
+    if (sceneFirstDrawPending_[layerIndex] && drawData->TotalVtxCount > 0) {
+        fwprintf(stderr, L"[EROverlay] UI_SCENE first draw submitted: layer=%ls vertices=%d indices=%d format=%u\n", layer == RenderLayer::BelowUI ? L"below-ui" : L"above-ui",
+                 drawData->TotalVtxCount, drawData->TotalIdxCount, unsigned(targetFormat_));
+        sceneFirstDrawPending_[layerIndex] = false;
+    }
 }
 
 LRESULT D3DRenderer::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (msg == WM_NCDESTROY) gD3DRenderer->windowDestroyed_.store(true, std::memory_order_release);
     ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
     auto &io = ImGui::GetIO();
     if (io.WantCaptureMouse) {
@@ -1016,105 +755,6 @@ void D3DRenderer::initStyle() {
     style.TabRounding = 4;
 }
 
-void D3DRenderer::CleanupRenderTarget() {
-    std::lock_guard lock(deviceMutex_);
-    boundSwapChain_ = nullptr;
-    waitForFrames();
-    if (!backBuffer_) return;
-    for (UINT i = 0; i < buffersCounts_; ++i) {
-        if (backBuffer_[i]) {
-            backBuffer_[i]->Release();
-            backBuffer_[i] = nullptr;
-        }
-    }
-    delete[] backBuffer_;
-    backBuffer_ = nullptr;
-}
-
-HRESULT WINAPI D3DRenderer::hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags) {
-    gD3DRenderer->overlay(pSwapChain);
-    HRESULT hr = gD3DRenderer->oPresent_(pSwapChain, SyncInterval, Flags);
-    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-        gD3DRenderer->handleDeviceLost(L"IDXGISwapChain::Present", hr);
-    }
-    return hr;
-}
-
-HRESULT WINAPI D3DRenderer::hkPresent1(IDXGISwapChain3 *pSwapChain,
-                                       UINT SyncInterval,
-                                       UINT PresentFlags,
-                                       const DXGI_PRESENT_PARAMETERS *pPresentParameters) {
-    gD3DRenderer->overlay(pSwapChain);
-    HRESULT hr = gD3DRenderer->oPresent1_(pSwapChain, SyncInterval, PresentFlags, pPresentParameters);
-    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-        gD3DRenderer->handleDeviceLost(L"IDXGISwapChain1::Present1", hr);
-    }
-    return hr;
-}
-
-HRESULT WINAPI D3DRenderer::hkResizeBuffers(IDXGISwapChain *pSwapChain,
-                                            UINT BufferCount,
-                                            UINT Width,
-                                            UINT Height,
-                                            DXGI_FORMAT NewFormat,
-                                            UINT SwapChainFlags) {
-    gD3DRenderer->releaseDeviceResources(L"swap-chain ResizeBuffers");
-    gD3DRenderer->releaseCommandQueue();
-    HRESULT hr = gD3DRenderer->oResizeBuffers_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
-    gD3DRenderer->installExecuteCommandListsHook();
-    return hr;
-}
-
-HRESULT WINAPI D3DRenderer::hkResizeBuffers1(IDXGISwapChain3 *pSwapChain,
-                                             UINT BufferCount,
-                                             UINT Width,
-                                             UINT Height,
-                                              DXGI_FORMAT NewFormat,
-                                              UINT SwapChainFlags,
-                                              const UINT *pCreationNodeMask,
-                                              IUnknown *const *ppPresentQueue) {
-    gD3DRenderer->releaseDeviceResources(L"swap-chain ResizeBuffers1");
-    gD3DRenderer->releaseCommandQueue();
-    HRESULT hr = gD3DRenderer->oResizeBuffers1_(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags, pCreationNodeMask, ppPresentQueue);
-    gD3DRenderer->installExecuteCommandListsHook();
-    return hr;
-}
-
-void WINAPI D3DRenderer::hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *const *ppCommandLists) {
-    bool captured = false;
-    if (!gD3DRenderer->commandQueue_) {
-        D3D12_COMMAND_QUEUE_DESC desc = pCommandQueue->GetDesc();
-        if (desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) {
-            pCommandQueue->AddRef();
-            gD3DRenderer->commandQueue_ = pCommandQueue;
-            captured = true;
-        }
-    }
-    gD3DRenderer->oExecuteCommandLists_(pCommandQueue, NumCommandLists, ppCommandLists);
-    if (captured) {
-        gD3DRenderer->releaseExecuteCommandListsHook();
-    }
-}
-
-HRESULT WINAPI D3DRenderer::hkCreateSwapChain(IDXGIFactory *pFactory, IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain) {
-    HRESULT hr = gD3DRenderer->oCreateSwapChain_(pFactory, pDevice, pDesc, ppSwapChain);
-    HWND hwnd = pDesc != nullptr ? pDesc->OutputWindow : nullptr;
-    gD3DRenderer->handleSwapChainCreated(hwnd, pDevice, hr);
-    return hr;
-}
-
-HRESULT WINAPI D3DRenderer::hkCreateSwapChainForHwnd(IDXGIFactory *pFactory,
-                                                     IUnknown *pDevice,
-                                                     HWND hWnd,
-                                                     const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                     const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc,
-                                                     IDXGIOutput *pRestrictToOutput,
-                                                     IDXGISwapChain1 **ppSwapChain) {
-    HRESULT hr = gD3DRenderer->oCreateSwapChainForHwnd_(pFactory, pDevice, hWnd, pDesc, pFullscreenDesc, pRestrictToOutput, ppSwapChain);
-    gD3DRenderer->handleSwapChainCreated(hWnd, pDevice, hr);
-    return hr;
-}
-
 // ---- Offscreen rendering ----
 
 OffscreenContext *D3DRenderer::CreateOffscreen() {
@@ -1123,44 +763,22 @@ OffscreenContext *D3DRenderer::CreateOffscreen() {
     return ctx;
 }
 
+void D3DRenderer::destroyOffscreenTarget(OffscreenTarget &target) {
+    deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
+    target = {};
+}
+
 void D3DRenderer::DestroyOffscreen(OffscreenContext *ctx) {
     if (!ctx)
         return;
-    for (auto &target: ctx->targets) {
-        if (target.texture) {
-            deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
-            target.texture = nullptr;
-            target.srvCpuHandle = {};
-            target.srvGpuHandle = {};
-        }
-        if (target.srvCpuHandle.ptr) {
-            HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
-            target.srvCpuHandle.ptr = 0;
-            target.srvGpuHandle.ptr = 0;
-        }
-    }
+    destroyOffscreenTarget(ctx->target);
     delete ctx;
 }
 
-void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
-    if (!ctx || ctx->currentIndex >= ctx->targets.size())
-        return;
-    auto &target = ctx->targets[ctx->currentIndex];
+void D3DRenderer::ensureOffscreenSize(OffscreenTarget &target, int w, int h) {
     if (target.texture && target.width == w && target.height == h)
         return;
-
-    // Release old resources
-    if (target.texture) {
-        deferTexture(target.texture, target.srvCpuHandle, target.srvGpuHandle);
-        target.texture = nullptr;
-        target.srvCpuHandle = {};
-        target.srvGpuHandle = {};
-    }
-    if (target.srvCpuHandle.ptr) {
-        HeapDescriptorFree(target.srvCpuHandle, target.srvGpuHandle);
-        target.srvCpuHandle.ptr = 0;
-        target.srvGpuHandle.ptr = 0;
-    }
+    destroyOffscreenTarget(target);
 
     target.width = w;
     target.height = h;
@@ -1197,7 +815,7 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
     // back buffer collide when more than one plugin creates an offscreen target.
     auto descriptorIndex = (target.srvCpuHandle.ptr - descriptorHeap_->GetCPUDescriptorHandleForHeapStart().ptr) / srvDescriptorSize_;
     target.rtvCpuHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-    target.rtvCpuHandle.ptr += rtvDescriptorSize_ * (buffersCounts_ + descriptorIndex);
+    target.rtvCpuHandle.ptr += rtvDescriptorSize_ * descriptorIndex;
     // Create RTV
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -1216,9 +834,9 @@ void D3DRenderer::ensureOffscreenSize(OffscreenContext *ctx, int w, int h) {
 void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+    if (!ctx)
         return;
-    auto &target = ctx->targets[ctx->currentIndex];
+    auto &target = ctx->target;
     if (!target.texture)
         return;
     auto *cl = ctx->renderer ? ctx->renderer->commandList_ : nullptr;
@@ -1236,6 +854,7 @@ void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd
     float clearColor[4] = {0.f, 0.f, 0.f, 0.f};
     cl->ClearRenderTargetView(target.rtvCpuHandle, clearColor, 0, nullptr);
     cl->OMSetRenderTargets(1, &target.rtvCpuHandle, FALSE, nullptr);
+    ImGui_ImplDX12_SetRenderTargetFormat(cl, DXGI_FORMAT_R8G8B8A8_UNORM);
     if (ctx->local) {
         // The local vertices and clip rectangles use DisplayPos as origin,
         // allowing the stock ImGui backend to keep handling scissors.
@@ -1254,9 +873,9 @@ void D3DRenderer::BeginOffscreenCallback(const ImDrawList *list, const ImDrawCmd
 void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd) {
     UNREFERENCED_PARAMETER(list);
     auto *ctx = (OffscreenContext *)cmd->UserCallbackData;
-    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+    if (!ctx)
         return;
-    auto &target = ctx->targets[ctx->currentIndex];
+    auto &target = ctx->target;
     if (!target.texture)
         return;
     auto *cl = ctx->renderer ? ctx->renderer->commandList_ : nullptr;
@@ -1272,6 +891,7 @@ void D3DRenderer::EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *
     cl->ResourceBarrier(1, &barrier);
 
     cl->OMSetRenderTargets(1, &ctx->renderer->currentRTV_, FALSE, nullptr);
+    ImGui_ImplDX12_SetRenderTargetFormat(cl, ctx->renderer->targetFormat_);
 }
 
 bool D3DRenderer::BeginOffscreen(OffscreenContext *ctx) {
@@ -1300,20 +920,13 @@ bool D3DRenderer::BeginOffscreenRegion(OffscreenContext *ctx, float x, float y, 
 }
 
 bool D3DRenderer::beginOffscreen(OffscreenContext *ctx, int w, int h) {
-    if (!ctx || !device_ || !rtvDescriptorHeap_ || buffersCounts_ == 0 || w <= 0 || h <= 0)
+    if (!ctx || !device_ || !rtvDescriptorHeap_ || w <= 0 || h <= 0)
         return false;
 
-    if (ctx->targets.size() != buffersCounts_) {
-        ctx->targets.resize(buffersCounts_);
-    }
-    // Use one offscreen render target per swap-chain back buffer. Reusing a single offscreen
-    // texture across frames can race with the previous frame still sampling it, which shows up
-    // as ghosted minimap decorations from other frames.
-    ctx->currentIndex = currentBackBufferIndex_ % buffersCounts_;
-    auto &target = ctx->targets[ctx->currentIndex];
-
-    // ensureOffscreenSize pairs the RTV with the target's unique SRV slot.
-    ensureOffscreenSize(ctx, w, h);
+    // Every write and sample uses the same DIRECT queue. GPU queue order
+    // protects one reusable target across frames and both render stages.
+    auto &target = ctx->target;
+    ensureOffscreenSize(target, w, h);
     if (!target.texture)
         return false;
 
@@ -1323,9 +936,9 @@ bool D3DRenderer::beginOffscreen(OffscreenContext *ctx, int w, int h) {
 }
 
 void *D3DRenderer::EndOffscreen(OffscreenContext *ctx) {
-    if (!ctx || ctx->currentIndex >= ctx->targets.size())
+    if (!ctx)
         return nullptr;
-    auto &target = ctx->targets[ctx->currentIndex];
+    auto &target = ctx->target;
     if (!target.texture)
         return nullptr;
 

@@ -59,6 +59,11 @@ typedef struct {
     uintptr_t viewModel;
 } ERMapState;
 
+typedef struct {
+    bool loadingOrLogo;
+    bool fullScreenMap;
+} ERDisplayState;
+
 // Optional, size-gated CPU layout information for hash-verified executables.
 typedef struct {
     uint32_t size;
@@ -106,6 +111,9 @@ typedef struct {
     // Actual committed GPU allocation; render-thread query, nonzero after
     // upload submission. Older cores can use a conservative DDS size estimate.
     uint64_t (*textureMemoryBytes)(uint64_t token);
+    // Independent of map/resource readiness; safe to query on render. False
+    // means the display state is not initialized/validated: callers must hide.
+    bool (*readDisplayState)(ERDisplayState *state);
 } EROverlayNativeAPI;
 
 #define ER_NATIVE_API_V1_SIZE offsetof(EROverlayNativeAPI, readGameLayout)

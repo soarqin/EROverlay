@@ -381,6 +381,14 @@ void GameFiles::stop() {
     if (impl_->worker.joinable())
         impl_->worker.join();
 }
+bool GameFiles::readDisplayState(ERDisplayState &state) const {
+    state = {true, false};
+    if (!compatible())
+        return false;
+    const auto &profile = *impl_->profile;
+    return util::readDisplayState(impl_->base + profile.menu, impl_->base + profile.gameData, profile.layout, state);
+}
+
 bool GameFiles::readMapState(ERMapState &state) {
     state = {};
     if (!compatible())

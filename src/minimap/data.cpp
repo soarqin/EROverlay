@@ -266,27 +266,26 @@ private:
 uint32_t rawMap(uint8_t area, uint8_t x, uint8_t z) { return (uint32_t(area) << 24) | (uint32_t(x) << 16) | (uint32_t(z) << 8); }
 } // namespace
 
+bool hiddenByGame() {
+    if (nativeApi && nativeApi->size >= offsetof(EROverlayNativeAPI, readDisplayState) + sizeof(nativeApi->readDisplayState) && nativeApi->readDisplayState) {
+        ERDisplayState state{true, false};
+        return !nativeApi->readDisplayState(&state) || state.loadingOrLogo || state.fullScreenMap;
+    }
+    // Older cores expose only the loading state. Do not reintroduce the old
+    // blanket "any menu open" condition in this compatibility fallback.
+    return api->screenState() != 0;
+}
+
 void Data::update() {
     MapSnapshot next;
     const bool showOthers = showOthers_.load(std::memory_order_relaxed);
-    if (!nativeApi || !nativeApi->readMapState(&next.state)) {
-        next.onGUI = api->screenState() != 0;
+    if (hiddenByGame() || !nativeApi || !nativeApi->readMapState(&next.state)) {
         std::lock_guard lock(mutex_);
         snapshot_ = std::move(next);
         return;
     }
     auto addresses = api->getGameAddresses();
-    auto menu = pointer(addresses.csMenuManImp);
-    uint32_t menuState = 1;
-    if (menu)
-        read(menu + 0x1C, menuState);
-    next.onGUI = api->screenState() != 0 || menuState != 0;
-    next.valid = !next.onGUI;
-    if (next.onGUI) {
-        std::lock_guard lock(mutex_);
-        snapshot_ = std::move(next);
-        return;
-    }
+    next.valid = true;
     auto camera = pointer(addresses.fieldArea);
     camera = camera ? pointer(camera + 0x20) : 0;
     camera = camera ? pointer(camera + 0x18) : 0;

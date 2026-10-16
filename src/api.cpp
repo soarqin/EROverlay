@@ -160,7 +160,8 @@ const EROverlayNativeAPI *getEROverlayNativeAPI(uint32_t version) {
         [](void *offscreen, float x, float y, float width, float height) {
             return er::gD3DRenderer && er::gD3DRenderer->BeginOffscreenRegion(static_cast<er::OffscreenContext *>(offscreen), x, y, width, height);
         },
-        [](uint64_t token) -> uint64_t { return er::gD3DRenderer ? er::gD3DRenderer->textureMemoryBytes(token) : 0; }
+        [](uint64_t token) -> uint64_t { return er::gD3DRenderer ? er::gD3DRenderer->textureMemoryBytes(token) : 0; },
+        [](ERDisplayState *state) { return state && er::gGameFiles && er::gGameFiles->readDisplayState(*state); }
     };
     return &native;
 }

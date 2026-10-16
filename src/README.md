@@ -6,11 +6,11 @@ The core loader (`EROverlay.dll`) for ELDEN RING Overlay Hook. It hooks into the
 
 ---
 
-## ⚠️ Compatibility Note
+## Compatibility
 
-Do **not** use this mod alongside overlays such as `FPS Counter` in Nvidia GeForce Experience, `MSI Afterburner`, or `RivaTuner Statistics Server`. They hook the same DirectX APIs and will cause the game to crash.
+UI_SCENE is the only renderer. It uses signature- and RTTI-validated game hooks instead of DXGI hooks. Static address checks pass for game versions 1.05–1.17.1; 1.02–1.04.1 currently do not render overlays. See [UI_SCENE rendering](../docs/ui-scene-prototype.md) for behavior and verification scope.
 
-Minimap native file adapters cover hash-verified 1.02–1.17 historical EXEs and Steam 1.17.1. Offline address/layout regressions passed for all supplied old EXEs; per-version old-game visual testing remains pending. Atlas mods were verified with 12 atlases. See the [compatibility report](../docs/minimap-version-compatibility.md).
+Minimap native file adapters cover hash-verified 1.02–1.17 historical EXEs and Steam 1.17.1; this data coverage does not extend the renderer's version range above. Offline address/layout regressions passed for all supplied old EXEs; per-version old-game visual testing remains pending. Atlas mods were verified with 12 atlases. See the [compatibility report](../docs/minimap-version-compatibility.md).
 
 ---
 

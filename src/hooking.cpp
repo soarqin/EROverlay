@@ -1,5 +1,4 @@
 #include "hooking.hpp"
-#include "d3drenderer.hpp"
 #include "util/signature.hpp"
 
 #include <MinHook.h>
@@ -55,18 +54,7 @@ Hooking::Hooking() {
     findHooks();
 }
 
-Hooking::~Hooking() noexcept {
-    unhook();
-    MH_Uninitialize();
-}
-
-bool Hooking::hook() {
-    return gD3DRenderer && gD3DRenderer->hook();
-}
-
-void Hooking::unhook() {
-    if (gD3DRenderer) gD3DRenderer->unhook();
-}
+Hooking::~Hooking() noexcept { MH_Uninitialize(); }
 
 void Hooking::showMouseCursor(bool show) const {
     if (csMenuManImp_ == 0) return;

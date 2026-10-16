@@ -20,8 +20,7 @@ bool D3DRenderer::initializeTextureUpload() {
     if (FAILED(device_->CreateCommandQueue(&desc, IID_PPV_ARGS(&uploadQueue_))) || FAILED(device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&uploadFence_))) ||
         FAILED(device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&frameFence_))))
         return false;
-    allocatorFences_.assign(buffersCounts_, 0);
-    imguiFences_.assign(buffersCounts_, 0);
+    allocatorFences_.assign(frameCount_, 0);
     acceptingTextures_.store(true, std::memory_order_release);
     return true;
 }
@@ -69,7 +68,7 @@ ERTextureStatus D3DRenderer::pollTexture(uint64_t token, ERTextureView &view) {
     if (texture.status == ER_TEXTURE_READY) {
         view = {reinterpret_cast<void *>(texture.gpu.ptr), texture.image.width, texture.image.height};
         // Views are requested while building this frame's ImGui draw list.
-        texture.drawValue = std::max(texture.drawValue, frameValue_ + (drawingFrame_ ? 1 : 0));
+        texture.drawValue = std::max(texture.drawValue, drawingFrame_ ? std::max(textureDrawFence_, frameValue_ + 1) : frameValue_);
     }
     return texture.status;
 }
@@ -284,13 +283,13 @@ void D3DRenderer::finishTextureFrame(bool submitted) {
     }
     ++frameValue_;
     if (submitted) {
-        allocatorFences_[currentBackBufferIndex_] = frameValue_;
-        imguiFences_[imguiFrame_++ % imguiFences_.size()] = frameValue_;
+        allocatorFences_[frameIndex_] = frameValue_;
+        ++imguiFrame_;
     }
 }
 
 void D3DRenderer::waitForFrames() {
-    // Waiting is allowed only during teardown/resize, never the Present path.
+    // Waiting is allowed only during teardown/resize, never a render callback.
     if (!device_ || FAILED(device_->GetDeviceRemovedReason()))
         return;
     HANDLE event = CreateEventW(nullptr, FALSE, FALSE, nullptr);
@@ -311,7 +310,7 @@ void D3DRenderer::waitForFrames() {
 
 void D3DRenderer::deferTexture(ID3D12Resource *texture, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu) {
     if (texture)
-        retiredTextures_.push_back({texture, cpu, gpu, frameValue_ + (drawingFrame_ ? 1 : 0)});
+        retiredTextures_.push_back({texture, cpu, gpu, drawingFrame_ ? std::max(textureDrawFence_, frameValue_ + 1) : frameValue_});
     else
         HeapDescriptorFree(cpu, gpu);
 }
@@ -347,7 +346,6 @@ void D3DRenderer::releaseTextureUploads() {
     uploadValue_ = frameValue_ = imguiFrame_ = 0;
     drawingFrame_ = false;
     allocatorFences_.clear();
-    imguiFences_.clear();
 }
 
 } // namespace er

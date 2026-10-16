@@ -11,9 +11,9 @@ A Windows DLL overlay mod for Elden Ring that hooks into the DirectX 12 renderin
 
 ---
 
-## ⚠️ Compatibility Note
+## Compatibility
 
-Do **not** use this mod alongside overlays such as `FPS Counter` in Nvidia GeForce Experience, `MSI Afterburner`, or `RivaTuner Statistics Server`. They hook the same DirectX APIs and will cause the game to crash.
+UI_SCENE is the only renderer. It uses signature- and RTTI-validated game hooks instead of DXGI hooks. Static address checks pass for game versions 1.05–1.17.1; 1.02–1.04.1 currently do not render overlays. See [UI_SCENE rendering](docs/ui-scene-prototype.md) for behavior and verification scope.
 
 ---
 

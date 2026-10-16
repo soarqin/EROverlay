@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include "nativeapi.h"
+#include "plugin.hpp"
 #include "util/assets.hpp"
 
 #define WIN32_LEAN_AND_MEAN
@@ -10,6 +11,7 @@
 #include <windows.h>
 
 #include <atomic>
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -22,6 +24,10 @@ struct ImDrawCmd;
 
 namespace er {
 
+class UiSceneBridge;
+class DrawLayers;
+struct UiSceneFrame;
+
 struct OffscreenTarget {
     ID3D12Resource *texture = nullptr;
     D3D12_CPU_DESCRIPTOR_HANDLE rtvCpuHandle = {};
@@ -33,8 +39,7 @@ struct OffscreenTarget {
 
 struct OffscreenContext {
     class D3DRenderer *renderer = nullptr;
-    std::vector<OffscreenTarget> targets;
-    UINT currentIndex = 0;
+    OffscreenTarget target;
     bool local = false;
     ImVec2 origin{}, displayPos{}, displaySize{};
     int firstVertex = 0, firstCommand = 0;
@@ -45,7 +50,7 @@ class D3DRenderer {
     friend struct NativeTextureVerifier;
 
 public:
-    explicit D3DRenderer() = default;
+    explicit D3DRenderer();
     ~D3DRenderer() noexcept;
     D3DRenderer(D3DRenderer const &) = delete;
     D3DRenderer(D3DRenderer &&) = delete;
@@ -54,16 +59,11 @@ public:
 
     [[nodiscard]] inline bool isForeground() const { return GetForegroundWindow() == gameWindow_; }
 
-    [[nodiscard]] bool isDeviceLost() const { return deviceLost_; }
-
-    bool createDevice();
     bool hook();
     void unhook();
 
-    void disableAll();
-
     bool initOverlay();
-    void overlay(IDXGISwapChain3 *pSwapChain);
+    void overlayScene(const UiSceneFrame &frame);
 
     static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -89,7 +89,8 @@ public:
     static void EndOffscreenCallback(const ImDrawList *list, const ImDrawCmd *cmd);
 
 private:
-    void ensureOffscreenSize(OffscreenContext *ctx, int w, int h);
+    void destroyOffscreenTarget(OffscreenTarget &target);
+    void ensureOffscreenSize(OffscreenTarget &target, int w, int h);
     [[nodiscard]] bool beginOffscreen(OffscreenContext *ctx, int width, int height);
     struct NativeTexture {
         std::vector<uint8_t> bytes;
@@ -123,30 +124,13 @@ private:
     void deferTexture(ID3D12Resource *texture, D3D12_CPU_DESCRIPTOR_HANDLE cpu, D3D12_GPU_DESCRIPTOR_HANDLE gpu);
 
 private:
-    [[nodiscard]] bool bindSwapChain(IDXGISwapChain3 *pSwapChain);
     [[nodiscard]] bool queueUsesDevice(IUnknown *deviceIdentity) const;
-    [[nodiscard]] bool createDeviceObjects(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd, ID3D12Device *device, IUnknown *deviceIdentity);
-    [[nodiscard]] bool createRenderTargets(IDXGISwapChain3 *pSwapChain, const DXGI_SWAP_CHAIN_DESC &sd);
-    void renderFrame(IDXGISwapChain3 *pSwapChain);
-    void releaseDeviceResources(const wchar_t *reason);
+    [[nodiscard]] bool createDeviceObjects(UINT frameCount, ID3D12Device *device, IUnknown *deviceIdentity);
+    void renderCommands(D3D12_CPU_DESCRIPTOR_HANDLE target, const D3D12_VIEWPORT &viewport, RenderLayer layer);
+    void releaseDeviceResources();
     void releaseCommandQueue();
-    bool captureCommandQueue(IUnknown *pDevice);
-    void handleSwapChainCreated(HWND hwnd, IUnknown *pDevice, HRESULT hr);
-    bool installExecuteCommandListsHook();
-    void releaseExecuteCommandListsHook();
-    void resetCommandQueueCapture();
     void handleDeviceLost(const wchar_t *where, HRESULT hr);
-    void CleanupRenderTarget();
 
-    static HRESULT WINAPI hkPresent(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT Flags);
-    static HRESULT WINAPI hkPresent1(IDXGISwapChain3 *pSwapChain, UINT SyncInterval, UINT PresentFlags, const DXGI_PRESENT_PARAMETERS *pPresentParameters);
-    static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
-    static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain3 *pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags,
-                                           const UINT *pCreationNodeMask, IUnknown *const *ppPresentQueue);
-    static void WINAPI hkExecuteCommandLists(ID3D12CommandQueue *pCommandQueue, UINT NumCommandLists, ID3D12CommandList *const *ppCommandLists);
-    static HRESULT WINAPI hkCreateSwapChain(IDXGIFactory *pFactory, IUnknown *pDevice, DXGI_SWAP_CHAIN_DESC *pDesc, IDXGISwapChain **ppSwapChain);
-    static HRESULT WINAPI hkCreateSwapChainForHwnd(IDXGIFactory *pFactory, IUnknown *pDevice, HWND hWnd, const DXGI_SWAP_CHAIN_DESC1 *pDesc,
-                                                   const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *pFullscreenDesc, IDXGIOutput *pRestrictToOutput, IDXGISwapChain1 **ppSwapChain);
     static void SrvDescriptorAlloc(ImGui_ImplDX12_InitInfo *info, D3D12_CPU_DESCRIPTOR_HANDLE *pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pOutGpuDescHandle);
     static void SrvDescriptorFree(ImGui_ImplDX12_InitInfo *info, D3D12_CPU_DESCRIPTOR_HANDLE hCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE hGpuDescHandle);
     void HeapDescriptorAlloc(D3D12_CPU_DESCRIPTOR_HANDLE *pOutCpuDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pOutGpuDescHandle);
@@ -154,54 +138,39 @@ private:
 
     std::vector<uint32_t> freeDescriptors_;
 
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT)> oPresent_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, const DXGI_PRESENT_PARAMETERS *)> oPresent1_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain *, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain3 *, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT *, IUnknown *const *)> oResizeBuffers1_;
-    std::add_pointer_t<void WINAPI(ID3D12CommandQueue *, UINT, ID3D12CommandList *const *)> oExecuteCommandLists_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, DXGI_SWAP_CHAIN_DESC *, IDXGISwapChain **)> oCreateSwapChain_;
-    std::add_pointer_t<HRESULT WINAPI(IDXGIFactory *, IUnknown *, HWND, const DXGI_SWAP_CHAIN_DESC1 *, const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *, IDXGIOutput *, IDXGISwapChain1 **)>
-        oCreateSwapChainForHwnd_;
     uint64_t oldWndProc_ = 0;
-
-    void *fnCreateSwapChain_ = nullptr;
-    void *fnCreateSwapChainForHwndChain_ = nullptr;
-
-    void *fnPresent_ = nullptr;
-    void *fnPresent1_ = nullptr;
-
-    void *fnResizeBuffers_ = nullptr;
-    void *fnResizeBuffers1_ = nullptr;
-
-    void *fnExecuteCommandLists_ = nullptr;
 
     HWND gameWindow_ = nullptr;
 
-    IUnknown *swapChainIdentity_ = nullptr;
     IUnknown *deviceIdentity_ = nullptr;
-    // Last validated Present target; not owned. Compared only by address.
+    // Last validated game swap chain; not owned. Compared only by address.
     IDXGISwapChain3 *boundSwapChain_ = nullptr;
-    ID3D12CommandQueue *boundQueue_ = nullptr;
     ID3D12Device *device_ = nullptr;
     ID3D12DescriptorHeap *descriptorHeap_ = nullptr;
     ID3D12DescriptorHeap *rtvDescriptorHeap_ = nullptr;
     ID3D12CommandAllocator **commandAllocator_ = nullptr;
     ID3D12GraphicsCommandList *commandList_ = nullptr;
     ID3D12CommandQueue *commandQueue_ = nullptr;
-    ID3D12Resource **backBuffer_ = nullptr;
-    std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargets_;
 
-    uint32_t buffersCounts_ = 0;
+    uint32_t frameCount_ = 0;
     size_t rtvDescriptorSize_ = 0;
     size_t srvDescriptorSize_ = 0;
 
     float fontSize_ = 0.0f;
     const ImWchar *charsetRange_;
     bool deviceLost_ = false;
-    bool hooksInstalled_ = false;
-    bool eclHookInstalled_ = false;
+    std::unique_ptr<UiSceneBridge> uiScene_;
+    UINT sceneWidth_ = 0, sceneHeight_ = 0;
+    DXGI_FORMAT sceneFormat_ = DXGI_FORMAT_UNKNOWN;
+    std::unique_ptr<DrawLayers> drawLayers_;
+    OffscreenTarget sceneUnderlay_;
+    uint64_t sceneSequence_ = 0;
+    DXGI_FORMAT targetFormat_ = DXGI_FORMAT_UNKNOWN;
+    std::array<bool, 2> sceneFirstDrawPending_{};
+    uint64_t sceneGeneration_ = 0;
+    std::atomic_bool windowDestroyed_{false};
     D3D12_CPU_DESCRIPTOR_HANDLE currentRTV_ = {};
-    UINT currentBackBufferIndex_ = 0;
+    UINT frameIndex_ = 0;
     ID3D12CommandQueue *uploadQueue_ = nullptr;
     ID3D12Fence *uploadFence_ = nullptr;
     ID3D12Fence *frameFence_ = nullptr;
@@ -220,10 +189,10 @@ private:
     size_t uploadingTextureBytes_ = 0;
     unsigned uploadingTextureCount_ = 0;
     std::vector<uint64_t> allocatorFences_;
-    std::vector<uint64_t> imguiFences_;
     std::unordered_map<uint64_t, NativeTexture> nativeTextures_;
     std::vector<RetiredTexture> retiredTextures_;
     bool drawingFrame_ = false;
+    uint64_t textureDrawFence_ = 0;
     std::recursive_mutex deviceMutex_;
 };
 

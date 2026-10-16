@@ -22,6 +22,7 @@ std::array<uint8_t, 96> memoSave{};
 std::array<uint8_t, 1600> memoSlots{};
 uintptr_t menuPointer = reinterpret_cast<uintptr_t>(menu.data());
 ERMapState state{};
+ERDisplayState display{};
 bool valid = true;
 bool completion = false;
 template<typename T>
@@ -231,6 +232,23 @@ int main() {
     data.update();
     if (data.snapshot().valid || !data.snapshot().decorations.empty() || !data.snapshot().memoMarkers.empty())
         return 4;
+    valid = true;
+    native.size = sizeof(native);
+    native.readDisplayState = [](ERDisplayState *out) { *out = display; return true; };
+    put(menu, 0x1c, uint32_t{0xffffffff});
+    data.update();
+    if (!data.snapshot().valid)
+        return 19;
+    for (auto hidden: {ERDisplayState{true, false}, ERDisplayState{false, true}}) {
+        display = hidden;
+        data.update();
+        if (data.snapshot().valid || !data.snapshot().decorations.empty())
+            return 20;
+    }
+    display = {};
+    data.update();
+    if (!data.snapshot().valid)
+        return 21;
     er::minimap::nativeApi = nullptr;
     std::puts(
         "PASS: production view reads, deaths, marker conversion, NPC/mod point visibility, quest landmarks, text-driven removal, cache reconfiguration, Home and invalidation.");

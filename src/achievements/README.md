@@ -1,7 +1,7 @@
 # ELDEN RING Overlay Hook
 
 ## NOTE
-* Please do not use this mod with some overlays like `FPS Counter` in `Nvidia GeForce Experience`, `MSI Afterburner`, `RivaTuner Statistics Server`, etc. They may cause the game to crash.
+* The current core uses UI_SCENE rendering. Static address checks pass for game versions 1.05–1.17.1; 1.02–1.04.1 currently do not render overlays.
 * You can use `EROverlay.dll` to load multiple overlays, I will keep the back compatibility so that you just need to make sure `Overlay Loader` version meets the minimal requirements for certain overlay.
 
 ## USAGE

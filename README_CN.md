@@ -11,9 +11,9 @@
 
 ---
 
-## ⚠️ 兼容性说明
+## 兼容范围
 
-**请勿**将本 Mod 与 Nvidia GeForce Experience 中的 `FPS Counter`、`MSI Afterburner` 或 `RivaTuner Statistics Server` 等覆盖层同时使用。它们会钩入相同的 DirectX API，导致游戏崩溃。
+UI_SCENE 是唯一渲染方式，通过 signature scan 和 RTTI 校验游戏内部 hook，不再安装 DXGI hook。游戏 1.05–1.17.1 已通过静态地址检查；1.02–1.04.1 当前不绘制覆盖层。行为与验证范围见 [UI_SCENE 渲染说明](docs/ui-scene-prototype.md)。
 
 ---
 

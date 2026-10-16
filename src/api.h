@@ -98,6 +98,11 @@ typedef struct {
     bool (*inputIsKeyPressed)(int keyChord);
 } EROverlayAPI;
 
+// Optional getRenderLayer() export. Plugins without this export retain the
+// historical above-UI behavior. This does not change PluginExports or API v0.
+// Both layers are submitted through the game's UI_SCENE draw queue.
+typedef enum { ER_RENDER_LAYER_ABOVE_UI = 0, ER_RENDER_LAYER_BELOW_UI = 1 } ERRenderLayer;
+
 /*
  * Plugin exports returned by getExports(), or struct in PLUGIN_DEFINE() macro.
  * Note: init() must not be null. Other functions are optional and will be called if they are not null.

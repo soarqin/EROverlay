@@ -57,7 +57,14 @@ struct ImGui_ImplDX12_InitInfo
 IMGUI_IMPL_API bool     ImGui_ImplDX12_Init(ImGui_ImplDX12_InitInfo* info);
 IMGUI_IMPL_API void     ImGui_ImplDX12_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplDX12_NewFrame();
-IMGUI_IMPL_API void     ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList* graphics_command_list);
+IMGUI_IMPL_API void     ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList* graphics_command_list, DXGI_FORMAT target_format = DXGI_FORMAT_UNKNOWN);
+// EROverlay: switch between the configured main RTV and RGBA8 offscreen RTVs.
+// Call from a draw callback; preserves the current sampler and root arguments.
+IMGUI_IMPL_API void     ImGui_ImplDX12_SetRenderTargetFormat(ID3D12GraphicsCommandList* graphics_command_list, DXGI_FORMAT format);
+// EROverlay: insert a premultiplied RGBA8 layer behind the game's existing UI.
+// The native UI target stores scene transmittance, rather than opacity, in alpha.
+IMGUI_IMPL_API void     ImGui_ImplDX12_CompositeUnderlay(ID3D12GraphicsCommandList* graphics_command_list, D3D12_GPU_DESCRIPTOR_HANDLE texture,
+                                                       DXGI_FORMAT format, float width, float height);
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 // Legacy initialization API Obsoleted in 1.91.5

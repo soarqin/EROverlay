@@ -60,3 +60,5 @@ PLUGIN_DEFINE(exports)
 // Immutable definitions, atomic CPU jobs and snapshots allow update/render
 // concurrency; create/destroy/uninit remain excluded by the core lifecycle lock.
 PLUGIN_EXPORT bool supportsConcurrentUpdateRender() { return true; }
+
+PLUGIN_EXPORT ERRenderLayer getRenderLayer() { return ER_RENDER_LAYER_BELOW_UI; }

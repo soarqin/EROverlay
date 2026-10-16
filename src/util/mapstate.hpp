@@ -16,6 +16,7 @@ struct MapContext {
 
 [[nodiscard]] bool readMapContext(uintptr_t menuGlobal, uintptr_t gameDataGlobal, const ERGameLayout &layout, MapContext &context);
 [[nodiscard]] bool mapContextUnchanged(const MapContext &context, const ERGameLayout &layout);
+[[nodiscard]] bool readDisplayState(uintptr_t menuGlobal, uintptr_t gameDataGlobal, const ERGameLayout &layout, ERDisplayState &state);
 
 // Read the exact view layout for the supported executable. The caller owns
 // generation/activeMasks and checks that the view identity remains current.

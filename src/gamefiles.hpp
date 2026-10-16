@@ -20,6 +20,7 @@ public:
     void release(uint64_t token);
     void stop();
     [[nodiscard]] bool readMapState(ERMapState &state);
+    [[nodiscard]] bool readDisplayState(ERDisplayState &state) const;
     [[nodiscard]] uintptr_t findParamTable(uint32_t group) const;
     [[nodiscard]] bool readEventFlag(uint32_t id) const;
     [[nodiscard]] bool readGameLayout(ERGameLayout &layout) const;

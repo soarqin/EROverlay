@@ -3,6 +3,8 @@ add_project(EROverlayDLL SHARED
     dllmain.cpp
     config.cpp config.hpp
     d3drenderer.cpp d3drenderer.hpp
+    drawlayers.hpp
+    uiscene.cpp uiscene.hpp util/uiscenescan.hpp util/uiscene_patterns.inc
     hooking.cpp hooking.hpp
     global.cpp global.hpp
     gamefiles.cpp gamefiles.hpp nativeapi.h

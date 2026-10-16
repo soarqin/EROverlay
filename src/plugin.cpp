@@ -3,21 +3,33 @@
 #include "api.h"
 #include "global.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 #include <mutex>
 #include <shared_mutex>
-#include <tuple>
+#include <vector>
 
 namespace er {
 
-static std::vector<std::tuple<int, int, PluginExports *, bool>> plugins;
+struct Plugin {
+    int priority;
+    PluginExports *exports;
+    bool concurrent;
+    RenderLayer layer;
+};
+static std::vector<Plugin> plugins;
 static bool renderersLoaded = false;
 // Lifecycle changes are exclusive. Legacy plugins keep serialized callbacks;
 // only plugins explicitly exporting the opt-in may update during rendering.
 static std::shared_mutex pluginsMutex;
 static std::mutex legacyCallbacksMutex;
+
+[[nodiscard]] static RenderLayer pluginRenderLayer(HMODULE module) {
+    auto getLayer = reinterpret_cast<ERRenderLayer (*)()>(GetProcAddress(module, "getRenderLayer"));
+    return getLayer && getLayer() == ER_RENDER_LAYER_BELOW_UI ? RenderLayer::BelowUI : RenderLayer::AboveUI;
+}
 
 void pluginsInit() {
     std::lock_guard lock(pluginsMutex);
@@ -45,7 +57,7 @@ void pluginsInit() {
                 }
                 auto ver = exports->init(api);
                 auto concurrent = reinterpret_cast<bool (*)()>(GetProcAddress(lib, "supportsConcurrentUpdateRender"));
-                plugins.emplace_back(ver, 0, exports, concurrent && concurrent());
+                plugins.push_back({0, exports, concurrent && concurrent(), pluginRenderLayer(lib)});
                 fmt::print(" successful. (API Version {})\n", ver);
             } else {
                 fmt::print(" unable to load.\n");
@@ -57,7 +69,7 @@ void pluginsInit() {
 void pluginsUninit() {
     std::lock_guard lock(pluginsMutex);
     for (const auto &pl: plugins) {
-        auto *p = std::get<2>(pl);
+        auto *p = pl.exports;
         if (p->uninit) {
             p->uninit();
         }
@@ -68,10 +80,10 @@ void pluginsUninit() {
 void pluginsUpdate() {
     std::shared_lock lock(pluginsMutex);
     for (const auto &pl: plugins) {
-        auto *p = std::get<2>(pl);
+        auto *p = pl.exports;
         if (p->update) {
             std::unique_lock<std::mutex> callLock;
-            if (!std::get<3>(pl))
+            if (!pl.concurrent)
                 callLock = std::unique_lock(legacyCallbacksMutex);
             p->update();
         }
@@ -82,39 +94,50 @@ void pluginsLoadRenderers(void *context, void *allocFunc, void *freeFunc, void *
     std::lock_guard lock(pluginsMutex);
     renderersLoaded = false;
     for (auto &pl: plugins) {
-        auto *p = std::get<2>(pl);
+        auto *p = pl.exports;
         if (p->createRenderer) {
             auto priority = p->createRenderer(context, allocFunc, freeFunc, userData);
-            std::get<1>(pl) = priority;
+            pl.priority = priority;
         }
     }
-    std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) { return std::get<1>(a) < std::get<1>(b); });
+    std::sort(plugins.begin(), plugins.end(), [](const auto &a, const auto &b) { return a.priority < b.priority; });
     renderersLoaded = true;
 }
 
 void pluginsDestroyRenderers() {
     std::lock_guard lock(pluginsMutex);
+    if (!renderersLoaded)
+        return;
+    renderersLoaded = false;
     for (const auto &pl: plugins) {
-        auto *p = std::get<2>(pl);
+        auto *p = pl.exports;
         if (p->destroyRenderer) {
             p->destroyRenderer();
         }
     }
-    renderersLoaded = false;
 }
 
-bool pluginsRender() {
+bool pluginsUseLayer(RenderLayer layer) {
+    std::shared_lock lock(pluginsMutex);
+    return std::any_of(plugins.begin(), plugins.end(), [layer](const auto &pl) { return pl.layer == layer && pl.exports->render; });
+}
+
+bool pluginsRender(PluginRenderObserver observer, void *context) {
     std::shared_lock lock(pluginsMutex);
     if (!renderersLoaded)
         return false;
     bool showCursor = false;
     for (const auto &pl: plugins) {
-        auto *p = std::get<2>(pl);
+        auto *p = pl.exports;
         if (p->render) {
             std::unique_lock<std::mutex> callLock;
-            if (!std::get<3>(pl))
+            if (!pl.concurrent)
                 callLock = std::unique_lock(legacyCallbacksMutex);
+            if (observer)
+                observer(pl.layer, true, context);
             auto r = p->render();
+            if (observer)
+                observer(pl.layer, false, context);
             showCursor = showCursor || r;
         }
     }

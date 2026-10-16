@@ -64,6 +64,10 @@ void Renderer::selectPreset(size_t index) {
 }
 
 bool Renderer::render() {
+    // Read this frame's display state even before resources/map data exist.
+    // An update snapshot may still describe the previous gameplay frame.
+    if (hiddenByGame())
+        return false;
     gResources.prepareTextures();
     auto now = gResources.frameTime();
     if (offscreen_ && now - offscreenTouched_ >= 10000) {
@@ -71,8 +75,6 @@ bool Renderer::render() {
         offscreen_ = nullptr;
     }
     auto snapshot = gData.snapshot();
-    if (snapshot.onGUI)
-        return false;
     if (toggleKey_ && toggleKey_ != scaleKey_ && api->inputIsKeyPressed(toggleKey_))
         show_ = !show_;
     if (show_ && scaleKey_ && api->inputIsKeyPressed(scaleKey_)) {

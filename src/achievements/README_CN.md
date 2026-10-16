@@ -1,7 +1,7 @@
 # ELDEN RING Overlay Hook
 
 ## 注意
-* 请不要与一些覆盖层(如`Nvidia GeForce Experience`中的`FPS Counter`、`MSI Afterburner`、`RivaTuner Statistics Server`等)一起使用此Mod，它们可能导致游戏崩溃。
+* 当前核心使用 UI_SCENE 渲染。游戏 1.05–1.17.1 已通过静态地址检查；1.02–1.04.1 当前不绘制覆盖层。
 * 你可以使用`EROverlay.dll`来加载多个覆盖层，我会保持向后兼容性，所以你只需要确保`覆盖层加载器`的版本满足特定覆盖层的最低要求即可。
 
 ## 用法

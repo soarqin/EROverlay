@@ -66,7 +66,6 @@ using MemoMarkers = MapMarkers<MemoMarkerInfo, 100>;
 struct MapSnapshot {
     ERMapState state{};
     Camera camera;
-    bool onGUI = true;
     bool valid = false;
     bool roundtable = false;
     uint32_t homeIcon = 48;
@@ -107,4 +106,5 @@ private:
     std::array<uint64_t, 7> diagnosticCounts_{}; // Update-thread only; log changed marker/resource counts.
 };
 extern Data gData;
+[[nodiscard]] bool hiddenByGame();
 } // namespace er::minimap

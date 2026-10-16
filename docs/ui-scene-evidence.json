@@ -1,0 +1,474 @@
+{
+  "date": "2026-10-16",
+  "liber_reference_commit": "d8ae5c92719adca4344d8d902b63286b807f562b",
+  "reference_game_version": "1.16",
+  "scope": "UI_SCENE is the only renderer. Static PE contracts, two-hook MinHook teardown, rejection without fallback, controlled D3D12 layer pixels/lifetimes, native SDR compositor opacity and CPU minimap visibility. User confirmed in-game tests passed before removing the DXGI renderer.",
+  "renderer": "ui_scene",
+  "renderer_selection_config": false,
+  "dxgi_hooks": false,
+  "startup_validation_failure": "no rendering; no fallback",
+  "review_fixes": {
+    "unsupported_image": "retry only while the window is missing; native validation failure returns once",
+    "plugin_destroy_calls": {
+      "baseline": 3,
+      "fixed": 1,
+      "scenario": "destroy before creation, then create and destroy twice"
+    },
+    "pending_gpu_submissions": {
+      "swapchain_buffers": 3,
+      "queued_game_frames": 3,
+      "baseline": 3,
+      "fixed": 6
+    },
+    "upper_layer_reservation": "when only one ring slot is free, skip the lower stage and submit the upper stage once",
+    "submission_ring_capacity": "2 * swapchain BufferCount, one fence shared by allocator and ImGui buffers",
+    "offscreen_textures_per_context": 1,
+    "callback_only_draw_lists": "preserve callbacks in each layer, including frames without geometry",
+    "removed_state": [
+      "layer filter/All mode",
+      "unused plugin API version storage",
+      "snapshot onGUI",
+      "second ImGui fence array",
+      "offscreen backbuffer ring",
+      "underlay context wrapper",
+      "Hooking forwarding methods"
+    ]
+  },
+  "user_reported_validation": {
+    "date": "2026-10-16",
+    "result": "All tests passed; user requested removal of the DXGI path and configuration."
+  },
+  "native_main_rtv_format": "R10G10B10A2_UNORM",
+  "native_below_ui_rtv_formats": [
+    "R10G10B10A2_UNORM",
+    "R8G8B8A8_UNORM"
+  ],
+  "native_hooks": [
+    "draw queue submit",
+    "native UI compositor boundary recording"
+  ],
+  "plugin_layers": {
+    "default_and_legacy": "above_ui",
+    "minimap_optional_export": "below_ui",
+    "plugin_exports_abi_changed": false,
+    "renders_per_plugin_per_frame": 1
+  },
+  "minimap_game_auto_hide": [
+    "loading_or_logo",
+    "full_screen_world_map"
+  ],
+  "minimap_display_state_validation": {
+    "constructed_rtti": [
+      "CS::CSMenuManImp",
+      "CS::LoadingScreenData"
+    ],
+    "visible_context_requires": [
+      "published menu owner",
+      "published owner view",
+      "validated root RTTI",
+      "unchanged object identities after read"
+    ],
+    "unvalidated_state": "hide resource text, border and map immediately",
+    "startup_regressions": [
+      "allocated player with zero-filled menu",
+      "LoadingScreenData not constructed",
+      "menu owner not published",
+      "owner view not published",
+      "root menu constructor in progress",
+      "loading data invalidated after gameplay"
+    ],
+    "baseline_vertices_per_failed_case": 48,
+    "fixed_vertices_per_hidden_case": 0,
+    "historical_layouts_tested": [
+      "1.02",
+      "1.03-1.10.1",
+      "1.12+"
+    ]
+  },
+  "offscreen_rtv_format": "R8G8B8A8_UNORM",
+  "native_ui_alpha_contract": {
+    "native_sdr_output": "pow(scene.rgb * ui.a + ui.rgb, outputGammaForSDR)",
+    "ui_alpha": "scene transmittance",
+    "lower_stage": "One reusable RGBA8 layer, then ui.rgb += lower.rgb * ui.a; ui.a *= 1 - lower.a",
+    "controlled_sdr_gamma": 1,
+    "alpha_cases": [
+      100,
+      90,
+      50,
+      20,
+      0
+    ],
+    "native_ui_transmittance_cases": [
+      255,
+      128,
+      0
+    ],
+    "game_shader_sha256": "27bc6d5a9de9046be85af720660b7f6ad63eb2fa875018bd7655c7ef0395f972",
+    "sm6_test_vertex_sha256": "f552a2330edf67f8d858e729d361e0c04be30fa7775e7dca1cafb0e1670bc993"
+  },
+  "hdr_test_scope": "User tested HDR with format 24 for both main RTV and swap chain; display colors and brightness are not measured by the log.",
+  "user_reported_hdr_log": {
+    "date": "2026-10-16",
+    "width": 3440,
+    "height": 1440,
+    "main_rtv_format": 24,
+    "swapchain_format": 24,
+    "offscreen_format": 28,
+    "first_draw_vertices": 350,
+    "first_draw_indices": 1473
+  },
+  "source_sha256_encoding": "raw UTF-8 bytes with CRLF normalized to LF",
+  "source_sha256": {
+    "src/util/uiscene_patterns.inc": "30ab000502c8be4b7cd11d59404dabe0a5388c5732a76f5b57edf2b146f969d3",
+    "src/util/uiscenescan.hpp": "52823e001e721f461da1e67a3fde60a0afb26894b0690db2f2f5e1b99df2bf60",
+    "src/uiscene.cpp": "61bdebaceafafdf46c8fe37e8aa41dbbab5cc523a108b3532fc0bbe57cbadf16",
+    "src/d3drenderer.cpp": "a05d8044ae492b8949dae49f0bdf9a25a2c9df748d4b38c1334e07de45147e34",
+    "deps/imgui/imgui_impl_dx12.cpp": "fc642a9e962ef059d8c6b93a18fc674eb78a88fdb2deed528f9de19f0292d622",
+    "deps/imgui/imgui_impl_dx12.h": "0b5b552010e574e481ec5e32129ff9a0567952dd1fb9a6d54c832f575446730d",
+    "src/uiscene.hpp": "67cd742a7dba5282cd6889cf5eaa2f929c35b1b05731d3ab356dddc84bd26c43",
+    "src/d3drenderer.hpp": "c4cc4d582e4fce991a27bba2c306f3aeafb91bf55a1934373b9ad577c695fded",
+    "src/drawlayers.hpp": "d4d46b5c5a77fd565fff0f53f9aa6580156ea05144335c3bc746e153331d3a49",
+    "src/plugin.cpp": "d4d50b33ec2f8f53782298509de79a167a2be3bc79823b56a73016f1f854ae03",
+    "src/plugin.hpp": "1dda84123ffec6902ca047213e726f2a7b9dea44aa9f62cc84b18ec5f80b81ac",
+    "src/api.h": "b1631137e28dbeca9274778fb9000292e4037fa66038cbe2e9c7b9ae6aa5a205",
+    "src/api.cpp": "c762a021dae45b1f1dd258436576c7d1d6ba776fb09b7adc92e1b0344f148179",
+    "src/nativeapi.h": "f617d578cb1a51b447480b08dedd8217180af303d49493008caefabf2f6994e0",
+    "src/textureupload.cpp": "3ea3e32929e9f946453497aa8b63dd96b88df93cf3fb9f7e5f3b08865157f33a",
+    "src/dllmain.cpp": "cbd007e6f32daaf620d3f98e619907f27ee7b786e1110bb43d00c23138d9da7b",
+    "src/hooking.cpp": "e3e0bb80b752bb0bb02cb680d3dc6e02d84d07ff291c759912ca82280b5455ef",
+    "src/hooking.hpp": "59823f966b090ee57fe29ecbacb5142b8e8ec49c3320ea0883998c060e16be07",
+    "src/util/mapstate.cpp": "f2d78461dd4259d4a66da5cc02e553b7267d1298a2e448a118dd308a0364d7ee",
+    "src/util/mapstate.hpp": "9a95b3271181df26d4e9b74efadcb805ae8dcf1e9351ee38269f0d85f8318a11",
+    "src/gamefiles.cpp": "ad366f3b58e37257a5348c325e2a6f1d2994eb9b4afc720147e5483c7a973070",
+    "src/gamefiles.hpp": "f374a42a4c123d0d0f2cdc1dd439145a4fa5c5a921329cdb3efeec2bf4fd1166",
+    "src/minimap/data.cpp": "10ac707abeaccb3f51416d1309e06fa8f60a867cd4985ba75d39b023b139bab1",
+    "src/minimap/render.cpp": "ad7ca2216f7e65d0b6ae1c5bb85e82ebb45f4ae07c61917f42c0afe3eaeeeb38",
+    "src/minimap/dllmain.cpp": "1c45b49ea3ef20dcc9f8ccd89d07c73af6fa3d732f3911da2093d40263121384",
+    "tools/ui_scene_scan_verify.cpp": "ba2b197b68b1ee3d3704cf770f179a64b0e24b34f02899e6e38bae16d4ace563",
+    "tools/ui_scene_render_verify.cpp": "2d313e3212711900bf879d31cbe700b8312db9ab7ec91e902699364ba0a919c9",
+    "tools/ui_scene_compositor_verify.hlsl": "1bc6ecb158be1a05603283a5a3d4ac2b527f11697bf6b585a9113965ccc6dc35",
+    "tools/minimap_visibility_verify.cpp": "531e82b6561bcc3ae351fa300a71b11da9f222eef808f01b230b9204d2550223",
+    "tools/plugin_thread_verify.cpp": "8394337babdbcae00ebf7c5fc79b36d59296192260c0caa9eaf7986a45fce4e0",
+    "tools/minimap_map_verify.cpp": "5284a286e6cc5b3ef7c6783547b6e5380c1da686d257e02a5319509fb800de7d",
+    "tools/minimap_texture_verify.cpp": "43c97367b03a2096217049e812cca56786bf5585c3e9053070e6d4835c71a686",
+    "tools/build_ui_scene_checks.bat": "4a4f11a55f6e77e9f88fae51963b23dd17f855dbbfbcf881d286998db35b4956",
+    "tools/ui_scene_evidence.py": "87e5c62472f510353e93c42cf1de9f57522fa8812a0ec75c36987c042913593b"
+  },
+  "archive_directories": 29,
+  "independent_sha256": 28,
+  "resolved_directories": 20,
+  "unsupported_directories": 9,
+  "images": [
+    {
+      "version": "1.02",
+      "sha256": "a903e4b4333b473757ccab8e274951aeb4e510e7cfd06d64cdb1670acfb3fc43",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.02.1",
+      "sha256": "38ead4ac3e1abea04a868a19dab96fea294ea5a3b8300c8cb95538848b386b90",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.02.2",
+      "sha256": "5fc7622e28ca4231288df79a1a6c5811d91777d4da21b8776c5ed6bab6731586",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.02.3",
+      "sha256": "9c247f0b058233d2907236198e3ab3ed2687688b217a0f254bef7fd500564cab",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.03",
+      "sha256": "0c407694135a320894cc9a4579a4ec05565ea652ed8fbbf6b45f7a64c9f63b9b",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.03.1",
+      "sha256": "17baa42d7c3100da3b15cfe91c005773ab49b64241b3e6bb2186c191268503a0",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.03.2",
+      "sha256": "8accfca440b89d5f2140301e690d20c8bc8f1803fd317e259786d4ff362b3b1f",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.04",
+      "sha256": "9e20ccdbcb22574e601438a59c878c79d90384cd11cd25a0c3edb5a5cebf45f3",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.04.1",
+      "sha256": "766c80fdcd63850d17c042c101c8d04f441a9851047874f10cba62594e9aeec2",
+      "status": "UNSUPPORTED",
+      "detail": "draw scene begin callback changed"
+    },
+    {
+      "version": "1.05",
+      "sha256": "1b083759eb9d6d3ab69112b5735994046eb5842c91cc4082f35aeb7e549319c8",
+      "status": "PASS",
+      "detail": "submit=0x194a140 enqueue=0x1a358b0 consume=0x1a35ba0 format=0x1de3030 view=0x2fbf350 texture=0x2fbe990 offsets=128,cc,25e8,8,8 composite=0x194a620 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.06",
+      "sha256": "72652de9a971f7f258456d2fe5abc3c2a9be0ce01318f1ad02a1d305e6bebce8",
+      "status": "PASS",
+      "detail": "submit=0x19523a0 enqueue=0x1a3e150 consume=0x1a3e440 format=0x1ded190 view=0x2fcc910 texture=0x2fcbf50 offsets=128,cc,25e8,8,8 composite=0x1952880 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.07",
+      "sha256": "c3b5ea259d8e9ce30620284050d1d73f27156643edb0f05e22658e0d11018c91",
+      "status": "PASS",
+      "detail": "submit=0x1955c10 enqueue=0x1a4f820 consume=0x1a4fb10 format=0x1dfa760 view=0x2fddaf0 texture=0x2fdd130 offsets=128,cc,25e8,8,8 composite=0x19560f0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.08",
+      "sha256": "6b03b202035b34f06e7e85cd60a88c23c02e2e5f3cce0dda45946319ced28dfe",
+      "status": "PASS",
+      "detail": "submit=0x199cb10 enqueue=0x1a97030 consume=0x1a97320 format=0x1e46d70 view=0x3046c30 texture=0x3046270 offsets=128,cc,25e8,8,8 composite=0x199cff0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.08.1",
+      "sha256": "a468ded661c6603b68a3c49caac071fae7ac1dad8929d47b04539670ccbdae56",
+      "status": "PASS",
+      "detail": "submit=0x199caf0 enqueue=0x1a97010 consume=0x1a97300 format=0x1e46d50 view=0x3046c30 texture=0x3046270 offsets=128,cc,25e8,8,8 composite=0x199cfd0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.09",
+      "sha256": "1938a60e6ba7636cac145dd1f9fd2e2ea6d6d5ea21a5874420388dd4a028562f",
+      "status": "PASS",
+      "detail": "submit=0x199f5b0 enqueue=0x1a99c90 consume=0x1a99f80 format=0x1e49a40 view=0x3049130 texture=0x3048770 offsets=128,cc,25e8,8,8 composite=0x199fa90 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.09.1",
+      "sha256": "92f9736f3a174b7e7fe2eddd2c5d9af55aa387a1d2e9fbeb381101b3350f7302",
+      "status": "PASS",
+      "detail": "submit=0x199f6c0 enqueue=0x1a99da0 consume=0x1a9a090 format=0x1e49b50 view=0x3049130 texture=0x3048770 offsets=128,cc,25e8,8,8 composite=0x199fba0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.10",
+      "sha256": "86a570fc04c7a1edf085a53bb5c0806aacf5133b815530c5346c1d7dc0955bc0",
+      "status": "PASS",
+      "detail": "submit=0x199f970 enqueue=0x1a9a050 consume=0x1a9a340 format=0x1e49e00 view=0x3049170 texture=0x30487b0 offsets=128,cc,25e8,8,8 composite=0x199fe50 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.10.1",
+      "sha256": "b5440b9391afe07d71ba80f56dc4bd6755ec7b6bd319879441e5803dcf048857",
+      "status": "PASS",
+      "detail": "submit=0x199fa50 enqueue=0x1a9a130 consume=0x1a9a420 format=0x1e49ee0 view=0x3049370 texture=0x30489b0 offsets=128,cc,25e8,8,8 composite=0x199ff30 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.12",
+      "sha256": "f8254c70809fb91df13200f2d077b23c2ce371b722906ef47b43abc2ef267613",
+      "status": "PASS",
+      "detail": "submit=0x19ea9b0 enqueue=0x1aea170 consume=0x1aea460 format=0x1e8e380 view=0x30a4770 texture=0x30a3db0 offsets=128,cc,25e8,8,8 composite=0x19eae90 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.12.3",
+      "sha256": "a6b3b2cac338ad2adaaf74a17c7a71b3ffbd82e27feea12fc662f29c7085e269",
+      "status": "PASS",
+      "detail": "submit=0x19ea9d0 enqueue=0x1aea190 consume=0x1aea480 format=0x1e8e3a0 view=0x30a4770 texture=0x30a3db0 offsets=128,cc,25e8,8,8 composite=0x19eaeb0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.13",
+      "sha256": "b1b8ba8c8b5c689188ca511cdf12f42b20787c14a3c06ba7cf816d42370c0a3c",
+      "status": "PASS",
+      "detail": "submit=0x19eaec0 enqueue=0x1aeaa30 consume=0x1aead20 format=0x1e8ec40 view=0x30a4830 texture=0x30a3e70 offsets=128,cc,25e8,8,8 composite=0x19eb3a0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.13.2",
+      "sha256": "b1b8ba8c8b5c689188ca511cdf12f42b20787c14a3c06ba7cf816d42370c0a3c",
+      "status": "PASS",
+      "detail": "submit=0x19eaec0 enqueue=0x1aeaa30 consume=0x1aead20 format=0x1e8ec40 view=0x30a4830 texture=0x30a3e70 offsets=128,cc,25e8,8,8 composite=0x19eb3a0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.14",
+      "sha256": "5e168646d33f10d797479ca47843eff7ff21e69e4df369f6e06c701767538874",
+      "status": "PASS",
+      "detail": "submit=0x19eae20 enqueue=0x1aea990 consume=0x1aeac80 format=0x1e8eba0 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb300 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.15",
+      "sha256": "fce35a10784566022d4bbe87f8b28f8cddbb2bd1277d13bd587628f7aa9e5fab",
+      "status": "PASS",
+      "detail": "submit=0x19eae20 enqueue=0x1aea990 consume=0x1aeac80 format=0x1e8eba0 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb300 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.16",
+      "sha256": "5d0b85d2bb86b61632705023690b3bd5c4d0bae06308db2eed50849bd37db611",
+      "status": "PASS",
+      "detail": "submit=0x19eadf0 enqueue=0x1aea960 consume=0x1aeac50 format=0x1e8eb70 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb2d0 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.16.1",
+      "sha256": "fafb931f886d5c8daebd93ba9ebade37c9a8d955447673b65d451f3af199e545",
+      "status": "PASS",
+      "detail": "submit=0x19eae50 enqueue=0x1aea9c0 consume=0x1aeacb0 format=0x1e8ebd0 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb330 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.16.2",
+      "sha256": "34102b1c08bb5f769a724427a6f70fe29b3b732c31cf73693f861c48d3492ddb",
+      "status": "PASS",
+      "detail": "submit=0x19eae30 enqueue=0x1aea9a0 consume=0x1aeac90 format=0x1e8ebb0 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb310 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.17",
+      "sha256": "d1a84083c6c7c7902162ff098f7d86812839aa6b3575959398857e539c488134",
+      "status": "PASS",
+      "detail": "submit=0x19ecc30 enqueue=0x1aec7a0 consume=0x1aeca90 format=0x1e909b0 view=0x30a79f0 texture=0x30a7030 offsets=128,cc,25e8,8,8 composite=0x19ed110 render-post=100 queues=708,6e8"
+    },
+    {
+      "version": "1.17.1",
+      "sha256": "1a3547101327f65d0c76da2f9190ac0aa66871ea42bae2aecc61e11a8b597891",
+      "status": "PASS",
+      "detail": "submit=0x19ecca0 enqueue=0x1aec810 consume=0x1aecb00 format=0x1e90a20 view=0x30a79f0 texture=0x30a7030 offsets=128,cc,25e8,8,8 composite=0x19ed180 render-post=100 queues=708,6e8"
+    }
+  ],
+  "negative_and_aslr_checks": [
+    "1.16\tPASS\tsubmit=0x19eadf0 enqueue=0x1aea960 consume=0x1aeac50 format=0x1e8eb70 view=0x30a48b0 texture=0x30a3ef0 offsets=128,cc,25e8,8,8 composite=0x19eb2d0 render-post=100 queues=708,6e8",
+    "negative duplicate submit: PASS",
+    "negative redirected enqueue: PASS",
+    "negative consumer control flow: PASS",
+    "negative redirected native composition enqueue: PASS",
+    "negative missing RTTI: PASS",
+    "negative truncated PE: PASS",
+    "relocated PE (+8 GiB): PASS"
+  ],
+  "controlled_integration_checks": {
+    "native_rgb10a2": {
+      "exit_code": 0,
+      "output": [
+        "start",
+        "PASS: two real MinHook detours; teardown drains in-flight submit/compositor calls, restored entries remain callable, reinstall succeeds.",
+        "PASS: exact native UI command boundary survives later native work; stale/missing boundaries suppress only the lower stage.",
+        "device ready",
+        "main RTV format=24, offscreen RTV format=28",
+        "D3D12 debug layer and GPU-based validation enabled; warnings/errors fail the check.",
+        "PASS: unsupported native image returns once with obsolete renderer=dxgi; no fallback or permanent startup retry.",
+        "SDR 90%: native RGB=234,10,21; source-over RGB=234,10,21 (native arithmetic compositor)",
+        "PASS: native SDR compositor matches source-over opacity at 100/90/50/20/0%; existing native UI stays above lower commands; overlapping draws and nested offscreen restore correctly.",
+        "PASS: native ResizeBuffers without notification, destroyed/recreated HWND and swap chain, fonts retained, pre/overlay/post GPU order, offscreen RTV restoration.",
+        "PASS: callback-only lists and zero-vertex frames execute once in their own render layer.",
+        "PASS: queued 6/6 layer submissions while GPU is pending, one ImGui frame per game frame.",
+        "PASS: one remaining render slot is reserved for visible upper UI; no wait or second ImGui frame.",
+        "PASS: one ImGui/input frame and one render per plugin; lower overlay -> native UI -> upper overlay, shared lists split correctly, RGBA8/RGB10A2 stages do not rebuild renderers, retired upper texture survives both submissions.",
+        "SDR 90%: native RGB=234,10,21; source-over RGB=234,10,21 (native arithmetic compositor)",
+        "PASS: native SDR compositor matches source-over opacity at 100/90/50/20/0%; existing native UI stays above lower commands; overlapping draws and nested offscreen restore correctly.",
+        "PASS: overlay binds once, skips empty frames, submits visible frames, uploads atlas growth, composites offscreen, rebuilds after resize.",
+        "ui-scene-frame-check=0",
+        "atexit"
+      ],
+      "diagnostics": [
+        "[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=29908",
+        "[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE stopped: queues=1 callbacks=0",
+        "[EROverlay] UI_SCENE stopped: queues=0 callbacks=0",
+        "[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=21648",
+        "[EROverlay] UI_SCENE queue 1: below-ui before native UI composition; priority=00FFFFFF",
+        "[EROverlay] UI_SCENE queue 1: consumed 2 callback(s) (below-ui=1 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE queue 2: enqueue before sort/consume; thread=21648",
+        "[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary",
+        "[EROverlay] UI_SCENE queue 2: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE queue 3: enqueue before sort/consume; thread=21648",
+        "[EROverlay] UI_SCENE queue 3: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE unavailable: draw queue submit signature is missing or ambiguous",
+        "[EROverlay] UI_SCENE generation 1: 640x360 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A50344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=4 indices=6 format=24",
+        "[EROverlay] UI_SCENE first draw submitted: layer=below-ui vertices=20 indices=30 format=28",
+        "[EROverlay] UI_SCENE generation 2: 800x450 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A50344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=56 indices=84 format=24",
+        "[EROverlay] UI_SCENE generation 3: 720x400 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A60344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=56 indices=84 format=24",
+        "[EROverlay] UI_SCENE first draw submitted: layer=below-ui vertices=80 indices=120 format=24"
+      ]
+    },
+    "native_sdr_game_compositor": {
+      "exit_code": 0,
+      "output": [
+        "start",
+        "PASS: two real MinHook detours; teardown drains in-flight submit/compositor calls, restored entries remain callable, reinstall succeeds.",
+        "PASS: exact native UI command boundary survives later native work; stale/missing boundaries suppress only the lower stage.",
+        "device ready",
+        "main RTV format=24, offscreen RTV format=28",
+        "D3D12 debug layer and GPU-based validation enabled; warnings/errors fail the check.",
+        "PASS: unsupported native image returns once with obsolete renderer=dxgi; no fallback or permanent startup retry.",
+        "SDR 90%: native RGB=234,10,21; source-over RGB=234,10,21 (game bytecode compositor)",
+        "PASS: native SDR compositor matches source-over opacity at 100/90/50/20/0%; existing native UI stays above lower commands; overlapping draws and nested offscreen restore correctly.",
+        "PASS: native ResizeBuffers without notification, destroyed/recreated HWND and swap chain, fonts retained, pre/overlay/post GPU order, offscreen RTV restoration.",
+        "PASS: callback-only lists and zero-vertex frames execute once in their own render layer.",
+        "PASS: queued 6/6 layer submissions while GPU is pending, one ImGui frame per game frame.",
+        "PASS: one remaining render slot is reserved for visible upper UI; no wait or second ImGui frame.",
+        "PASS: one ImGui/input frame and one render per plugin; lower overlay -> native UI -> upper overlay, shared lists split correctly, RGBA8/RGB10A2 stages do not rebuild renderers, retired upper texture survives both submissions.",
+        "SDR 90%: native RGB=234,10,21; source-over RGB=234,10,21 (game bytecode compositor)",
+        "PASS: native SDR compositor matches source-over opacity at 100/90/50/20/0%; existing native UI stays above lower commands; overlapping draws and nested offscreen restore correctly.",
+        "PASS: overlay binds once, skips empty frames, submits visible frames, uploads atlas growth, composites offscreen, rebuilds after resize.",
+        "ui-scene-frame-check=0",
+        "atexit"
+      ],
+      "diagnostics": [
+        "[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=33164",
+        "[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE stopped: queues=1 callbacks=0",
+        "[EROverlay] UI_SCENE stopped: queues=0 callbacks=0",
+        "[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=6540",
+        "[EROverlay] UI_SCENE queue 1: below-ui before native UI composition; priority=00FFFFFF",
+        "[EROverlay] UI_SCENE queue 1: consumed 2 callback(s) (below-ui=1 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE queue 2: enqueue before sort/consume; thread=6540",
+        "[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary",
+        "[EROverlay] UI_SCENE queue 2: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE queue 3: enqueue before sort/consume; thread=6540",
+        "[EROverlay] UI_SCENE queue 3: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game",
+        "[EROverlay] UI_SCENE unavailable: draw queue submit signature is missing or ambiguous",
+        "[EROverlay] UI_SCENE generation 1: 640x360 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A70344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=4 indices=6 format=24",
+        "[EROverlay] UI_SCENE first draw submitted: layer=below-ui vertices=20 indices=30 format=28",
+        "[EROverlay] UI_SCENE generation 2: 800x450 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A70344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=56 indices=84 format=24",
+        "[EROverlay] UI_SCENE generation 3: 720x400 format=24 swapchain-format=24 offscreen-format=28 HWND=0000000000A80344 layer=above-ui; borrowing game RTV",
+        "[EROverlay] UI_SCENE first draw submitted: layer=above-ui vertices=56 indices=84 format=24",
+        "[EROverlay] UI_SCENE first draw submitted: layer=below-ui vertices=80 indices=120 format=24"
+      ]
+    },
+    "plugin_thread": {
+      "exit_code": 0,
+      "output": [
+        "PASS: PluginExports ABI unchanged; missing/invalid optional layer export defaults above UI; below-UI opt-in resolves through GetProcAddress.",
+        "PASS: destroyRenderer only follows a loaded generation, once; calls=1",
+        "PASS: production dispatcher serializes legacy callbacks, runs opted-in update/render concurrently and waits for active callbacks before teardown."
+      ],
+      "diagnostics": []
+    },
+    "minimap_visibility": {
+      "exit_code": 0,
+      "output": [
+        "PASS: startup zero/partial/reset UI state produces no resource text or border; initialized waiting state and ordinary menus stay visible; logo/loading/map, relocated RTTI, secondary roots, three historical layouts and optional API size gate work."
+      ],
+      "diagnostics": []
+    },
+    "minimap_map": {
+      "exit_code": 0,
+      "output": [
+        "PASS: production view reads, deaths, marker conversion, NPC/mod point visibility, quest landmarks, text-driven removal, cache reconfiguration, Home and invalidation."
+      ],
+      "diagnostics": []
+    },
+    "offscreen": {
+      "exit_code": 0,
+      "output": [
+        "PASS: reusable offscreen targets, local/fullscreen pixels, alpha, nonzero origins, resize, independent contexts and descriptor retirement.",
+        "texture-verification=0"
+      ],
+      "diagnostics": []
+    }
+  }
+}

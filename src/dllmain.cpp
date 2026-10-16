@@ -91,22 +91,29 @@ void init() {
 
     er::pluginsInit();
 
-    if (!waitForRendererHook()) {
-        fwprintf(stderr, L"[EROverlay] D3D hook was not installed; overlay thread exiting\n");
-        er::pluginsUninit();
-        er::gGameFiles->stop();
-        er::gGameFiles.reset();
-        er::util::closeNativeLog();
-        return;
+    const bool rendererReady = waitForRendererHook();
+    if (rendererReady)
+        mainThread();
+    else {
+        er::gRunning = false;
+        fwprintf(stderr, L"[EROverlay] UI_SCENE was not installed; overlay thread exiting\n");
     }
 
-    mainThread();
-
-    er::Hooking::unhook();
+    // Drain render callbacks before uninitializing plugins, and keep MinHook
+    // alive until both the renderer and plugin hooks have been removed.
+    // Renderer destruction callbacks use the public API through gD3DRenderer;
+    // keep that pointer published until those callbacks and uninit return.
+    if (er::gD3DRenderer)
+        er::gD3DRenderer->unhook();
     er::pluginsUninit();
-    er::gGameFiles->stop();
+    er::gD3DRenderer.reset();
     er::gGameFiles.reset();
+    er::gHooking.reset();
     er::util::closeNativeLog();
+    // Keep the proxy DLL loaded and the diagnostic console available on an
+    // unsupported image. Normal unload remains an explicit user action.
+    if (!rendererReady)
+        return;
     std::this_thread::sleep_for(500ms);
     if (enableConsole) {
         FreeConsole();
@@ -117,13 +124,12 @@ void init() {
 bool waitForRendererHook() {
     using namespace std::chrono_literals;
 
+    er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
     while (er::gRunning) {
-        er::gD3DRenderer = std::make_unique<er::D3DRenderer>();
-        if (er::Hooking::hook()) {
-            return true;
-        }
-
-        er::gD3DRenderer.reset();
+        // A missing window is transient. Missing signatures or a hook
+        // installation failure cannot be repaired by rescanning every 500 ms.
+        if (er::gD3DRenderer->initOverlay())
+            return er::gD3DRenderer->hook();
         std::this_thread::sleep_for(500ms);
     }
     return false;

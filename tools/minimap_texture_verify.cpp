@@ -3,11 +3,13 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <windows.h>
+#include <wrl/client.h>
 
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <thread>
 #include <vector>
@@ -65,11 +67,17 @@ struct NativeTextureVerifier {
         io.IniFilename = io.LogFilename = nullptr;
         D3D12_DESCRIPTOR_HEAP_DESC heap{};
         heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-        heap.NumDescriptors = 1026;
+        heap.NumDescriptors = 1024;
         if (FAILED(renderer.device_->CreateDescriptorHeap(&heap, IID_PPV_ARGS(&renderer.rtvDescriptorHeap_))))
             return false;
         renderer.rtvDescriptorSize_ = renderer.device_->GetDescriptorHandleIncrementSize(heap.Type);
-        renderer.currentRTV_ = renderer.rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+        // Production borrows the game's RTV outside the offscreen heap. Keep
+        // the fixture's main target in a separate heap for the same contract.
+        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mainRtvHeap;
+        heap.NumDescriptors = 1;
+        if (FAILED(renderer.device_->CreateDescriptorHeap(&heap, IID_PPV_ARGS(&mainRtvHeap))))
+            return false;
+        renderer.currentRTV_ = mainRtvHeap->GetCPUDescriptorHandleForHeapStart();
         D3D12_HEAP_PROPERTIES properties{};
         properties.Type = D3D12_HEAP_TYPE_DEFAULT;
         D3D12_RESOURCE_DESC target{};
@@ -89,6 +97,7 @@ struct NativeTextureVerifier {
         info.CommandQueue = renderer.commandQueue_;
         info.NumFramesInFlight = 2;
         info.RTVFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+        renderer.targetFormat_ = info.RTVFormat;
         info.SrvDescriptorHeap = renderer.descriptorHeap_;
         info.UserData = &renderer;
         info.SrvDescriptorAllocFn = D3DRenderer::SrvDescriptorAlloc;
@@ -127,7 +136,7 @@ struct NativeTextureVerifier {
         bool correct = true;
         for (size_t frame = 0; frame < std::size(cases); ++frame) {
             const auto &c = cases[frame];
-            renderer.currentBackBufferIndex_ = static_cast<UINT>(frame % 2);
+            renderer.frameIndex_ = static_cast<UINT>(frame % 2);
             renderer.waitForFrames();
             renderer.processTextureUploads();
             ImGui_ImplDX12_NewFrame();
@@ -162,9 +171,9 @@ struct NativeTextureVerifier {
             ImGui::End();
             ImGui::PopStyleVar(2);
             ImGui::Render();
-            auto &localTarget = offscreen->targets[offscreen->currentIndex];
+            auto &localTarget = offscreen->target;
             if (localTarget.width != (c.local ? int(c.size.x) : 640) || localTarget.height != (c.local ? int(c.size.y) : 360) ||
-                localTarget.rtvCpuHandle.ptr == sibling->targets[sibling->currentIndex].rtvCpuHandle.ptr)
+                localTarget.rtvCpuHandle.ptr == sibling->target.rtvCpuHandle.ptr)
                 return false;
             if (FAILED(allocator->Reset()) || FAILED(renderer.commandList_->Reset(allocator, nullptr)))
                 return false;
@@ -359,7 +368,7 @@ struct NativeTextureVerifier {
         queue.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
         if (FAILED(renderer.device_->CreateCommandQueue(&queue, IID_PPV_ARGS(&renderer.commandQueue_))))
             return 2;
-        renderer.buffersCounts_ = 2;
+        renderer.frameCount_ = 2;
         D3D12_DESCRIPTOR_HEAP_DESC heap{};
         heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         heap.NumDescriptors = 1024;
@@ -371,6 +380,12 @@ struct NativeTextureVerifier {
             renderer.freeDescriptors_.push_back(i - 1);
         if (!renderer.initializeTextureUpload())
             return 4;
+        if (ddsPath && std::strcmp(ddsPath, "--offscreen") == 0) {
+            bool ok = verifyOffscreen(renderer);
+            std::puts(ok ? "PASS: reusable offscreen targets, local/fullscreen pixels, alpha, nonzero origins, resize, independent contexts and descriptor retirement."
+                         : "FAIL: reusable offscreen target verification");
+            return ok ? 0 : 17;
+        }
         std::ifstream stream(ddsPath ? ddsPath : "build/ida/probes/run-26836-32694765/surface-v8000.tpf", std::ios::binary | std::ios::ate);
         auto size = stream.tellg();
         if (size <= 0)
@@ -498,10 +513,10 @@ struct NativeTextureVerifier {
         offscreen.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         offscreen.SampleDesc.Count = 1;
         offscreen.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-        auto fullBytes = renderer.device_->GetResourceAllocationInfo(0, 1, &offscreen).SizeInBytes * 3;
+        auto fullBytes = renderer.device_->GetResourceAllocationInfo(0, 1, &offscreen).SizeInBytes;
         offscreen.Width = offscreen.Height = 648;
-        auto localBytes = renderer.device_->GetResourceAllocationInfo(0, 1, &offscreen).SizeInBytes * 3;
-        std::printf("MEMORY: 4K/648px circle/3 backbuffers: fullscreen=%llu local=%llu bytes (actual device allocation).\n", static_cast<unsigned long long>(fullBytes),
+        auto localBytes = renderer.device_->GetResourceAllocationInfo(0, 1, &offscreen).SizeInBytes;
+        std::printf("MEMORY: 4K/648px circle/one reusable target: fullscreen=%llu local=%llu bytes (actual device allocation).\n", static_cast<unsigned long long>(fullBytes),
                     static_cast<unsigned long long>(localBytes));
         std::puts("PASS: production BC7 upload/readback matches DDS blocks, frame fences and SRV retirement.");
         std::puts("PASS: twelve BC1 atlases upload together, each GPU readback matches its DDS and all twelve descriptors retire.");
@@ -513,7 +528,7 @@ struct NativeTextureVerifier {
 } // namespace er
 int main(int argc, char **argv) {
     if (argc > 2) {
-        std::fputs("Usage: minimap_texture_verify.exe [sprite.dds]\n", stderr);
+        std::fputs("Usage: minimap_texture_verify.exe [sprite.dds | --offscreen]\n", stderr);
         return 1;
     }
     er::D3DRenderer renderer;

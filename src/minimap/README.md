@@ -8,7 +8,11 @@ Place `EROverlay.dll`, `overlays/Minimap.dll` and `configs/` in your mod loader 
 
 When updating to the sectioned configuration format, back up your old `configs/minimap.ini` and replace it with the new file. Old flat keys and parallel comma-separated setting lists are ignored and are not converted automatically.
 
-The minimap reads game archives and renders its own textures. External `data/map` images are not required. Avoid running it alongside MSI Afterburner, RivaTuner Statistics Server or Nvidia FPS Counter, which may hook the same DirectX interfaces.
+The minimap reads game archives and renders its own textures. External `data/map` images are not required.
+
+With the new core and Minimap DLL, the minimap draws below game UI automatically. Boss, Achievements and their older plugin binaries remain above UI. UI_SCENE is the only renderer; there is no backend setting. Static address checks pass for game versions 1.05–1.17.1; 1.02–1.04.1 currently do not render overlays.
+
+The minimap and its resource-loading status hide during loading/game logos and while the game's full-screen map is open. Other game menus do not trigger automatic hiding. Manual hiding and presets with `zoom = 0` remain available.
 
 ## Start with the defaults
 
@@ -45,7 +49,7 @@ English comments are in `configs/`; Chinese-comment templates are in `configs_CN
 
 Use letters, digits, `F1`–`F24` or chords such as `CTRL+M`, `ALT+N` and `CTRL+SHIFT+F8`. Do not put spaces around `+`. See `configs/input.ini` for all key names. An empty value or `none` disables a shortcut.
 
-One key can toggle multiple marker groups. When `toggle` and `cycle` share a nonempty key, a hidden step is appended unless a preset already has `zoom = 0`. Disabled keys do not add a hidden step. Minimap shortcuts respond while the game is in the foreground and its menus are closed.
+One key can toggle multiple marker groups. When `toggle` and `cycle` share a nonempty key, a hidden step is appended unless a preset already has `zoom = 0`. Disabled keys do not add a hidden step. Minimap shortcuts respond while the game is in the foreground, except during loading, logos and the game's full-screen map.
 
 To use M only for show/hide and F8 for cycling:
 
@@ -167,7 +171,7 @@ Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource reque
 | Symptom | Check |
 |---|---|
 | Changes do not apply | Edit the loader's `configs/minimap.ini`, save, then restart the game |
-| Shortcut does not respond | Check for an empty/incorrect key, foreground focus or an open game menu |
+| Shortcut does not respond | Check for an empty/incorrect key, foreground focus, loading/logos or the game's full-screen map |
 | New preset is missing | Match the case of its section name and `order` entry |
 | Margins do not match expectations | Use `position = margins` and leave the opposite edge empty on each axis; `0` also selects an edge |
 | Map becomes hidden | Check the hidden step, `zoom = 0`, zero dimensions or `opacity = 0%` |
@@ -176,7 +180,7 @@ Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource reque
 
 ## Game and resource support
 
-Native adapters cover hash-verified historical 1.02–1.17 EXEs and Steam 1.17.1. All supplied old EXEs passed offline address/layout checks; individual old-game visual testing remains pending. Unknown EXEs show a status and disable native calls. See the [compatibility report](../../docs/minimap-version-compatibility.md).
+Native adapters cover hash-verified historical 1.02–1.17 EXEs and Steam 1.17.1. All supplied old EXEs passed offline address/layout checks; individual old-game visual testing remains pending. Unknown EXEs disable native calls; the minimap stays hidden while display state cannot be verified. See the [compatibility report](../../docs/minimap-version-compatibility.md).
 
 Atlas names and counts come from native GFX/TextureAtlas definitions, including atlas mods. Loading, drawing and retirement were verified with 12 atlases. Resources must be readable through the game's file layer and use supported PC GFX/TPF/DDS formats. Pre-DLC games require only surface/underground resources; M10 and DLC atlases are optional. Resource and texture budgets still apply.
 

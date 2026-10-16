@@ -1,5 +1,7 @@
 # Minimap 原生文件资源开发计划
 
+2026-10-16 更新：本计划记录资源迁移过程；其中的 Present 接入已由 [UI_SCENE](ui-scene-prototype.md) 替代，DXGI 路径已移除。当前渲染行为与验证范围以该说明为准。
+
 目标：使用游戏文件加载层读取底图 DDS、图集区域与 GFX 帧定义，由 EROverlay 创建和管理纹理、SRV、上传与绘制，**替换全部外部底图和 sprite，并显示死亡位置及玩家编号标记**。依据[可行性报告](minimap-game-textures.md)与[完整 sprite 映射](minimap-game-sprites.evidence.json)，于 2026-10-02 补充并开始实施。
 
 历史版本扩展已完成全部旧 EXE 的静态分析，具体地址、布局、资源缺口和实施顺序单列于[历史版本适配开发计划](minimap-version-compatibility-plan.md)。当前实现仍限定最新基准，不能将本计划的最新样本验收结果视为旧版已支持。

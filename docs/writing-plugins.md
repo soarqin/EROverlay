@@ -26,7 +26,7 @@ DLL loaded → init() → [game running loop] → uninit()
 - **`init()`** — Called once when the plugin is loaded. Receive the API pointer here.
 - **`update()`** — Called at approximately 60 Hz in a dedicated thread. Use for game state polling.
 - **`createRenderer()`** — Called when the DX12 renderer is ready. Set up ImGui context here.
-- **`render()`** — Called every frame from the DX12 Present hook thread. Draw ImGui widgets here.
+- **`render()`** — Called once per overlay frame from the game's render-queue callback. Draw ImGui widgets here.
 - **`destroyRenderer()`** — Called when the renderer is being torn down.
 - **`uninit()`** — Called when the plugin is unloaded.
 
@@ -208,7 +208,7 @@ typedef struct {
 ## Threading Notes
 
 - `update()` runs in a **dedicated overlay thread** at ~60 Hz.
-- `render()` runs in the **DX12 Present hook thread**.
+- `render()` runs in the **native game render-queue callback** through UI_SCENE.
 - If you share state between `update()` and `render()`, protect it with a `std::mutex`.
 - Use `std::atomic_bool` for simple cross-thread flags.
 
@@ -231,6 +231,36 @@ Check `size >= offsetof(EROverlayNativeAPI, member) + sizeof(api->member)` and
 the function pointer before each optional method. GPU status queries and
 retirement stay on render; a READY view must be polled at least once in each
 frame that uses it so deferred retirement covers all draws.
+
+---
+
+## Rendering Below Game UI
+
+Plugins draw above the game's composited UI by default. Existing Boss,
+Achievements and third-party plugin binaries keep that behavior without
+recompiling. A plugin can opt into the lower scene target by
+adding this optional DLL export:
+
+```cpp
+PLUGIN_EXPORT ERRenderLayer getRenderLayer() { return ER_RENDER_LAYER_BELOW_UI; }
+```
+
+The core reads this export once when loading the plugin. Missing exports,
+`ER_RENDER_LAYER_ABOVE_UI` and unrecognized values select the upper layer.
+`PluginExports` and `EROverlayAPI` retain their existing layouts. Older cores
+ignore the export. Minimap is the only bundled plugin that opts in.
+
+The native backend builds one ImGui/input frame, calls every plugin's `render()`
+once, and submits the lower commands before native UI composition and the upper
+commands afterward. `createRenderer()`'s return value still controls callback
+order; it does not select a game render stage. A shared window or foreground
+draw list can contain commands from both plugin layers.
+
+UI_SCENE is the only renderer; no backend selection is required. Use the new
+core together with the new Minimap DLL for the lower layer and the immediate
+loading/logo/world-map visibility checks. The size-gated native
+`readDisplayState()` reports these conditions independently of resource and
+map-snapshot readiness; check the API size and pointer before calling it.
 
 ---
 

@@ -97,9 +97,15 @@ struct ImGui_ImplDX12_Data
     ID3D12RootSignature*        pRootSignatureNearest;
     ID3D12PipelineState*        pPipelineStateLinear;
     ID3D12PipelineState*        pPipelineStateNearest;
+    ID3D12PipelineState*        pPipelineStateRgba8Linear;
+    ID3D12PipelineState*        pPipelineStateRgba8Nearest;
+    ID3D12PipelineState*        pPipelineStateUnderlay;
+    ID3D12PipelineState*        pPipelineStateUnderlayRgba8;
     ID3D12CommandQueue*         pCommandQueue;
     bool                        commandQueueOwned;
     DXGI_FORMAT                 RTVFormat;
+    DXGI_FORMAT                 ActiveRTVFormat;
+    bool                        SamplerNearest;
     DXGI_FORMAT                 DSVFormat;
     ID3D12DescriptorHeap*       pd3dSrvDescHeap;
     ID3D12Fence*                Fence;
@@ -150,15 +156,31 @@ void ImGui_ImplDX12_SetupSamplerNearest(ID3D12GraphicsCommandList* command_list)
 void ImGui_ImplDX12_SetupSamplerLinear(ID3D12GraphicsCommandList* command_list)
 {
     ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
-    command_list->SetPipelineState(bd->pPipelineStateLinear);
+    bd->SamplerNearest = false;
+    command_list->SetPipelineState(bd->ActiveRTVFormat == bd->RTVFormat ? bd->pPipelineStateLinear : bd->pPipelineStateRgba8Linear);
     command_list->SetGraphicsRootSignature(bd->pRootSignatureLinear);
 }
 
 void ImGui_ImplDX12_SetupSamplerNearest(ID3D12GraphicsCommandList* command_list)
 {
     ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
-    command_list->SetPipelineState(bd->pPipelineStateNearest);
+    bd->SamplerNearest = true;
+    command_list->SetPipelineState(bd->ActiveRTVFormat == bd->RTVFormat ? bd->pPipelineStateNearest : bd->pPipelineStateRgba8Nearest);
     command_list->SetGraphicsRootSignature(bd->pRootSignatureNearest);
+}
+
+void ImGui_ImplDX12_SetRenderTargetFormat(ID3D12GraphicsCommandList* command_list, DXGI_FORMAT format)
+{
+    ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
+    IM_ASSERT(bd && command_list);
+    IM_ASSERT(format == bd->RTVFormat || (format == DXGI_FORMAT_R8G8B8A8_UNORM && bd->pPipelineStateRgba8Linear && bd->pPipelineStateRgba8Nearest));
+    bd->ActiveRTVFormat = format;
+    // Both formats use the same root signatures. Change only the PSO so the
+    // local offscreen projection and the current sampler remain intact.
+    bool main_target = format == bd->RTVFormat;
+    command_list->SetPipelineState(bd->SamplerNearest
+        ? (main_target ? bd->pPipelineStateNearest : bd->pPipelineStateRgba8Nearest)
+        : (main_target ? bd->pPipelineStateLinear : bd->pPipelineStateRgba8Linear));
 }
 
 static void ImGui_ImplDX12_SetupRenderState(ImDrawData* draw_data, ID3D12GraphicsCommandList* command_list, ImGui_ImplDX12_RenderBuffers* fr)
@@ -212,6 +234,21 @@ static void ImGui_ImplDX12_SetupRenderState(ImDrawData* draw_data, ID3D12Graphic
     command_list->OMSetBlendFactor(blend_factor);
 }
 
+void ImGui_ImplDX12_CompositeUnderlay(ID3D12GraphicsCommandList* command_list, D3D12_GPU_DESCRIPTOR_HANDLE texture, DXGI_FORMAT format, float width, float height)
+{
+    ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
+    IM_ASSERT(bd && command_list && bd->pPipelineStateUnderlay && bd->pPipelineStateUnderlayRgba8);
+    command_list->SetPipelineState(format == bd->RTVFormat ? bd->pPipelineStateUnderlay : bd->pPipelineStateUnderlayRgba8);
+    command_list->SetGraphicsRootSignature(bd->pRootSignatureLinear);
+    command_list->SetGraphicsRootDescriptorTable(1, texture);
+    D3D12_VIEWPORT viewport = { 0, 0, width, height, 0, 1 };
+    D3D12_RECT scissor = { 0, 0, (LONG)width, (LONG)height };
+    command_list->RSSetViewports(1, &viewport);
+    command_list->RSSetScissorRects(1, &scissor);
+    command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    command_list->DrawInstanced(3, 1, 0, 0);
+}
+
 template<typename T>
 static inline void SafeRelease(T*& res)
 {
@@ -221,7 +258,7 @@ static inline void SafeRelease(T*& res)
 }
 
 // Render function
-void ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList* command_list)
+void ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandList* command_list, DXGI_FORMAT target_format)
 {
     // Avoid rendering when minimized
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
@@ -309,6 +346,8 @@ void ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3D12GraphicsCommandL
     IM_ASSERT(range.End == draw_data->TotalIdxCount * sizeof(ImDrawIdx));
     fr->IndexBuffer->Unmap(0, &range);
 
+    // Each draw begins on the main target, independent of the previous frame.
+    bd->ActiveRTVFormat = target_format == DXGI_FORMAT_UNKNOWN ? bd->RTVFormat : target_format;
     // Setup desired DX state
     ImGui_ImplDX12_SetupRenderState(draw_data, command_list, fr);
 
@@ -817,10 +856,70 @@ bool    ImGui_ImplDX12_CreateDeviceObjects()
     psoDesc.pRootSignature = bd->pRootSignatureNearest;
 
     result_pipeline_state = bd->pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&bd->pPipelineStateNearest));
+    // Offscreen alpha must retain 8-bit precision even when the game's main
+    // target is RGB10A2 or FP16. Build compatible PSOs using the same shaders.
+    if (result_pipeline_state == S_OK && bd->RTVFormat != DXGI_FORMAT_R8G8B8A8_UNORM)
+    {
+        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.pRootSignature = bd->pRootSignatureLinear;
+        result_pipeline_state = bd->pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&bd->pPipelineStateRgba8Linear));
+        if (result_pipeline_state == S_OK)
+        {
+            psoDesc.pRootSignature = bd->pRootSignatureNearest;
+            result_pipeline_state = bd->pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&bd->pPipelineStateRgba8Nearest));
+        }
+    }
     vertexShaderBlob->Release();
     pixelShaderBlob->Release();
     if (result_pipeline_state != S_OK)
         return false;
+
+    if (bd->RTVFormat == DXGI_FORMAT_R10G10B10A2_UNORM)
+    {
+        // The native BlendUI shaders evaluate scene.rgb * ui.a + ui.rgb.
+        // Insert the completed overlay behind existing native UI, preserving
+        // its premultiplied RGB and multiplying its remaining transmittance:
+        // ui.rgb += overlay.rgb * ui.a; ui.a *= 1 - overlay.a.
+        static const char* underlayVertexShader = R"(
+            struct Output { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };
+            Output main(uint id : SV_VertexID) {
+                Output o;
+                o.uv = float2((id << 1) & 2, id & 2);
+                o.pos = float4(o.uv * float2(2, -2) + float2(-1, 1), 0, 1);
+                return o;
+            })";
+        static const char* underlayPixelShader = R"(
+            SamplerState sampler0 : register(s0);
+            Texture2D texture0 : register(t0);
+            float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_Target {
+                return texture0.Sample(sampler0, uv);
+            })";
+        vertexShaderBlob = pixelShaderBlob = nullptr;
+        HRESULT underlayResult = D3DCompile(underlayVertexShader, strlen(underlayVertexShader), nullptr, nullptr, nullptr, "main", "vs_5_0", 0, 0, &vertexShaderBlob, nullptr);
+        if (SUCCEEDED(underlayResult))
+            underlayResult = D3DCompile(underlayPixelShader, strlen(underlayPixelShader), nullptr, nullptr, nullptr, "main", "ps_5_0", 0, 0, &pixelShaderBlob, nullptr);
+        if (SUCCEEDED(underlayResult))
+        {
+            psoDesc.VS = { vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize() };
+            psoDesc.PS = { pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize() };
+            psoDesc.InputLayout = {};
+            psoDesc.pRootSignature = bd->pRootSignatureLinear;
+            psoDesc.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_DEST_ALPHA;
+            psoDesc.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+            psoDesc.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+            psoDesc.RTVFormats[0] = bd->RTVFormat;
+            underlayResult = bd->pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&bd->pPipelineStateUnderlay));
+            if (SUCCEEDED(underlayResult))
+            {
+                psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+                underlayResult = bd->pd3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&bd->pPipelineStateUnderlayRgba8));
+            }
+        }
+        SafeRelease(vertexShaderBlob);
+        SafeRelease(pixelShaderBlob);
+        if (FAILED(underlayResult))
+            return false;
+    }
 
     // Create command allocator and command list for ImGui_ImplDX12_UpdateTexture()
     hr = bd->pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&bd->pTexCmdAllocator));
@@ -853,6 +952,10 @@ void    ImGui_ImplDX12_InvalidateDeviceObjects()
     SafeRelease(bd->pRootSignatureNearest);
     SafeRelease(bd->pPipelineStateLinear);
     SafeRelease(bd->pPipelineStateNearest);
+    SafeRelease(bd->pPipelineStateRgba8Linear);
+    SafeRelease(bd->pPipelineStateRgba8Nearest);
+    SafeRelease(bd->pPipelineStateUnderlay);
+    SafeRelease(bd->pPipelineStateUnderlayRgba8);
 
     if (bd->pTexUploadBufferMapped)
     {
