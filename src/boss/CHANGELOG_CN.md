@@ -13,11 +13,18 @@
 - 复活时按 Boss 数据一并恢复场地、阶段、召唤及入口 flag；支持显式恢复为 1，先解析全部地址后再写入，解析失败保留原状态。
 - 根据原始事件脚本修正火焰巨人的主击败 flag；同步全部 207 个 Boss、14 种语言的数据和生成源。
 - 每次更新重新解析击败 flag 地址；修复 flag 解析器对直接存储和不存在类别的处理。
+- 修复 `boss.panel_pos` 含非法数值时解析抛出异常的问题；无法解析出数值的字段按 `0` 处理。
 
 #### 变更
 
-- 迷你/完整模式切换快捷键支持 Ctrl、Alt、Shift 和 Win 组合，并可与其他覆盖层共用按键。
+- 迷你/完整模式切换快捷键改用核心的虚拟键输入 API，支持 Ctrl、Alt、Shift 和 Win 组合，并可与其他覆盖层共用按键。
 - 优化 `boss.ini` 的说明，新增 `configs_CN/` 中文注释模板。
+
+#### 升级说明
+
+- 需同时更新 `EROverlay.dll`、`overlays/Boss.dll` 和 Boss 数据文件。新版 Boss 依赖核心的 `configGetVirtualKey()`、`inputIsKeyPressed()` 回调；仍按 ImGui 键码处理输入的旧版 Boss 无法正确读取虚拟键核心返回的快捷键值。
+- 面板位置解析修复编译在 `Boss.dll` 内，仅更新 `EROverlay.dll` 不会应用此修复。
+- 切换到 `UI_SCENE` 渲染器本身无需额外迁移 Boss API；Boss 仍在游戏 UI 上层绘制。
 
 ### [1.5.2] - 2026-06-30
 

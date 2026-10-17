@@ -13,11 +13,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Revival restores per-boss arena, phase, summon and entry flags, including explicit true targets; all addresses are resolved before writing and resolution failures leave flags untouched.
 - Correct the Fire Giant's primary defeat flag from original event scripts; update all 207 boss entries, 14 languages and generation sources.
 - Re-resolve defeat flag addresses on updates and handle direct storage and absent categories correctly in the flag resolver.
+- Fix exceptions when `boss.panel_pos` contains invalid numbers; fields with no numeric value are read as `0`.
 
 #### Changed
 
-- The mini/full mode shortcut supports Ctrl, Alt, Shift and Win combinations and can share a key with other overlays.
+- Use the core's virtual-key input API for the mini/full mode shortcut, supporting Ctrl, Alt, Shift and Win combinations and sharing keys with other overlays.
 - Clarify the `boss.ini` instructions and provide a Chinese-comment template in `configs_CN/`.
+
+#### Upgrade notes
+
+- Update `EROverlay.dll`, `overlays/Boss.dll` and the Boss data files together. New Boss builds require the core's `configGetVirtualKey()` and `inputIsKeyPressed()` callbacks; older Boss builds still expecting ImGui key codes cannot correctly read shortcut values from the virtual-key core.
+- The panel-position parsing fix is compiled into `Boss.dll`; updating only `EROverlay.dll` does not apply it.
+- The `UI_SCENE` renderer switch itself requires no additional Boss API migration; Boss remains above game UI.
 
 ### [1.5.2] - 2026-06-30
 

@@ -8,14 +8,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### [Unreleased]
 
+#### Added
+
+- Add the optional `getRenderLayer()` plugin export to draw above or below game UI without changing the existing plugin ABI. Plugins without this export, including older Boss and Achievements DLLs, remain above UI.
+- Add `readDisplayState()` to the native API to query loading screens, logos and the full-screen map independently of map-resource readiness.
+
 #### Changed
 
+- Replace the DXGI renderer with the game's native `UI_SCENE` render queue, resolving game hooks through signatures and RTTI instead of hooking DXGI and `ExecuteCommandLists`.
+- Support the game's RGB10A2 render targets used in SDR and HDR, retaining RGBA8 offscreen textures to preserve alpha precision. Composite lower-layer overlays behind native UI with its transparency preserved.
+- Build one ImGui frame across both UI layers, reuse GPU submission slots without per-frame CPU waits, and keep one texture per offscreen context to reduce video memory use.
 - Reduce overlay work on the game's render thread: frames with nothing to display submit no GPU commands, font atlas updates no longer wait for the game's submitted GPU work, and controller input is no longer polled.
 
 #### Fixed
 
 - Fix crashes caused by empty or malformed numbers and colors in INI files; the defaults are used instead.
 - Fix fonts being loaded again and duplicated after changing resolution or window mode.
+- Fix rendering and input recovery after the game recreates its window or swap chain.
+- Fix plugin renderer destruction callbacks running before creation or more than once during cleanup; drain active render callbacks before releasing plugins and GPU resources.
+- Preserve ImGui draw lists containing only callbacks, including offscreen rendering callbacks, when submitting either UI layer.
+
+#### Upgrade notes
+
+- Static address checks pass for archived game versions 1.05–1.17.1; versions 1.02–1.04.1 no longer render overlays. Static checks do not replace in-game verification for each version.
+- `UI_SCENE` is the only renderer. The old `common.renderer` setting is ignored; the DXGI backend and fallback have been removed.
+- Update `overlays/Boss.dll` when upgrading from Boss builds that still use ImGui key codes: the earlier virtual-key input API migration changed shortcut-value semantics even though the function-table slot stayed in place.
 
 ### [1.4.0] - 2026-10-03
 

@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Clarify the achievement-count limit and panel-layout instructions, and provide a Chinese-comment template in `configs_CN/`.
 
+#### Fixed
+
+- Fix exceptions when `achievements.panel_pos` contains invalid numbers; fields with no numeric value are read as `0`.
+
+#### Upgrade notes
+
+- The panel-position parsing fix is compiled into `Achievements.dll`; rebuild or update this DLL to receive it. Updating only `EROverlay.dll` does not apply the fix.
+- The `UI_SCENE` renderer switch itself requires no Achievements API migration or rebuild. The overlay does not use the changed hotkey API or the new native API extensions and remains above game UI.
+
 ### [0.1.1] - 2026-06-30
 
 #### Changed

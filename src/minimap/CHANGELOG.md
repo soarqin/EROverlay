@@ -14,11 +14,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Changed
 
+- Draw the minimap below game UI so menus, dialogs and HUD elements can cover it.
+- Keep the minimap visible and its shortcuts usable in ordinary game menus. Automatic hiding applies only to loading screens, logos and the game's full-screen map.
 - Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.
 
 #### Fixed
 
 - Follow the loaded game's GFX container depths and native point ordering when markers overlap, including graces and mod icons. Reverse already ordered points and skip disabled marker layers. Request resources with canonical lowercase paths for older cores. Record changed marker counts in the optional diagnostic log.
+- Keep quest targets controlled by `landmarks` instead of hiding them when `[markers] others` is disabled.
+- Stop repeatedly reloading atlas containers when a recolored mod icon references an invalid region; skip the unusable icon instead.
+- Hide the minimap border and resource-loading messages during startup before display state can be verified, and hide immediately when loading, logos or the full-screen map begin.
+
+#### Upgrade notes
+
+- Update both `EROverlay.dll` and `overlays/Minimap.dll` to enable rendering below game UI and the new visibility rules.
 
 ### [2.0.0] - 2026-10-03
 
