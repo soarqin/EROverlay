@@ -472,7 +472,7 @@ void Data::update() {
         const uint32_t layer = next.state.mapId == 10 ? 2 : (next.state.underground & 1) ? 1 : 0;
         // The DLL adds native children to ItemList after the game's pins.
         // Its API supplies their own child depths, not category priorities.
-        for (const auto &point: gGoblins.points(layer)) {
+        for (const auto &point: gGoblins.viewPoints(layer)) {
             DecorationInfo marker;
             marker.id = point.id;
             marker.iconId = point.icon_id;

@@ -19,7 +19,7 @@ if errorlevel 1 goto :failed
 %OUT%\minimap_runtime_icon_verify.exe
 if errorlevel 1 goto :failed
 rem This test DLL has controlled marker state. It is NEVER an installable mod.
-cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MT /LD /I"%UPSTREAM%\src" "%UPSTREAM%\src\goblin_map_api.cpp" "%UPSTREAM%\src\generated_shared\goblin_map_icons.cpp" tools\compat\mapforgoblins\fixtures\provider.cpp /Fo:%OUT%\ /Fe:%OUT%\MapForGoblins.dll /link /IMPLIB:%OUT%\MapForGoblins.lib
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MT /LD /DMfgGetMapAPI=MfgGetMapAPIProvider /Isrc\minimap\compat /I"%UPSTREAM%\src" "%UPSTREAM%\src\goblin_map_api.cpp" "%UPSTREAM%\src\generated_shared\goblin_map_icons.cpp" tools\compat\mapforgoblins\fixtures\provider.cpp /Fo:%OUT%\ /Fe:%OUT%\MapForGoblins.dll /link /IMPLIB:%OUT%\MapForGoblins.lib
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc\minimap\compat tools\compat\mapforgoblins\fixtures\client.cpp /Fo:%OUT%\ /Fe:%OUT%\client.exe
 if errorlevel 1 goto :failed

@@ -18,9 +18,9 @@ cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W4 /Isrc /Ideps\pattern16 tools\
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W3 /Isrc /Ideps\fmt\include tools\plugin_thread_verify.cpp /Fo:build\ui-scene\ /Fe:build\ui-scene\plugin_thread_verify.exe /link build\deps\fmt\Release\fmt.lib
 if errorlevel 1 goto :failed
-cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W3 /Isrc tools\minimap_map_verify.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\ui-scene\ /Fe:build\ui-scene\minimap_map_verify.exe /link xmllite.lib shlwapi.lib
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W3 /Isrc tools\minimap_map_verify.cpp src\minimap\data.cpp src\minimap\goblins.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\runtimeicons.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\ui-scene\ /Fe:build\ui-scene\minimap_map_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
-cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W3 /wd4819 /Isrc /Ideps\imgui tools\minimap_visibility_verify.cpp src\minimap\render.cpp src\minimap\settings.cpp src\minimap\data.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\ui-scene\ /Fe:build\ui-scene\minimap_visibility_verify.exe /link build\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /W3 /wd4819 /Isrc /Ideps\imgui tools\minimap_visibility_verify.cpp src\minimap\render.cpp src\minimap\settings.cpp src\minimap\data.cpp src\minimap\goblins.cpp src\util\mapstate.cpp src\minimap\resources.cpp src\minimap\runtimeicons.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\ui-scene\ /Fe:build\ui-scene\minimap_visibility_verify.exe /link build\deps\imgui\Release\imgui.lib xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 set OBJ=build\src\EROverlayDLL.dir\Release
 set OBJS=%OBJ%\api.obj %OBJ%\assets.obj %OBJ%\config.obj %OBJ%\d3drenderer.obj %OBJ%\dllmain.obj %OBJ%\embeddedfont.obj %OBJ%\file.obj %OBJ%\gamefiles.obj %OBJ%\gameflags.obj %OBJ%\global.obj %OBJ%\hooking.obj %OBJ%\input.obj %OBJ%\mapstate.obj %OBJ%\param.obj %OBJ%\pointers.obj %OBJ%\steam.obj %OBJ%\sysfont.obj %OBJ%\textureupload.obj %OBJ%\winhttp.obj %OBJ%\wstring.obj

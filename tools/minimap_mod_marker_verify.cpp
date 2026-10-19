@@ -347,8 +347,9 @@ bool goblinsDLL(const char *path) {
     auto module = LoadLibraryW(dllPath.c_str());
     const auto setScenario = module ? reinterpret_cast<void (*)(uint32_t)>(GetProcAddress(module, "setTestScenario")) : nullptr;
     const auto calls = module ? reinterpret_cast<uint32_t (*)()>(GetProcAddress(module, "testCalls")) : nullptr;
+    const auto lastPointView = module ? reinterpret_cast<const MfgMapPoint *(*)()>(GetProcAddress(module, "testLastPointView")) : nullptr;
     const auto get = module ? reinterpret_cast<MfgGetMapAPIFn>(GetProcAddress(module, "MfgGetMapAPI")) : nullptr;
-    if (!setScenario || !calls || !get) {
+    if (!setScenario || !calls || !lastPointView || !get) {
         std::fputs("FAIL: provide the test provider, not the shipping mod DLL\n", stderr);
         if (module)
             FreeLibrary(module);
@@ -368,6 +369,10 @@ bool goblinsDLL(const char *path) {
     auto containers = gResources.markerLayers();
     const bool warpAbove = std::find(containers.begin(), containers.end(), MapLayer::Warp) > std::find(containers.begin(), containers.end(), MapLayer::Item);
     bool ok = true;
+    setScenario(0);
+    const auto before = calls();
+    const auto borrowed = gGoblins.viewPoints(0);
+    ok &= borrowed.size() == 3 && calls() == before + 1 && borrowed.data() == lastPointView();
     for (uint32_t layer = 0; layer < 3; ++layer) {
         const uint8_t area = layer == 2 ? 61 : 60;
         WorldMapPointParam mine{};
@@ -408,7 +413,9 @@ bool goblinsDLL(const char *path) {
             setScenario(scenario);
             ++generation;
             gData.setShowOthers(true);
+            const auto beforeRefresh = calls();
             gData.update();
+            ok &= calls() == beforeRefresh + 1;
             auto snapshot = gData.snapshot();
             size_t runtimeCount = 0;
             for (const auto &marker: snapshot.decorations)
@@ -448,7 +455,7 @@ bool goblinsDLL(const char *path) {
         auto disabled = gData.snapshot();
         ok &= calls() == before && std::none_of(disabled.decorations.begin(), disabled.decorations.end(), [](const auto &m) { return m.runtimeIcon; });
     }
-    const auto *bridge = get(1);
+    const auto *bridge = get(MFG_MAP_ABI);
     for (uint32_t index = 0; index < bridge->icon_count; ++index) {
         MfgMapIcon icon{};
         ok &= bridge->get_icon(index, &icon) == MFG_MAP_OK;
@@ -462,7 +469,7 @@ bool goblinsDLL(const char *path) {
     gGoblins.stop();
     ok &= GetModuleHandleW(L"MapForGoblins.dll") == nullptr && textures.empty();
     ImGui::DestroyContext();
-    std::puts(ok ? "PASS: real DLL bridge through Data/Resources/ImGui; all embedded icons; native layers; source ID collisions; masks; buffer growth; provider "
+    std::puts(ok ? "PASS: real DLL bridge through Data/Resources/ImGui; borrowed pointer identity; single refresh; all embedded icons; native layers; ID collisions; provider "
                    "visibility/failure; optional switch; module/texture lifetime."
                  : "FAIL: DLL bridge replay");
     return ok;
@@ -813,15 +820,16 @@ bool scenario(const char *name, std::initializer_list<uint32_t> enabled, uint32_
 }
 } // namespace
 int main(int argc, char **argv) {
+    const bool goblinsMode = argc == 8 && !std::strcmp(argv[6], "--goblins-dll");
     if ((argc != 6 && argc != 7 && argc != 8) || (argc == 7 && std::strcmp(argv[6], "--vanilla-completion") && std::strcmp(argv[6], "--other-markers")) ||
-        (argc == 8 && std::strcmp(argv[6], "--goblins-dll") && (std::strcmp(argv[6], "--other-markers") || std::strcmp(argv[7], "--grace-below-items")))) {
+        (argc == 8 && !goblinsMode && (std::strcmp(argv[6], "--other-markers") || std::strcmp(argv[7], "--grace-below-items")))) {
         std::fputs("Usage: minimap_mod_marker_verify.exe worldmap.gfx layouts.bnd atlases.tpf BonfireWarpParam.param WorldMapPointParam.param "
                    "[--vanilla-completion|--other-markers [--grace-below-items]|--goblins-dll provider-fixture.dll]\n",
                    stderr);
         return 1;
     }
     vanillaCompletion = argc == 7 && !std::strcmp(argv[6], "--vanilla-completion");
-    warpAboveItems = argc != 8 || !std::strcmp(argv[6], "--goblins-dll");
+    warpAboveItems = argc != 8 || goblinsMode;
     showLandmarks = !vanillaCompletion;
     auto gfx = readFile(argv[1]), layouts = readFile(argv[2]);
     tpf = readFile(argv[3]);
@@ -839,7 +847,7 @@ int main(int argc, char **argv) {
         return 9;
     if (!gResources.loadDefinitions(gfx, layouts))
         return 3;
-    if (argc == 8 && !std::strcmp(argv[6], "--goblins-dll"))
+    if (goblinsMode)
         return goblinsDLL(argv[7]) ? 0 : 10;
     if (argc >= 7 && !std::strcmp(argv[6], "--other-markers"))
         return otherMarkers() ? 0 : 8;

@@ -10,13 +10,13 @@ index 49a6632..87f00bb 100644
    src/from/params.hpp
 diff --git a/sdk/mfg_map_api.h b/sdk/mfg_map_api.h
 new file mode 100644
-index 0000000..3a33389
+index 0000000..ae6593c
 --- /dev/null
 +++ b/sdk/mfg_map_api.h
-@@ -0,0 +1,56 @@
-+/* Optional read-only MapForGoblins bridge. MIT, Copyright (c) 2026 EROverlay contributors.
-+ * ABI 1, Windows x64, default packing and calling convention.
-+ * Caller retains the provider module until all returned icon bytes are copied.
+@@ -0,0 +1,61 @@
++/* Read-only MapForGoblins map views. MIT, Copyright (c) 2026 EROverlay contributors.
++ * Windows x64, default packing and calling convention.
++ * Caller retains the provider module while using any returned pointer.
 + * No STL objects, heap ownership or exceptions cross the DLL boundary.
 + */
 +#pragma once
@@ -28,7 +28,7 @@ index 0000000..3a33389
 +#endif
 +
 +enum { MFG_MAP_ABI = 1, MFG_MAP_MAX_POINTS = 32768, MFG_MAP_MAX_ICONS = 512 };
-+enum { MFG_MAP_OK = 0, MFG_MAP_SMALL_BUFFER = 1, MFG_MAP_INVALID = 2, MFG_MAP_FAILED = 3 };
++enum { MFG_MAP_OK = 0, MFG_MAP_INVALID = 1, MFG_MAP_FAILED = 2 };
 +
 +typedef struct MfgMapPoint {
 +    uint64_t id;
@@ -56,12 +56,17 @@ index 0000000..3a33389
 +    uint32_t icon_count; /* Immutable enumeration, valid indices [0, icon_count). */
 +    uint32_t reserved;
 +    /* Update thread only. layer: surface=0, underground=1, DLC=2.
-+     * Only visible points are copied, including completion badges and focus rings.
-+     * *count receives the required count; SMALL_BUFFER writes no partial output.
-+     * Before a native child exists, draw_order follows the provider's snapshot
-+     * order in its normal/ring depth bands. Existing children use actual depths.
++     * Returns a borrowed read-only view of visible points, including completion
++     * badges and focus rings, sorted by ascending native child draw_order.
++     * Before child creation, draw_order follows native row order in the normal
++     * and focus-ring depth bands; existing children use their actual depths.
++     * The view is valid until the calling thread next calls view_points, exits,
++     * or the provider is unloaded. Other threads cannot invalidate the view.
++     * Consume synchronously without reentering view_points. Do not modify,
++     * free, or retain the view beyond its lifetime.
++     * Empty/not ready: MFG_MAP_OK with NULL/0. Failure: non-OK with NULL/0.
 +     */
-+    int (*copy_points)(uint32_t layer, MfgMapPoint *points, uint32_t capacity, uint32_t *count);
++    int (*view_points)(uint32_t layer, const MfgMapPoint **points, uint32_t *count);
 +    int (*get_icon)(uint32_t index, MfgMapIcon *icon);
 +} MfgMapAPI;
 +
@@ -71,7 +76,7 @@ index 0000000..3a33389
 +}
 +#endif
 diff --git a/src/goblin_inject.cpp b/src/goblin_inject.cpp
-index 9a3af6e..e00d926 100644
+index 9a3af6e..e004fc8 100644
 --- a/src/goblin_inject.cpp
 +++ b/src/goblin_inject.cpp
 @@ -6,2 +6,3 @@
@@ -82,16 +87,77 @@ index 9a3af6e..e00d926 100644
      spdlog::debug("Map entries complete: {} total rows", total_rows);
 +    goblin::map_api::publish_rows();
  }
+@@ -2002,5 +2004,11 @@ static void refresh_deoverlap(int layer)
+
+-std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer, bool include_hidden)
++namespace goblin
++{
++static std::vector<NativeMarkerPoint> collect_native_markers(int layer, bool include_hidden, NativeMarkerVisitor visitor, void *context)
+ {
+     std::vector<NativeMarkerPoint> out;
++    const auto emit = [&](const NativeMarkerPoint &point) {
++        if (visitor) visitor(point, context);
++        else out.push_back(point);
++    };
+     if (layer < 0 || layer > 2) return out;
+@@ -2017,3 +2025,3 @@ std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer,
+     std::lock_guard<std::mutex> layout_lk(g_layout_mtx);
+-    out.reserve(g_category_rows.size());
++    if (!visitor) out.reserve(g_category_rows.size());
+     const int focus = g_focus_category;
+@@ -2034,3 +2042,3 @@ std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer,
+         if (source_icon < 0) continue;
+-        out.push_back({cr.original_row_id, source_icon, cr.native_area, cr.native_layer,
++        emit({cr.original_row_id, source_icon, cr.native_area, cr.native_layer,
+                        cr.native_gx, cr.native_gz, cr.native_px, cr.native_pz, visible,
+@@ -2050,3 +2058,3 @@ std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer,
+         if (cleared_flag != 0 && goblin::flag_is_set(cleared_flag))
+-            out.push_back({cr.original_row_id | NATIVE_CLEARED_KEY_BIT,
++            emit({cr.original_row_id | NATIVE_CLEARED_KEY_BIT,
+                            static_cast<int>(goblin::generated::CLEARED_ICON_ID),
+@@ -2112,3 +2120,3 @@ std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer,
+             }
+-            out.push_back(rp);
++            emit(rp);
+         }
+@@ -2118,2 +2126,13 @@ std::vector<goblin::NativeMarkerPoint> goblin::native_marker_snapshot(int layer,
+
++std::vector<NativeMarkerPoint> native_marker_snapshot(int layer, bool include_hidden)
++{
++    return collect_native_markers(layer, include_hidden, nullptr, nullptr);
++}
++
++void visit_native_markers(int layer, NativeMarkerVisitor visitor, void *context)
++{
++    if (visitor) (void)collect_native_markers(layer, false, visitor, context);
++}
++} // namespace goblin
++
+ namespace
+diff --git a/src/goblin_inject.hpp b/src/goblin_inject.hpp
+index 0bc8924..eca560a 100644
+--- a/src/goblin_inject.hpp
++++ b/src/goblin_inject.hpp
+@@ -117,2 +117,7 @@ namespace goblin
+
++    // Synchronous visitor under the layout lock; does not allocate an intermediate snapshot.
++    // The callback must not reenter layout functions or retain the point reference.
++    using NativeMarkerVisitor = void (*)(const NativeMarkerPoint &, void *);
++    void visit_native_markers(int layer, NativeMarkerVisitor visitor, void *context);
++
+     // Live row of the VISIBLE native marker nearest the map reticle, within a
 diff --git a/src/goblin_map_api.cpp b/src/goblin_map_api.cpp
 new file mode 100644
-index 0000000..dda3035
+index 0000000..788dc54
 --- /dev/null
 +++ b/src/goblin_map_api.cpp
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,126 @@
++#include <algorithm>
 +#include <atomic>
 +#include <cmath>
 +#include <mutex>
 +#include <unordered_map>
++#include <vector>
 +
 +#include "../sdk/mfg_map_api.h"
 +#include "generated_shared/goblin_map_icons.hpp"
@@ -109,43 +175,64 @@ index 0000000..dda3035
 +    return point.visible && point.source_icon_id >= 0 && point.gx <= 255 && point.gz <= 255 && std::isfinite(point.px) && std::isfinite(point.pz);
 +}
 +
-+int copyPoints(uint32_t layer, MfgMapPoint *output, uint32_t capacity, uint32_t *count) noexcept {
-+    if (!count)
++int viewPoints(uint32_t layer, const MfgMapPoint **output, uint32_t *count) noexcept {
++    if (output)
++        *output = nullptr;
++    if (count)
++        *count = 0;
++    if (!output || !count || layer > 2)
 +        return MFG_MAP_INVALID;
-+    *count = 0;
-+    if (layer > 2 || (capacity && !output))
-+        return MFG_MAP_INVALID;
++    // Each calling thread owns the storage behind its borrowed point view.
++    // Native refreshes and other threads cannot invalidate that view.
++    thread_local std::vector<MfgMapPoint> points;
++    points.clear();
 +    if (!rows_ready.load(std::memory_order_acquire))
 +        return MFG_MAP_OK;
 +    try {
-+        // Reuse the same locked visibility/layout calculation as native markers.
-+        // This changes neither parameter rows nor event flags.
-+        const auto points = goblin::native_marker_snapshot(static_cast<int>(layer));
-+        for (const auto &point: points)
-+            *count += usable(point);
-+        if (*count > MFG_MAP_MAX_POINTS)
++        struct Collector {
++            std::vector<MfgMapPoint> &points;
++            uint32_t order = 24;
++            bool overflow = false;
++        } collector{points};
++        // Fill this thread's view storage from the native marker enumeration.
++        goblin::visit_native_markers(
++            static_cast<int>(layer),
++            [](const auto &point, void *context) {
++                auto &sink = *static_cast<Collector *>(context);
++                const uint32_t fallback = (point.original_row_id & goblin::NATIVE_HIGHLIGHT_KEY_BIT)
++                                              ? 50000 + static_cast<uint32_t>(point.original_row_id & ~goblin::NATIVE_HIGHLIGHT_KEY_BIT)
++                                              : sink.order++;
++                if (!usable(point))
++                    return;
++                if (sink.points.size() == MFG_MAP_MAX_POINTS) {
++                    sink.overflow = true;
++                    return;
++                }
++                sink.points.push_back({point.original_row_id, static_cast<uint32_t>(point.source_icon_id),
++                                       (uint32_t(point.area) << 24) | (uint32_t(point.gx) << 16) | (uint32_t(point.gz) << 8), point.px, point.pz, fallback, 0});
++            },
++            &collector);
++        if (collector.overflow) {
++            points.clear();
 +            return MFG_MAP_FAILED;
-+        if (*count > capacity)
-+            return MFG_MAP_SMALL_BUFFER;
-+        std::lock_guard lock(depth_mutex);
-+        uint32_t order = 24;
-+        for (const auto &point: points) {
-+            const uint32_t fallback =
-+                (point.original_row_id & goblin::NATIVE_HIGHLIGHT_KEY_BIT) ? 50000 + static_cast<uint32_t>(point.original_row_id & ~goblin::NATIVE_HIGHLIGHT_KEY_BIT) : order++;
-+            if (!usable(point))
-+                continue;
-+            const auto depth = depths.find(point.original_row_id);
-+            *output++ = {point.original_row_id,
-+                         static_cast<uint32_t>(point.source_icon_id),
-+                         (uint32_t(point.area) << 24) | (uint32_t(point.gx) << 16) | (uint32_t(point.gz) << 8),
-+                         point.px,
-+                         point.pz,
-+                         depth != depths.end() ? depth->second : fallback,
-+                         0};
 +        }
++        {
++            // Read native child depths after releasing the layout lock.
++            // Neither lock is held while the caller consumes the view.
++            std::lock_guard lock(depth_mutex);
++            for (auto &point: points)
++                if (const auto depth = depths.find(point.id); depth != depths.end())
++                    point.draw_order = depth->second;
++        }
++        const auto before = [](const auto &a, const auto &b) { return a.draw_order < b.draw_order; };
++        if (!std::is_sorted(points.begin(), points.end(), before))
++            std::stable_sort(points.begin(), points.end(), before);
++        if (!points.empty())
++            *output = points.data();
++        *count = static_cast<uint32_t>(points.size());
 +        return MFG_MAP_OK;
 +    } catch (...) {
-+        *count = 0;
++        points.clear();
 +        return MFG_MAP_FAILED;
 +    }
 +}
@@ -188,7 +275,7 @@ index 0000000..dda3035
 +
 +extern "C" __declspec(dllexport) const MfgMapAPI *MfgGetMapAPI(uint32_t version) noexcept {
 +    static const MfgMapAPI api{sizeof(MfgMapAPI), MFG_MAP_ABI, sizeof(MfgMapPoint), sizeof(MfgMapIcon), static_cast<uint32_t>(goblin::generated::MAP_ICON_TAG_COUNT), 0,
-+                               copyPoints,        getIcon};
++                               viewPoints,        getIcon};
 +    return goblin::variants::kNativeMarkers && version == MFG_MAP_ABI ? &api : nullptr;
 +}
 diff --git a/src/goblin_map_api.hpp b/src/goblin_map_api.hpp

@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Changed
 
+- Read MapForGoblins markers through borrowed read-only views, avoiding the intermediate native snapshot, caller array copy and buffer-sizing retries.
 - Draw the minimap below game UI so menus, dialogs and HUD elements can cover it.
 - Keep the minimap visible and its shortcuts usable in ordinary game menus. Automatic hiding applies only to loading screens, logos and the game's full-screen map.
 - Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.

@@ -1,6 +1,6 @@
-/* Optional read-only MapForGoblins bridge. MIT, Copyright (c) 2026 EROverlay contributors.
- * ABI 1, Windows x64, default packing and calling convention.
- * Caller retains the provider module until all returned icon bytes are copied.
+/* Read-only MapForGoblins map views. MIT, Copyright (c) 2026 EROverlay contributors.
+ * Windows x64, default packing and calling convention.
+ * Caller retains the provider module while using any returned pointer.
  * No STL objects, heap ownership or exceptions cross the DLL boundary.
  */
 #pragma once
@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 enum { MFG_MAP_ABI = 1, MFG_MAP_MAX_POINTS = 32768, MFG_MAP_MAX_ICONS = 512 };
-enum { MFG_MAP_OK = 0, MFG_MAP_SMALL_BUFFER = 1, MFG_MAP_INVALID = 2, MFG_MAP_FAILED = 3 };
+enum { MFG_MAP_OK = 0, MFG_MAP_INVALID = 1, MFG_MAP_FAILED = 2 };
 
 typedef struct MfgMapPoint {
     uint64_t id;
@@ -40,12 +40,17 @@ typedef struct MfgMapAPI {
     uint32_t icon_count; /* Immutable enumeration, valid indices [0, icon_count). */
     uint32_t reserved;
     /* Update thread only. layer: surface=0, underground=1, DLC=2.
-     * Only visible points are copied, including completion badges and focus rings.
-     * *count receives the required count; SMALL_BUFFER writes no partial output.
-     * Before a native child exists, draw_order follows the provider's snapshot
-     * order in its normal/ring depth bands. Existing children use actual depths.
+     * Returns a borrowed read-only view of visible points, including completion
+     * badges and focus rings, sorted by ascending native child draw_order.
+     * Before child creation, draw_order follows native row order in the normal
+     * and focus-ring depth bands; existing children use their actual depths.
+     * The view is valid until the calling thread next calls view_points, exits,
+     * or the provider is unloaded. Other threads cannot invalidate the view.
+     * Consume synchronously without reentering view_points. Do not modify,
+     * free, or retain the view beyond its lifetime.
+     * Empty/not ready: MFG_MAP_OK with NULL/0. Failure: non-OK with NULL/0.
      */
-    int (*copy_points)(uint32_t layer, MfgMapPoint *points, uint32_t capacity, uint32_t *count);
+    int (*view_points)(uint32_t layer, const MfgMapPoint **points, uint32_t *count);
     int (*get_icon)(uint32_t index, MfgMapIcon *icon);
 } MfgMapAPI;
 
