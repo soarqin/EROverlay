@@ -10,12 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Added
 
-- Support the runtime DLL edition of Map for Goblins through an optional read-only map API. Requires its companion source patch and rebuilt `MapForGoblins.dll`; enable `[markers] others`. Imports embedded icons, display positions, visibility and native child depths. See [the compatibility patch](../../tools/compat/mapforgoblins/README.md).
+- Support the runtime DLL edition of Map for Goblins through its official read-only map API in 2.1.7 and later; enable `[markers] others`. Imports embedded icons, display positions, visibility and native child depths. See [the integration notes](../../docs/minimap-goblins-api.md).
 - Add `[markers] others` to show NPCs, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
 
 #### Changed
 
-- Read MapForGoblins markers through borrowed read-only views, avoiding the intermediate native snapshot, caller array copy and buffer-sizing retries.
+- Read MapForGoblins markers through borrowed views of its background snapshots. Marker refreshes run in the provider; reading a view does not recalculate visibility or copy a receiving array.
 - Draw the minimap below game UI so menus, dialogs and HUD elements can cover it.
 - Keep the minimap visible and its shortcuts usable in ordinary game menus. Automatic hiding applies only to loading screens, logos and the game's full-screen map.
 - Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.

@@ -1,2 +1,0 @@
-# Preserve significant context spaces and LF line endings in unified diffs.
-tools/compat/mapforgoblins/*.patch text eol=lf whitespace=-blank-at-eol

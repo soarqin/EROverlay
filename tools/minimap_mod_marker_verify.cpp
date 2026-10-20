@@ -23,6 +23,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "fixtures/minimap_goblins.hpp"
 #include "minimap/defs/BonfireWarpParam.h"
 #include "minimap/defs/WorldMapPointParam.h"
 #include "minimap/goblins.hpp"
@@ -343,13 +344,15 @@ bool overlappingMarkers() {
     return ok;
 }
 bool goblinsDLL(const char *path) {
+    using er::minimap::test::GoblinsScenario;
     const auto dllPath = std::filesystem::u8path(path);
     auto module = LoadLibraryW(dllPath.c_str());
-    const auto setScenario = module ? reinterpret_cast<void (*)(uint32_t)>(GetProcAddress(module, "setTestScenario")) : nullptr;
+    const auto setScenario = module ? reinterpret_cast<void (*)(uint32_t, GoblinsScenario)>(GetProcAddress(module, "setTestScenario")) : nullptr;
     const auto calls = module ? reinterpret_cast<uint32_t (*)()>(GetProcAddress(module, "testCalls")) : nullptr;
-    const auto lastPointView = module ? reinterpret_cast<const MfgMapPoint *(*)()>(GetProcAddress(module, "testLastPointView")) : nullptr;
+    const auto poll = module ? reinterpret_cast<bool (*)(uint32_t)>(GetProcAddress(module, "testPollLayer")) : nullptr;
     const auto get = module ? reinterpret_cast<MfgGetMapAPIFn>(GetProcAddress(module, "MfgGetMapAPI")) : nullptr;
-    if (!setScenario || !calls || !lastPointView || !get) {
+    const auto *bridge = get ? get(MFG_MAP_ABI) : nullptr;
+    if (!setScenario || !calls || !poll || !bridge) {
         std::fputs("FAIL: provide the test provider, not the shipping mod DLL\n", stderr);
         if (module)
             FreeLibrary(module);
@@ -369,10 +372,16 @@ bool goblinsDLL(const char *path) {
     auto containers = gResources.markerLayers();
     const bool warpAbove = std::find(containers.begin(), containers.end(), MapLayer::Warp) > std::find(containers.begin(), containers.end(), MapLayer::Item);
     bool ok = true;
-    setScenario(0);
+    setScenario(0, GoblinsScenario::Visible);
     const auto before = calls();
+    ok &= gGoblins.viewPoints(0).empty() && calls() == before;
+    ok &= poll(0);
+    const auto published = calls();
+    const MfgMapPoint *providerPoints = nullptr;
+    uint32_t providerCount = 0;
+    ok &= bridge->view_points(0, &providerPoints, &providerCount) == MFG_MAP_OK;
     const auto borrowed = gGoblins.viewPoints(0);
-    ok &= borrowed.size() == 3 && calls() == before + 1 && borrowed.data() == lastPointView();
+    ok &= providerCount == 3 && borrowed.size() == providerCount && calls() == published && borrowed.data() == providerPoints;
     for (uint32_t layer = 0; layer < 3; ++layer) {
         const uint8_t area = layer == 2 ? 61 : 60;
         WorldMapPointParam mine{};
@@ -409,13 +418,19 @@ bool goblinsDLL(const char *path) {
         const float settings[]{0, 0, 0, 128, 128, 1};
         std::memcpy(view.data() + 0x100, origin, sizeof(origin));
         std::memcpy(view.data() + 0x104, settings, sizeof(settings));
-        for (uint32_t scenario: {0u, 1u, 2u, 3u, 4u}) {
-            setScenario(scenario);
+        struct Scenario {
+            GoblinsScenario state;
+            size_t count;
+        };
+        for (const auto &[scenario, expected]: {Scenario{GoblinsScenario::Visible, 3}, Scenario{GoblinsScenario::FailedBuild, 3}, Scenario{GoblinsScenario::Hidden, 0},
+                                                Scenario{GoblinsScenario::ManyPoints, 603}, Scenario{GoblinsScenario::Overflow, 0}, Scenario{GoblinsScenario::NativeDepths, 3}}) {
+            setScenario(layer, scenario);
+            ok &= poll(layer);
             ++generation;
             gData.setShowOthers(true);
             const auto beforeRefresh = calls();
             gData.update();
-            ok &= calls() == beforeRefresh + 1;
+            ok &= calls() == beforeRefresh;
             auto snapshot = gData.snapshot();
             size_t runtimeCount = 0;
             for (const auto &marker: snapshot.decorations)
@@ -423,9 +438,8 @@ bool goblinsDLL(const char *path) {
                     ++runtimeCount;
                     ok &= marker.source == DecorationSource::Other && marker.maps == (1u << layer) && marker.x == 269 && marker.y == -1;
                 }
-            const size_t expected = scenario == 1 || scenario == 2 ? 0 : scenario == 3 ? 603 : 3;
             ok &= snapshot.valid && runtimeCount == expected && snapshot.decorations.size() == expected + 2;
-            if (scenario == 0 || scenario == 4) {
+            if (scenario == GoblinsScenario::Visible || scenario == GoblinsScenario::NativeDepths) {
                 Renderer renderer;
                 renderer.init(ImGui::GetCurrentContext(), reinterpret_cast<void *>(+[](size_t size, void *) { return std::malloc(size); }),
                               reinterpret_cast<void *>(+[](void *data, void *) { std::free(data); }), nullptr);
@@ -442,20 +456,18 @@ bool goblinsDLL(const char *path) {
                 }
                 auto baseIndex = drawIndex(base->layers.front()), badgeIndex = drawIndex(badge->layers.front()), ringIndex = drawIndex(ring->layers.front());
                 auto mineIndex = drawIndex(gResources.icon(25)->layers.front()), graceIndex = drawIndex(gResources.icon(1)->layers.front());
-                ok &= baseIndex != UINT64_MAX && badgeIndex != UINT64_MAX && ringIndex != UINT64_MAX && mineIndex < std::min(baseIndex, badgeIndex) &&
+                ok &= baseIndex != UINT64_MAX && badgeIndex != UINT64_MAX && ringIndex != UINT64_MAX && graceIndex != UINT64_MAX && mineIndex < std::min(baseIndex, badgeIndex) &&
                       std::max(baseIndex, badgeIndex) < ringIndex && (warpAbove ? ringIndex < graceIndex : graceIndex < mineIndex);
                 // The provider can report badge-before-base; never override it to improve Boss art.
-                ok &= scenario == 4 ? badgeIndex < baseIndex : true;
+                ok &= scenario != GoblinsScenario::NativeDepths || badgeIndex < baseIndex;
             }
         }
-        const auto before = calls();
         gData.setShowOthers(false);
         ++generation;
         gData.update();
         auto disabled = gData.snapshot();
-        ok &= calls() == before && std::none_of(disabled.decorations.begin(), disabled.decorations.end(), [](const auto &m) { return m.runtimeIcon; });
+        ok &= std::none_of(disabled.decorations.begin(), disabled.decorations.end(), [](const auto &m) { return m.runtimeIcon; });
     }
-    const auto *bridge = get(MFG_MAP_ABI);
     for (uint32_t index = 0; index < bridge->icon_count; ++index) {
         MfgMapIcon icon{};
         ok &= bridge->get_icon(index, &icon) == MFG_MAP_OK;
@@ -469,8 +481,8 @@ bool goblinsDLL(const char *path) {
     gGoblins.stop();
     ok &= GetModuleHandleW(L"MapForGoblins.dll") == nullptr && textures.empty();
     ImGui::DestroyContext();
-    std::puts(ok ? "PASS: real DLL bridge through Data/Resources/ImGui; borrowed pointer identity; single refresh; all embedded icons; native layers; ID collisions; provider "
-                   "visibility/failure; optional switch; module/texture lifetime."
+    std::puts(ok ? "PASS: official DLL bridge through Data/Resources/ImGui; published pointer identity; reads without rebuilds; all embedded icons; native layers; ID collisions; "
+                   "provider visibility/failure; optional switch; module/texture lifetime."
                  : "FAIL: DLL bridge replay");
     return ok;
 }

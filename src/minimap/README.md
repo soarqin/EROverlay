@@ -74,6 +74,8 @@ Fully revealed terrain changes only the minimap display. It does not grant fragm
 
 `others` is independent of the grace and landmark switches and uses the preset's `decoration_scale`. It supports markers added by `Map for Goblins`: load that mod too and enable the desired marker categories in its grace menu. The minimap reads the mod's icons and display conditions, so collecting items, defeating enemies or disabling a category removes the relevant markers according to the mod's rules.
 
+The [MapForGoblins DLL edition](https://github.com/VirusAlex/ERR-MapForGoblins-DLL) requires 2.1.7 or later and uses its official map API to read background snapshots. No additional source patch is needed. Markers may appear shortly after the first read or after a layer has been idle; the mod controls refresh timing. See [the integration notes](../../docs/minimap-goblins-api.md).
+
 Place and delete stamps in the game's world map; the minimap follows their icon, coordinates and map layer. Update both `EROverlay.dll` and `overlays/Minimap.dll` for this feature, including mod icon color handling.
 
 ### Border

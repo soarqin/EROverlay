@@ -15,7 +15,8 @@ public:
     Goblins &operator=(const Goblins &) = delete;
     Goblins(Goblins &&) = delete;
     Goblins &operator=(Goblins &&) = delete;
-    // Borrowed read-only view; valid until this thread next calls viewPoints() or stop().
+    // Published snapshot; empty/stale until the provider's background refresh.
+    // Valid until this thread rereads the same layer, exits, or stop() releases the module.
     [[nodiscard]] std::span<const MfgMapPoint> viewPoints(uint32_t layer);
     void stop();
 

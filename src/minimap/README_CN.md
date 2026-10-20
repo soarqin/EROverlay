@@ -76,6 +76,8 @@ cycle = F8
 
 `others` 独立于赐福和地标开关，使用预设的 `decoration_scale` 调整大小。兼容 `Map for Goblins` 添加的标记：需同时加载该 Mod，并在其赐福菜单中开启所需的标记类别。小地图读取 Mod 的图标和显示条件，拾取物品、击败敌人或关闭类别后，相关标记按 Mod 规则消失。
 
+[MapForGoblins DLL](https://github.com/VirusAlex/ERR-MapForGoblins-DLL) 版需使用 2.1.7 或更新版本，通过其官方地图 API 读取后台快照，无需额外源码补丁。首次读取或长时间未使用某地图层后，标记可能稍后出现；刷新时机由该 Mod 控制。详见[接入说明](../../docs/minimap-goblins-api.md)。
+
 手动图章仍在游戏大地图中放置和删除，小地图同步其图案、位置和地图层。更新此功能时，请同时更新 `EROverlay.dll` 和 `overlays/Minimap.dll`，以支持 Mod 图标的颜色处理。
 
 ### 边框
