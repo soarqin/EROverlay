@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
+- Remove the remaining EXE hash whitelist from native file and map initialization, fixing the missing minimap after the 1.17.2 update. Resolve and validate bindings from the loaded image; also fix missed Pattern16 matches near SIMD cleanup boundaries. Update the core DLL.
 - Follow the loaded game's GFX container depths and native point ordering when markers overlap, including graces and mod icons. Reverse already ordered points and skip disabled marker layers. Request resources with canonical lowercase paths for older cores. Record changed marker counts in the optional diagnostic log.
 - Keep quest targets controlled by `landmarks` instead of hiding them when `[markers] others` is disabled.
 - Stop repeatedly reloading atlas containers when a recolored mod icon references an invalid region; skip the unusable icon instead.

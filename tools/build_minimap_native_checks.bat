@@ -30,12 +30,12 @@ cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_progress_veri
 if errorlevel 1 goto :failed
 cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_performance_verify.cpp src\minimap\resources.cpp src\minimap\runtimeicons.cpp src\minimap\gfx.cpp src\util\assets.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_performance_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
-cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /LD /Isrc tools\minimap_bridge_verify.cpp src\gamefiles.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\bridge_verify.dll /link bcrypt.lib
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /LD /Isrc /Ideps\pattern16 tools\minimap_bridge_verify.cpp src\gamefiles.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\bridge_verify.dll
 if errorlevel 1 goto :failed
-cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc tools\minimap_file_verify.cpp src\minimap\resources.cpp src\minimap\runtimeicons.cpp src\minimap\gfx.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_file_verify.exe /link bcrypt.lib xmllite.lib shlwapi.lib
+cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /Isrc /Ideps\pattern16 tools\minimap_file_verify.cpp src\minimap\resources.cpp src\minimap\runtimeicons.cpp src\minimap\gfx.cpp src\util\assets.cpp src\util\gameflags.cpp src\util\mapstate.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_file_verify.exe /link xmllite.lib shlwapi.lib
 if errorlevel 1 goto :failed
 if exist build\native\src\EROverlayDLL.dir\Release\textureupload.obj (
-    cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /DEROVERLAY_EXPORTS /Isrc /Ideps\imgui tools\minimap_texture_verify.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_texture_verify.exe /link build\native\src\EROverlayDLL.dir\Release\*.obj build\native\deps\fmt\Release\fmt.lib build\native\deps\imgui\Release\imgui.lib build\native\deps\imgui\Release\imgui_dx12_backend.lib build\native\deps\minhook\Release\minhook.lib deps\steamworks\lib\steam_api64.lib d3d12.lib dxgi.lib d3dcompiler.lib dwmapi.lib shlwapi.lib version.lib bcrypt.lib advapi32.lib
+    cl /nologo /std:c++latest /utf-8 /EHsc /O2 /MD /DEROVERLAY_EXPORTS /Isrc /Ideps\imgui tools\minimap_texture_verify.cpp /Fo:build\native-checks\ /Fe:build\native-checks\minimap_texture_verify.exe /link build\native\src\EROverlayDLL.dir\Release\*.obj build\native\deps\fmt\Release\fmt.lib build\native\deps\imgui\Release\imgui.lib build\native\deps\imgui\Release\imgui_dx12_backend.lib build\native\deps\minhook\Release\minhook.lib deps\steamworks\lib\steam_api64.lib d3d12.lib dxgi.lib d3dcompiler.lib dwmapi.lib shlwapi.lib version.lib advapi32.lib
     if errorlevel 1 goto :failed
 )
 popd

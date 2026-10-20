@@ -1,10 +1,10 @@
 // Uses the production resolver on mapped PE images without loading game code.
 #define NOMINMAX
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <vector>
 
+#include "fixtures/pe_image.hpp"
 #include "util/uiscenescan.hpp"
 
 namespace {
@@ -12,35 +12,11 @@ using namespace er::util::uiscene;
 using er::util::PeImage;
 
 bool verify(const std::filesystem::path &path, bool negative) {
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file || file.tellg() < sizeof(IMAGE_DOS_HEADER))
+    er::test::MappedPe fixture;
+    if (!fixture.load(path))
         return false;
-    std::vector<uint8_t> raw(static_cast<size_t>(file.tellg()));
-    file.seekg(0);
-    if (!file.read(reinterpret_cast<char *>(raw.data()), raw.size()))
-        return false;
-    IMAGE_DOS_HEADER dos{};
-    std::memcpy(&dos, raw.data(), sizeof(dos));
-    if (dos.e_magic != IMAGE_DOS_SIGNATURE || dos.e_lfanew <= 0 || uint64_t(dos.e_lfanew) + sizeof(IMAGE_NT_HEADERS64) > raw.size())
-        return false;
-    IMAGE_NT_HEADERS64 nt{};
-    std::memcpy(&nt, raw.data() + dos.e_lfanew, sizeof(nt));
-    if (nt.Signature != IMAGE_NT_SIGNATURE || nt.OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC || nt.OptionalHeader.SizeOfImage > 512 * 1024 * 1024 ||
-        nt.OptionalHeader.SizeOfHeaders > raw.size() || nt.OptionalHeader.SizeOfHeaders > nt.OptionalHeader.SizeOfImage)
-        return false;
-    std::vector<uint8_t> mapped(nt.OptionalHeader.SizeOfImage);
-    std::memcpy(mapped.data(), raw.data(), nt.OptionalHeader.SizeOfHeaders);
-    size_t table = size_t(dos.e_lfanew) + offsetof(IMAGE_NT_HEADERS64, OptionalHeader) + nt.FileHeader.SizeOfOptionalHeader;
-    for (unsigned i = 0; i < nt.FileHeader.NumberOfSections; ++i) {
-        IMAGE_SECTION_HEADER section{};
-        if (table + sizeof(section) > raw.size())
-            return false;
-        std::memcpy(&section, raw.data() + table, sizeof(section));
-        table += sizeof(section);
-        if (uint64_t(section.PointerToRawData) + section.SizeOfRawData > raw.size() || uint64_t(section.VirtualAddress) + section.SizeOfRawData > mapped.size())
-            return false;
-        std::memcpy(mapped.data() + section.VirtualAddress, raw.data() + section.PointerToRawData, section.SizeOfRawData);
-    }
+    auto &mapped = fixture.bytes;
+    const auto &nt = fixture.header;
     PeImage image(mapped, uintptr_t(nt.OptionalHeader.ImageBase));
     Addresses addresses{};
     const char *error = nullptr;
@@ -103,32 +79,9 @@ bool verify(const std::filesystem::path &path, bool negative) {
     all &= !resolve(truncated, ignored, error);
     std::cout << "negative truncated PE: " << (!resolve(truncated, ignored, error) ? "PASS" : "FAIL") << '\n';
     // Model the loader's DIR64 relocations and use the relocated module base.
-    const auto &directory = nt.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
-    if (!directory.Size || uint64_t(directory.VirtualAddress) + directory.Size > mapped.size())
-        return false;
     constexpr uint64_t delta = 0x200000000ULL;
-    uint32_t cursor = directory.VirtualAddress;
-    while (cursor < uint64_t(directory.VirtualAddress) + directory.Size) {
-        IMAGE_BASE_RELOCATION block{};
-        if (!image.read(cursor, block) || block.SizeOfBlock < sizeof(block) || uint64_t(cursor) + block.SizeOfBlock > uint64_t(directory.VirtualAddress) + directory.Size)
-            return false;
-        for (uint32_t offset = sizeof(block); offset + 2 <= block.SizeOfBlock; offset += 2) {
-            uint16_t entry = 0;
-            if (!image.read(cursor + offset, entry))
-                return false;
-            if ((entry >> 12) == IMAGE_REL_BASED_ABSOLUTE)
-                continue;
-            if ((entry >> 12) != IMAGE_REL_BASED_DIR64)
-                return false;
-            uint64_t location = uint64_t(block.VirtualAddress) + (entry & 0xfff);
-            uint64_t pointer = 0;
-            if (location > UINT32_MAX || !image.read(uint32_t(location), pointer))
-                return false;
-            pointer += delta;
-            std::memcpy(mapped.data() + location, &pointer, sizeof(pointer));
-        }
-        cursor += block.SizeOfBlock;
-    }
+    if (!fixture.relocate(delta))
+        return false;
     PeImage relocated(mapped, uintptr_t(nt.OptionalHeader.ImageBase + delta));
     Addresses rebased{};
     bool aslr = resolve(relocated, rebased, error) && rebased.submit == addresses.submit && rebased.renderViewVtable == addresses.renderViewVtable &&

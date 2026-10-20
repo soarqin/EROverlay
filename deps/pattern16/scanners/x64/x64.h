@@ -10,13 +10,11 @@ namespace Pattern16 {
 	namespace Impl {
 		PATTERN16_NO_INLINE const void* scanRegion(const void* regionStart, const void* regionEnd, size_t sigStart, int, SplitSignature<uint64_t>& signature, size_t length) {
 			auto psig = signature.first.data();
-			auto pmask = signature.first.data();
 			auto psig_bytes = (reinterpret_cast<uint8_t*>(signature.first.data()));
-			auto pmask_bytes = (reinterpret_cast<uint8_t*>(signature.second.data()));
 			auto sig_bytemask = broadcastMask64(psig_bytes[0 + sigStart], psig_bytes[1 + sigStart]);
 			auto sig_offset = -static_cast<intptr_t>(sigStart);
-			auto mask_bytemask1 = 0xFFFF'0000'0000ull;
-			auto mask_bytemask2 = 0xFFFF'0000'0000'0000ull;
+			auto mask_bytemask1 = 0xFFFF'0000'0000'0000ull;
+			auto mask_bytemask2 = 0xFFFF'0000'0000ull;
 			auto cur = reinterpret_cast<const uint64_t*>(regionStart) - 8;
 			auto safety = (signature.first.size() + 5) * sizeof(uint64_t);
 			auto span = ((reinterpret_cast<uintptr_t>(regionEnd) - reinterpret_cast<uintptr_t>(regionStart) - safety) >> 6);
@@ -32,8 +30,6 @@ namespace Pattern16 {
 					{
 						auto read_alignedl = sig_bytemask ^ cur[0];
 						auto read_alignedh = sig_bytemask ^ cur[4];
-						auto read_alignedlh = static_cast<uint32_t>(read_alignedl >> 32);
-						auto read_alignedhh = static_cast<uint32_t>(read_alignedh >> 32);
 						{
 							auto val = 1u << 6;
 							resultl |= read_alignedl & mask_bytemask1 ? resultl : val;
@@ -131,8 +127,8 @@ namespace Pattern16 {
 						auto read_unalignedh = sig_bytemask ^ reinterpret_cast<const uint64_t*>(reinterpret_cast<const uint8_t*>(cur) + 1)[4];
 						{
 							auto val = 2u << 6;
-							resultl = read_unalignedl & mask_bytemask1 ? resultl : val;
-							resulth = read_unalignedh & mask_bytemask1 ? resulth : val;
+							resultl |= read_unalignedl & mask_bytemask1 ? 0 : val;
+							resulth |= read_unalignedh & mask_bytemask1 ? 0 : val;
 						}
 						{
 							auto val = 2u << 4;
@@ -246,8 +242,8 @@ namespace Pattern16 {
 					}
 				}
 			}
-			auto cur_byte = reinterpret_cast<const uint8_t*>(cur);
-			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 13);
+			auto cur_byte = reinterpret_cast<const uint8_t*>(cur) + sig_offset;
+			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 13) + sig_offset;
 			do {
 				auto cur_sig_start = reinterpret_cast<const uint64_t*>(cur_byte);
 				auto length_ = length;

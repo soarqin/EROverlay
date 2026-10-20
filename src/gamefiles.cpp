@@ -1,9 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-// clang-format off
 #include <windows.h>
-#include <bcrypt.h>
-// clang-format on
 
 #include <algorithm>
 #include <atomic>
@@ -20,7 +17,7 @@
 #include "gamefiles.hpp"
 #include "util/assets.hpp"
 #include "util/gameflags.hpp"
-#include "util/gameprofile.hpp"
+#include "util/gamescan.hpp"
 #include "util/mapstate.hpp"
 #include "util/nativelog.hpp"
 
@@ -34,42 +31,6 @@ bool readGame(uintptr_t address, T &value) {
 uintptr_t pointer(uintptr_t address) {
     uintptr_t value = 0;
     return readGame(address, value) ? value : 0;
-}
-const util::GameProfile *executableProfile() {
-    wchar_t path[32768];
-    DWORD length = GetModuleFileNameW(nullptr, path, static_cast<DWORD>(std::size(path)));
-    if (!length || length >= std::size(path))
-        return nullptr;
-    HANDLE file = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (file == INVALID_HANDLE_VALUE)
-        return nullptr;
-    BCRYPT_ALG_HANDLE algorithm = nullptr;
-    BCRYPT_HASH_HANDLE hash = nullptr;
-    bool ok = BCryptOpenAlgorithmProvider(&algorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0) >= 0;
-    if (ok)
-        ok = BCryptCreateHash(algorithm, &hash, nullptr, 0, nullptr, 0, 0) >= 0;
-    uint8_t buffer[65536], digest[32];
-    DWORD read;
-    while (ok) {
-        ok = ReadFile(file, buffer, sizeof(buffer), &read, nullptr) != FALSE;
-        if (!ok || !read)
-            break;
-        ok = BCryptHashData(hash, buffer, read, 0) >= 0;
-    }
-    if (ok)
-        ok = BCryptFinishHash(hash, digest, sizeof(digest), 0) >= 0;
-    if (hash)
-        BCryptDestroyHash(hash);
-    if (algorithm)
-        BCryptCloseAlgorithmProvider(algorithm, 0);
-    CloseHandle(file);
-    return ok ? util::findGameProfile(digest) : nullptr;
-}
-bool entryMatches(uintptr_t base, uintptr_t rva, std::initializer_list<uint8_t> bytes) {
-    uint8_t actual[16];
-    SIZE_T read = 0;
-    return bytes.size() <= sizeof(actual) && ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<void *>(base + rva), actual, bytes.size(), &read) && read == bytes.size() &&
-           std::equal(bytes.begin(), bytes.end(), actual);
 }
 struct ReadRequest {
     const wchar_t *path;
@@ -125,8 +86,7 @@ struct GameFiles::Impl {
         bool logged = false;
     };
     uintptr_t base = reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
-    const util::GameProfile *profile = nullptr;
-    std::atomic_bool checked{false};
+    util::GameBindings bindings{};
     std::atomic_bool supported{false};
     std::mutex mutex;
     std::condition_variable condition;
@@ -190,8 +150,8 @@ struct GameFiles::Impl {
         if (!item.submitted)
             return true;
         // FD4 request cleanup returns objects to the shared pool. Use the
-        // hash-selected published pool owner, independent of containment.
-        auto poolOwner = profile ? pointer(base + profile->retirePoolOwner) : 0;
+        // scan-resolved published pool owner, independent of containment.
+        auto poolOwner = pointer(base + bindings.retirePoolOwner);
         auto pool = poolOwner ? pointer(poolOwner) : 0;
         auto generations = pool ? pointer(pool + 0x50) : 0;
         uint16_t generation = 0;
@@ -199,23 +159,25 @@ struct GameFiles::Impl {
     }
 
     void run() {
-        profile = executableProfile();
-        bool match = profile && entryMatches(base, profile->submit, {0x4c, 0x8b, 0xdc, 0x48, 0x83, 0xec, 0x78}) &&
-                     entryMatches(base, profile->flush, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) && entryMatches(base, profile->enqueue, {0x41, 0x56, 0x48, 0x83, 0xec, 0x30}) &&
-                     entryMatches(base, profile->cancel, {0x48, 0x83, 0xec, 0x28, 0x48, 0x8b, 0x15});
+        auto module = util::Module(nullptr);
+        util::PeImage image({module.base().as<const uint8_t *>(), module.size()}, base);
+        std::string error;
+        bool match = util::gamescan::resolve(image, bindings, error);
         supported.store(match, std::memory_order_release);
-        checked.store(true, std::memory_order_release);
-        util::nativeLog("game-compatible=%d profile=%s base=%llx\n", match, profile ? profile->label : "unknown", static_cast<unsigned long long>(base));
-        if (!match)
-            fwprintf(stderr, L"[Minimap] 当前 EXE 与原生资源适配器不匹配，已禁用游戏调用。\n");
-        auto submit = match ? reinterpret_cast<int (*)(void *, uint64_t *, const ReadRequest *)>(base + profile->submit) : nullptr;
-        auto flush = match ? reinterpret_cast<void (*)(void *)>(base + profile->flush) : nullptr;
-        auto enqueue = match ? reinterpret_cast<void (*)(void *, void *, uint64_t)>(base + profile->enqueue) : nullptr;
+        util::nativeLog("game-compatible=%d source=signature-scan base=%llx error=%s\n", match, static_cast<unsigned long long>(base), error.c_str());
+        if (match)
+            fwprintf(stderr, L"[Minimap] native bindings resolved by signature scan: submit=+%X menu=+%X owner=+%X view=+%X\n", bindings.submit, bindings.menu,
+                     bindings.layout.menuOwnerOffset, bindings.layout.ownerViewOffset);
+        else
+            fwprintf(stderr, L"[Minimap] 原生接口扫描失败：%hs；已禁用游戏调用。\n", error.c_str());
+        auto submit = match ? reinterpret_cast<int (*)(void *, uint64_t *, const ReadRequest *)>(base + bindings.submit) : nullptr;
+        auto flush = match ? reinterpret_cast<void (*)(void *)>(base + bindings.flush) : nullptr;
+        auto enqueue = match ? reinterpret_cast<void (*)(void *, void *, uint64_t)>(base + bindings.enqueue) : nullptr;
         uint64_t logFlush = 0;
         for (;;) {
             std::vector<std::shared_ptr<Item>> submitItems, cancelItems;
-            uintptr_t manager = match ? pointer(base + profile->manager) : 0;
-            auto allocator = match ? reinterpret_cast<void *>(pointer(base + profile->allocator)) : nullptr;
+            uintptr_t manager = match ? pointer(base + bindings.manager) : 0;
+            auto allocator = match ? reinterpret_cast<void *>(pointer(base + bindings.allocator)) : nullptr;
             uint8_t ending = 1;
             bool ready = match && manager && allocator && readGame(manager + 0xE38, ending) && !ending;
             {
@@ -268,7 +230,7 @@ struct GameFiles::Impl {
             if (!submitItems.empty())
                 flush(reinterpret_cast<void *>(manager));
             for (const auto &item: cancelItems) {
-                enqueue(reinterpret_cast<void *>(item->manager + 0x20), reinterpret_cast<void *>(base + profile->cancel), item->nativeId);
+                enqueue(reinterpret_cast<void *>(item->manager + 0x20), reinterpret_cast<void *>(base + bindings.cancel), item->nativeId);
             }
             if (util::nativeLogEnabled()) {
                 auto now = GetTickCount64();
@@ -385,17 +347,17 @@ bool GameFiles::readDisplayState(ERDisplayState &state) const {
     state = {true, false};
     if (!compatible())
         return false;
-    const auto &profile = *impl_->profile;
-    return util::readDisplayState(impl_->base + profile.menu, impl_->base + profile.gameData, profile.layout, state);
+    const auto &bindings = impl_->bindings;
+    return util::readDisplayState(impl_->base + bindings.menu, impl_->base + bindings.gameData, bindings.layout, state);
 }
 
 bool GameFiles::readMapState(ERMapState &state) {
     state = {};
     if (!compatible())
         return false;
-    const auto &profile = *impl_->profile;
+    const auto &bindings = impl_->bindings;
     util::MapContext context;
-    bool contextRead = util::readMapContext(impl_->base + profile.menu, impl_->base + profile.gameData, profile.layout, context);
+    bool contextRead = util::readMapContext(impl_->base + bindings.menu, impl_->base + bindings.gameData, bindings.layout, context);
     auto view = context.view, player = context.player;
     if (view != impl_->lastView || player != impl_->lastPlayer) {
         ++impl_->mapGeneration;
@@ -409,12 +371,12 @@ bool GameFiles::readMapState(ERMapState &state) {
     if (!contextRead)
         return false;
     uint8_t reveal = 0;
-    auto repository = pointer(impl_->base + profile.repository);
+    auto repository = pointer(impl_->base + bindings.repository);
     auto pieceEntry = repository ? pointer(repository + 0x88 + 88 * 72) : 0;
     auto pieceCap = pieceEntry ? pointer(pieceEntry + 0x80) : 0;
     auto pieceTable = pieceCap ? pointer(pieceCap + 0x80) : 0;
-    auto flags = pointer(impl_->base + profile.eventFlags);
-    if (!util::readWorldMapView(view, state) || !readGame(impl_->base + profile.reveal, reveal) || !util::mapContextUnchanged(context, profile.layout))
+    auto flags = pointer(impl_->base + bindings.eventFlags);
+    if (!util::readWorldMapView(view, state) || !readGame(impl_->base + bindings.reveal, reveal) || !util::mapContextUnchanged(context, bindings.layout))
         return false;
     uint64_t now = GetTickCount64();
     if (now >= impl_->maskRefresh || flags != impl_->lastFlags || pieceTable != impl_->lastPieceTable || reveal != impl_->lastReveal) {
@@ -439,9 +401,9 @@ bool GameFiles::readMapState(ERMapState &state) {
 }
 
 uintptr_t GameFiles::findParamTable(uint32_t group) const {
-    if (!compatible() || (group != 43 && group != 87 && group != 88 && group != 141) || group >= impl_->profile->layout.repositoryGroups)
+    if (!compatible() || (group != 43 && group != 87 && group != 88 && group != 141) || group >= impl_->bindings.layout.repositoryGroups)
         return 0;
-    auto repository = pointer(impl_->base + impl_->profile->repository);
+    auto repository = pointer(impl_->base + impl_->bindings.repository);
     auto entry = repository ? pointer(repository + 0x88 + group * 72) : 0;
     auto cap = entry ? pointer(entry + 0x80) : 0;
     return cap ? pointer(cap + 0x80) : 0;
@@ -449,7 +411,7 @@ uintptr_t GameFiles::findParamTable(uint32_t group) const {
 bool GameFiles::readEventFlag(uint32_t id) const {
     if (!compatible() || id == UINT32_MAX)
         return false;
-    auto manager = pointer(impl_->base + impl_->profile->eventFlags);
+    auto manager = pointer(impl_->base + impl_->bindings.eventFlags);
     bool value = false;
     std::lock_guard lock(impl_->flagMutex);
     return impl_->flagCache.read(manager, id, value) && value;
@@ -458,7 +420,7 @@ bool GameFiles::readGameLayout(ERGameLayout &layout) const {
     layout = {};
     if (!compatible())
         return false;
-    layout = impl_->profile->layout;
+    layout = impl_->bindings.layout;
     return true;
 }
 } // namespace er

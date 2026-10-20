@@ -23,6 +23,8 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("build/ui-scene/evidence.json"))
     parser.add_argument("--ui-compositor", type=Path, nargs=2, metavar=("VERTEX", "PIXEL"), help="Optional SM6 test vertex shader and locally extracted GXSimple_BlendUI_SDR2SDR_F.ppo")
     args = parser.parse_args()
+    args.archive = args.archive.resolve()
+    args.output = args.output.resolve()
     root = Path(__file__).resolve().parent.parent
     scanner = root / "build/ui-scene/ui_scene_scan_verify.exe"
     renderer = root / "build/ui-scene/ui_scene_render_verify.exe"
@@ -44,6 +46,8 @@ def main():
         runs.append(("native_sdr_game_compositor", renderer, ["--ui-compositor", *(str(p.resolve()) for p in args.ui_compositor)]))
     runs.extend((name, renderer.parent / (name + "_verify.exe"), []) for name in ["signature", "plugin_thread", "minimap_visibility", "minimap_map"])
     runs.append(("offscreen", renderer.parent / "minimap_texture_verify.exe", ["--offscreen"]))
+    runs.append(("minimap_bindings", Path(sys.executable), [str(root / "tools/minimap_scan_evidence.py"), str(args.archive),
+                                                         "--output", str(args.output.parent / "minimap-bindings-evidence.json")]))
     for name, executable, extra in runs:
         run = subprocess.run([str(executable), *extra], capture_output=True, text=True, cwd=root)
         if run.returncode:
@@ -55,7 +59,7 @@ def main():
         "date": date.today().isoformat(),
         "liber_reference_commit": "d8ae5c92719adca4344d8d902b63286b807f562b",
         "reference_game_version": "1.16",
-        "scope": "UI_SCENE is the only renderer. Static PE contracts, two-hook MinHook teardown, rejection without fallback, controlled D3D12 layer pixels/lifetimes, native SDR compositor opacity and CPU minimap visibility. User confirmed in-game tests passed before removing the DXGI renderer.",
+        "scope": "UI_SCENE is the only renderer. Static PE contracts, native file/map binding scans, two-hook MinHook teardown, rejection without fallback, controlled D3D12 layer pixels/lifetimes, native SDR compositor opacity and CPU minimap visibility. User confirmed in-game tests passed before removing the DXGI renderer.",
         "renderer": "ui_scene",
         "renderer_selection_config": False,
         "dxgi_hooks": False,
@@ -106,7 +110,10 @@ def main():
         },
         "source_sha256_encoding": "raw UTF-8 bytes with CRLF normalized to LF",
         "source_sha256": {p: digest(root / p, source=True) for p in ["src/util/uiscene_patterns.inc", "src/util/uiscenescan.hpp", "src/util/peimage.hpp", "src/util/signature.hpp",
-                                                       "deps/pattern16/scanners/base.h", "src/uiscene.cpp", "src/d3drenderer.cpp",
+                                                       "deps/pattern16/scanners/base.h", "deps/pattern16/scanners/x64/AVX.h", "deps/pattern16/scanners/x64/SSE.h", "deps/pattern16/scanners/x64/x64.h",
+                                                       "src/util/gamescan.hpp", "src/util/gamebindings.hpp", "src/util/minimap_scan_rules.inc", "docs/minimap-scanner-signatures.json",
+                                                       "tools/generate_minimap_scan_rules.py", "tools/minimap_scan_verify.cpp", "tools/minimap_scan_evidence.py", "tools/fixtures/pe_image.hpp",
+                                                       "src/uiscene.cpp", "src/d3drenderer.cpp",
                                                        "deps/imgui/imgui_impl_dx12.cpp", "deps/imgui/imgui_impl_dx12.h", "src/uiscene.hpp", "src/d3drenderer.hpp",
                                                        "src/drawlayers.hpp", "src/plugin.cpp", "src/plugin.hpp", "src/api.h", "src/api.cpp", "src/nativeapi.h", "src/textureupload.cpp",
                                                        "src/dllmain.cpp", "src/hooking.cpp", "src/hooking.hpp",

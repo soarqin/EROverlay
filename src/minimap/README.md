@@ -182,7 +182,7 @@ Set `log_file = D:/Logs/minimap.log` in `[diagnostics]` to record resource reque
 
 ## Game and resource support
 
-Native adapters cover hash-verified historical 1.02–1.17 EXEs and Steam 1.17.1. All supplied old EXEs passed offline address/layout checks; individual old-game visual testing remains pending. Unknown EXEs disable native calls; the minimap stays hidden while display state cannot be verified. See the [compatibility report](../../docs/minimap-version-compatibility.md).
+Native file and map interfaces are resolved from the loaded EXE through shared signatures, RTTI and ABI checks. Addresses and layouts pass offline verification for 1.02–1.17.2, including independent IDA verification for 1.17.2. An unfamiliar hash does not disable the minimap; missing or incompatible interfaces are reported in the startup log. In-game visual verification remains separate. See the [runtime scanner notes](../../docs/minimap-native-scanner.md).
 
 Atlas names and counts come from native GFX/TextureAtlas definitions, including atlas mods. Loading, drawing and retirement were verified with 12 atlases. Resources must be readable through the game's file layer and use supported PC GFX/TPF/DDS formats. Pre-DLC games require only surface/underground resources; M10 and DLC atlases are optional. Resource and texture budgets still apply.
 

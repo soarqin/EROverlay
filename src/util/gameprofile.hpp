@@ -9,6 +9,7 @@
 
 namespace er::util {
 
+// Historical offline expectations only. Runtime binding uses gamescan.hpp.
 struct GameProfile {
     const char *label;
     std::array<uint8_t, 32> sha256;

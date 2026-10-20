@@ -65,8 +65,8 @@ namespace Pattern16 {
 					}
 				}
 			}
-			auto cur_byte = reinterpret_cast<const uint8_t*>(cur);
-			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 3);
+			auto cur_byte = reinterpret_cast<const uint8_t*>(cur) + sig_offset;
+			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 3) + sig_offset;
 			do {
 				auto cur_sig_start = reinterpret_cast<const __m256i*>(cur_byte);
 				auto length_ = length;

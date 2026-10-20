@@ -151,8 +151,9 @@ namespace Pattern16 {
 			if constexpr (version == SSE4_1) address = scanRegion(alignedStart, end, sigStartPos, 0, sig, sig.first.size());
 			else address = scanRegion<version>(alignedStart, end, sigStartPos, 0, sig, sig.first.size());
 			if (address) return address;
-			// The SIMD tail is cache-line based; include the last legal start.
-			return scanRegion(end - sig.first.size() * sizeof(T) - 128, end, signature);
+			// SIMD candidates are anchor-relative, including its cleanup loop.
+			// Overlap the full tail and include the last legal signature start.
+			return scanRegion(end - sig.first.size() * sizeof(T) - 128 - sigStartPos, end, signature);
 		}
 
 		PATTERN16_NO_INLINE const void* scan(const void* regionStart, size_t regionSize, SplitSignatureU8& signature, const Frequencies16& frequencies) {

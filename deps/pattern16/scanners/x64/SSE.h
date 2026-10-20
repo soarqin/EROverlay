@@ -80,15 +80,15 @@ namespace Pattern16 {
 					}
 				}
 			}
-			auto cur_byte = reinterpret_cast<const uint8_t*>(cur);
-			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 7);
+			auto cur_byte = reinterpret_cast<const uint8_t*>(cur) + sig_offset;
+			auto end_byte = reinterpret_cast<const uint8_t*>(cur + 7) + sig_offset;
 			do {
 				auto cur_sig_start = reinterpret_cast<const __m128i*>(cur_byte);
 				auto length_ = length;
 				while (length_--) {
 					auto potential_match = _mm_loadu_si128(cur_sig_start + length_);
 					potential_match = _mm_xor_si128(potential_match, signature.first[length_]);
-					if (!_mm_testz_si128(potential_match, signature.second[length_])) break;
+					if (!_mm_testz_SSE<version>(potential_match, signature.second[length_])) break;
 					if (!length_) return (const void*)cur_sig_start;
 				}
 			} while (++cur_byte < end_byte);

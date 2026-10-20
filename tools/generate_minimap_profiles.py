@@ -49,7 +49,7 @@ def profiles(evidence):
     # RVAs confirmed on the Steam 1.17.1 baseline, distinct from 1.17.
     result.append({
         "label": reference["version"], "sha256": reference["sha256"],
-        "path": r"D:\Steam\steamapps\common\ELDEN RING\Game\eldenring.exe",
+        "path": r"D:\Games\EldenRingExe\1.17.1\Game\eldenring.exe",
         "submit": 0x26EEB60, "flush": 0x26EED40, "enqueue": 0x26F42E0, "cancel": 0x26EE2C0,
         "manager": 0x48611A0, "allocator": 0x3D8B360, "retirePoolOwner": 0x4860D70,
         "menu": 0x3D6F820, "gameData": 0x3D61F98, "eventFlags": 0x3D6C4B8, "field": 0x3D6D248,

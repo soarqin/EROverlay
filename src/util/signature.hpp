@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Pattern16.h>
+#include <vector>
 
 #include "memory.hpp"
 
@@ -26,6 +27,17 @@ public:
      * \return MemoryHandle
      */
     [[nodiscard]] MemoryHandle scan(MemoryRegion region = Module(nullptr)) const { return Pattern16::scan(region.base().as<void *>(), region.size(), pattern_); }
+
+    [[nodiscard]] std::vector<MemoryHandle> scanAll(MemoryRegion region) const {
+        std::vector<MemoryHandle> hits;
+        auto end = region.end().as<std::uintptr_t>();
+        while (auto hit = scan(region)) {
+            hits.push_back(hit);
+            auto next = hit.add(1);
+            region = MemoryRegion(next, end - next.as<std::uintptr_t>());
+        }
+        return hits;
+    }
 
     /** Returns null if the region contains zero or multiple matches. */
     [[nodiscard]] MemoryHandle scanUnique(MemoryRegion region = Module(nullptr)) const {

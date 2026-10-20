@@ -64,7 +64,7 @@ typedef struct {
     bool fullScreenMap;
 } ERDisplayState;
 
-// Optional, size-gated CPU layout information for hash-verified executables.
+// Optional, size-gated CPU layout information validated by the native scanner.
 typedef struct {
     uint32_t size;
     uint32_t menuOwnerOffset;

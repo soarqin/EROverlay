@@ -74,12 +74,18 @@ public:
         return hit ? start + uint32_t(hit.as<const uint8_t *>() - bytes.data()) : 0;
     }
 
-    [[nodiscard]] uint32_t relative(uint32_t instruction, uint32_t displacement, uint32_t size) const {
+    [[nodiscard]] uint32_t relativeAddress(uint32_t instruction, uint32_t displacement, uint32_t size) const {
         int32_t delta = 0;
-        if (!read(instruction + displacement, delta))
+        if (!instruction || uint64_t(instruction) + size > bytes_.size() || displacement > size || sizeof(delta) > size - displacement ||
+            uint64_t(instruction) + displacement > UINT32_MAX || !read(instruction + displacement, delta))
             return 0;
         int64_t target = int64_t(instruction) + size + delta;
-        return target > 0 && target <= UINT32_MAX && executable(uint32_t(target)) ? uint32_t(target) : 0;
+        return target > 0 && uint64_t(target) < bytes_.size() && target <= UINT32_MAX ? uint32_t(target) : 0;
+    }
+
+    [[nodiscard]] uint32_t relative(uint32_t instruction, uint32_t displacement, uint32_t size) const {
+        auto target = relativeAddress(instruction, displacement, size);
+        return target && executable(target) ? target : 0;
     }
 
     // MSVC x64 RTTI: TypeDescriptor -> COL (image-relative) -> vtable[-1].

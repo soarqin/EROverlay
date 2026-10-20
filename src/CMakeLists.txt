@@ -31,7 +31,7 @@ add_project(EROverlayDLL SHARED
     util/assets.cpp util/assets.hpp
     util/gameflags.cpp util/gameflags.hpp
     util/mapstate.cpp util/mapstate.hpp
-    util/gameprofile.hpp util/gameprofiles.inc util/paramreader.hpp
+    util/gamebindings.hpp util/gamescan.hpp util/minimap_scan_rules.inc util/paramreader.hpp
     util/memory.hpp util/signature.hpp util/peimage.hpp util/eventflag.hpp
     util/steam.cpp util/steam.hpp
     util/sysfont.cpp util/sysfont.hpp
@@ -64,7 +64,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         Pattern16 steam_api64 imgui_dx12_backend minhook
     # Windows libraries
-        dwmapi shlwapi version bcrypt)
+        dwmapi shlwapi version)
 if(NOT MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
 endif()
