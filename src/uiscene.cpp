@@ -65,7 +65,7 @@ bool UiSceneBridge::install() {
         return true;
     auto module = util::Module(nullptr);
     module_ = module.base().as<uintptr_t>();
-    util::uiscene::Image image({module.base().as<const uint8_t *>(), module.size()}, module_);
+    util::PeImage image({module.base().as<const uint8_t *>(), module.size()}, module_);
     const char *error = nullptr;
     if (!util::uiscene::resolve(image, addresses_, error)) {
         fwprintf(stderr, L"[EROverlay] UI_SCENE unavailable: %hs\n", error);

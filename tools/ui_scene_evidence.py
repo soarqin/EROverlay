@@ -42,7 +42,7 @@ def main():
     runs = [("native_rgb10a2", renderer, [])]
     if args.ui_compositor:
         runs.append(("native_sdr_game_compositor", renderer, ["--ui-compositor", *(str(p.resolve()) for p in args.ui_compositor)]))
-    runs.extend((name, renderer.parent / (name + "_verify.exe"), []) for name in ["plugin_thread", "minimap_visibility", "minimap_map"])
+    runs.extend((name, renderer.parent / (name + "_verify.exe"), []) for name in ["signature", "plugin_thread", "minimap_visibility", "minimap_map"])
     runs.append(("offscreen", renderer.parent / "minimap_texture_verify.exe", ["--offscreen"]))
     for name, executable, extra in runs:
         run = subprocess.run([str(executable), *extra], capture_output=True, text=True, cwd=root)
@@ -105,13 +105,14 @@ def main():
             "first_draw_vertices": 350, "first_draw_indices": 1473,
         },
         "source_sha256_encoding": "raw UTF-8 bytes with CRLF normalized to LF",
-        "source_sha256": {p: digest(root / p, source=True) for p in ["src/util/uiscene_patterns.inc", "src/util/uiscenescan.hpp", "src/uiscene.cpp", "src/d3drenderer.cpp",
+        "source_sha256": {p: digest(root / p, source=True) for p in ["src/util/uiscene_patterns.inc", "src/util/uiscenescan.hpp", "src/util/peimage.hpp", "src/util/signature.hpp",
+                                                       "deps/pattern16/scanners/base.h", "src/uiscene.cpp", "src/d3drenderer.cpp",
                                                        "deps/imgui/imgui_impl_dx12.cpp", "deps/imgui/imgui_impl_dx12.h", "src/uiscene.hpp", "src/d3drenderer.hpp",
                                                        "src/drawlayers.hpp", "src/plugin.cpp", "src/plugin.hpp", "src/api.h", "src/api.cpp", "src/nativeapi.h", "src/textureupload.cpp",
                                                        "src/dllmain.cpp", "src/hooking.cpp", "src/hooking.hpp",
                                                        "src/util/mapstate.cpp", "src/util/mapstate.hpp", "src/gamefiles.cpp", "src/gamefiles.hpp",
                                                        "src/minimap/data.cpp", "src/minimap/render.cpp", "src/minimap/dllmain.cpp",
-                                                       "tools/ui_scene_scan_verify.cpp", "tools/ui_scene_render_verify.cpp", "tools/ui_scene_compositor_verify.hlsl", "tools/minimap_visibility_verify.cpp",
+                                                       "tools/signature_verify.cpp", "tools/ui_scene_scan_verify.cpp", "tools/ui_scene_render_verify.cpp", "tools/ui_scene_compositor_verify.hlsl", "tools/minimap_visibility_verify.cpp",
                                                        "tools/plugin_thread_verify.cpp", "tools/minimap_map_verify.cpp", "tools/minimap_texture_verify.cpp", "tools/build_ui_scene_checks.bat", "tools/ui_scene_evidence.py"]},
         "archive_directories": len(records),
         "independent_sha256": len({r["sha256"] for r in records}),

@@ -9,6 +9,7 @@
 
 namespace {
 using namespace er::util::uiscene;
+using er::util::PeImage;
 
 bool verify(const std::filesystem::path &path, bool negative) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -40,7 +41,7 @@ bool verify(const std::filesystem::path &path, bool negative) {
             return false;
         std::memcpy(mapped.data() + section.VirtualAddress, raw.data() + section.PointerToRawData, section.SizeOfRawData);
     }
-    Image image(mapped, uintptr_t(nt.OptionalHeader.ImageBase));
+    PeImage image(mapped, uintptr_t(nt.OptionalHeader.ImageBase));
     Addresses addresses{};
     const char *error = nullptr;
     bool ok = resolve(image, addresses, error);
@@ -68,8 +69,9 @@ bool verify(const std::filesystem::path &path, bool negative) {
     if (image.section(".text", textRva).empty())
         return false;
     uint32_t duplicate = textRva + 0x1000;
-    std::vector<uint8_t> saved(mapped.begin() + duplicate, mapped.begin() + duplicate + QUEUE_SUBMIT.size);
-    std::memcpy(mapped.data() + duplicate, mapped.data() + addresses.submit, QUEUE_SUBMIT.size);
+    size_t submitSize = er::util::Signature(QUEUE_SUBMIT).size();
+    std::vector<uint8_t> saved(mapped.begin() + duplicate, mapped.begin() + duplicate + submitSize);
+    std::memcpy(mapped.data() + duplicate, mapped.data() + addresses.submit, submitSize);
     all &= rejects("duplicate submit");
     std::memcpy(mapped.data() + duplicate, saved.data(), saved.size());
     // A valid opcode signature with a redirected callee must also be rejected.
@@ -96,7 +98,7 @@ bool verify(const std::filesystem::path &path, bool negative) {
     mapped[type] ^= 1;
     all &= rejects("missing RTTI");
     mapped[type] ^= 1;
-    Image truncated(std::span<const uint8_t>(mapped.data(), 64), uintptr_t(nt.OptionalHeader.ImageBase));
+    PeImage truncated(std::span<const uint8_t>(mapped.data(), 64), uintptr_t(nt.OptionalHeader.ImageBase));
     Addresses ignored{};
     all &= !resolve(truncated, ignored, error);
     std::cout << "negative truncated PE: " << (!resolve(truncated, ignored, error) ? "PASS" : "FAIL") << '\n';
@@ -127,7 +129,7 @@ bool verify(const std::filesystem::path &path, bool negative) {
         }
         cursor += block.SizeOfBlock;
     }
-    Image relocated(mapped, uintptr_t(nt.OptionalHeader.ImageBase + delta));
+    PeImage relocated(mapped, uintptr_t(nt.OptionalHeader.ImageBase + delta));
     Addresses rebased{};
     bool aslr = resolve(relocated, rebased, error) && rebased.submit == addresses.submit && rebased.renderViewVtable == addresses.renderViewVtable &&
                 rebased.textureVtable == addresses.textureVtable;

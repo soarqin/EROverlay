@@ -30,17 +30,18 @@ namespace Pattern16 {
 	namespace Impl {
 		PATTERN16_NO_INLINE const void* scanRegion(const void* regionStart, const void* regionEnd, const SplitSignatureU8& signature) {
 			auto length = signature.first.size();
-			auto cur = reinterpret_cast<const uint8_t*>(regionStart) - 1;
+			if (!length || (uintptr_t)regionEnd - (uintptr_t)regionStart < length) return nullptr;
+			auto cur = reinterpret_cast<const uint8_t*>(regionStart);
 			auto end = reinterpret_cast<const uint8_t*>(regionEnd) - signature.first.size();
-			while PATTERN16_LIKELY (++cur < end) {
+			do {
 				auto length_ = length;
 				while (length_--) {
-					if (!length_) return (const void*)cur;
 					auto potential_match = cur[length_];
 					potential_match ^= signature.first[length_];
 					if (potential_match & signature.second[length_]) break;
+					if (!length_) return (const void*)cur;
 				}
-			};
+			} while (cur++ < end);
 			return nullptr;
 		}
 
@@ -125,8 +126,16 @@ namespace Pattern16 {
 
 		template <typename T, SSE_VERSION version = SSE4_1>
 		PATTERN16_NO_INLINE const void* scanT(const void* regionStart, size_t regionSize, SplitSignatureU8& signature, const Frequencies16& frequencies) {
-			auto alignedStart = alignUpCacheline(regionStart);
-			if (auto address = scanRegion(regionStart, alignedStart, signature)) return address;
+			auto begin = reinterpret_cast<const uint8_t*>(regionStart);
+			auto end = begin + regionSize;
+			auto length = signature.first.size();
+			// Keep SIMD candidate reads inside the requested region, including
+			// candidates whose anchor lies well into a long signature.
+			auto alignedStart = alignUpCacheline(begin + length - 1);
+			if ((uintptr_t)alignedStart >= (uintptr_t)end ||
+				(size_t)(end - alignedStart) < alignUp<alignof(T)>(length) + 256)
+				return scanRegion(begin, end, signature);
+			if (auto address = scanRegion(begin, alignedStart + length - 1, signature)) return address;
 			size_t sigStartPos;
 			std::array<int, 4> cpuInfo;
 			{
@@ -135,12 +144,21 @@ namespace Pattern16 {
 				else if (PATTERN16_FEATURE_TEST(cpuInfo, PATTERN16_FEATURE_BMI1)) sigStartPos = getSigStartPos<BMI1>(signature, frequencies);
 				else sigStartPos = getSigStartPos<BMI_NONE>(signature, frequencies);
 			}
+			if (signature.second[sigStartPos] != 0xFF || signature.second[sigStartPos + 1] != 0xFF)
+				return scanRegion(alignedStart, end, signature);
 			auto sig = processSignatureBytes<T>(signature);
-			if constexpr (version == SSE4_1) return scanRegion(alignedStart, (const void*)((uintptr_t)regionStart + regionSize), sigStartPos, 0, sig, sig.first.size());
-			else return scanRegion<version>(alignedStart, (const void*)((uintptr_t)regionStart + regionSize), sigStartPos, 0, sig, sig.first.size());
+			const void* address;
+			if constexpr (version == SSE4_1) address = scanRegion(alignedStart, end, sigStartPos, 0, sig, sig.first.size());
+			else address = scanRegion<version>(alignedStart, end, sigStartPos, 0, sig, sig.first.size());
+			if (address) return address;
+			// The SIMD tail is cache-line based; include the last legal start.
+			return scanRegion(end - sig.first.size() * sizeof(T) - 128, end, signature);
 		}
 
 		PATTERN16_NO_INLINE const void* scan(const void* regionStart, size_t regionSize, SplitSignatureU8& signature, const Frequencies16& frequencies) {
+			if (!regionStart || signature.first.empty() || regionSize < signature.first.size()) return nullptr;
+			if (signature.first.size() == 1)
+				return scanRegion(regionStart, reinterpret_cast<const uint8_t*>(regionStart) + regionSize, signature);
 			std::array<int, 4> cpuInfo;
 			PATTERN16_CPUID_LEAF7(cpuInfo);
 			if (PATTERN16_FEATURE_TEST(cpuInfo, PATTERN16_FEATURE_AVX2)) {
