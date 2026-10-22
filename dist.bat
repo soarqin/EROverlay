@@ -1,60 +1,54 @@
 @echo off
 
-setlocal enabledelayedexpansion
+setlocal
+pushd "%~dp0" || exit /b 1
 
-del /q build\CMakeCache.txt
-cmake -B build -G "Visual Studio 18 2026" -A x64 -T v142 -DRELEASE_USE_STATIC_CRT=OFF -DRELEASE_USE_LTO=ON .
-cmake --build build --config Release
-
-IF NOT EXIST dist mkdir dist
-IF NOT EXIST dist\Boss mkdir dist\Boss
-IF NOT EXIST dist\Minimap mkdir dist\Minimap
-
-pushd dist\Boss
-copy /y ..\..\build\bin\EROverlay.dll .
-IF NOT EXIST overlays mkdir overlays
-copy /y ..\..\build\bin\overlays\Boss.dll overlays\
-copy /y ..\..\src\boss\README.md .
-copy /y ..\..\src\boss\README_CN.md .
-copy /y ..\..\LICENSE .
-IF NOT EXIST docs mkdir docs
-copy /y ..\..\docs\boss-revival.md docs\
-copy /y ..\..\docs\boss-revival.evidence.json docs\
-IF NOT EXIST configs mkdir configs
-copy /y ..\..\configs\boss.ini configs\
-copy /y ..\..\configs\common.ini configs\
-copy /y ..\..\configs\input.ini configs\
-copy /y ..\..\configs\style.ini configs\
-IF NOT EXIST configs_CN mkdir configs_CN
-copy /y ..\..\configs_CN\boss.ini configs_CN\
-copy /y ..\..\configs_CN\common.ini configs_CN\
-copy /y ..\..\configs_CN\input.ini configs_CN\
-copy /y ..\..\configs_CN\style.ini configs_CN\
-IF NOT EXIST data mkdir data
-xcopy /y /e ..\..\src\boss\data\* data\
-7z a -tzip -r -mx=9 ..\Boss.zip
+call :dist
+set "RESULT=%ERRORLEVEL%"
 popd
+exit /b %RESULT%
 
-pushd dist\Minimap
-copy /y ..\..\build\bin\EROverlay.dll .
-IF NOT EXIST overlays mkdir overlays
-copy /y ..\..\build\bin\overlays\Minimap.dll overlays\
-copy /y ..\..\src\minimap\README.md .
-copy /y ..\..\src\minimap\README_CN.md .
-copy /y ..\..\LICENSE .
-copy /y ..\..\deps\bcdec\LICENSE LICENSE_bcdec.txt
-IF NOT EXIST configs mkdir configs
-copy /y ..\..\configs\minimap.ini configs\
-copy /y ..\..\configs\common.ini configs\
-copy /y ..\..\configs\input.ini configs\
-copy /y ..\..\configs\style.ini configs\
-IF NOT EXIST configs_CN mkdir configs_CN
-copy /y ..\..\configs_CN\minimap.ini configs_CN\
-copy /y ..\..\configs_CN\common.ini configs_CN\
-copy /y ..\..\configs_CN\input.ini configs_CN\
-copy /y ..\..\configs_CN\style.ini configs_CN\
-IF EXIST ..\Minimap.zip 7z d -r ..\Minimap.zip data
-7z a -tzip -r -mx=9 ..\Minimap.zip EROverlay.dll overlays\Minimap.dll configs configs_CN README.md README_CN.md LICENSE LICENSE_bcdec.txt
+:dist
+where cmake >nul || exit /b 1
+where 7z >nul || exit /b 1
+cmake -B build -G "Visual Studio 18 2026" -A x64 -T v142 -DRELEASE_USE_STATIC_CRT=OFF -DRELEASE_USE_LTO=ON . || exit /b 1
+rem Debug and Release share build\bin, so incremental builds can leave the wrong DLLs.
+cmake --build build --config Release --clean-first || exit /b 1
+
+for %%P in (Boss Minimap) do (
+    if exist "dist\%%P" rmdir /s /q "dist\%%P"
+    if exist "dist\%%P" exit /b 1
+    if exist "dist\%%P.zip" del /q "dist\%%P.zip"
+    if exist "dist\%%P.zip" exit /b 1
+)
+
+call :package Boss || exit /b 1
+call :package Minimap || exit /b 1
+echo Created dist\Boss.zip and dist\Minimap.zip.
+exit /b 0
+
+:package
+mkdir "dist\%~1\overlays" "dist\%~1\configs" "dist\%~1\configs_CN" || exit /b 1
+copy /y "build\bin\EROverlay.dll" "dist\%~1\" || exit /b 1
+copy /y "build\bin\overlays\%~1.dll" "dist\%~1\overlays\" || exit /b 1
+for %%F in (README.md README_CN.md) do (
+    copy /y "src\%~1\%%F" "dist\%~1\" || exit /b 1
+)
+copy /y LICENSE "dist\%~1\" || exit /b 1
+for %%C in (common input style %~1) do (
+    copy /y "configs\%%C.ini" "dist\%~1\configs\" || exit /b 1
+    copy /y "configs_CN\%%C.ini" "dist\%~1\configs_CN\" || exit /b 1
+)
+if /i "%~1"=="Boss" (
+    mkdir "dist\Boss\docs" || exit /b 1
+    copy /y "docs\boss-revival.md" "dist\Boss\docs\" || exit /b 1
+    copy /y "docs\boss-revival.evidence.json" "dist\Boss\docs\" || exit /b 1
+    xcopy /y /e "src\boss\data\*" "dist\Boss\data\" || exit /b 1
+) else (
+    copy /y "deps\bcdec\LICENSE" "dist\Minimap\LICENSE_bcdec.txt" || exit /b 1
+)
+pushd "dist\%~1" || exit /b 1
+7z a -tzip -r -mx=9 "..\%~1.zip" *
+set "RESULT=%ERRORLEVEL%"
 popd
-
-endlocal
+exit /b %RESULT%
