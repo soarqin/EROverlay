@@ -6,31 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-### [2.1.0] - 2026-10-20
+### [Unreleased]
 
 #### Added
 
-- Support the runtime DLL edition of Map for Goblins through its official read-only map API in 2.1.6 and later; enable `[markers] others`. Imports embedded icons, display positions, visibility and native child depths. See [the integration notes](../../docs/minimap-goblins-api.md).
-- Add `[markers] others` to show NPCs, placed stamps and other points added by map mods. Disabled by default; supports `Map for Goblins` composite icons, green backgrounds, category switches and marker removal conditions. Update `EROverlay.dll` as well.
+- Add `[markers] others` to show NPCs, placed stamps and other points added by map mods. Disabled by default; quest targets remain controlled by the landmark setting.
+- Support Map for Goblins markers, including DLL edition 2.1.7 and later. With `others` enabled, icons, colors, category switches and visibility after collecting items or defeating enemies follow the mod's settings.
 
 #### Changed
 
-- Read MapForGoblins markers through borrowed views of its background snapshots. Marker refreshes run in the provider; reading a view does not recalculate visibility or copy a receiving array.
 - Draw the minimap below game UI so menus, dialogs and HUD elements can cover it.
-- Keep the minimap visible and its shortcuts usable in ordinary game menus. Automatic hiding applies only to loading screens, logos and the game's full-screen map.
-- Reduce the CPU cost of refreshing graces and landmarks: event flags, PARAM rows, the grace list and map coordinate conversions are now read in batches or cached. The event flag cache is in the core; update `EROverlay.dll` as well.
+- Keep the minimap visible and its shortcuts usable in ordinary menus. Automatic hiding applies only to loading screens, startup logos and the full-screen map, including the border and loading messages.
+- Reduce CPU overhead when refreshing map markers.
 
 #### Fixed
 
-- Fix missed Pattern16 matches near SIMD cleanup boundaries. Update the core DLL.
-- Follow the loaded game's GFX container depths and native point ordering when markers overlap, including graces and mod icons. Reverse already ordered points and skip disabled marker layers. Request resources with canonical lowercase paths for older cores. Record changed marker counts in the optional diagnostic log.
-- Keep quest targets controlled by `landmarks` instead of hiding them when `[markers] others` is disabled.
-- Stop repeatedly reloading atlas containers when a recolored mod icon references an invalid region; skip the unusable icon instead.
-- Hide the minimap border and resource-loading messages during startup before display state can be verified, and hide immediately when loading, logos or the full-screen map begin.
+- Fix the minimap not appearing after updating the game to 1.17.2.
+- Fix missing icons and resources failing to load with map mods that use large texture packs.
+- Fix missing boss completion markers in mods and standalone boss markers remaining visible after their grace is activated.
+- Draw overlapping graces, landmarks and mod icons in the same order as the game's full-screen map.
 
 #### Upgrade notes
 
-- Update both `EROverlay.dll` and `overlays/Minimap.dll` to enable rendering below game UI and the new visibility rules.
+- Update `EROverlay.dll` and `overlays/Minimap.dll` together.
 
 ### [2.0.0] - 2026-10-03
 
@@ -52,8 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
-- Improve minimap compatibility with modded UI assets.
-- Follow the game's rules when hiding standalone markers after their grace is activated.
 - Fix circular borders being cut off at the top, bottom, left and right edges.
 
 #### Upgrade notes

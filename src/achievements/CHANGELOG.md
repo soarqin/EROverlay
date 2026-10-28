@@ -14,12 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Fixed
 
-- Fix exceptions when `achievements.panel_pos` contains invalid numbers; fields with no numeric value are read as `0`.
+- Fix possible game crashes caused by invalid panel-position settings; values that cannot be read as numbers are treated as `0`.
 
 #### Upgrade notes
 
-- The panel-position parsing fix is compiled into `Achievements.dll`; rebuild or update this DLL to receive it. Updating only `EROverlay.dll` does not apply the fix.
-- The `UI_SCENE` renderer switch itself requires no Achievements API migration or rebuild. The overlay does not use the changed hotkey API or the new native API extensions and remains above game UI.
+- Update `EROverlay.dll` and `overlays/Achievements.dll` together.
 
 ### [0.1.1] - 2026-06-30
 
