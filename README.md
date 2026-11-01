@@ -40,6 +40,8 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
+升级前须完全退出游戏。从 `bc96b83` 基线升级只需替换 `overlays/Minimap.dll`；从此前 `c519cdb`、`86cd403` 等旧包升级，必须同时替换 `EROverlay.dll` 和 `overlays/Minimap.dll`。保留现有 `configs/`，包括 `[diagnostics]` 中的 `log_file` 设置，不要用包内默认配置覆盖。
+
 ## 加载与退出
 
 Rust DLL 加载后只在 `DllMain` 中调度初始化线程。该线程在 loader lock 释放后读取 DLL 同目录下的配置和 `overlays/`，扫描游戏接口并安装原生 UI_SCENE hook。渲染不安装 Present 或 DXGI hook，不创建独立窗口或窗口事件循环。

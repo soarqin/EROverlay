@@ -132,4 +132,6 @@ cargo test --release --locked -p eroverlay-minimap installed_language_fonts_cove
 cargo test --release --locked -p eroverlay-minimap archived -- --ignored --nocapture --test-threads=1
 ```
 
-已有 Rust 包只更新 Minimap 即可复测。本次没有操作游戏安装目录、启动／注入游戏、改写 C++ 分支或推送远端。
+升级前须完全退出游戏。从 `bc96b83` 基线升级只需替换 `overlays/Minimap.dll`；从此前 `c519cdb`、`86cd403` 等旧包升级，必须同时替换 `EROverlay.dll` 和 `overlays/Minimap.dll`。保留现有 `configs/`，包括 `[diagnostics]` 中的 `log_file` 设置，不要用包内默认配置覆盖。
+
+本次没有操作游戏安装目录、启动／注入游戏、改写 C++ 分支或推送远端。
