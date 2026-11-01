@@ -1,0 +1,18 @@
+[package]
+name = "eroverlay-abi-fixture"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "BadPlugin"
+crate-type = ["cdylib"]
+
+[features]
+missing-export = []
+
+[dependencies]
+eroverlay-abi.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "eroverlay-game"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[features]
+# Original C++ readers are linked only into explicitly selected offline tests.
+runtime-read-fixture = ["dep:cc"]
+
+[dependencies]
+eroverlay-abi.workspace = true
+texture2ddecoder = "=0.1.2"
+memchr = "=2.8.3"
+
+[build-dependencies]
+cc = { version = "=1.2.67", optional = true }

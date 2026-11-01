@@ -1,0 +1,19 @@
+[package]
+name = "eroverlay-minimap"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "Minimap"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+eroverlay-abi = { path = "../abi" }
+eroverlay-game = { path = "../game" }
+egui.workspace = true
+quick-xml = "=0.38.3"
+miniz_oxide = "=0.8.9"
+ttf-parser = "=0.25.1"
+
+[lints]
+workspace = true

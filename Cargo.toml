@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/abi", "crates/abi-fixture", "crates/core", "crates/game", "crates/minimap", "crates/renderer", "crates/harness"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.99"
+license = "MIT"
+version = "0.1.0"
+
+[workspace.dependencies]
+eroverlay-abi = { path = "crates/abi" }
+eroverlay-game = { path = "crates/game" }
+eroverlay-renderer = { path = "crates/renderer" }
+egui = { version = "=0.33.3", default-features = false, features = ["default_fonts"] }
+windows = { version = "=0.62.2" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+debug = 1
+panic = "unwind"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

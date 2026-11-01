@@ -1,0 +1,20 @@
+[package]
+name = "eroverlay-renderer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+build = "build.rs"
+
+[dependencies]
+eroverlay-abi.workspace = true
+eroverlay-game.workspace = true
+windows = { workspace = true, features = ["Win32_Foundation", "Win32_Security", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D_Fxc", "Win32_Graphics_Direct3D12", "Win32_Graphics_Dxgi", "Win32_Graphics_Dxgi_Common", "Win32_System_Threading"] }
+
+[dev-dependencies]
+egui.workspace = true
+
+[build-dependencies]
+cc = "=1.2.67"
+
+[lints]
+workspace = true

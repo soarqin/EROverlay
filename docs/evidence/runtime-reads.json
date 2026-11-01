@@ -1,0 +1,464 @@
+{
+  "date": "2026-11-02",
+  "cpu": "Intel Core i9-13900KF",
+  "platform": "Windows x64",
+  "rust": "1.99.1",
+  "build": "Release ThinLTO, 1 codegen unit",
+  "baseline": "20fce70339795538bd17b2914adbba985d5b07f4",
+  "fixed": "source commit containing this evidence",
+  "workload": "production update_snapshot plus fresh read_map_state on a real allocated-memory fixture with native RTTI/owner/PARAM/flag layouts, 96 PARAM rows",
+  "runs": "three serial alternating revision pairs, one untimed initialization update and 1000 samples per scenario per run",
+  "limits": "CPU call batches only; excludes native hook, full Minimap update, rendering/GPU and game scheduling; does not measure game FPS or complete C++/Rust runtime cost",
+  "records": [
+    {
+      "revision": "20fce70",
+      "run": 1,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 129600,
+      "p95_ns": 138000,
+      "p99_ns": 156900,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 1,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 260300,
+      "p95_ns": 271000,
+      "p99_ns": 290900,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 1,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 55800,
+      "p95_ns": 58200,
+      "p99_ns": 72100,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 1,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 65800,
+      "p95_ns": 68600,
+      "p99_ns": 80100,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 1,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 102400,
+      "p95_ns": 132100,
+      "p99_ns": 141400,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 1,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 16500,
+      "p95_ns": 16600,
+      "p99_ns": 19100,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 1,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 41500,
+      "p95_ns": 42800,
+      "p99_ns": 47900,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 1,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 7100,
+      "p95_ns": 7200,
+      "p99_ns": 7300,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 1,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 7700,
+      "p95_ns": 7800,
+      "p99_ns": 7900,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 1,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 9900,
+      "p95_ns": 16600,
+      "p99_ns": 16800,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 2,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 123700,
+      "p95_ns": 129800,
+      "p99_ns": 141100,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 2,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 252900,
+      "p95_ns": 271000,
+      "p99_ns": 405900,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 2,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 53100,
+      "p95_ns": 54200,
+      "p99_ns": 60300,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 2,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 62900,
+      "p95_ns": 67900,
+      "p99_ns": 84400,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 2,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 73200,
+      "p95_ns": 126500,
+      "p99_ns": 133100,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 2,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 16300,
+      "p95_ns": 16400,
+      "p99_ns": 18000,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 2,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 41200,
+      "p95_ns": 43600,
+      "p99_ns": 52100,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 2,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 7100,
+      "p95_ns": 7100,
+      "p99_ns": 7300,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 2,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 7600,
+      "p95_ns": 7700,
+      "p99_ns": 7800,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 2,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 10000,
+      "p95_ns": 16400,
+      "p99_ns": 16500,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 3,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 129500,
+      "p95_ns": 139100,
+      "p99_ns": 170500,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 3,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 258900,
+      "p95_ns": 272200,
+      "p99_ns": 324800,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 3,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 55400,
+      "p95_ns": 56900,
+      "p99_ns": 65100,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 3,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 65500,
+      "p95_ns": 68900,
+      "p99_ns": 80800,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "20fce70",
+      "run": 3,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 111100,
+      "p95_ns": 133300,
+      "p99_ns": 155900,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 3,
+      "scenario": "steady",
+      "samples": 1000,
+      "p50_ns": 16500,
+      "p95_ns": 16900,
+      "p99_ns": 33000,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 3,
+      "scenario": "forced_mask_refresh",
+      "samples": 1000,
+      "p50_ns": 41600,
+      "p95_ns": 42000,
+      "p99_ns": 46900,
+      "valid": 1000,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 3,
+      "scenario": "no_param",
+      "samples": 1000,
+      "p50_ns": 7100,
+      "p95_ns": 7200,
+      "p99_ns": 16800,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 3,
+      "scenario": "invalid_flag",
+      "samples": 1000,
+      "p50_ns": 7700,
+      "p95_ns": 7800,
+      "p99_ns": 8200,
+      "valid": 0,
+      "masks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "revision": "fixed",
+      "run": 3,
+      "scenario": "load_then_valid",
+      "samples": 1000,
+      "p50_ns": 16400,
+      "p95_ns": 16600,
+      "p99_ns": 21100,
+      "valid": 500,
+      "masks": [
+        4294967295,
+        4294967295,
+        4294967295
+      ]
+    }
+  ]
+}

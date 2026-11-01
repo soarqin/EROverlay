@@ -1,0 +1,96 @@
+# EROverlay Rust + egui
+
+本仓库是 EROverlay 核心基础库和 Minimap 的独立 Rust 改写。Cargo workspace 位于仓库根目录。原 C++ 工程仅在独立 C++ 分支中保留，用于可选的行为和性能对照，不参与本分支的构建。Rust 版采用 `EROverlay.dll` 和 `overlays/Minimap.dll` 两个动态库，不加载旧 ImGui 插件。本期不移植 Boss、Achievements。
+
+实现和验证状态以 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md) 为准。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
+
+针对 1.17.2 实测卡顿及读档后持续等待，已修正首次资源与标记快照的错误依赖、无插件层的 renderer 重建和旗标读取契约，并恢复 PARAM 批读。用户已确认后续功能与加载提示修复正常。累计审查进一步修正资源背压、请求成员退休、尺寸变化与配置／ABI 边界，见 [审查和修复记录](docs/review-2026-11-02.md)。此前确定反例及 C++ 源码差分见 [读档与性能修复](docs/runtime-read-review.md)。
+
+## 构建独立安装目录
+
+要求 Windows x64、Rust MSVC 1.99 或更新工具链、Visual Studio C++ Build Tools 和 Windows SDK。本次使用 Rust 1.99.1。项目使用已签入的 MinHook 源码和 C++ 编译器构建 UI_SCENE 回调桥接。游戏接口、PE／RTTI／签名扫描、数据、资源和绘制主体均为 Rust；不链接旧 ImGui、Pattern16 或旧核心。原生源码和许可证范围见 [第三方声明](THIRD_PARTY.md) 与 [源码结构](docs/source-layout.md)。
+
+在仓库根目录执行：
+
+```powershell
+./build.ps1
+```
+
+脚本使用 `Cargo.lock` 构建 Release，然后生成 `package/`：
+
+```text
+package/
+  EROverlay.dll
+  overlays/Minimap.dll
+  configs/common.ini
+  configs/input.ini
+  configs/style.ini
+  configs/minimap.ini
+  README.md
+  LICENSE
+  THIRD_PARTY.md
+  third_party/          # MinHook 和内置字体许可
+  manifest.json
+  source.json
+  docs/                 # 功能、设计、验证与性能记录
+  crates/               # Minimap 和后端说明
+```
+
+脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
+
+## 加载与退出
+
+Rust DLL 加载后只在 `DllMain` 中调度初始化线程。该线程在 loader lock 释放后读取 DLL 同目录下的配置和 `overlays/`，扫描游戏接口并安装原生 UI_SCENE hook。渲染不安装 Present 或 DXGI hook，不创建独立窗口或窗口事件循环。
+
+手动安装或测试时，使用独立的 Rust 目录和受控的 DLL 加载器。不能将 Rust 核心与 C++ Minimap 混装。`EROverlay.dll` 是普通 DLL，当前不提供 `winhttp.dll` 代理导出；不能通过改名为 `winhttp.dll` 加载。游戏加载方式需要使用现有能够加载普通 DLL 的 Mod loader 或注入器。此任务不会自动操作正在运行的游戏。
+
+初始化失败会停止接入并返回错误。启动线程不会通过固定 EXE 哈希判断兼容，也不会在每帧重新扫描。通过 `configs/input.ini` 的 `unload` 快捷键请求停止；空值默认禁用，可配置为 `END` 等现有键名。停止先关闭 hook 和新回调，排空对回调上下文的访问及 update，再等待自有 GPU 工作和游戏文件请求退役，最后销毁插件和运行资源。文件回调或 GPU 未退役时返回 `ERR_BUSY`，保留 DLL 并重试。
+
+独立宿主可在加载 DLL 前设置 `EROVERLAY_RUST_OFFLINE_HOST=1`，然后使用 `eroverlay_start`、`eroverlay_render`、`eroverlay_stats` 和 `eroverlay_stop` 导出。此模式不安装游戏 hook。它用于离线检查，不能作为游戏中已接入的证明。
+
+原生模式在首次启用 hook 前通过 Windows `GetModuleHandleExW(FROM_ADDRESS | PIN)` 固定核心模块，直到进程退出。原有读锁只能排空访问桥接对象的区间，不能证明 detour 前导和尾声已返回；停用 hook 后仍执行这些代码的线程必须有有效代码页。即使安装过程随后失败，已固定的模块也不再解除固定。停止完成返回 `STOPPED_RESIDENT = 1`，表示功能和资源已停止，核心代码仍常驻。原生模式本期不支持同进程完整卸载或重新启动；再次使用需要重启游戏。这是安全保留策略，不是热重载实现。
+
+自动启动线程持有独立的 DLL 引用。外部加载器必须保留自己的 `LoadLibrary` 引用直到 `eroverlay_stop` 返回 `OK = 0` 或 `STOPPED_RESIDENT = 1`；由其负责停止时禁用 `input.unload`，避免并发调用。停止完成后只释放各自持有的引用；`1` 不代表模块已解除映射。没有安装原生 hook 的离线模式仍返回 `0`，支持完整装卸载。运行中替换 DLL 不属于本期能力。
+
+## 配置与素材
+
+Minimap 延续现有 UTF-8 INI 的分区和键名，包括命名预设、按键、尺寸、边距、位置、缩放、透明度、旋转、形状、边框及标记开关。先读根目录 `EROverlay.ini`，再由 `configs/*.ini` 覆盖；配置在初始化时读取。空快捷键和 `none` 用于禁用快捷键。现有 `configs_CN/minimap.ini` 可以替换包内对应模板。
+
+地形、图集、Scaleform 图标和布局从游戏原生虚拟文件服务按需读取，不分发游戏素材。首次请求元数据须等待有效地图状态，避免标题阶段提前固定尚未被 Mod 覆盖的原版素材。正常等待和纹理排队不显示文字，单块瓦片失败仅记录日志并重试；元数据和图集的实际读取／处理失败保留错误提示。纹理入队暂未接收时保留源数据并退避，文件轮询忙时保留原请求。关键失败由 update 线程按实际失败尝试记录路径和处理阶段。DDS 在工作线程解析，保留 BC1/2/3/7 压缩格式及 mip 层上传；RGBA 素材在工作线程准备预乘透明度。地表、地下和 DLC 使用现有进度及坐标规则。地图和标记的实际对齐情况见功能对照。
+
+## 新插件 ABI
+
+插件导出 `getEROverlayPluginV1(version)`，返回带 `magic/size/version/capabilities` 的 C 函数表。完整定义在 `crates/abi/src/lib.rs`。核心验证固定表头后才读取其余成员；缺失导出、未知版本、短表、能力缺失和无效层级会被拒绝。
+
+各 DLL 私有管理自己的 Rust 分配器、egui context、容器和状态。跨 DLL 仅传 `repr(C)` POD、句柄、函数指针和明确长度的借用缓冲。插件提交网格后核心立即复制到有界 staging；插件内存不被核心保留。文件缓冲借用到 `release_file`，纹理由核心拥有并经 GPU fence 延迟回收。`Vec`、`String`、trait object、egui context 和 Rust ABI 均不跨 DLL。
+
+旧 Boss、Achievements 和第三方 ImGui 插件需要按新 API 直接重写，不提供旧二进制 ABI 或 ImGui 桥接。
+
+## 验证命令
+
+在仓库根目录执行：
+
+```powershell
+cargo fmt --all -- --check
+cargo check --workspace --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
+cargo build --workspace --release --locked
+./target/release/eroverlay-harness.exe ./package 10
+```
+
+`eroverlay-harness` 实际加载核心和 Minimap DLL，检查初始化、重复启动拒绝、未知版本、空指针、update、RGB10A2 WARP 渲染、交替层尺寸、分辨率变化和重复装卸载。可选的合法上层测试插件提交真实纹理和三角形，检查尺寸变化不重建 renderer，GPU 在途时停止等待退休；命令见 [审查记录](docs/review-2026-11-02.md)。无游戏状态时 Minimap 保持隐藏，其可见绘制另由归档素材探针和 renderer 像素回读验证。这些检查不启动游戏。
+
+可选 C++ 差分测试先使用 `tools/export_cpp_reference.py --repository <C++仓库路径>` 导出明确提交，再设置 `EROVERLAY_CPP_REFERENCE` 并启用 `runtime-read-fixture`；普通构建和测试不需要 C++ 分支。独立 clone 不含旧提交时须显式指定含该提交的 C++ 仓库，不会自动获取旧历史。具体命令见 [源码结构](docs/source-layout.md)。
+
+归档 EXE、素材和性能检查的实际参数及结果见验证记录；受控 C++/Rust 对照见 [性能记录](docs/performance.md)。完整验收还需同场景游戏内画面和整体性能对照。
+
+## 性能测量原则
+
+主要验收依据是相同硬件、分辨率、配置、地图、标记数量和样本时长下的 C++/Rust 对照。统计 Rust、egui、依赖、分配、FFI、CPU、GPU 和显存的全部开销，不扣除所谓 runtime 开销，不设置用户未认可的百分比门槛。固定毫秒预算仅作观察参考。
+
+渲染线程不读取磁盘、解压、解析配置、执行全局签名扫描或等待 update 锁。资源由更新线程和纹理准备线程处理，绘制使用快照与 `try_lock`，GPU 使用有界提交环和 fence 回收。普通绘制遇到忙槽会跳过，不能通过逐帧 GPU 等待腾出槽位。测量 harness 内为读取结果而执行的同步与产品绘制路径分开统计。
+
+运行场景至少覆盖隐藏、稳定显示、大尺寸、旋转、透明、切图、碎片变化、标记变化和大量标记。记录 CPU p50/p95/p99、分配次数和字节、draw call、上传量、驻留显存和缓存上限。离线 fixture、WARP 和真实游戏数据必须分别标注。
+
+依赖选择、线程边界、失败回滚和原生代码复用理由见 [设计记录](docs/adr-0001.md)。

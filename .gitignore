@@ -1,0 +1,6 @@
+/target/
+/package/
+/evidence/
+/build/
+__pycache__/
+*.pyc
