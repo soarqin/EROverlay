@@ -100,7 +100,6 @@ dependencies = [
  "ahash",
  "ecolor",
  "emath",
- "epaint_default_fonts",
  "log",
  "nohash-hasher",
  "parking_lot",
@@ -158,6 +157,7 @@ name = "eroverlay-minimap"
 version = "0.1.0"
 dependencies = [
  "egui",
+ "epaint_default_fonts",
  "eroverlay-abi",
  "eroverlay-game",
  "miniz_oxide",

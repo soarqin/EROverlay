@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "method": {
+    "scope": "CPU egui production paint + tessellation + ABI sink",
+    "resolution": [
+      1920,
+      1080
+    ],
+    "warmup_frames_per_scenario": 100,
+    "measured_frames_per_scenario": 1000,
+    "workload": "Synthetic marker positions, archived native recipes",
+    "excluded": [
+      "GPU",
+      "Minimap update",
+      "assets I/O"
+    ],
+    "execution_order": [
+      "before-1",
+      "after-1",
+      "before-2",
+      "after-2",
+      "before-3",
+      "after-3"
+    ],
+    "execution_order_note": "按本轮执行记录，before/after 串行交替；未把各轮混合为一个分位数。",
+    "limits": "这些探针不测量游戏内帧率或完整模组开销；原始日志未记录硬件，未补填硬件信息。"
+  },
+  "asset_fixture": {
+    "recipes": 118,
+    "resolved_regions": 148,
+    "atlas_count": 4,
+    "stamp_frames": 10,
+    "atlases": [
+      {
+        "name": "SB_Chara",
+        "width": 1024,
+        "height": 1024,
+        "format": 98,
+        "bytes": 1048724
+      },
+      {
+        "name": "SB_MapCursor",
+        "width": 2048,
+        "height": 1024,
+        "format": 98,
+        "bytes": 2097300
+      },
+      {
+        "name": "SB_MapCursor_02",
+        "width": 1024,
+        "height": 2048,
+        "format": 98,
+        "bytes": 2097300
+      },
+      {
+        "name": "SB_MapCursor_03_dlc",
+        "width": 1024,
+        "height": 2048,
+        "format": 98,
+        "bytes": 2097300
+      }
+    ]
+  },
+  "retained_variation": {
+    "phase": "after",
+    "round": 2,
+    "scenario": "many-markers",
+    "p99_us": 530.9,
+    "before_same_round_p99_us": 435.5,
+    "other_after_rounds_p99_us": [
+      433.6,
+      431.2
+    ],
+    "note": "保留 after 第 2 轮的 p99 波动，没有剔除该轮或用其他轮次替换；日志未确定波动原因。"
+  },
+  "runs": [
+    {
+      "phase": "before",
+      "round": 1,
+      "source_log": "target/binary-size/validation/probe-before-1.log",
+      "source_sha256": "066673105b91173478424b4e961e12bba1bec0a6e3ccbb287316c3db2ced09e1",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 43.1,
+          "p95_us": 50.4,
+          "p99_us": 80.3,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 42.7,
+          "p95_us": 45.7,
+          "p99_us": 71.8,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 344.4,
+          "p95_us": 397.6,
+          "p99_us": 435.0,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 45,
+        "elapsed_seconds": 0.62
+      }
+    },
+    {
+      "phase": "after",
+      "round": 1,
+      "source_log": "target/binary-size/validation/probe-after-1.log",
+      "source_sha256": "a6513d5c4f4ef09cb07696c0a1e134c7b77d858f7f25e1d999d2b3e2ab5ade29",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 43.7,
+          "p95_us": 47.5,
+          "p99_us": 61.3,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 43.0,
+          "p95_us": 44.7,
+          "p99_us": 62.9,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 344.3,
+          "p95_us": 393.2,
+          "p99_us": 433.6,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 49,
+        "elapsed_seconds": 0.62
+      }
+    },
+    {
+      "phase": "before",
+      "round": 2,
+      "source_log": "target/binary-size/validation/probe-before-2.log",
+      "source_sha256": "df6029c67ed1ec379ad54dd445cccae2ffee8b4e0a6c482593627c24bc237cb0",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 42.8,
+          "p95_us": 49.3,
+          "p99_us": 70.0,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 42.3,
+          "p95_us": 45.5,
+          "p99_us": 65.9,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 342.0,
+          "p95_us": 375.6,
+          "p99_us": 435.5,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 45,
+        "elapsed_seconds": 0.62
+      }
+    },
+    {
+      "phase": "after",
+      "round": 2,
+      "source_log": "target/binary-size/validation/probe-after-2.log",
+      "source_sha256": "2de46518a4b5ff13a9119a9e9687ee468e9e15e23945fafb49d1333b0748a1f8",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 43.1,
+          "p95_us": 47.2,
+          "p99_us": 65.5,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 43.5,
+          "p95_us": 45.6,
+          "p99_us": 57.1,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 343.1,
+          "p95_us": 396.9,
+          "p99_us": 530.9,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 49,
+        "elapsed_seconds": 0.62
+      }
+    },
+    {
+      "phase": "before",
+      "round": 3,
+      "source_log": "target/binary-size/validation/probe-before-3.log",
+      "source_sha256": "2a71cfd4d29cf825d19c8fc9322cf83f6e36ccdc94bb1f2a953f3d96f26b988b",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 42.7,
+          "p95_us": 47.1,
+          "p99_us": 74.4,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 42.5,
+          "p95_us": 46.9,
+          "p99_us": 76.1,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 341.7,
+          "p95_us": 379.5,
+          "p99_us": 454.3,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 45,
+        "elapsed_seconds": 0.61
+      }
+    },
+    {
+      "phase": "after",
+      "round": 3,
+      "source_log": "target/binary-size/validation/probe-after-3.log",
+      "source_sha256": "df9f392019aee1cbdc0b4af4d8649cd1eb8f686383341d4d4ffb5a6b9719c015",
+      "scenarios": [
+        {
+          "scenario": "hidden",
+          "markers": 0,
+          "p50_us": 0.0,
+          "p95_us": 0.1,
+          "p99_us": 0.1,
+          "allocations_per_frame": 0.0,
+          "allocated_bytes_per_frame": 0.0,
+          "meshes_per_frame": 0.0,
+          "vertices_per_frame": 0.0,
+          "indices_per_frame": 0.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "steady",
+          "markers": 117,
+          "p50_us": 43.1,
+          "p95_us": 47.0,
+          "p99_us": 69.8,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3645.0,
+          "indices_per_frame": 9381.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "large-rotated-alpha",
+          "markers": 117,
+          "p50_us": 43.3,
+          "p95_us": 46.4,
+          "p99_us": 76.9,
+          "allocations_per_frame": 427.0,
+          "allocated_bytes_per_frame": 213708.0,
+          "meshes_per_frame": 81.0,
+          "vertices_per_frame": 3649.0,
+          "indices_per_frame": 9387.0,
+          "steady_uploads": 0
+        },
+        {
+          "scenario": "many-markers",
+          "markers": 1000,
+          "p50_us": 345.4,
+          "p95_us": 379.8,
+          "p99_us": 431.2,
+          "allocations_per_frame": 3505.0,
+          "allocated_bytes_per_frame": 1743060.0,
+          "meshes_per_frame": 672.0,
+          "vertices_per_frame": 30559.0,
+          "indices_per_frame": 78759.0,
+          "steady_uploads": 0
+        }
+      ],
+      "test_result": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 49,
+        "elapsed_seconds": 0.62
+      }
+    }
+  ]
+}

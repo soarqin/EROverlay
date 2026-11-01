@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 eroverlay-abi = { path = "../abi" }
 eroverlay-game = { path = "../game" }
 egui.workspace = true
+epaint_default_fonts = "=0.33.3"
 quick-xml = "=0.38.3"
 miniz_oxide = "=0.8.9"
 ttf-parser = "=0.25.1"

@@ -225,6 +225,7 @@ pub struct Renderer {
     vertices: Vec<abi::Vertex>,
     definitions: egui::FontDefinitions,
     status_size: f32,
+    status_chinese: bool,
     deferred: Vec<u64>,
     pool: MeshPool,
     budget_reported: bool,
@@ -234,12 +235,15 @@ impl Renderer {
     pub fn new() -> Self {
         let context = egui::Context::default();
         context.set_pixels_per_point(1.0);
+        let definitions = minimal_font_definitions();
+        context.set_fonts(definitions.clone());
         Self {
             context,
             fonts: HashMap::new(),
             vertices: Vec::with_capacity(8192),
-            definitions: egui::FontDefinitions::default(),
+            definitions,
             status_size: 20.0,
+            status_chinese: false,
             deferred: Vec::new(),
             pool: MeshPool::default(),
             budget_reported: false,
@@ -254,14 +258,8 @@ impl Renderer {
             .filter(|v| v.is_finite() && *v > 0.0 && *v <= 512.0)
             .unwrap_or(20.0);
         let custom = host.config_raw("common.font").unwrap_or_default();
-        let mut paths = Vec::new();
-        if !custom.is_empty() {
-            paths.extend(custom_font_candidates(
-                &PathBuf::from(host.config_raw("runtime.directory").unwrap_or_default())
-                    .join("data"),
-                &custom,
-            ));
-        }
+        let directory =
+            PathBuf::from(host.config_raw("runtime.directory").unwrap_or_default()).join("data");
         let windows =
             PathBuf::from(std::env::var_os("WINDIR").unwrap_or_else(|| "C:/Windows".into()))
                 .join("Fonts");
@@ -269,36 +267,24 @@ impl Renderer {
             &host.config_raw("common.charset").unwrap_or_default(),
             &host.config_raw("runtime.game_language").unwrap_or_default(),
         );
-        let fallback = match charset {
-            "ja" => "meiryo.ttc",
-            "ko" => "malgun.ttf",
-            "th" => "LeelawUI.ttf",
-            _ => "msyh.ttc",
-        };
-        paths.push(windows.join(fallback));
-        if fallback != "msyh.ttc" {
-            paths.push(windows.join("msyh.ttc"));
+        let paths = font_candidates(&directory, &custom, &windows, charset);
+        let (definitions, loaded) =
+            load_font_definitions(&paths, &windows.join("msyh.ttc"), |path| {
+                std::fs::metadata(path)
+                    .is_ok_and(|m| m.len() <= 64 * 1024 * 1024)
+                    .then(|| std::fs::read(path).ok())
+                    .flatten()
+            });
+        self.use_font_definitions(definitions);
+        for path in loaded {
+            host.log(&format!("minimap-font {}\n", path.display()));
         }
-        for path in paths {
-            if std::fs::metadata(&path).is_ok_and(|m| m.len() <= 64 * 1024 * 1024)
-                && let Ok(bytes) = std::fs::read(&path)
-                && ttf_parser::Face::parse(&bytes, 0).is_ok()
-            {
-                let name = "overlay-font".to_owned();
-                self.definitions
-                    .font_data
-                    .insert(name.clone(), Arc::new(egui::FontData::from_owned(bytes)));
-                self.definitions
-                    .families
-                    .entry(egui::FontFamily::Proportional)
-                    .or_default()
-                    .insert(0, name);
-                host.log(&format!("minimap-font {}\n", path.display()));
-                break;
-            }
-        }
-        self.context.set_fonts(self.definitions.clone());
         self.pool = MeshPool::default();
+    }
+    fn use_font_definitions(&mut self, definitions: egui::FontDefinitions) {
+        self.status_chinese = supports_status_glyphs(&definitions);
+        self.definitions = definitions;
+        self.context.set_fonts(self.definitions.clone());
     }
     pub fn reset(&mut self, host: Host) {
         self.last_sequence = None;
@@ -390,6 +376,7 @@ impl Renderer {
         if !can_paint_map {
             self.pool.begin();
         }
+        let status = readable_status(snapshot.visuals.status, self.status_chinese);
         let output = self.context.run(raw, |ctx| {
             let painter = ctx
                 .layer_painter(egui::LayerId::new(
@@ -406,7 +393,7 @@ impl Renderer {
                 painter.text(
                     rect.center(),
                     egui::Align2::CENTER_CENTER,
-                    snapshot.visuals.status,
+                    status,
                     egui::FontId::proportional(self.status_size),
                     Color32::WHITE,
                 );
@@ -1030,6 +1017,124 @@ fn paint(
     }
 }
 
+// Production text is limited to the resource-status painter and beacon digits;
+// both request FontId::proportional. Map icons are native bitmap/vector recipes,
+// not emoji or monospace text. Keep a full Latin/Cyrillic fallback for failed
+// custom/system reads without linking the other three egui default font files.
+fn minimal_font_definitions() -> egui::FontDefinitions {
+    let mut definitions = egui::FontDefinitions::empty();
+    let name = "Ubuntu-Light".to_owned();
+    definitions.font_data.insert(
+        name.clone(),
+        Arc::new(egui::FontData::from_static(
+            epaint_default_fonts::UBUNTU_LIGHT,
+        )),
+    );
+    for family in definitions.families.values_mut() {
+        family.push(name.clone());
+    }
+    definitions
+}
+
+// All characters in the current resource error messages. ASCII/numbers always
+// have the embedded fallback; only load another large CJK file when necessary.
+const STATUS_GLYPHS: &str = "游戏 GFX 或图集布局无法解析地图瓦片目录资源读取失败，正在重试处理";
+
+fn supports_status_glyphs(definitions: &egui::FontDefinitions) -> bool {
+    let faces: Vec<_> = definitions.families[&egui::FontFamily::Proportional]
+        .iter()
+        .filter_map(|name| {
+            let data = &definitions.font_data[name];
+            ttf_parser::Face::parse(data.font.as_ref(), data.index).ok()
+        })
+        .collect();
+    STATUS_GLYPHS
+        .chars()
+        .all(|c| faces.iter().any(|face| face.glyph_index(c).is_some()))
+}
+
+// The coverage check runs at font initialization only. Rendering selects static
+// messages without font queries, parsing, formatting or allocations.
+fn readable_status(status: &str, chinese: bool) -> &str {
+    if chinese {
+        return status;
+    }
+    match status {
+        "游戏 GFX 或图集布局无法解析" => "GFX / ATLAS LAYOUT PARSE FAILED",
+        "地图瓦片目录无法解析" => "MAP TILE DIRECTORY PARSE FAILED",
+        "游戏资源读取失败，正在重试" => "GAME RESOURCE READ FAILED - RETRYING",
+        "图集读取或处理失败，正在重试" => "ATLAS READ / PROCESS FAILED - RETRYING",
+        _ => status,
+    }
+}
+
+fn font_candidates(
+    directory: &std::path::Path,
+    custom: &str,
+    windows: &std::path::Path,
+    charset: &str,
+) -> Vec<std::path::PathBuf> {
+    let mut paths = if custom.is_empty() {
+        Vec::new()
+    } else {
+        custom_font_candidates(directory, custom)
+    };
+    paths.push(windows.join(match charset {
+        "ja" => "meiryo.ttc",
+        "ko" => "malgun.ttf",
+        "th" => "LeelawUI.ttf",
+        _ => "msyh.ttc",
+    }));
+    paths
+}
+
+fn load_font_definitions(
+    paths: &[std::path::PathBuf],
+    cjk_path: &std::path::Path,
+    mut read: impl FnMut(&std::path::Path) -> Option<Vec<u8>>,
+) -> (egui::FontDefinitions, Vec<std::path::PathBuf>) {
+    let mut definitions = minimal_font_definitions();
+    let mut loaded = Vec::new();
+    let mut cjk_attempted = false;
+    let mut needs_cjk = true;
+    for path in paths {
+        cjk_attempted |= path == cjk_path;
+        let Some(bytes) = read(path) else { continue };
+        let Ok(face) = ttf_parser::Face::parse(&bytes, 0) else {
+            continue;
+        };
+        needs_cjk = !STATUS_GLYPHS.chars().all(|c| face.glyph_index(c).is_some());
+        definitions.font_data.insert(
+            "overlay-font".to_owned(),
+            Arc::new(egui::FontData::from_owned(bytes)),
+        );
+        definitions
+            .families
+            .get_mut(&egui::FontFamily::Proportional)
+            .unwrap()
+            .insert(0, "overlay-font".to_owned());
+        loaded.push(path.clone());
+        break;
+    }
+    if needs_cjk
+        && !cjk_attempted
+        && let Some(bytes) = read(cjk_path)
+        && ttf_parser::Face::parse(&bytes, 0).is_ok()
+    {
+        definitions.font_data.insert(
+            "overlay-cjk".to_owned(),
+            Arc::new(egui::FontData::from_owned(bytes)),
+        );
+        let family = definitions
+            .families
+            .get_mut(&egui::FontFamily::Proportional)
+            .unwrap();
+        family.insert(family.len() - 1, "overlay-cjk".to_owned());
+        loaded.push(cjk_path.to_owned());
+    }
+    (definitions, loaded)
+}
+
 fn custom_font_candidates(directory: &std::path::Path, name: &str) -> Vec<std::path::PathBuf> {
     let path = std::path::PathBuf::from(name);
     let path = if path.is_absolute() {
@@ -1314,13 +1419,45 @@ mod tests {
             ..Default::default()
         };
         let mut renderer = Renderer::new();
+        let paths = font_candidates(
+            std::path::Path::new("data"),
+            "missing",
+            std::path::Path::new("Fonts"),
+            "zh",
+        );
+        let (definitions, loaded) =
+            load_font_definitions(&paths, std::path::Path::new("Fonts/msyh.ttc"), |_| None);
+        assert!(loaded.is_empty());
+        renderer.use_font_definitions(definitions);
+        assert!(!renderer.status_chinese);
         // Actual font deltas, egui tessellation and ABI submission must produce
         // text even though gameplay data is valid and definitions are absent.
-        for status in ["UNSUPPORTED RESOURCE", "RESOURCE READ FAILED"] {
+        for (status, fallback) in [
+            ("UNSUPPORTED RESOURCE", "UNSUPPORTED RESOURCE"),
+            ("RESOURCE READ FAILED", "RESOURCE READ FAILED"),
+            (
+                "游戏 GFX 或图集布局无法解析",
+                "GFX / ATLAS LAYOUT PARSE FAILED",
+            ),
+            ("地图瓦片目录无法解析", "MAP TILE DIRECTORY PARSE FAILED"),
+            (
+                "游戏资源读取失败，正在重试",
+                "GAME RESOURCE READ FAILED - RETRYING",
+            ),
+            (
+                "图集读取或处理失败，正在重试",
+                "ATLAS READ / PROCESS FAILED - RETRYING",
+            ),
+        ] {
             snapshot.visuals.status = status;
             frame.sequence += 1;
             sink.clear();
             assert_eq!(renderer.render(host, &snapshot, &frame), abi::OK);
+            assert_eq!(readable_status(status, renderer.status_chinese), fallback);
+            assert!(fallback.is_ascii());
+            assert!(renderer.context.fonts_mut(|fonts| {
+                fonts.has_glyphs(&egui::FontId::proportional(renderer.status_size), fallback)
+            }));
             assert!(sink.meshes.iter().any(|m| m.0 == 901));
             assert_eq!(sink.options[0].opacity, 1.0);
             assert_eq!(sink.options[0].border_width, 3.5);
@@ -1485,6 +1622,204 @@ mod tests {
         assert_eq!(font_charset("", "jpnJP"), "ja");
         assert_eq!(font_charset("invalid", "koreana"), "ko");
         assert_eq!(font_charset("", "thaTH"), "th");
+    }
+
+    fn assert_text_glyphs_and_mesh(definitions: egui::FontDefinitions, text: &str) {
+        let context = egui::Context::default();
+        context.set_fonts(definitions);
+        let output = context.run(
+            egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1920.0, 1080.0))),
+                ..Default::default()
+            },
+            |ctx| {
+                let font = egui::FontId::proportional(20.0);
+                assert!(ctx.fonts_mut(|fonts| fonts.has_glyphs(&font, text)));
+                ctx.layer_painter(egui::LayerId::background()).text(
+                    Pos2::new(8.0, 8.0),
+                    egui::Align2::LEFT_TOP,
+                    text,
+                    font,
+                    Color32::WHITE,
+                );
+            },
+        );
+        assert!(!output.textures_delta.set.is_empty());
+        assert!(
+            context
+                .tessellate(output.shapes, output.pixels_per_point)
+                .iter()
+                .any(|p| matches!(&p.primitive, Primitive::Mesh(m) if !m.indices.is_empty()))
+        );
+    }
+
+    // Keep a real outline font, but replace its cmap with controlled aliases.
+    // The aliases use Ubuntu's A outline; they test glyph fallback routing and
+    // actual egui rasterization, not the visual correctness of CJK typefaces.
+    fn test_font_with_glyphs(extra: &str) -> Vec<u8> {
+        let source = epaint_default_fonts::UBUNTU_LIGHT;
+        let face = ttf_parser::Face::parse(source, 0).unwrap();
+        let mut mappings = std::collections::BTreeMap::new();
+        for code in 32..=126 {
+            let glyph = face.glyph_index(char::from_u32(code).unwrap()).unwrap();
+            mappings.insert(code, u32::from(glyph.0));
+        }
+        let alias = u32::from(face.glyph_index('A').unwrap().0);
+        for c in extra.chars().filter(|c| !c.is_ascii()) {
+            mappings.insert(c as u32, alias);
+        }
+        let mut cmap = Vec::new();
+        cmap.extend_from_slice(&0u16.to_be_bytes());
+        cmap.extend_from_slice(&1u16.to_be_bytes());
+        cmap.extend_from_slice(&3u16.to_be_bytes());
+        cmap.extend_from_slice(&10u16.to_be_bytes());
+        cmap.extend_from_slice(&12u32.to_be_bytes());
+        cmap.extend_from_slice(&12u16.to_be_bytes());
+        cmap.extend_from_slice(&0u16.to_be_bytes());
+        cmap.extend_from_slice(&(16u32 + mappings.len() as u32 * 12).to_be_bytes());
+        cmap.extend_from_slice(&0u32.to_be_bytes());
+        cmap.extend_from_slice(&(mappings.len() as u32).to_be_bytes());
+        for (code, glyph) in mappings {
+            cmap.extend_from_slice(&code.to_be_bytes());
+            cmap.extend_from_slice(&code.to_be_bytes());
+            cmap.extend_from_slice(&glyph.to_be_bytes());
+        }
+        let count = u16::from_be_bytes(source[4..6].try_into().unwrap()) as usize;
+        let record = (0..count)
+            .map(|i| 12 + i * 16)
+            .find(|at| &source[*at..*at + 4] == b"cmap")
+            .unwrap();
+        let mut bytes = source.to_vec();
+        let offset = bytes.len().next_multiple_of(4);
+        bytes.resize(offset, 0);
+        bytes.extend_from_slice(&cmap);
+        bytes[record + 8..record + 12].copy_from_slice(&(offset as u32).to_be_bytes());
+        bytes[record + 12..record + 16].copy_from_slice(&(cmap.len() as u32).to_be_bytes());
+        bytes
+    }
+
+    #[test]
+    fn font_definitions_keep_readable_embedded_fallback_when_all_reads_fail() {
+        use std::path::Path;
+        let paths = font_candidates(Path::new("data"), "broken", Path::new("Fonts"), "en");
+        let mut reads = Vec::new();
+        let (definitions, loaded) =
+            load_font_definitions(&paths, Path::new("Fonts/msyh.ttc"), |path| {
+                reads.push(path.to_owned());
+                Some(b"invalid-font".to_vec())
+            });
+        assert!(loaded.is_empty());
+        assert!(!supports_status_glyphs(&definitions));
+        assert_eq!(
+            reads, paths,
+            "MSYH must not be read twice after a failed attempt"
+        );
+        assert_eq!(
+            definitions.font_data.keys().collect::<Vec<_>>(),
+            ["Ubuntu-Light"]
+        );
+        for family in definitions.families.values() {
+            assert_eq!(family, &["Ubuntu-Light"]);
+        }
+        assert_text_glyphs_and_mesh(
+            definitions,
+            "RESOURCE READ FAILED 0123456789 Zażółć gęślą jaźń Русская карта",
+        );
+    }
+
+    #[test]
+    fn font_definitions_keep_language_primary_and_add_chinese_status_fallback() {
+        use std::path::Path;
+        for (charset, filename, sample) in [
+            ("ja", "meiryo.ttc", "日本語あいうアイウ"),
+            ("ko", "malgun.ttf", "한국지도"),
+            ("th", "LeelawUI.ttf", "ภาษาไทย"),
+        ] {
+            let language = test_font_with_glyphs(sample);
+            let chinese = test_font_with_glyphs(STATUS_GLYPHS);
+            let paths = font_candidates(Path::new("data"), "", Path::new("Fonts"), charset);
+            assert_eq!(paths, [Path::new("Fonts").join(filename)]);
+            let mut reads = Vec::new();
+            let (definitions, loaded) =
+                load_font_definitions(&paths, Path::new("Fonts/msyh.ttc"), |path| {
+                    reads.push(path.to_owned());
+                    Some(if path == Path::new("Fonts/msyh.ttc") {
+                        chinese.clone()
+                    } else {
+                        language.clone()
+                    })
+                });
+            assert_eq!(reads.len(), 2);
+            assert_eq!(loaded, reads);
+            assert_eq!(definitions.font_data.len(), 3);
+            assert!(supports_status_glyphs(&definitions));
+            assert_eq!(readable_status(STATUS_GLYPHS, true), STATUS_GLYPHS);
+            assert_eq!(
+                definitions.families[&egui::FontFamily::Proportional],
+                ["overlay-font", "overlay-cjk", "Ubuntu-Light"]
+            );
+            assert_text_glyphs_and_mesh(
+                definitions,
+                &format!("{sample} {STATUS_GLYPHS} 0123456789"),
+            );
+        }
+    }
+
+    #[test]
+    fn font_definitions_use_complete_custom_font_without_redundant_system_reads() {
+        use std::path::Path;
+        let paths = font_candidates(Path::new("data"), "custom", Path::new("Fonts"), "ja");
+        let custom = test_font_with_glyphs(STATUS_GLYPHS);
+        let mut reads = Vec::new();
+        let (definitions, loaded) =
+            load_font_definitions(&paths, Path::new("Fonts/msyh.ttc"), |path| {
+                reads.push(path.to_owned());
+                match path.to_str().unwrap().replace('\\', "/").as_str() {
+                    "data/custom" => None,
+                    "data/custom.ttf" => Some(custom.clone()),
+                    other => panic!("unnecessary fallback read: {other}"),
+                }
+            });
+        assert_eq!(reads.len(), 2);
+        assert_eq!(loaded, [Path::new("data/custom.ttf")]);
+        assert_eq!(definitions.font_data.len(), 2);
+        assert!(supports_status_glyphs(&definitions));
+        assert_eq!(
+            definitions.families[&egui::FontFamily::Proportional],
+            ["overlay-font", "Ubuntu-Light"]
+        );
+        assert_text_glyphs_and_mesh(definitions, STATUS_GLYPHS);
+    }
+
+    #[test]
+    #[ignore = "reads installed Windows language fonts and checks real cmap/egui glyphs"]
+    fn installed_language_fonts_cover_status_and_produce_text_meshes() {
+        use std::path::Path;
+        let windows = std::path::PathBuf::from(
+            std::env::var_os("WINDIR").unwrap_or_else(|| "C:/Windows".into()),
+        )
+        .join("Fonts");
+        for (charset, sample) in [
+            ("en", "RESOURCE READ FAILED"),
+            ("pl", "Zażółć gęślą jaźń"),
+            ("ru", "Русская карта"),
+            ("ja", "日本語あいうアイウ"),
+            ("ko", "한국지도"),
+            ("th", "ภาษาไทย"),
+            ("zh", "中文地图"),
+        ] {
+            let paths = font_candidates(Path::new("data"), "", &windows, charset);
+            let (definitions, loaded) =
+                load_font_definitions(&paths, &windows.join("msyh.ttc"), |path| {
+                    std::fs::read(path).ok()
+                });
+            println!("charset={charset} loaded={loaded:?}");
+            assert!(supports_status_glyphs(&definitions));
+            assert_text_glyphs_and_mesh(
+                definitions,
+                &format!("{sample} {STATUS_GLYPHS} 0123456789"),
+            );
+        }
     }
     #[test]
     fn anchored_circle_and_percent_reference() {

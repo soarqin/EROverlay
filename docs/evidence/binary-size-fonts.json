@@ -1,0 +1,170 @@
+{
+  "rust_dll": "target\\delivery-root-bc96b83\\overlays\\Minimap.dll",
+  "rust_dll_bytes": 2805760,
+  "cpp_dll": "target\\cpp-reference-lf\\build\\bin\\overlays\\Minimap.dll",
+  "cpp_dll_bytes": 518656,
+  "embedded_fonts": [
+    {"font": "emoji-icon-font.ttf", "bytes": 317864, "raw_file_offset": 2283264, "full_file_bytes_match": true},
+    {"font": "Hack-Regular.ttf", "bytes": 309408, "raw_file_offset": 1193376, "full_file_bytes_match": true},
+    {"font": "NotoEmoji-Regular.ttf", "bytes": 418804, "raw_file_offset": 1502784, "full_file_bytes_match": true},
+    {"font": "Ubuntu-Light.ttf", "bytes": 361676, "raw_file_offset": 1921588, "full_file_bytes_match": true}
+  ],
+  "cmap": [
+    {
+      "font": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\emoji-icon-font.ttf",
+      "present": true,
+      "bytes": 317864,
+      "mapped_codepoints": 653,
+      "samples": {
+        "digits": {"supported": 0, "distinct": 10},
+        "ascii": {"supported": 1, "distinct": 12},
+        "ChineseStatus": {"supported": 0, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 0, "distinct": 14},
+        "Russian": {"supported": 0, "distinct": 8},
+        "Emoji": {"supported": 2, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 2
+    },
+    {
+      "font": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Hack-Regular.ttf",
+      "present": true,
+      "bytes": 309408,
+      "mapped_codepoints": 1548,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 3, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 14, "distinct": 14},
+        "Russian": {"supported": 8, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 0
+    },
+    {
+      "font": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\NotoEmoji-Regular.ttf",
+      "present": true,
+      "bytes": 418804,
+      "mapped_codepoints": 887,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 1, "distinct": 12},
+        "ChineseStatus": {"supported": 0, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 0, "distinct": 14},
+        "Russian": {"supported": 0, "distinct": 8},
+        "Emoji": {"supported": 3, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 0
+    },
+    {
+      "font": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Ubuntu-Light.ttf",
+      "present": true,
+      "bytes": 361676,
+      "mapped_codepoints": 1194,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 3, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 14, "distinct": 14},
+        "Russian": {"supported": 8, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 0
+    },
+    {
+      "font": "C:\\Windows\\Fonts\\msyh.ttc",
+      "present": true,
+      "bytes": 19704352,
+      "mapped_codepoints": 29905,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 31, "distinct": 31},
+        "Chinese": {"supported": 4, "distinct": 4},
+        "Japanese": {"supported": 9, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 14, "distinct": 14},
+        "Russian": {"supported": 8, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 20992
+    },
+    {"font": "C:\\Windows\\Fonts\\meiryo.ttc", "present": false},
+    {
+      "font": "C:\\Windows\\Fonts\\malgun.ttf",
+      "present": true,
+      "bytes": 13459196,
+      "mapped_codepoints": 27133,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 23, "distinct": 31},
+        "Chinese": {"supported": 3, "distinct": 4},
+        "Japanese": {"supported": 9, "distinct": 9},
+        "Korean": {"supported": 4, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 7, "distinct": 14},
+        "Russian": {"supported": 8, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 7476
+    },
+    {
+      "font": "C:\\Windows\\Fonts\\LeelawUI.ttf",
+      "present": true,
+      "bytes": 390004,
+      "mapped_codepoints": 714,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 3, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 6, "distinct": 6},
+        "Polish": {"supported": 7, "distinct": 14},
+        "Russian": {"supported": 0, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 0
+    },
+    {
+      "font": "C:\\Windows\\Fonts\\segoeui.ttf",
+      "present": true,
+      "bytes": 960076,
+      "mapped_codepoints": 3998,
+      "samples": {
+        "digits": {"supported": 10, "distinct": 10},
+        "ascii": {"supported": 12, "distinct": 12},
+        "ChineseStatus": {"supported": 3, "distinct": 31},
+        "Chinese": {"supported": 0, "distinct": 4},
+        "Japanese": {"supported": 0, "distinct": 9},
+        "Korean": {"supported": 0, "distinct": 4},
+        "Thai": {"supported": 0, "distinct": 6},
+        "Polish": {"supported": 14, "distinct": 14},
+        "Russian": {"supported": 8, "distinct": 8},
+        "Emoji": {"supported": 0, "distinct": 3}
+      },
+      "CJK_4e00_9fff": 0
+    }
+  ],
+  "embedded_font_bytes": 1407752,
+  "embedded_font_percent_dll": 50.173642791970806,
+  "embedded_font_percent_size_gap": 61.55172655025744
+}

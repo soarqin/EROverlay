@@ -1,0 +1,1463 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "readobj": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\Llvm\\x64\\bin\\llvm-readobj.exe",
+    "pdbutil": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\Llvm\\x64\\bin\\llvm-pdbutil.exe"
+  },
+  "files": {
+    "rust-core": {
+      "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\delivery-root-bc96b83\\EROverlay.dll",
+      "sha256": "a18e34ad59938541b5dd7762265128bef22e050f975a684c4ebbdba3ef45fc08",
+      "bytes": 654336,
+      "machine": 34404,
+      "size_of_image": 663552,
+      "sections": [
+        {"index": 1, "name": ".text", "virtual_size": 466584, "rva": 4096, "raw_size": 466944, "raw_offset": 1024},
+        {"index": 2, "name": ".rdata", "virtual_size": 162142, "rva": 471040, "raw_size": 162304, "raw_offset": 467968},
+        {"index": 3, "name": ".data", "virtual_size": 1568, "rva": 634880, "raw_size": 1536, "raw_offset": 630272},
+        {"index": 4, "name": ".pdata", "virtual_size": 20172, "rva": 638976, "raw_size": 20480, "raw_offset": 631808},
+        {"index": 5, "name": ".reloc", "virtual_size": 1844, "rva": 659456, "raw_size": 2048, "raw_offset": 652288}
+      ],
+      "imports": [
+        {
+          "dll": "KERNEL32.dll",
+          "symbols": [
+            {"name": "DisableThreadLibraryCalls"},
+            {"name": "GetEnvironmentVariableW"},
+            {"name": "GetModuleHandleExW"},
+            {"name": "CreateThread"},
+            {"name": "FreeLibrary"},
+            {"name": "CloseHandle"},
+            {"name": "GetCurrentProcessId"},
+            {"name": "AllocConsole"},
+            {"name": "LoadLibraryExW"},
+            {"name": "GetProcAddress"},
+            {"name": "GetModuleFileNameW"},
+            {"name": "FreeLibraryAndExitThread"},
+            {"name": "InitializeSListHead"},
+            {"name": "GetSystemTimeAsFileTime"},
+            {"name": "FindNextFileW"},
+            {"name": "QueryPerformanceFrequency"},
+            {"name": "GetModuleHandleA"},
+            {"name": "FlsSetValue"},
+            {"name": "IsThreadAFiber"},
+            {"name": "FlsAlloc"},
+            {"name": "FlsFree"},
+            {"name": "SetWaitableTimer"},
+            {"name": "CreateWaitableTimerExW"},
+            {"name": "GetConsoleOutputCP"},
+            {"name": "GetConsoleMode"},
+            {"name": "WriteConsoleW"},
+            {"name": "MultiByteToWideChar"},
+            {"name": "ReleaseMutex"},
+            {"name": "CreateMutexA"},
+            {"name": "LoadLibraryA"},
+            {"name": "WaitForSingleObjectEx"},
+            {"name": "WideCharToMultiByte"},
+            {"name": "SwitchToThread"},
+            {"name": "FindClose"},
+            {"name": "FindFirstFileExW"},
+            {"name": "lstrlenW"},
+            {"name": "GetCurrentDirectoryW"},
+            {"name": "GetCurrentThread"},
+            {"name": "SetThreadStackGuarantee"},
+            {"name": "GetFileInformationByHandleEx"},
+            {"name": "GetFileInformationByHandle"},
+            {"name": "SetFileTime"},
+            {"name": "QueryPerformanceCounter"},
+            {"name": "GetStdHandle"},
+            {"name": "CreateFileW"},
+            {"name": "SetFileInformationByHandle"},
+            {"name": "GetFullPathNameW"},
+            {"name": "SetLastError"},
+            {"name": "GetSystemInfo"},
+            {"name": "Thread32Next"},
+            {"name": "Thread32First"},
+            {"name": "CreateToolhelp32Snapshot"},
+            {"name": "SetThreadContext"},
+            {"name": "GetThreadContext"}
+          ]
+        },
+        {"dll": "api-ms-win-core-synch-l1-2-0.dll", "symbols": [{"name": "WakeByAddressAll"}, {"name": "WaitOnAddress"}, {"name": "WakeByAddressSingle"}]},
+        {"dll": "user32.dll", "symbols": [{"name": "GetForegroundWindow"}, {"name": "GetWindowThreadProcessId"}, {"name": "GetAsyncKeyState"}]},
+        {
+          "dll": "kernel32.dll",
+          "symbols": [
+            {"name": "Sleep"},
+            {"name": "GetCurrentProcess"},
+            {"name": "WaitForSingleObject"},
+            {"name": "FormatMessageW"},
+            {"name": "ReleaseSRWLockShared"},
+            {"name": "GetCurrentThreadId"},
+            {"name": "ReleaseSRWLockExclusive"},
+            {"name": "GetLastError"},
+            {"name": "GetProcessHeap"},
+            {"name": "HeapCreate"},
+            {"name": "AcquireSRWLockShared"},
+            {"name": "LoadLibraryExA"},
+            {"name": "ReadProcessMemory"},
+            {"name": "CreateEventW"},
+            {"name": "HeapAlloc"},
+            {"name": "HeapReAlloc"},
+            {"name": "AcquireSRWLockExclusive"},
+            {"name": "VirtualQuery"},
+            {"name": "VirtualFree"},
+            {"name": "VirtualAlloc"},
+            {"name": "GetModuleHandleW"},
+            {"name": "VirtualProtect"},
+            {"name": "FlushInstructionCache"},
+            {"name": "ResumeThread"},
+            {"name": "SuspendThread"},
+            {"name": "OpenThread"},
+            {"name": "HeapFree"}
+          ]
+        },
+        {"dll": "d3d12.dll", "symbols": [{"name": "D3D12SerializeRootSignature"}]},
+        {"dll": "d3dcompiler_47.dll", "symbols": [{"name": "D3DCompile"}]},
+        {"dll": "oleaut32.dll", "symbols": [{"name": "SysFreeString"}, {"name": "SysStringLen"}, {"name": "GetErrorInfo"}]},
+        {"dll": "api-ms-win-core-winrt-error-l1-1-0.dll", "symbols": [{"name": "RoOriginateErrorW"}]},
+        {"dll": "bcryptprimitives.dll", "symbols": [{"name": "ProcessPrng"}]},
+        {
+          "dll": "ntdll.dll",
+          "symbols": [
+            {"name": "RtlCaptureContext"},
+            {"name": "NtWriteFile"},
+            {"name": "RtlVirtualUnwind"},
+            {"name": "RtlLookupFunctionEntry"},
+            {"name": "RtlNtStatusToDosError"},
+            {"name": "NtReadFile"}
+          ]
+        },
+        {"dll": "MSVCP140.dll", "symbols": [{"name": "?_Throw_Cpp_error@std@@YAXH@Z"}, {"name": "_Mtx_unlock"}, {"name": "_Mtx_lock"}]},
+        {
+          "dll": "VCRUNTIME140.dll",
+          "symbols": [
+            {"name": "__CxxFrameHandler3"},
+            {"name": "memset"},
+            {"name": "memmove"},
+            {"name": "memcpy"},
+            {"name": "memcmp"},
+            {"name": "__std_exception_copy"},
+            {"name": "__std_exception_destroy"},
+            {"name": "_CxxThrowException"},
+            {"name": "__C_specific_handler"},
+            {"name": "__std_type_info_destroy_list"}
+          ]
+        },
+        {"dll": "VCRUNTIME140_1.dll", "symbols": [{"name": "__CxxFrameHandler4"}]},
+        {"dll": "api-ms-win-crt-math-l1-1-0.dll", "symbols": [{"name": "ceilf"}, {"name": "floorf"}]},
+        {"dll": "api-ms-win-crt-stdio-l1-1-0.dll", "symbols": [{"name": "__stdio_common_vfwprintf"}, {"name": "__acrt_iob_func"}]},
+        {
+          "dll": "api-ms-win-crt-runtime-l1-1-0.dll",
+          "symbols": [
+            {"name": "_seh_filter_dll"},
+            {"name": "_initterm_e"},
+            {"name": "_initterm"},
+            {"name": "_execute_onexit_table"},
+            {"name": "_crt_atexit"},
+            {"name": "_configure_narrow_argv"},
+            {"name": "_cexit"},
+            {"name": "_register_onexit_function"},
+            {"name": "_initialize_narrow_environment"},
+            {"name": "_initialize_onexit_table"}
+          ]
+        },
+        {"dll": "api-ms-win-crt-string-l1-1-0.dll", "symbols": [{"name": "wcslen"}]},
+        {"dll": "api-ms-win-crt-heap-l1-1-0.dll", "symbols": [{"name": "free"}, {"name": "_callnewh"}, {"name": "malloc"}]}
+      ],
+      "delay_imports": [],
+      "codeview": {"guid": "A17A1948-0F61-4D48-972A-7F7F29BDB371", "age": 1},
+      "readobj_raw": "rust-core.readobj.txt",
+      "pdb": {
+        "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\EROverlay.pdb",
+        "raw": "rust-core.pdb.txt",
+        "notes": [
+          "Section-offset intervals are unioned, including overlaps within one compiland. Shared/ICF ranges count once in section totals.",
+          "exclusive_bytes plus shared_groups are additive; shared_referenced_bytes are non-additive references, not extra storage.",
+          "Compiland ownership is linker attribution, not semantic ownership: LTO imports/inlining move code across crate boundaries; padding and linker-generated bytes may be unattributed."
+        ],
+        "sections": [
+          {"index": 1, "name": ".text", "unique_bytes": 459431, "shared_bytes": 0},
+          {"index": 2, "name": ".rdata", "unique_bytes": 160941, "shared_bytes": 0},
+          {"index": 3, "name": ".data", "unique_bytes": 1456, "shared_bytes": 0}
+        ],
+        "modules": [
+          {
+            "id": 1,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\EROverlay.EROverlay.a8db8388e1c3885e-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 158111, ".rdata": 45567, ".data": 60},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 2,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\EROverlay.2s8m9wbqqx0dm67si6kx9pbbl.rcgu.o",
+            "exclusive_bytes": {".text": 21},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 3, "name": "KERNEL32.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {
+            "id": 4,
+            "name": "eroverlay_renderer-f01ac3ba7343116e.eroverlay_renderer.d0bc57806802f0d5-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 39666, ".rdata": 18899},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 5,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\build\\eroverlay-renderer-af8367481a27783a\\out\\44f7d3c4c0a9780b-scene.o",
+            "exclusive_bytes": {".text": 5192, ".rdata": 2833, ".data": 167},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 6,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\build\\eroverlay-renderer-af8367481a27783a\\out\\dcfd0742c1a16cf3-hook.o",
+            "exclusive_bytes": {".text": 3145, ".rdata": 516, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 7,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\build\\eroverlay-renderer-af8367481a27783a\\out\\dcfd0742c1a16cf3-buffer.o",
+            "exclusive_bytes": {".text": 814, ".rdata": 64, ".data": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 8,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\build\\eroverlay-renderer-af8367481a27783a\\out\\dcfd0742c1a16cf3-trampoline.o",
+            "exclusive_bytes": {".text": 1039, ".rdata": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 9,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\build\\eroverlay-renderer-af8367481a27783a\\out\\dcfd0742c1a16cf3-hde64.o",
+            "exclusive_bytes": {".text": 2062, ".rdata": 108, ".data": 529},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 10,
+            "name": "eroverlay_game-371454fdb3dd6e63.eroverlay_game.2a4fc64718625225-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 88057, ".rdata": 40854},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 11, "name": "texture2ddecoder-cb48e4cdab361d7b.texture2ddecoder.47e00f694c13d67b-cgu.0.rcgu.o", "exclusive_bytes": {".rdata": 32}, "shared_referenced_bytes": {}},
+          {"id": 12, "name": "memchr-d54b8e752c619248.memchr.adaefcb6e2b076a7-cgu.0.rcgu.o", "exclusive_bytes": {".text": 9195, ".rdata": 750, ".data": 8}, "shared_referenced_bytes": {}},
+          {"id": 13, "name": "windows-b548bd735811167a.windows.f66d4e79b6101e84-cgu.0.rcgu.o", "exclusive_bytes": {".text": 1910, ".rdata": 569}, "shared_referenced_bytes": {}},
+          {"id": 14, "name": "api-ms-win-core-synch-l1-2-0.dll", "exclusive_bytes": {".rdata": 89}, "shared_referenced_bytes": {}},
+          {"id": 15, "name": "user32.dll", "exclusive_bytes": {".rdata": 67}, "shared_referenced_bytes": {}},
+          {"id": 16, "name": "kernel32.dll", "exclusive_bytes": {".rdata": 69}, "shared_referenced_bytes": {}},
+          {"id": 17, "name": "d3d12.dll", "exclusive_bytes": {".rdata": 66}, "shared_referenced_bytes": {}},
+          {"id": 18, "name": "d3dcompiler_47.dll", "exclusive_bytes": {".rdata": 75}, "shared_referenced_bytes": {}},
+          {"id": 19, "name": "windows_core-205e674d16b51323.windows_core.df6dc2df041e987f-cgu.0.rcgu.o", "exclusive_bytes": {".text": 506, ".rdata": 446}, "shared_referenced_bytes": {}},
+          {"id": 20, "name": "rpcrt4.dll", "exclusive_bytes": {".rdata": 20}, "shared_referenced_bytes": {}},
+          {"id": 21, "name": "combase.dll", "exclusive_bytes": {".rdata": 20}, "shared_referenced_bytes": {}},
+          {"id": 23, "name": "oleaut32.dll", "exclusive_bytes": {".rdata": 69}, "shared_referenced_bytes": {}},
+          {"id": 24, "name": "windows_result-2b5f155a7103e3e8.windows_result.8e3396cb173b2836-cgu.0.rcgu.o", "exclusive_bytes": {".text": 3431, ".rdata": 851}, "shared_referenced_bytes": {}},
+          {"id": 25, "name": "api-ms-win-core-winrt-error-l1-1-0.dll", "exclusive_bytes": {".rdata": 95}, "shared_referenced_bytes": {}},
+          {"id": 26, "name": "eroverlay_abi-3264003a8444baa8.eroverlay_abi.bb5fe9ee59c57469-cgu.0.rcgu.o", "exclusive_bytes": {".text": 6601, ".rdata": 952}, "shared_referenced_bytes": {}},
+          {"id": 27, "name": "std-3854312d46c17a37.std.91f9a918aea500fd-cgu.0.rcgu.o", "exclusive_bytes": {".text": 62446, ".rdata": 22136, ".data": 240}, "shared_referenced_bytes": {}},
+          {"id": 28, "name": "bcryptprimitives.dll", "exclusive_bytes": {".rdata": 77}, "shared_referenced_bytes": {}},
+          {
+            "id": 29,
+            "name": "panic_unwind-4531eec6307bead5.panic_unwind.40d8df48f0cbc2e1-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 371, ".rdata": 368, ".data": 84},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 30,
+            "name": "rustc_demangle-16b50824155ae42c.rustc_demangle.f0458be0d4909762-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 23187, ".rdata": 3024},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 31,
+            "name": "std_detect-b1b36538f7570106.std_detect.e0c4c0ed9a4ef890-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 1780, ".rdata": 32, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 32, "name": "hashbrown-92982299f960c902.hashbrown.794395e5a6442b62-cgu.0.rcgu.o", "exclusive_bytes": {".text": 87, ".rdata": 91}, "shared_referenced_bytes": {}},
+          {"id": 33, "name": "alloc-f9fd422e5eb593ae.alloc.ba94fcdaf7c4b245-cgu.0.rcgu.o", "exclusive_bytes": {".text": 6220, ".rdata": 2137}, "shared_referenced_bytes": {}},
+          {"id": 34, "name": "core-f9527ed7f1165c0a.core.57570d04ba8eb63f-cgu.0.rcgu.o", "exclusive_bytes": {".text": 41455, ".rdata": 12482, ".data": 24}, "shared_referenced_bytes": {}},
+          {"id": 38, "name": "ntdll.dll", "exclusive_bytes": {".rdata": 46}, "shared_referenced_bytes": {}},
+          {
+            "id": 41,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\chkstk.obj",
+            "exclusive_bytes": {".text": 94, ".rdata": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 42,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\tlssup.obj",
+            "exclusive_bytes": {".rdata": 58, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 43,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\std_type_info_static.obj",
+            "exclusive_bytes": {".text": 43, ".rdata": 120, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 44,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\fltused.obj",
+            "exclusive_bytes": {".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 45,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\dll_dllmain.obj",
+            "exclusive_bytes": {".text": 996, ".rdata": 212, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 46,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\new_scalar.obj",
+            "exclusive_bytes": {".text": 68},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 47,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\delete_scalar_size.obj",
+            "exclusive_bytes": {".text": 5},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 48,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gshandler.obj",
+            "exclusive_bytes": {".text": 510, ".rdata": 20},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 49,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gshandlereh4.obj",
+            "exclusive_bytes": {".text": 104, ".rdata": 16},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 50,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\amdsecgs.obj",
+            "exclusive_bytes": {".text": 46, ".rdata": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 51,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gs_cookie.obj",
+            "exclusive_bytes": {".data": 72},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 52,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\utility.obj",
+            "exclusive_bytes": {".text": 831, ".rdata": 72, ".data": 76},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 53,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gs_support.obj",
+            "exclusive_bytes": {".text": 191},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 54,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\tncleanup.obj",
+            "exclusive_bytes": {".text": 26, ".data": 16},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 55,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\default_local_stdio_options.obj",
+            "exclusive_bytes": {".text": 35, ".data": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 56,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\dyn_tls_init.obj",
+            "exclusive_bytes": {".text": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 57,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\utility_desktop.obj",
+            "exclusive_bytes": {".text": 5, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 58,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\initsect.obj",
+            "exclusive_bytes": {".text": 132, ".rdata": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 59,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\initializers.obj",
+            "exclusive_bytes": {".rdata": 64},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 60,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_support.obj",
+            "exclusive_bytes": {".rdata": 48},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 61,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\throw_bad_alloc.obj",
+            "exclusive_bytes": {".text": 97, ".rdata": 63},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 62,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\delete_scalar.obj",
+            "exclusive_bytes": {".text": 5},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 64,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\cpu_disp.obj",
+            "exclusive_bytes": {".text": 680, ".rdata": 56, ".data": 40},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 65,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\argv_mode.obj",
+            "exclusive_bytes": {".text": 6},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 66,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\ucrt_detection.obj",
+            "exclusive_bytes": {".text": 12},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 67,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_dispatch.obj",
+            "exclusive_bytes": {".text": 18, ".rdata": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 68,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_xfg_dispatch.obj",
+            "exclusive_bytes": {".text": 22, ".rdata": 4},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 69, "name": "MSVCP140.dll", "exclusive_bytes": {".rdata": 50}, "shared_referenced_bytes": {}},
+          {"id": 70, "name": "VCRUNTIME140.dll", "exclusive_bytes": {".rdata": 54}, "shared_referenced_bytes": {}},
+          {"id": 71, "name": "VCRUNTIME140_1.dll", "exclusive_bytes": {".rdata": 56}, "shared_referenced_bytes": {}},
+          {"id": 72, "name": "api-ms-win-crt-math-l1-1-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {"id": 73, "name": "api-ms-win-crt-stdio-l1-1-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {"id": 74, "name": "api-ms-win-crt-runtime-l1-1-0.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {"id": 75, "name": "api-ms-win-crt-string-l1-1-0.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {"id": 76, "name": "api-ms-win-crt-heap-l1-1-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {
+            "id": 77,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\EROverlay.dll.exp",
+            "exclusive_bytes": {".rdata": 176},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 78,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\ucrt_stubs.obj",
+            "exclusive_bytes": {".text": 3, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 79,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\loadcfg.obj",
+            "exclusive_bytes": {".rdata": 320},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 80,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcruntime\\build\\base\\md\\vcruntime_base_md_kernel32.vcxproj\\objr\\amd64\\softmemtag.obj",
+            "exclusive_bytes": {".rdata": 8},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 81, "name": "Import:KERNEL32.dll", "exclusive_bytes": {".text": 18, ".rdata": 1938}, "shared_referenced_bytes": {}},
+          {"id": 82, "name": "Import:api-ms-win-core-synch-l1-2-0.dll", "exclusive_bytes": {".rdata": 38}, "shared_referenced_bytes": {}},
+          {"id": 83, "name": "Import:d3d12.dll", "exclusive_bytes": {".rdata": 46}, "shared_referenced_bytes": {}},
+          {"id": 84, "name": "Import:d3dcompiler_47.dll", "exclusive_bytes": {".rdata": 30}, "shared_referenced_bytes": {}},
+          {"id": 85, "name": "Import:user32.dll", "exclusive_bytes": {".rdata": 118}, "shared_referenced_bytes": {}},
+          {"id": 86, "name": "Import:kernel32.dll", "exclusive_bytes": {".rdata": 814}, "shared_referenced_bytes": {}},
+          {"id": 88, "name": "Import:kernel32.dll", "exclusive_bytes": {".rdata": 34}, "shared_referenced_bytes": {}},
+          {"id": 90, "name": "Import:oleaut32.dll", "exclusive_bytes": {".rdata": 64}, "shared_referenced_bytes": {}},
+          {"id": 91, "name": "Import:kernel32.dll", "exclusive_bytes": {".rdata": 34}, "shared_referenced_bytes": {}},
+          {"id": 92, "name": "Import:api-ms-win-core-winrt-error-l1-1-0.dll", "exclusive_bytes": {".rdata": 36}, "shared_referenced_bytes": {}},
+          {"id": 93, "name": "Import:oleaut32.dll", "exclusive_bytes": {".rdata": 32}, "shared_referenced_bytes": {}},
+          {"id": 94, "name": "Import:kernel32.dll", "exclusive_bytes": {".rdata": 34}, "shared_referenced_bytes": {}},
+          {"id": 95, "name": "Import:api-ms-win-core-synch-l1-2-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {"id": 96, "name": "Import:bcryptprimitives.dll", "exclusive_bytes": {".rdata": 30}, "shared_referenced_bytes": {}},
+          {"id": 97, "name": "Import:ntdll.dll", "exclusive_bytes": {".rdata": 214}, "shared_referenced_bytes": {}},
+          {"id": 100, "name": "Import:MSVCP140.dll", "exclusive_bytes": {".text": 18, ".rdata": 106}, "shared_referenced_bytes": {}},
+          {"id": 101, "name": "Import:VCRUNTIME140_1.dll", "exclusive_bytes": {".text": 6, ".rdata": 38}, "shared_referenced_bytes": {}},
+          {"id": 102, "name": "Import:VCRUNTIME140.dll", "exclusive_bytes": {".text": 60, ".rdata": 350}, "shared_referenced_bytes": {}},
+          {"id": 103, "name": "Import:api-ms-win-crt-string-l1-1-0.dll", "exclusive_bytes": {".text": 6, ".rdata": 26}, "shared_referenced_bytes": {}},
+          {"id": 104, "name": "Import:api-ms-win-crt-stdio-l1-1-0.dll", "exclusive_bytes": {".rdata": 78}, "shared_referenced_bytes": {}},
+          {"id": 105, "name": "Import:api-ms-win-crt-runtime-l1-1-0.dll", "exclusive_bytes": {".text": 60, ".rdata": 368}, "shared_referenced_bytes": {}},
+          {"id": 106, "name": "Import:api-ms-win-crt-math-l1-1-0.dll", "exclusive_bytes": {".text": 12, ".rdata": 50}, "shared_referenced_bytes": {}},
+          {"id": 107, "name": "Import:api-ms-win-crt-heap-l1-1-0.dll", "exclusive_bytes": {".text": 18, ".rdata": 78}, "shared_referenced_bytes": {}},
+          {"id": 108, "name": "* Linker *", "exclusive_bytes": {".rdata": 1022, ".data": 8}, "shared_referenced_bytes": {}}
+        ],
+        "shared_groups": []
+      },
+      "fonts": [
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\emoji-icon-font.ttf",
+          "bytes": 317864,
+          "sha256": "3a706840d2f888b83c184f7d41900dbaa0151a806c4d130cc88539d53fedef0a",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Hack-Regular.ttf",
+          "bytes": 309408,
+          "sha256": "15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\NotoEmoji-Regular.ttf",
+          "bytes": 418804,
+          "sha256": "415dc6290378574135b64c808dc640c1df7531973290c4970c51fdeb849cb0c5",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Ubuntu-Light.ttf",
+          "bytes": 361676,
+          "sha256": "80307b8da7649aa4ee4d484b232140e3ce1ec0ca093073d3c53c8f5a5ced7a70",
+          "file_offsets": []
+        }
+      ]
+    },
+    "rust-minimap": {
+      "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\delivery-root-bc96b83\\overlays\\Minimap.dll",
+      "sha256": "1f8d0fc8d60aa45cf1069183bff17cde348de68c21e46dbd01ce34aa5a696990",
+      "bytes": 2805760,
+      "machine": 34404,
+      "size_of_image": 2822144,
+      "sections": [
+        {"index": 1, "name": ".text", "virtual_size": 1159640, "rva": 4096, "raw_size": 1159680, "raw_offset": 1024},
+        {"index": 2, "name": ".rdata", "virtual_size": 1610780, "rva": 1167360, "raw_size": 1611264, "raw_offset": 1160704},
+        {"index": 3, "name": ".data", "virtual_size": 936, "rva": 2781184, "raw_size": 512, "raw_offset": 2771968},
+        {"index": 4, "name": ".pdata", "virtual_size": 30948, "rva": 2785280, "raw_size": 31232, "raw_offset": 2772480},
+        {"index": 5, "name": ".reloc", "virtual_size": 1928, "rva": 2818048, "raw_size": 2048, "raw_offset": 2803712}
+      ],
+      "imports": [
+        {
+          "dll": "KERNEL32.dll",
+          "symbols": [
+            {"name": "GetModuleHandleExW"},
+            {"name": "GetProcAddress"},
+            {"name": "FreeLibrary"},
+            {"name": "InitializeSListHead"},
+            {"name": "DisableThreadLibraryCalls"},
+            {"name": "GetSystemTimeAsFileTime"},
+            {"name": "QueryPerformanceFrequency"},
+            {"name": "FormatMessageW"},
+            {"name": "FlsSetValue"},
+            {"name": "IsThreadAFiber"},
+            {"name": "FlsAlloc"},
+            {"name": "FlsFree"},
+            {"name": "GetConsoleOutputCP"},
+            {"name": "GetConsoleMode"},
+            {"name": "WriteConsoleW"},
+            {"name": "MultiByteToWideChar"},
+            {"name": "HeapAlloc"},
+            {"name": "GetEnvironmentVariableW"},
+            {"name": "ReleaseMutex"},
+            {"name": "CreateMutexA"},
+            {"name": "LoadLibraryA"},
+            {"name": "WaitForSingleObjectEx"},
+            {"name": "WideCharToMultiByte"},
+            {"name": "FindClose"},
+            {"name": "FindFirstFileExW"},
+            {"name": "lstrlenW"},
+            {"name": "GetCurrentDirectoryW"},
+            {"name": "GetFileInformationByHandleEx"},
+            {"name": "GetFileInformationByHandle"},
+            {"name": "SetFileTime"},
+            {"name": "GetCurrentProcessId"},
+            {"name": "QueryPerformanceCounter"},
+            {"name": "HeapReAlloc"},
+            {"name": "HeapFree"},
+            {"name": "GetProcessHeap"},
+            {"name": "GetStdHandle"},
+            {"name": "CreateFileW"},
+            {"name": "SetFileInformationByHandle"},
+            {"name": "GetCurrentThreadId"},
+            {"name": "GetFullPathNameW"},
+            {"name": "SetLastError"},
+            {"name": "WaitForSingleObject"},
+            {"name": "GetLastError"},
+            {"name": "GetModuleHandleW"},
+            {"name": "GetCurrentProcess"}
+          ]
+        },
+        {"dll": "kernel32.dll", "symbols": [{"name": "Sleep"}, {"name": "CloseHandle"}, {"name": "GetModuleHandleA"}]},
+        {"dll": "api-ms-win-core-synch-l1-2-0.dll", "symbols": [{"name": "WaitOnAddress"}, {"name": "WakeByAddressAll"}, {"name": "WakeByAddressSingle"}]},
+        {"dll": "bcryptprimitives.dll", "symbols": [{"name": "ProcessPrng"}]},
+        {
+          "dll": "ntdll.dll",
+          "symbols": [
+            {"name": "RtlLookupFunctionEntry"},
+            {"name": "NtReadFile"},
+            {"name": "NtWriteFile"},
+            {"name": "RtlCaptureContext"},
+            {"name": "RtlNtStatusToDosError"},
+            {"name": "RtlVirtualUnwind"}
+          ]
+        },
+        {
+          "dll": "VCRUNTIME140.dll",
+          "symbols": [
+            {"name": "_CxxThrowException"},
+            {"name": "memset"},
+            {"name": "__std_type_info_destroy_list"},
+            {"name": "memmove"},
+            {"name": "__CxxFrameHandler3"},
+            {"name": "memcmp"},
+            {"name": "memcpy"},
+            {"name": "__C_specific_handler"}
+          ]
+        },
+        {
+          "dll": "api-ms-win-crt-math-l1-1-0.dll",
+          "symbols": [
+            {"name": "atan2f"},
+            {"name": "cosf"},
+            {"name": "sinf"},
+            {"name": "roundf"},
+            {"name": "floorf"},
+            {"name": "_hypotf"},
+            {"name": "ceilf"},
+            {"name": "truncf"},
+            {"name": "powf"},
+            {"name": "expf"},
+            {"name": "acosf"},
+            {"name": "cbrtf"},
+            {"name": "exp2f"}
+          ]
+        },
+        {"dll": "api-ms-win-crt-string-l1-1-0.dll", "symbols": [{"name": "wcslen"}]},
+        {
+          "dll": "api-ms-win-crt-runtime-l1-1-0.dll",
+          "symbols": [
+            {"name": "_initterm"},
+            {"name": "_initterm_e"},
+            {"name": "_seh_filter_dll"},
+            {"name": "_configure_narrow_argv"},
+            {"name": "_initialize_narrow_environment"},
+            {"name": "_initialize_onexit_table"},
+            {"name": "_register_onexit_function"},
+            {"name": "_execute_onexit_table"},
+            {"name": "_crt_atexit"},
+            {"name": "_cexit"}
+          ]
+        },
+        {"dll": "api-ms-win-crt-heap-l1-1-0.dll", "symbols": [{"name": "free"}]}
+      ],
+      "delay_imports": [],
+      "codeview": {"guid": "6C0D3056-B861-4F9C-9D14-74ACFDA16B65", "age": 1},
+      "readobj_raw": "rust-minimap.readobj.txt",
+      "pdb": {
+        "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\Minimap.pdb",
+        "raw": "rust-minimap.pdb.txt",
+        "notes": [
+          "Section-offset intervals are unioned, including overlaps within one compiland. Shared/ICF ranges count once in section totals.",
+          "exclusive_bytes plus shared_groups are additive; shared_referenced_bytes are non-additive references, not extra storage.",
+          "Compiland ownership is linker attribution, not semantic ownership: LTO imports/inlining move code across crate boundaries; padding and linker-generated bytes may be unattributed."
+        ],
+        "sections": [
+          {"index": 1, "name": ".text", "unique_bytes": 1149114, "shared_bytes": 0},
+          {"index": 2, "name": ".rdata", "unique_bytes": 1609367, "shared_bytes": 0},
+          {"index": 3, "name": ".data", "unique_bytes": 832, "shared_bytes": 0}
+        ],
+        "modules": [
+          {
+            "id": 1,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\Minimap.Minimap.5ba12e92dc51225d-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 336943, ".rdata": 49011, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 2,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\Minimap.230j1p9ds7diyvrgnuwufq1bd.rcgu.o",
+            "exclusive_bytes": {".text": 21},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 3, "name": "KERNEL32.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {"id": 4, "name": "miniz_oxide-cf9711cfde6d9fb9.miniz_oxide.b4d5a323451bad67-cgu.0.rcgu.o", "exclusive_bytes": {".text": 15290, ".rdata": 3546}, "shared_referenced_bytes": {}},
+          {"id": 5, "name": "adler2-2600544c1f4a2fb8.adler2.ade013ea98876153-cgu.0.rcgu.o", "exclusive_bytes": {".text": 996, ".rdata": 60}, "shared_referenced_bytes": {}},
+          {"id": 6, "name": "egui-afd80c5a1751319a.egui.f1b80ce8bf2381ab-cgu.0.rcgu.o", "exclusive_bytes": {".text": 321977, ".rdata": 50206}, "shared_referenced_bytes": {}},
+          {
+            "id": 8,
+            "name": "epaint-4b3495940aa50c49.epaint.87cb396373768036-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 182092, ".rdata": 1434862, ".data": 8},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 9, "name": "log-1abef1d6e4710ec8.log.28138e03a8659449-cgu.0.rcgu.o", "exclusive_bytes": {".text": 45, ".rdata": 48, ".data": 40}, "shared_referenced_bytes": {}},
+          {"id": 10, "name": "ahash-98990c9e7c343ffa.ahash.66f2ead4088469df-cgu.0.rcgu.o", "exclusive_bytes": {".text": 247, ".rdata": 20, ".data": 16}, "shared_referenced_bytes": {}},
+          {"id": 11, "name": "ab_glyph-84239bcfa070cc9a.ab_glyph.325dc3caefca76cb-cgu.0.rcgu.o", "exclusive_bytes": {".text": 16416, ".rdata": 1432}, "shared_referenced_bytes": {}},
+          {
+            "id": 12,
+            "name": "owned_ttf_parser-6760085ad4b47afd.owned_ttf_parser.8231aab4db452e0d-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 3899, ".rdata": 544},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 13, "name": "ttf_parser-8541e7b91fa7fe59.ttf_parser.11925b313e637ffc-cgu.0.rcgu.o", "exclusive_bytes": {".text": 81794, ".rdata": 5720}, "shared_referenced_bytes": {}},
+          {
+            "id": 14,
+            "name": "ab_glyph_rasterizer-f911677814f6819e.ab_glyph_rasterizer.be8eaed0e930ae6-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 6416, ".rdata": 871, ".data": 12},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 15, "name": "parking_lot-8efbe871868b54e4.parking_lot.47c0b7e8e20020c6-cgu.0.rcgu.o", "exclusive_bytes": {".text": 14119, ".rdata": 2671}, "shared_referenced_bytes": {}},
+          {
+            "id": 16,
+            "name": "parking_lot_core-e0471306452231f5.parking_lot_core.ec3f534f4342328b-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 3064, ".rdata": 1103, ".data": 40},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 17, "name": "kernel32.dll", "exclusive_bytes": {".rdata": 69}, "shared_referenced_bytes": {}},
+          {"id": 18, "name": "ecolor-cde8bf5cdbeba3d7.ecolor.c81495a70cb2fa75-cgu.0.rcgu.o", "exclusive_bytes": {".data": 32}, "shared_referenced_bytes": {}},
+          {"id": 19, "name": "emath-1d4d20a9ee031d53.emath.ee882664e6b391a9-cgu.0.rcgu.o", "exclusive_bytes": {".text": 675, ".rdata": 450}, "shared_referenced_bytes": {}},
+          {"id": 20, "name": "quick_xml-a3dee832882e4fcf.quick_xml.b8d4fc5f15c98959-cgu.0.rcgu.o", "exclusive_bytes": {".text": 8679, ".rdata": 1462}, "shared_referenced_bytes": {}},
+          {
+            "id": 21,
+            "name": "eroverlay_game-371454fdb3dd6e63.eroverlay_game.2a4fc64718625225-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 10668, ".rdata": 1402},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 22,
+            "name": "texture2ddecoder-cb48e4cdab361d7b.texture2ddecoder.47e00f694c13d67b-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 8413, ".rdata": 3838},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 23, "name": "memchr-d54b8e752c619248.memchr.adaefcb6e2b076a7-cgu.0.rcgu.o", "exclusive_bytes": {".text": 3813, ".rdata": 84, ".data": 48}, "shared_referenced_bytes": {}},
+          {"id": 24, "name": "eroverlay_abi-3264003a8444baa8.eroverlay_abi.bb5fe9ee59c57469-cgu.0.rcgu.o", "exclusive_bytes": {".text": 6601, ".rdata": 952}, "shared_referenced_bytes": {}},
+          {"id": 25, "name": "std-3854312d46c17a37.std.91f9a918aea500fd-cgu.0.rcgu.o", "exclusive_bytes": {".text": 47013, ".rdata": 16429, ".data": 184}, "shared_referenced_bytes": {}},
+          {"id": 26, "name": "api-ms-win-core-synch-l1-2-0.dll", "exclusive_bytes": {".rdata": 89}, "shared_referenced_bytes": {}},
+          {"id": 27, "name": "bcryptprimitives.dll", "exclusive_bytes": {".rdata": 77}, "shared_referenced_bytes": {}},
+          {
+            "id": 28,
+            "name": "panic_unwind-4531eec6307bead5.panic_unwind.40d8df48f0cbc2e1-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 371, ".rdata": 368, ".data": 84},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 29,
+            "name": "rustc_demangle-16b50824155ae42c.rustc_demangle.f0458be0d4909762-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 23187, ".rdata": 3064},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 30,
+            "name": "std_detect-b1b36538f7570106.std_detect.e0c4c0ed9a4ef890-cgu.0.rcgu.o",
+            "exclusive_bytes": {".text": 1780, ".rdata": 32, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 31, "name": "hashbrown-92982299f960c902.hashbrown.794395e5a6442b62-cgu.0.rcgu.o", "exclusive_bytes": {".text": 87, ".rdata": 91}, "shared_referenced_bytes": {}},
+          {"id": 32, "name": "alloc-f9fd422e5eb593ae.alloc.ba94fcdaf7c4b245-cgu.0.rcgu.o", "exclusive_bytes": {".text": 3672, ".rdata": 1115}, "shared_referenced_bytes": {}},
+          {"id": 33, "name": "core-f9527ed7f1165c0a.core.57570d04ba8eb63f-cgu.0.rcgu.o", "exclusive_bytes": {".text": 47480, ".rdata": 24164, ".data": 24}, "shared_referenced_bytes": {}},
+          {"id": 38, "name": "ntdll.dll", "exclusive_bytes": {".rdata": 46}, "shared_referenced_bytes": {}},
+          {
+            "id": 41,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\chkstk.obj",
+            "exclusive_bytes": {".text": 94, ".rdata": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 42,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\std_type_info_static.obj",
+            "exclusive_bytes": {".text": 43, ".rdata": 128, ".data": 32},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 43,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\fltused.obj",
+            "exclusive_bytes": {".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 44,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\dll_dllmain.obj",
+            "exclusive_bytes": {".text": 996, ".rdata": 220, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 45,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\tlssup.obj",
+            "exclusive_bytes": {".rdata": 58, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 46,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\utility.obj",
+            "exclusive_bytes": {".text": 831, ".rdata": 72, ".data": 76},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 47,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\delete_scalar_size.obj",
+            "exclusive_bytes": {".text": 5},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 48,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gs_support.obj",
+            "exclusive_bytes": {".text": 191, ".rdata": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 49,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\dll_dllmain_stub.obj",
+            "exclusive_bytes": {".text": 35},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 50,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\tncleanup.obj",
+            "exclusive_bytes": {".text": 26, ".data": 16},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 51,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\default_local_stdio_options.obj",
+            "exclusive_bytes": {".text": 43, ".data": 16},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 52,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\dyn_tls_init.obj",
+            "exclusive_bytes": {".text": 8},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 53,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\utility_desktop.obj",
+            "exclusive_bytes": {".text": 5, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 54,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\initsect.obj",
+            "exclusive_bytes": {".text": 132, ".rdata": 44},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 55,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\initializers.obj",
+            "exclusive_bytes": {".rdata": 64},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 56,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_support.obj",
+            "exclusive_bytes": {".text": 3, ".rdata": 48},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 57,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\cpu_disp.obj",
+            "exclusive_bytes": {".text": 680, ".rdata": 56, ".data": 40},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 58,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\argv_mode.obj",
+            "exclusive_bytes": {".text": 6},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 59,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\ucrt_detection.obj",
+            "exclusive_bytes": {".text": 12},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 60,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\delete_scalar.obj",
+            "exclusive_bytes": {".text": 5},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 61,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\gs_cookie.obj",
+            "exclusive_bytes": {".data": 72},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 62,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_dispatch.obj",
+            "exclusive_bytes": {".text": 18, ".rdata": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 63,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\guard_xfg_dispatch.obj",
+            "exclusive_bytes": {".text": 22, ".rdata": 4},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 64, "name": "VCRUNTIME140.dll", "exclusive_bytes": {".rdata": 54}, "shared_referenced_bytes": {}},
+          {"id": 65, "name": "api-ms-win-crt-math-l1-1-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {"id": 66, "name": "api-ms-win-crt-string-l1-1-0.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {"id": 67, "name": "api-ms-win-crt-runtime-l1-1-0.dll", "exclusive_bytes": {".rdata": 70}, "shared_referenced_bytes": {}},
+          {"id": 68, "name": "api-ms-win-crt-heap-l1-1-0.dll", "exclusive_bytes": {".rdata": 68}, "shared_referenced_bytes": {}},
+          {
+            "id": 69,
+            "name": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\clean-root-checkout\\target\\release\\deps\\Minimap.dll.exp",
+            "exclusive_bytes": {".rdata": 83},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 70,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\ucrt_stubs.obj",
+            "exclusive_bytes": {".text": 3, ".data": 4},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 71,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcstartup\\build\\md\\msvcrt_md_kernel32.vcxproj\\objr\\amd64\\loadcfg.obj",
+            "exclusive_bytes": {".rdata": 320},
+            "shared_referenced_bytes": {}
+          },
+          {
+            "id": 72,
+            "name": "D:\\a\\_work\\1\\s\\Intermediate\\crt\\vcruntime\\build\\base\\md\\vcruntime_base_md_kernel32.vcxproj\\objr\\amd64\\softmemtag.obj",
+            "exclusive_bytes": {".rdata": 8},
+            "shared_referenced_bytes": {}
+          },
+          {"id": 73, "name": "Import:KERNEL32.dll", "exclusive_bytes": {".rdata": 1592}, "shared_referenced_bytes": {}},
+          {"id": 74, "name": "Import:kernel32.dll", "exclusive_bytes": {".rdata": 90}, "shared_referenced_bytes": {}},
+          {"id": 75, "name": "Import:api-ms-win-core-synch-l1-2-0.dll", "exclusive_bytes": {".rdata": 106}, "shared_referenced_bytes": {}},
+          {"id": 76, "name": "Import:bcryptprimitives.dll", "exclusive_bytes": {".rdata": 30}, "shared_referenced_bytes": {}},
+          {"id": 77, "name": "Import:ntdll.dll", "exclusive_bytes": {".rdata": 214}, "shared_referenced_bytes": {}},
+          {"id": 80, "name": "Import:VCRUNTIME140.dll", "exclusive_bytes": {".text": 48, ".rdata": 268}, "shared_referenced_bytes": {}},
+          {"id": 81, "name": "Import:api-ms-win-crt-string-l1-1-0.dll", "exclusive_bytes": {".text": 6, ".rdata": 26}, "shared_referenced_bytes": {}},
+          {"id": 82, "name": "Import:api-ms-win-crt-runtime-l1-1-0.dll", "exclusive_bytes": {".text": 60, ".rdata": 368}, "shared_referenced_bytes": {}},
+          {"id": 83, "name": "Import:api-ms-win-crt-math-l1-1-0.dll", "exclusive_bytes": {".text": 78, ".rdata": 322}, "shared_referenced_bytes": {}},
+          {"id": 84, "name": "Import:api-ms-win-crt-heap-l1-1-0.dll", "exclusive_bytes": {".text": 6, ".rdata": 24}, "shared_referenced_bytes": {}},
+          {"id": 85, "name": "* Linker *", "exclusive_bytes": {".rdata": 976, ".data": 8}, "shared_referenced_bytes": {}}
+        ],
+        "shared_groups": []
+      },
+      "fonts": [
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\emoji-icon-font.ttf",
+          "bytes": 317864,
+          "sha256": "3a706840d2f888b83c184f7d41900dbaa0151a806c4d130cc88539d53fedef0a",
+          "file_offsets": [2283264]
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Hack-Regular.ttf",
+          "bytes": 309408,
+          "sha256": "15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125",
+          "file_offsets": [1193376]
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\NotoEmoji-Regular.ttf",
+          "bytes": 418804,
+          "sha256": "415dc6290378574135b64c808dc640c1df7531973290c4970c51fdeb849cb0c5",
+          "file_offsets": [1502784]
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Ubuntu-Light.ttf",
+          "bytes": 361676,
+          "sha256": "80307b8da7649aa4ee4d484b232140e3ce1ec0ca093073d3c53c8f5a5ced7a70",
+          "file_offsets": [1921588]
+        }
+      ]
+    },
+    "cpp-core": {
+      "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\cpp-reference-lf\\build\\bin\\EROverlay.dll",
+      "sha256": "97c779a1af8d7f8d608a11942706a5b13b39d8239b0fccb915026ab2e91d0072",
+      "bytes": 1048064,
+      "machine": 34404,
+      "size_of_image": 1081344,
+      "sections": [
+        {"index": 1, "name": ".text", "virtual_size": 678651, "rva": 4096, "raw_size": 678912, "raw_offset": 1024},
+        {"index": 2, "name": ".rdata", "virtual_size": 201464, "rva": 684032, "raw_size": 201728, "raw_offset": 679936},
+        {"index": 3, "name": ".data", "virtual_size": 149272, "rva": 888832, "raw_size": 133632, "raw_offset": 881664},
+        {"index": 4, "name": ".pdata", "virtual_size": 30372, "rva": 1040384, "raw_size": 30720, "raw_offset": 1015296},
+        {"index": 5, "name": ".rsrc", "virtual_size": 480, "rva": 1073152, "raw_size": 512, "raw_offset": 1046016},
+        {"index": 6, "name": ".reloc", "virtual_size": 1060, "rva": 1077248, "raw_size": 1536, "raw_offset": 1046528}
+      ],
+      "imports": [
+        {"dll": "SHLWAPI.dll", "symbols": [{"name": "PathRemoveFileSpecW"}, {"name": "PathCombineW"}, {"name": "PathAppendW"}]},
+        {"dll": "VERSION.dll", "symbols": [{"name": "VerQueryValueW"}, {"name": "GetFileVersionInfoSizeW"}, {"name": "GetFileVersionInfoW"}]},
+        {
+          "dll": "steam_api64.dll",
+          "symbols": [{"name": "SteamAPI_ISteamApps_GetCurrentGameLanguage"}, {"name": "SteamAPI_SteamApps_v008"}, {"name": "SteamAPI_ISteamApps_BIsDlcInstalled"}]
+        },
+        {"dll": "dxgi.dll", "symbols": [{"name": "CreateDXGIFactory1"}]},
+        {"dll": "D3DCOMPILER_47.dll", "symbols": [{"name": "D3DCompile"}]},
+        {
+          "dll": "KERNEL32.dll",
+          "symbols": [
+            {"name": "DeleteCriticalSection"},
+            {"name": "InitializeCriticalSectionAndSpinCount"},
+            {"name": "LeaveCriticalSection"},
+            {"name": "ResetEvent"},
+            {"name": "WaitForSingleObjectEx"},
+            {"name": "GetModuleFileNameW"},
+            {"name": "DeleteAtom"},
+            {"name": "FreeLibraryAndExitThread"},
+            {"name": "DisableThreadLibraryCalls"},
+            {"name": "FreeConsole"},
+            {"name": "CreateThread"},
+            {"name": "FindAtomW"},
+            {"name": "AddAtomW"},
+            {"name": "AllocConsole"},
+            {"name": "MultiByteToWideChar"},
+            {"name": "GetCurrentProcess"},
+            {"name": "GetCurrentThreadId"},
+            {"name": "GetModuleHandleA"},
+            {"name": "ReleaseSRWLockExclusive"},
+            {"name": "AcquireSRWLockExclusive"},
+            {"name": "ReleaseSRWLockShared"},
+            {"name": "AcquireSRWLockShared"},
+            {"name": "ReadProcessMemory"},
+            {"name": "HeapFree"},
+            {"name": "GetTickCount64"},
+            {"name": "HeapAlloc"},
+            {"name": "GetProcessHeap"},
+            {"name": "GetModuleHandleW"},
+            {"name": "WaitForSingleObject"},
+            {"name": "CreateEventW"},
+            {"name": "Sleep"},
+            {"name": "CloseHandle"},
+            {"name": "LoadLibraryW"},
+            {"name": "GetProcAddress"},
+            {"name": "FreeLibrary"},
+            {"name": "lstrcmpA"},
+            {"name": "lstrlenW"},
+            {"name": "GetEnvironmentVariableW"},
+            {"name": "lstrcpyW"},
+            {"name": "GetSystemDirectoryW"},
+            {"name": "OutputDebugStringA"},
+            {"name": "GlobalAlloc"},
+            {"name": "GlobalFree"},
+            {"name": "GlobalLock"},
+            {"name": "WideCharToMultiByte"},
+            {"name": "GlobalUnlock"},
+            {"name": "WriteConsoleW"},
+            {"name": "LoadLibraryA"},
+            {"name": "CreateEventA"},
+            {"name": "GetLocaleInfoA"},
+            {"name": "QueryPerformanceFrequency"},
+            {"name": "RtlCaptureContext"},
+            {"name": "QueryPerformanceCounter"},
+            {"name": "HeapCreate"},
+            {"name": "VirtualProtect"},
+            {"name": "Thread32Next"},
+            {"name": "Thread32First"},
+            {"name": "SuspendThread"},
+            {"name": "ResumeThread"},
+            {"name": "CreateToolhelp32Snapshot"},
+            {"name": "GetLastError"},
+            {"name": "HeapReAlloc"},
+            {"name": "HeapDestroy"},
+            {"name": "GetThreadContext"},
+            {"name": "GetCurrentProcessId"},
+            {"name": "FlushInstructionCache"},
+            {"name": "SetThreadContext"},
+            {"name": "OpenThread"},
+            {"name": "VirtualFree"},
+            {"name": "VirtualAlloc"},
+            {"name": "GetSystemInfo"},
+            {"name": "VirtualQuery"},
+            {"name": "RtlLookupFunctionEntry"},
+            {"name": "EnterCriticalSection"},
+            {"name": "GetFileInformationByHandleEx"},
+            {"name": "AreFileApisANSI"},
+            {"name": "GetFileAttributesExW"},
+            {"name": "FindNextFileW"},
+            {"name": "FindFirstFileExW"},
+            {"name": "FindClose"},
+            {"name": "CreateFileW"},
+            {"name": "FormatMessageA"},
+            {"name": "LocalFree"},
+            {"name": "RtlVirtualUnwind"},
+            {"name": "UnhandledExceptionFilter"},
+            {"name": "SetUnhandledExceptionFilter"},
+            {"name": "TerminateProcess"},
+            {"name": "SetEvent"},
+            {"name": "IsProcessorFeaturePresent"},
+            {"name": "IsDebuggerPresent"},
+            {"name": "GetSystemTimeAsFileTime"},
+            {"name": "InitializeSListHead"},
+            {"name": "IsDBCSLeadByte"}
+          ]
+        },
+        {
+          "dll": "USER32.dll",
+          "symbols": [
+            {"name": "LoadCursorA"},
+            {"name": "GetMessageExtraInfo"},
+            {"name": "ScreenToClient"},
+            {"name": "GetCapture"},
+            {"name": "ClientToScreen"},
+            {"name": "TrackMouseEvent"},
+            {"name": "GetKeyboardLayout"},
+            {"name": "GetKeyState"},
+            {"name": "DefWindowProcW"},
+            {"name": "FindWindowW"},
+            {"name": "IsWindow"},
+            {"name": "SetWindowLongPtrW"},
+            {"name": "CallWindowProcW"},
+            {"name": "GetForegroundWindow"},
+            {"name": "GetAsyncKeyState"},
+            {"name": "SetClipboardData"},
+            {"name": "GetClipboardData"},
+            {"name": "EmptyClipboard"},
+            {"name": "CloseClipboard"},
+            {"name": "OpenClipboard"},
+            {"name": "GetCursorPos"},
+            {"name": "SetCursorPos"},
+            {"name": "ReleaseCapture"},
+            {"name": "IsWindowUnicode"},
+            {"name": "GetClientRect"},
+            {"name": "SetCursor"},
+            {"name": "SetCapture"}
+          ]
+        },
+        {"dll": "SHELL32.dll", "symbols": [{"name": "ShellExecuteW"}]},
+        {"dll": "ADVAPI32.dll", "symbols": [{"name": "RegOpenKeyW"}, {"name": "RegCloseKey"}, {"name": "RegQueryValueExW"}]},
+        {
+          "dll": "MSVCP140.dll",
+          "symbols": [
+            {"name": "?_Xbad_alloc@std@@YAXXZ"},
+            {"name": "?_Throw_C_error@std@@YAXH@Z"},
+            {"name": "?_Xlength_error@std@@YAXPEBD@Z"},
+            {"name": "_Mtx_destroy_in_situ"},
+            {"name": "_Mtx_lock"},
+            {"name": "_Mtx_init_in_situ"},
+            {"name": "_Thrd_sleep"},
+            {"name": "_Query_perf_counter"},
+            {"name": "_Xtime_get_ticks"},
+            {"name": "_Mtx_unlock"},
+            {"name": "?_Getcvt@_Locinfo@std@@QEBA?AU_Cvtvec@@XZ"},
+            {"name": "?_Xout_of_range@std@@YAXPEBD@Z"},
+            {"name": "?_Winerror_map@std@@YAHH@Z"},
+            {"name": "?_Syserror_map@std@@YAPEBDH@Z"},
+            {"name": "_Cnd_signal"},
+            {"name": "_Mtx_current_owns"},
+            {"name": "_Cnd_init_in_situ"},
+            {"name": "?_Throw_Cpp_error@std@@YAXH@Z"},
+            {"name": "_Cnd_timedwait"},
+            {"name": "_Cnd_do_broadcast_at_thread_exit"},
+            {"name": "_Cnd_wait"},
+            {"name": "_Thrd_id"},
+            {"name": "_Thrd_join"},
+            {"name": "_Cnd_destroy_in_situ"},
+            {"name": "??1_Lockit@std@@QEAA@XZ"},
+            {"name": "??0_Lockit@std@@QEAA@H@Z"},
+            {"name": "?_Getgloballocale@locale@std@@CAPEAV_Locimp@12@XZ"},
+            {"name": "?id@?$numpunct@_W@std@@2V0locale@2@A"},
+            {"name": "??1facet@locale@std@@MEAA@XZ"},
+            {"name": "??0facet@locale@std@@IEAA@_K@Z"},
+            {"name": "?_Decref@facet@locale@std@@UEAAPEAV_Facet_base@3@XZ"},
+            {"name": "?_Incref@facet@locale@std@@UEAAXXZ"},
+            {"name": "??Bid@locale@std@@QEAA_KXZ"},
+            {"name": "?_Gettrue@_Locinfo@std@@QEBAPEBDXZ"},
+            {"name": "?_Getfalse@_Locinfo@std@@QEBAPEBDXZ"},
+            {"name": "?_Getlconv@_Locinfo@std@@QEBAPEBUlconv@@XZ"},
+            {"name": "??1_Locinfo@std@@QEAA@XZ"},
+            {"name": "??0_Locinfo@std@@QEAA@PEBD@Z"},
+            {"name": "?id@?$codecvt@DDU_Mbstatet@@@std@@2V0locale@2@A"},
+            {"name": "?_Fiopen@std@@YAPEAU_iobuf@@PEB_WHH@Z"},
+            {"name": "?_Getcat@?$codecvt@DDU_Mbstatet@@@std@@SA_KPEAPEBVfacet@locale@2@PEBV42@@Z"},
+            {"name": "?unshift@?$codecvt@DDU_Mbstatet@@@std@@QEBAHAEAU_Mbstatet@@PEAD1AEAPEAD@Z"},
+            {"name": "??0?$basic_streambuf@DU?$char_traits@D@std@@@std@@IEAA@XZ"},
+            {"name": "?getloc@?$basic_streambuf@DU?$char_traits@D@std@@@std@@QEBA?AVlocale@2@XZ"},
+            {"name": "?_Init@?$basic_streambuf@DU?$char_traits@D@std@@@std@@IEAAXXZ"},
+            {"name": "?in@?$codecvt@DDU_Mbstatet@@@std@@QEBAHAEAU_Mbstatet@@PEBD1AEAPEBDPEAD3AEAPEAD@Z"},
+            {"name": "?out@?$codecvt@DDU_Mbstatet@@@std@@QEBAHAEAU_Mbstatet@@PEBD1AEAPEBDPEAD3AEAPEAD@Z"},
+            {"name": "_Mbrtowc"},
+            {"name": "?_Pninc@?$basic_streambuf@DU?$char_traits@D@std@@@std@@IEAAPEADXZ"},
+            {"name": "?setstate@?$basic_ios@DU?$char_traits@D@std@@@std@@QEAAXH_N@Z"},
+            {"name": "??0?$basic_ios@DU?$char_traits@D@std@@@std@@IEAA@XZ"},
+            {"name": "??0?$basic_istream@DU?$char_traits@D@std@@@std@@QEAA@PEAV?$basic_streambuf@DU?$char_traits@D@std@@@1@_N@Z"},
+            {"name": "??1?$basic_streambuf@DU?$char_traits@D@std@@@std@@UEAA@XZ"},
+            {"name": "?showmanyc@?$basic_streambuf@DU?$char_traits@D@std@@@std@@MEAA_JXZ"},
+            {"name": "?xsgetn@?$basic_streambuf@DU?$char_traits@D@std@@@std@@MEAA_JPEAD_J@Z"},
+            {"name": "?xsputn@?$basic_streambuf@DU?$char_traits@D@std@@@std@@MEAA_JPEBD_J@Z"},
+            {"name": "??1?$basic_ios@DU?$char_traits@D@std@@@std@@UEAA@XZ"},
+            {"name": "??1?$basic_istream@DU?$char_traits@D@std@@@std@@UEAA@XZ"},
+            {"name": "?read@?$basic_istream@DU?$char_traits@D@std@@@std@@QEAAAEAV12@PEAD_J@Z"},
+            {"name": "?seekg@?$basic_istream@DU?$char_traits@D@std@@@std@@QEAAAEAV12@_JH@Z"},
+            {"name": "?tellg@?$basic_istream@DU?$char_traits@D@std@@@std@@QEAA?AV?$fpos@U_Mbstatet@@@2@XZ"},
+            {"name": "?always_noconv@codecvt_base@std@@QEBA_NXZ"},
+            {"name": "?_Init@locale@std@@CAPEAV_Locimp@12@_N@Z"},
+            {"name": "?id@?$numpunct@D@std@@2V0locale@2@A"},
+            {"name": "_Query_perf_frequency"}
+          ]
+        },
+        {"dll": "IMM32.dll", "symbols": [{"name": "ImmReleaseContext"}, {"name": "ImmGetContext"}, {"name": "ImmSetCandidateWindow"}, {"name": "ImmSetCompositionWindow"}]},
+        {"dll": "VCRUNTIME140_1.dll", "symbols": [{"name": "__CxxFrameHandler4"}]},
+        {
+          "dll": "VCRUNTIME140.dll",
+          "symbols": [
+            {"name": "memset"},
+            {"name": "_CxxThrowException"},
+            {"name": "__current_exception_context"},
+            {"name": "__current_exception"},
+            {"name": "__C_specific_handler"},
+            {"name": "strchr"},
+            {"name": "__std_terminate"},
+            {"name": "__std_exception_copy"},
+            {"name": "__std_exception_destroy"},
+            {"name": "memchr"},
+            {"name": "__std_type_info_destroy_list"},
+            {"name": "memcpy"},
+            {"name": "memmove"},
+            {"name": "memcmp"}
+          ]
+        },
+        {
+          "dll": "api-ms-win-crt-stdio-l1-1-0.dll",
+          "symbols": [
+            {"name": "setvbuf"},
+            {"name": "fgetc"},
+            {"name": "fseek"},
+            {"name": "ftell"},
+            {"name": "fsetpos"},
+            {"name": "fgets"},
+            {"name": "_fseeki64"},
+            {"name": "_get_stream_buffer_pointers"},
+            {"name": "fread"},
+            {"name": "_wfopen"},
+            {"name": "__stdio_common_vfwprintf"},
+            {"name": "fclose"},
+            {"name": "__acrt_iob_func"},
+            {"name": "fflush"},
+            {"name": "__stdio_common_vfprintf"},
+            {"name": "fputws"},
+            {"name": "fputc"},
+            {"name": "ungetc"},
+            {"name": "__stdio_common_vswprintf"},
+            {"name": "fwrite"},
+            {"name": "_fileno"},
+            {"name": "_isatty"},
+            {"name": "_get_osfhandle"},
+            {"name": "__stdio_common_vsscanf"},
+            {"name": "freopen"},
+            {"name": "__stdio_common_vsprintf"},
+            {"name": "fgetpos"}
+          ]
+        },
+        {
+          "dll": "api-ms-win-crt-heap-l1-1-0.dll",
+          "symbols": [{"name": "malloc"}, {"name": "_callnewh"}, {"name": "realloc"}, {"name": "_aligned_malloc"}, {"name": "calloc"}, {"name": "_aligned_free"}, {"name": "free"}]
+        },
+        {
+          "dll": "api-ms-win-crt-runtime-l1-1-0.dll",
+          "symbols": [
+            {"name": "_seh_filter_dll"},
+            {"name": "_configure_narrow_argv"},
+            {"name": "_errno"},
+            {"name": "_initterm_e"},
+            {"name": "_initterm"},
+            {"name": "terminate"},
+            {"name": "_initialize_onexit_table"},
+            {"name": "_initialize_narrow_environment"},
+            {"name": "_cexit"},
+            {"name": "_invalid_parameter_noinfo_noreturn"},
+            {"name": "_crt_atexit"},
+            {"name": "_execute_onexit_table"},
+            {"name": "_register_onexit_function"},
+            {"name": "_beginthreadex"}
+          ]
+        },
+        {"dll": "api-ms-win-crt-string-l1-1-0.dll", "symbols": [{"name": "isspace"}, {"name": "strncmp"}, {"name": "strcmp"}, {"name": "strncpy"}, {"name": "toupper"}]},
+        {"dll": "api-ms-win-crt-convert-l1-1-0.dll", "symbols": [{"name": "strtol"}]},
+        {
+          "dll": "api-ms-win-crt-math-l1-1-0.dll",
+          "symbols": [
+            {"name": "powf"},
+            {"name": "_dclass"},
+            {"name": "_fdclass"},
+            {"name": "_dsign"},
+            {"name": "sinf"},
+            {"name": "fmodf"},
+            {"name": "cosf"},
+            {"name": "sqrtf"},
+            {"name": "ceilf"},
+            {"name": "acosf"},
+            {"name": "_ldclass"},
+            {"name": "ldexp"}
+          ]
+        },
+        {"dll": "api-ms-win-crt-filesystem-l1-1-0.dll", "symbols": [{"name": "_unlock_file"}, {"name": "_lock_file"}]},
+        {"dll": "api-ms-win-crt-utility-l1-1-0.dll", "symbols": [{"name": "qsort"}]},
+        {"dll": "api-ms-win-crt-locale-l1-1-0.dll", "symbols": [{"name": "___lc_codepage_func"}]}
+      ],
+      "delay_imports": [],
+      "codeview": null,
+      "readobj_raw": "cpp-core.readobj.txt",
+      "fonts": [
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\emoji-icon-font.ttf",
+          "bytes": 317864,
+          "sha256": "3a706840d2f888b83c184f7d41900dbaa0151a806c4d130cc88539d53fedef0a",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Hack-Regular.ttf",
+          "bytes": 309408,
+          "sha256": "15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\NotoEmoji-Regular.ttf",
+          "bytes": 418804,
+          "sha256": "415dc6290378574135b64c808dc640c1df7531973290c4970c51fdeb849cb0c5",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Ubuntu-Light.ttf",
+          "bytes": 361676,
+          "sha256": "80307b8da7649aa4ee4d484b232140e3ce1ec0ca093073d3c53c8f5a5ced7a70",
+          "file_offsets": []
+        }
+      ]
+    },
+    "cpp-minimap": {
+      "path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\steady-jepsen\\target\\cpp-reference-lf\\build\\bin\\overlays\\Minimap.dll",
+      "sha256": "548245dfda341d942362e933a7cd419280784fe6ed01a5bea4a48934a8ee8d7c",
+      "bytes": 518656,
+      "machine": 34404,
+      "size_of_image": 536576,
+      "sections": [
+        {"index": 1, "name": ".text", "virtual_size": 404716, "rva": 4096, "raw_size": 404992, "raw_offset": 1024},
+        {"index": 2, "name": ".rdata", "virtual_size": 88010, "rva": 409600, "raw_size": 88064, "raw_offset": 406016},
+        {"index": 3, "name": ".data", "virtual_size": 7432, "rva": 499712, "raw_size": 2560, "raw_offset": 494080},
+        {"index": 4, "name": ".pdata", "virtual_size": 20112, "rva": 507904, "raw_size": 20480, "raw_offset": 496640},
+        {"index": 5, "name": ".rsrc", "virtual_size": 480, "rva": 528384, "raw_size": 512, "raw_offset": 517120},
+        {"index": 6, "name": ".reloc", "virtual_size": 628, "rva": 532480, "raw_size": 1024, "raw_offset": 517632}
+      ],
+      "imports": [
+        {"dll": "XmlLite.dll", "symbols": [{"name": "CreateXmlReader"}]},
+        {"dll": "SHLWAPI.dll", "symbols": [{"ordinal": 12}]},
+        {
+          "dll": "KERNEL32.dll",
+          "symbols": [
+            {"name": "GetModuleHandleW"},
+            {"name": "GetCurrentProcess"},
+            {"name": "GetTickCount64"},
+            {"name": "ReadProcessMemory"},
+            {"name": "MultiByteToWideChar"},
+            {"name": "WideCharToMultiByte"},
+            {"name": "GetModuleHandleExW"},
+            {"name": "FreeLibrary"},
+            {"name": "OutputDebugStringA"},
+            {"name": "GetCurrentThreadId"},
+            {"name": "IsDebuggerPresent"},
+            {"name": "GetProcAddress"},
+            {"name": "DisableThreadLibraryCalls"},
+            {"name": "InitializeSListHead"},
+            {"name": "CreateEventW"},
+            {"name": "DeleteCriticalSection"},
+            {"name": "InitializeCriticalSectionAndSpinCount"},
+            {"name": "CloseHandle"},
+            {"name": "IsProcessorFeaturePresent"},
+            {"name": "TerminateProcess"},
+            {"name": "SetUnhandledExceptionFilter"},
+            {"name": "UnhandledExceptionFilter"},
+            {"name": "GetCurrentProcessId"},
+            {"name": "RtlVirtualUnwind"},
+            {"name": "RtlLookupFunctionEntry"},
+            {"name": "GetSystemTimeAsFileTime"},
+            {"name": "RtlCaptureContext"},
+            {"name": "QueryPerformanceCounter"}
+          ]
+        },
+        {
+          "dll": "MSVCP140.dll",
+          "symbols": [
+            {"name": "?_Throw_C_error@std@@YAXH@Z"},
+            {"name": "?_Xlength_error@std@@YAXPEBD@Z"},
+            {"name": "_Mtx_destroy_in_situ"},
+            {"name": "_Mtx_lock"},
+            {"name": "_Mtx_init_in_situ"},
+            {"name": "_Mtx_unlock"},
+            {"name": "?_Xout_of_range@std@@YAXPEBD@Z"},
+            {"name": "?_Xbad_function_call@std@@YAXXZ"}
+          ]
+        },
+        {"dll": "VCRUNTIME140_1.dll", "symbols": [{"name": "__CxxFrameHandler4"}]},
+        {
+          "dll": "VCRUNTIME140.dll",
+          "symbols": [
+            {"name": "memset"},
+            {"name": "_CxxThrowException"},
+            {"name": "memcpy"},
+            {"name": "memcmp"},
+            {"name": "__std_exception_copy"},
+            {"name": "memchr"},
+            {"name": "__C_specific_handler"},
+            {"name": "__current_exception"},
+            {"name": "__std_type_info_destroy_list"},
+            {"name": "__std_exception_destroy"},
+            {"name": "__current_exception_context"},
+            {"name": "memmove"},
+            {"name": "__std_terminate"}
+          ]
+        },
+        {
+          "dll": "api-ms-win-crt-runtime-l1-1-0.dll",
+          "symbols": [
+            {"name": "_invalid_parameter_noinfo_noreturn"},
+            {"name": "_configure_narrow_argv"},
+            {"name": "_initialize_narrow_environment"},
+            {"name": "_initterm_e"},
+            {"name": "_initterm"},
+            {"name": "terminate"},
+            {"name": "_cexit"},
+            {"name": "_seh_filter_dll"},
+            {"name": "_crt_atexit"},
+            {"name": "_execute_onexit_table"},
+            {"name": "_register_onexit_function"},
+            {"name": "_initialize_onexit_table"}
+          ]
+        },
+        {
+          "dll": "api-ms-win-crt-stdio-l1-1-0.dll",
+          "symbols": [{"name": "__stdio_common_vsprintf"}, {"name": "__acrt_iob_func"}, {"name": "fflush"}, {"name": "fwrite"}, {"name": "__stdio_common_vfprintf"}, {"name": "fclose"}]
+        },
+        {"dll": "api-ms-win-crt-heap-l1-1-0.dll", "symbols": [{"name": "malloc"}, {"name": "free"}, {"name": "realloc"}, {"name": "_callnewh"}]},
+        {"dll": "api-ms-win-crt-utility-l1-1-0.dll", "symbols": [{"name": "qsort"}]},
+        {"dll": "api-ms-win-crt-string-l1-1-0.dll", "symbols": [{"name": "strcmp"}]},
+        {
+          "dll": "api-ms-win-crt-math-l1-1-0.dll",
+          "symbols": [{"name": "sinf"}, {"name": "sqrtf"}, {"name": "roundf"}, {"name": "cosf"}, {"name": "ceilf"}, {"name": "atan2f"}, {"name": "acosf"}, {"name": "_fdclass"}, {"name": "floorf"}]
+        }
+      ],
+      "delay_imports": [],
+      "codeview": null,
+      "readobj_raw": "cpp-minimap.readobj.txt",
+      "fonts": [
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\emoji-icon-font.ttf",
+          "bytes": 317864,
+          "sha256": "3a706840d2f888b83c184f7d41900dbaa0151a806c4d130cc88539d53fedef0a",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Hack-Regular.ttf",
+          "bytes": 309408,
+          "sha256": "15f55cc0c85a2988d2b4b3a8cdb5d77fdfbaf319e1bb5309d725db9818fb7125",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\NotoEmoji-Regular.ttf",
+          "bytes": 418804,
+          "sha256": "415dc6290378574135b64c808dc640c1df7531973290c4970c51fdeb849cb0c5",
+          "file_offsets": []
+        },
+        {
+          "path": "C:\\Users\\Soar\\scoop\\persist\\rustup\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint_default_fonts-0.33.3\\fonts\\Ubuntu-Light.ttf",
+          "bytes": 361676,
+          "sha256": "80307b8da7649aa4ee4d484b232140e3ce1ec0ca093073d3c53c8f5a5ced7a70",
+          "file_offsets": []
+        }
+      ]
+    }
+  }
+}

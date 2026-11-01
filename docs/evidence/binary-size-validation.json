@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-02",
+  "hardware_observed": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900KF",
+    "gpu": "NVIDIA GeForce RTX 4080",
+    "cpu_probe_gpu_work": false,
+    "dll_test_backend": "D3D12 WARP, RGB10A2"
+  },
+  "rust_profile": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "target": "x86_64-pc-windows-msvc",
+    "opt_level": 3,
+    "lto": "thin",
+    "codegen_units": 1,
+    "debug": 1,
+    "panic": "unwind"
+  },
+  "core_sections": [
+    {
+      "section": ".text",
+      "raw_bytes": 466944,
+      "identical": true,
+      "different_bytes": 0,
+      "before_sha256": "123f8281974cad6d394233bd7d85b6351c01083d336522adfd7bbdbc3c1c26db",
+      "after_sha256": "123f8281974cad6d394233bd7d85b6351c01083d336522adfd7bbdbc3c1c26db"
+    },
+    {
+      "section": ".rdata",
+      "raw_bytes": 162304,
+      "identical": false,
+      "different_bytes": 22,
+      "before_sha256": "7521206592af6c5639a54e7bacc57fb137b9be9f1232242487bcde934aaeb5d3",
+      "after_sha256": "f184876f40aae52b883da0e7b8e2f9412f7c991214c16daf3fac2dd0c5a4cc9b"
+    },
+    {
+      "section": ".data",
+      "raw_bytes": 1536,
+      "identical": true,
+      "different_bytes": 0,
+      "before_sha256": "d73ed9853e7b0c3c0a6a82ddde7c869ef1fb4228a0f4e2bbb3c221307d7a414c",
+      "after_sha256": "d73ed9853e7b0c3c0a6a82ddde7c869ef1fb4228a0f4e2bbb3c221307d7a414c"
+    },
+    {
+      "section": ".pdata",
+      "raw_bytes": 20480,
+      "identical": true,
+      "different_bytes": 0,
+      "before_sha256": "f83a52d94b418cdc60079c33db7b4f8592474bf07daa05deb411d8d2806cd885",
+      "after_sha256": "f83a52d94b418cdc60079c33db7b4f8592474bf07daa05deb411d8d2806cd885"
+    },
+    {
+      "section": ".reloc",
+      "raw_bytes": 2048,
+      "identical": true,
+      "different_bytes": 0,
+      "before_sha256": "3c7962f498e0eb7b0e9ed7c528c202e1179185722bf548648fd3fb16131d423a",
+      "after_sha256": "3c7962f498e0eb7b0e9ed7c528c202e1179185722bf548648fd3fb16131d423a"
+    }
+  ],
+  "core_rdata_identical_after_masking": "three IMAGE_DEBUG_DIRECTORY TimeDateStamp fields and RSDS GUID only",
+  "core_imports_identical": true,
+  "validation": {
+    "fmt": {
+      "path": "target/binary-size/validation/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_lines": []
+    },
+    "check": {
+      "path": "target/binary-size/validation/check.log",
+      "sha256": "26d7e2ef604b6540c3cce2213dfb6c73ea500fcfc6431ab4d4c1729aca01dd58",
+      "result_lines": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.66s"
+      ]
+    },
+    "clippy": {
+      "path": "target/binary-size/validation/clippy.log",
+      "sha256": "b8ae613707b904a25b34ed520951340113025e88f72c6c4dd4f061c0d9f1aa81",
+      "result_lines": [
+        "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.01s"
+      ]
+    },
+    "test": {
+      "path": "target/binary-size/validation/test.log",
+      "sha256": "41ca16221a74f9d7beb7b98da54a99c978477edfa3cbb315185d9445697f327a",
+      "result_lines": [
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.34s",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 31 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 48 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.09s",
+        "test result: ok. 10 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 3.48s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    "tools": {
+      "path": "target/binary-size/validation/tools.log",
+      "sha256": "4eb340a58d40d4f7008fa893fd779c0ab36ce1fd11d7fec95f6d3614079d5e75",
+      "result_lines": [
+        "Ran 6 tests in 0.695s",
+        "OK"
+      ]
+    },
+    "release": {
+      "path": "target/binary-size/validation/release.log",
+      "sha256": "aded663aed2650cc95b38500339fab5fc6947edaf7334dda39ff0142caea1523",
+      "result_lines": [
+        "    Finished `release` profile [optimized + debuginfo] target(s) in 45.65s"
+      ]
+    },
+    "final-release": {
+      "path": "target/binary-size/validation/final-release.log",
+      "sha256": "c32158543beca20e23ddf93f963ec81c1d78b98fc0d7968778f606a9fe6e5afa",
+      "result_lines": [
+        "    Finished `release` profile [optimized + debuginfo] target(s) in 45.74s"
+      ]
+    },
+    "windows-fonts": {
+      "path": "target/binary-size/validation/windows-fonts.log",
+      "sha256": "6403d0b37df1046a73f5694a5cf1bc349c39826d966585b90b56d2fcbadea65e",
+      "result_lines": [
+        "    Finished `release` profile [optimized + debuginfo] target(s) in 0.06s",
+        "test ui::tests::installed_language_fonts_cover_status_and_produce_text_meshes ... charset=en loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=pl loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=ru loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=ja loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=ko loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\malgun.ttf\", \"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=th loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\LeelawUI.ttf\", \"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "charset=zh loaded=[\"C:\\\\WINDOWS\\\\Fonts\\\\msyh.ttc\"]",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 50 filtered out; finished in 0.06s"
+      ]
+    },
+    "dll-warp-normal": {
+      "path": "target/binary-size/validation/dll-warp-normal.log",
+      "sha256": "9ab1f617ce60628223baf51b4352b5fd21ebc61488556d979d9936c7d3d10101",
+      "result_lines": [
+        "cycle 1: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=19, committed=1114112; upper_fixture=false, GPU-retained shutdown=false; offline Minimap hidden)",
+        "cycle 2: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=19, committed=1114112; upper_fixture=false, GPU-retained shutdown=false; offline Minimap hidden)",
+        "cycle 3: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=19, committed=1114112; upper_fixture=false, GPU-retained shutdown=false; offline Minimap hidden)"
+      ]
+    },
+    "dll-warp-upper": {
+      "path": "target/binary-size/validation/dll-warp-upper.log",
+      "sha256": "0f86b0a6ac76fcb15bdca4c90a94cecbe42547352fce9738cb248b8a11a757df",
+      "result_lines": [
+        "cycle 1: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1441792; upper_fixture=true, GPU-retained shutdown=true; offline Minimap hidden)",
+        "cycle 2: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1441792; upper_fixture=true, GPU-retained shutdown=true; offline Minimap hidden)",
+        "cycle 3: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1441792; upper_fixture=true, GPU-retained shutdown=true; offline Minimap hidden)"
+      ]
+    }
+  },
+  "limits": [
+    "No new live-game frame-time, GPU timing or RSS measurements.",
+    "Offline hosts unload; native PIN / STOPPED_RESIDENT=1 unchanged.",
+    "Font probe uses installed fonts; this host lacks Meiryo.",
+    "Three paired CPU probe runs exclude update, assets I/O and GPU; all values retained separately."
+  ]
+}

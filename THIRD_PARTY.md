@@ -22,8 +22,9 @@ reference sources only from an explicit ignored export, never a production build
 ## Rust dependencies and public ABI
 
 Cargo dependencies, including egui/epaint, windows, texture2ddecoder and cc, are
-pinned in [Cargo.lock](Cargo.lock). The default egui fonts also carry MIT,
-OFL-1.1 and Ubuntu-font-1.0 notices, retained under
+pinned in [Cargo.lock](Cargo.lock). Minimap embeds only Ubuntu Light from
+`epaint_default_fonts`; the full egui default font collection is disabled.
+The upstream font collection's MIT, OFL-1.1 and Ubuntu-font-1.0 notices are retained under
 [font-licenses](third_party/font-licenses/) and copied into the installation package.
 Their source packages retain their own license
 files and Cargo license metadata; they are not copied from the legacy project.
