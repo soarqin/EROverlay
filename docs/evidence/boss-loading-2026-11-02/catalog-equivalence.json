@@ -1,0 +1,14 @@
+{
+  "previous_audit": "docs/evidence/boss-207-scope-2026-11-02/audit.json",
+  "previous_audit_sha256": "a4da0d9231cbd28764aa762149e2d418cb3442e5f65240faa84e793c3068e19b",
+  "new_audit_sha256": "9048653749e210c8868ebb99a3f21e1fc630d25a35f6a7bc4cbec9a950d0d5e6",
+  "identical_sections": [
+    "catalogue",
+    "old_to_rust",
+    "summary",
+    "scene_evidence",
+    "relationship_configuration"
+  ],
+  "unchanged_csv_sha256": "30095b135ac115bfe29d174d607017144a8dac9e5bf614f9daa5cb920ece296a",
+  "note": "Production map priority changes script/discovery ordering; the complete catalogue, per-old-item members, counts, scene evidence and selected relationships remain identical decoded JSON values. Full unchanged sections remain in previous_audit."
+}

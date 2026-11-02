@@ -54,6 +54,10 @@ Boss 原先将 `event:/…emevd`、`msg:/…msgbnd`、`mapstudio:/…msb` 这些
 
 全部 DLL 合计 5,146,112 B，比上一包增加 9,216 B；没有新增依赖、字库或公共服务 DLL。原始回执保留在 [本轮证据目录](evidence/boss-loading-2026-11-02/)。此前旗标批读、紧凑模式延后构造、三条外部遭遇关系、复活写入集合、输入、PIN 和 MFG 契约均保留。
 
+修复提交 `73ee96027eb90587a9c5987107ae859f2ea7560d` 又从本地仓库以 `--no-local --no-tags --single-branch` 克隆到全新目录。在无旧 C++ 导出、无游戏归档、无可选 `EROVERLAY_*` 环境和无 target 缓存的条件下，fmt、check、clippy、166 项测试及 `build.ps1` 全部通过。首轮命令合计约 80 秒，独立包的 109 项 manifest 大小和哈希全部有效，source 记录该提交、隔离分支及 `dirty=false`。首次 transcript 未捕获 native stdout，因此在不改源码的情况下补跑并显式保存输出；两次均通过，见 [执行日志](evidence/boss-loading-2026-11-02/clean-checkout.txt) 和 [回执](evidence/boss-loading-2026-11-02/clean-checkout.json)。后续仅追加验证文档，不改变运行时代码。
+
+不同构建目录的 DLL 哈希不同，独立重建只证明源码构建不依赖本机遗留资产；最终安装包保留上表中实际通过严格探针的根目录 DLL，并逐项核对哈希。新旧归档审计的完整目录、逐项成员、统计、场景证据和外部关系 JSON 值也逐项相同，见 [等价性回执](evidence/boss-loading-2026-11-02/catalog-equivalence.json)，不重复保存另一份相同的完整映射。
+
 ## 复现入口
 
 普通检查不需要游戏或旧 C++：

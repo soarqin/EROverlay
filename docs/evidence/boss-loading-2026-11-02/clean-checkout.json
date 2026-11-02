@@ -1,0 +1,116 @@
+{
+  "head": "73ee96027eb90587a9c5987107ae859f2ea7560d",
+  "branch": "cindy/gentle-darwin",
+  "clone": "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\clean-boss-loading-checkout",
+  "clone_command": "git clone --no-local --no-tags --single-branch --branch cindy/gentle-darwin E:/Projects/EROverlay/.cindy-worktrees/gentle-darwin E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\clean-boss-loading-checkout",
+  "powershell": "7.6.9",
+  "removed_environment_names": [],
+  "removed_cargo_target_dir": false,
+  "dirty_before": false,
+  "dirty_after": false,
+  "absent_directories": [
+    "src",
+    "rust",
+    "target/cpp-reference",
+    "build/ida",
+    "target/research",
+    "target/boss-contract",
+    "target/boss-merge-research",
+    "target/clean-boss-checkout"
+  ],
+  "game_archive_files": [],
+  "steps": [
+    {
+      "name": "fmt",
+      "exit_code": 0,
+      "seconds": 0.5272941
+    },
+    {
+      "name": "check",
+      "exit_code": 0,
+      "seconds": 8.6535425
+    },
+    {
+      "name": "clippy",
+      "exit_code": 0,
+      "seconds": 3.4451341
+    },
+    {
+      "name": "test",
+      "exit_code": 0,
+      "seconds": 15.8217949
+    },
+    {
+      "name": "build.ps1",
+      "exit_code": 0,
+      "seconds": 51.800037
+    }
+  ],
+  "dlls": [
+    {
+      "path": "EROverlay.dll",
+      "bytes": 693760,
+      "sha256": "20a37a0eb0d84f061c2b327fe2bc777691ca93e744362932aef5c9972ff31713",
+      "root_package_sha256": "a1b9528a038c77996e57b16139e636235ab7995c988b92e10b85be5feaf6ad61",
+      "matches_root_package": false
+    },
+    {
+      "path": "overlays/Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "0d53947a481923302df638d5622db032129ae752704bc41594100243247244b2",
+      "root_package_sha256": "231c5596cb36cddaa923de687158527cb691b60b424f1f3bc066d948e1decab8",
+      "matches_root_package": false
+    },
+    {
+      "path": "overlays/Boss.dll",
+      "bytes": 2685952,
+      "sha256": "d6234a3137a037adcb73ac17ad3814e8473b7db30520ca321d767ea48b63fb82",
+      "root_package_sha256": "c14b2fb42e7f996124ad6c705aa0b1a9179a4ca91a2756239b837b14b67059df",
+      "matches_root_package": false
+    }
+  ],
+  "source_json": {
+    "commit": "73ee96027eb90587a9c5987107ae859f2ea7560d",
+    "branch": "cindy/gentle-darwin",
+    "dirty": false
+  },
+  "manifest_entries": 109,
+  "manifest_hashes_and_sizes_valid": true,
+  "manifest_covers_package": true,
+  "source_json_valid": true,
+  "tests": {
+    "suites": 18,
+    "passed": 166.0,
+    "failed": 0.0,
+    "ignored": 10.0
+  },
+  "native_output_capture_repeat": [
+    {
+      "name": "fmt",
+      "exit_code": 0,
+      "seconds": 0.5514567
+    },
+    {
+      "name": "check",
+      "exit_code": 0,
+      "seconds": 0.1891086
+    },
+    {
+      "name": "clippy",
+      "exit_code": 0,
+      "seconds": 0.4075897
+    },
+    {
+      "name": "test",
+      "exit_code": 0,
+      "seconds": 4.7626449
+    },
+    {
+      "name": "build.ps1",
+      "exit_code": 0,
+      "seconds": 0.8709804
+    }
+  ],
+  "cold_command_seconds_total": 80.2478026,
+  "capture_note": "Cold clone and five checks passed with a new clone-local target; Start-Transcript omitted native output. Unchanged-source command repeat above explicitly captures all native output. No source or root package files changed."
+}
