@@ -70,6 +70,11 @@ struct Fixture {
     next: u64,
     upload_count: u64,
     request_count: u64,
+    state_mode: u8,
+    flag_reads: u64,
+    param_queries: u64,
+    params_ready_epoch: u64,
+    files_ready_epoch: u64,
 }
 unsafe fn fixture<'a>(user: *mut c_void) -> &'a mut Fixture {
     unsafe { &mut *user.cast::<Fixture>() }
@@ -122,14 +127,24 @@ unsafe extern "C" fn display(user: *mut c_void, out: *mut abi::DisplayState) -> 
     abi::OK
 }
 unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
-    unsafe { out.write(fixture(user).state) };
-    abi::OK
+    let f = unsafe { fixture(user) };
+    let mut value = f.state;
+    if f.state_mode != 0 {
+        value.valid = 0;
+    }
+    unsafe { out.write(value) };
+    if f.state_mode == 1 {
+        abi::ERR_UNAVAILABLE
+    } else {
+        abi::OK
+    }
 }
 unsafe extern "C" fn flags(user: *mut c_void, ids: *const u32, out: *mut u8, len: usize) -> i32 {
     if len > 4096 || (len != 0 && (ids.is_null() || out.is_null() || !ids.is_aligned())) {
         return abi::ERR_INVALID;
     }
     let f = unsafe { fixture(user) };
+    f.flag_reads += 1;
     if len == 0 {
         f.last_flag_ids.clear();
         return abi::OK;
@@ -144,14 +159,9 @@ unsafe extern "C" fn flags(user: *mut c_void, ids: *const u32, out: *mut u8, len
     abi::OK
 }
 unsafe extern "C" fn event_flag(user: *mut c_void, id: u32) -> u32 {
-    u32::from(
-        unsafe { fixture(user) }
-            .flags
-            .get(&id)
-            .copied()
-            .unwrap_or(1)
-            == 1,
-    )
+    let f = unsafe { fixture(user) };
+    f.flag_reads += 1;
+    u32::from(f.flags.get(&id).copied().unwrap_or(1) == 1)
 }
 unsafe extern "C" fn revive(
     user: *mut c_void,
@@ -209,10 +219,12 @@ unsafe extern "C" fn revive(
     abi::OK
 }
 unsafe extern "C" fn param(user: *mut c_void, id: u32) -> usize {
-    unsafe { fixture(user) }
-        .params
-        .get(&id)
-        .map_or(0, |b| b.as_ptr() as usize + 16)
+    let f = unsafe { fixture(user) };
+    f.param_queries += 1;
+    if f.update_epoch < f.params_ready_epoch {
+        return 0;
+    }
+    f.params.get(&id).map_or(0, |b| b.as_ptr() as usize + 16)
 }
 unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest) -> u64 {
     let f = unsafe { fixture(user) };
@@ -229,6 +241,9 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
         f.invalid_resource_requests.insert(invalid);
         return 0;
     };
+    if f.update_epoch < f.files_ready_epoch {
+        return 0;
+    }
     let scene = path
         .strip_prefix("mapstudio:/")
         .or_else(|| path.strip_prefix("mapstudio_dlc2:/"));
@@ -737,7 +752,7 @@ impl Probe {
         self.refresh_flags(&[])?;
         Ok(())
     }
-    fn wait_catalog(&mut self) -> Result<(), String> {
+    fn wait_catalog_resources(&mut self) -> Result<(), String> {
         let start = Instant::now();
         let deadline = start + Duration::from_secs(35);
         let epoch = self.fixture.update_epoch;
@@ -748,8 +763,21 @@ impl Probe {
         let interval = Duration::from_nanos(1_000_000_000 / 60);
         let mut max_update = Duration::ZERO;
         while self.fixture.directory_count == 0 {
+            let submissions = self.fixture.request_count;
             let elapsed = self.update()?;
             max_update = max_update.max(elapsed);
+            if self.fixture.request_count - submissions > 32 {
+                return Err("one update exceeded the 32-request submission budget".into());
+            }
+            if self.fixture.state_mode != 0
+                && self.fixture.update_epoch > self.fixture.files_ready_epoch + 40
+                && self.fixture.request_count == requests
+            {
+                return Err(
+                    "static catalogue still requires a valid save after PARAM/VFS are available"
+                        .into(),
+                );
+            }
             if !self.fixture.invalid_resource_requests.is_empty() {
                 return Err(format!(
                     "production raw resource request violates physical .dcx / 0x40 contract: first={:?}, invalid requests={}, update epoch={}",
@@ -784,8 +812,58 @@ impl Probe {
                 "catalogue did not exercise next-tick pending and transient busy polls".into(),
             );
         }
+        if self.fixture.max_pending_requests > 16 {
+            return Err("Boss exceeded its 16 active-token budget".into());
+        }
+        Ok(())
+    }
+    fn wait_catalog(&mut self) -> Result<(), String> {
+        self.wait_catalog_resources()?;
         std::thread::sleep(Duration::from_millis(510));
         self.update()?;
+        self.verify_catalog_flags()
+    }
+    fn preload_before_save(&mut self) -> Result<(), String> {
+        self.fixture.state_mode = 1;
+        self.fixture.display.loading_or_logo = 1;
+        self.fixture.params_ready_epoch = self.fixture.update_epoch + 2;
+        self.fixture.files_ready_epoch = self.fixture.update_epoch + 50;
+        let flags_before = self.fixture.flag_reads;
+        let writes_before = self.fixture.writes.len();
+        self.wait_catalog_resources()?;
+        if self.fixture.directory_count != 207
+            || self.fixture.flag_reads != flags_before
+            || self.fixture.writes.len() != writes_before
+        {
+            return Err(
+                "menu preparation did not produce 207 rows without save reads/writes".into(),
+            );
+        }
+        // A Host may return OK with valid=0 instead of ERR_UNAVAILABLE.
+        self.fixture.state_mode = 2;
+        std::thread::sleep(Duration::from_millis(510));
+        self.update()?;
+        if self.fixture.flag_reads != flags_before || self.fixture.writes.len() != writes_before {
+            return Err("OK/valid=0 save state permitted menu flag reads/writes".into());
+        }
+        let resource_requests = self.fixture.request_count;
+        let queries = self.fixture.param_queries;
+        self.fixture.state_mode = 0;
+        self.fixture.display.loading_or_logo = 0;
+        std::thread::sleep(Duration::from_millis(510));
+        let elapsed = self.update()?;
+        self.verify_catalog_flags()?;
+        if self.fixture.request_count != resource_requests {
+            return Err("first valid save restarted static resource preparation".into());
+        }
+        println!(
+            "PASS: menu catalogue Ready with save always unavailable, late PARAM/VFS, zero flag reads/writes; OK/valid=0 also rejected. First valid save update={}us, extra file requests=0, extra PARAM pointer queries={}; this is a controlled startup, not a live-game completion-time claim.",
+            elapsed.as_micros(),
+            self.fixture.param_queries - queries
+        );
+        Ok(())
+    }
+    fn verify_catalog_flags(&self) -> Result<(), String> {
         let ids = &self.fixture.last_flag_ids;
         if !self.fixture.invalid_scene_aliases.is_empty() {
             return Err(format!(
@@ -1183,6 +1261,11 @@ fn run() -> Result<(), String> {
         next: 100,
         upload_count: 0,
         request_count: 0,
+        state_mode: 0,
+        flag_reads: 0,
+        param_queries: 0,
+        params_ready_epoch: 0,
+        files_ready_epoch: 0,
     });
     check_controlled_revive(&mut fixture)?;
     // SAFETY: zero is valid for nullable callbacks/pointers and scalar POD fields.
@@ -1266,7 +1349,7 @@ fn run() -> Result<(), String> {
         sequence: 0,
         cpu: Duration::ZERO,
     };
-    probe.wait_catalog()?;
+    probe.preload_before_save()?;
     println!(
         "Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue={} rows, unique completion flags={}, file requests={}, real scenes={:?}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.",
         probe.fixture.directory_count,

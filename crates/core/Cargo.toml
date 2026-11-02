@@ -11,6 +11,8 @@ crate-type = ["cdylib", "rlib"]
 [features]
 # Controlled local-hook DLL fixture; excluded from the installation build.
 native-lifecycle-fixture = []
+# Controlled multi-DLL/native-queue pixel fixture; never ship this core DLL.
+layer-order-fixture = ["eroverlay-renderer/native-scene-fixture"]
 
 [dependencies]
 eroverlay-abi.workspace = true

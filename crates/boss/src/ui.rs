@@ -106,6 +106,7 @@ impl Ui {
         }
         match status {
             "Waiting for game parameters" => "正在等待游戏参数",
+            "Waiting for game language" => "正在等待游戏语言",
             "Loading game text and Boss events" => "正在读取游戏文本与 Boss 事件",
             "Loading Boss data; some requests timed out" => {
                 "部分 Boss 资源请求超时，正在整理已读取的数据"

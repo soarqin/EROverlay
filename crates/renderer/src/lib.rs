@@ -6,6 +6,9 @@ pub mod scene_scan;
 pub use gpu::{PreparedTexture, RenderStats, Renderer, RendererDiagnostics};
 use std::ffi::c_void;
 
+#[cfg(test)]
+static NATIVE_SCENE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct NativeFrame {
@@ -19,6 +22,53 @@ pub struct NativeFrame {
     pub sequence: u64,
 }
 pub type FrameCallback = unsafe extern "C" fn(*mut c_void, *const NativeFrame);
+
+/// Drives the real native queue/draw/frame adapter against caller-owned WARP
+/// targets. It is intentionally absent from normal core/plugin builds.
+///
+/// # Safety
+/// All frames, COM resources and callback state must remain live for this call.
+/// Use only in a controlled single-threaded offline host without native hooks.
+#[cfg(feature = "native-scene-fixture")]
+#[allow(clippy::too_many_arguments)]
+pub unsafe fn drive_scene_fixture(
+    callback: FrameCallback,
+    user: *mut c_void,
+    above: &NativeFrame,
+    above_resource: *mut c_void,
+    below: &NativeFrame,
+    below_resource: *mut c_void,
+    native_command: unsafe extern "C" fn(*mut c_void),
+    native_user: *mut c_void,
+    scenario: u32,
+) -> bool {
+    unsafe extern "C" {
+        fn er_rust_scene_drive_fixture(
+            callback: FrameCallback,
+            user: *mut c_void,
+            above: *const NativeFrame,
+            above_resource: *mut c_void,
+            below: *const NativeFrame,
+            below_resource: *mut c_void,
+            native_command: unsafe extern "C" fn(*mut c_void),
+            native_user: *mut c_void,
+            scenario: u32,
+        ) -> bool;
+    }
+    unsafe {
+        er_rust_scene_drive_fixture(
+            callback,
+            user,
+            above,
+            above_resource,
+            below,
+            below_resource,
+            native_command,
+            native_user,
+            scenario,
+        )
+    }
+}
 
 unsafe extern "C" {
     fn er_rust_scene_install(
@@ -90,6 +140,7 @@ mod tests {
     }
     #[test]
     fn native_hook_teardown_and_exact_layer_boundary() {
+        let _guard = super::NATIVE_SCENE_TEST_LOCK.lock().unwrap();
         assert!(unsafe { er_rust_scene_lifecycle_check() });
         assert!(super::NativeBridge::requires_module_retention());
     }

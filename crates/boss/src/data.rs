@@ -27,12 +27,20 @@ const PARAM_GROUPS: [u32; 6] = [
 ];
 const MAX_FILES: usize = 4096;
 const MAX_SCRIPT_BYTES: usize = 32 * 1024 * 1024;
-const MAX_PENDING: usize = 4;
+// Leave most of the shared native 128-request pool available to other plugins.
+// Admission/completion still shares the update CPU and batch limits below.
+const MAX_PENDING: usize = 16;
 const MAX_SCENE_BYTES: usize = 32 * 1024 * 1024;
 const UPDATE_BUDGET: Duration = Duration::from_millis(2);
 const MAX_BATCH: usize = 32;
 const JOB_TIMEOUT: Duration = Duration::from_secs(10);
 const LOADING_TIMEOUT: Duration = Duration::from_secs(60);
+
+fn current_language(host: Host) -> Option<String> {
+    host.config("common.language")
+        .filter(|s| !s.trim().is_empty())
+        .or_else(eroverlay_game::game_language)
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Encounter {
@@ -157,14 +165,21 @@ impl Loading {
             }
         }
         if self.queued.len() < MAX_FILES && self.queued.insert(path.clone()) {
-            self.jobs.push_back(Job {
+            let job = Job {
                 path,
                 kind,
                 attempts: 0,
                 retry: Instant::now(),
                 token: 0,
                 started: None,
-            });
+            };
+            // Start newly declared dependencies while the broad map probes
+            // are in flight, so their unchanged retry backoff can overlap IO.
+            if matches!(job.kind, Kind::Event { required: true }) {
+                self.jobs.push_front(job);
+            } else {
+                self.jobs.push_back(job);
+            }
         }
     }
     fn event(&mut self, name: &str, required: bool) {
@@ -191,7 +206,11 @@ impl Loading {
             host.log("boss-text: current game language is unavailable; using numeric labels\n");
         }
     }
+    #[cfg(test)]
     fn new(host: Host, tables: [usize; 6]) -> Option<Self> {
+        Self::with_language(host, tables, current_language(host).as_deref())
+    }
+    fn with_language(host: Host, tables: [usize; 6], language: Option<&str>) -> Option<Self> {
         let mut load = Self {
             areas: params::game_areas(tables[0])?,
             graces: params::bonfires(tables[1])?,
@@ -218,11 +237,7 @@ impl Loading {
             timeouts: 0,
             first_failure: None,
         };
-        let language = host
-            .config("common.language")
-            .filter(|s| !s.trim().is_empty())
-            .or_else(eroverlay_game::game_language);
-        load.queue_text(language.as_deref(), host);
+        load.queue_text(language, host);
         load.event("common_func.emevd", true);
         load.event("common.emevd", false);
         // Get the existing Boss-position maps ahead of broad resource probes.
@@ -309,6 +324,7 @@ impl Loading {
         let mut polled = BTreeSet::new();
         let mut submissions = 0;
         let mut completed = 0;
+        let mut pending = self.jobs.iter().filter(|job| job.token != 0).count();
         let loading_expired = now.saturating_duration_since(self.started) >= LOADING_TIMEOUT;
         while completed < MAX_BATCH && Instant::now() < until {
             if let Some(index) = self.jobs.iter().position(|job| {
@@ -318,6 +334,7 @@ impl Loading {
                         .is_some_and(|start| now.saturating_duration_since(start) >= JOB_TIMEOUT)
             }) {
                 let job = self.jobs.remove(index).unwrap();
+                pending -= usize::from(job.token != 0);
                 host.release(job.token);
                 self.unavailable(
                     job,
@@ -331,7 +348,6 @@ impl Loading {
                 completed += 1;
                 continue;
             }
-            let mut pending = self.jobs.iter().filter(|job| job.token != 0).count();
             for job in &mut self.jobs {
                 if pending >= MAX_PENDING || submissions >= MAX_BATCH || Instant::now() >= until {
                     break;
@@ -358,6 +374,7 @@ impl Loading {
                 break;
             };
             let mut job = self.jobs.remove(index).unwrap();
+            pending -= 1;
             host.release(job.token);
             job.token = 0;
             completed += 1;
@@ -564,7 +581,11 @@ impl Loading {
         }
         self.displays = retained;
     }
+    #[cfg(test)]
     fn catalog(&self, host: Host, relations: &Relations) -> Catalog {
+        self.catalog_with_labels(host, relations).0
+    }
+    fn catalog_with_labels(&self, host: Host, relations: &Relations) -> (Catalog, Labels) {
         build_catalog(
             &self.displays,
             &self.areas,
@@ -591,6 +612,7 @@ pub struct Data {
     publish_empty: bool,
     relations: Relations,
     relation_error: bool,
+    labels: Labels,
 }
 impl Data {
     pub fn new(host: Host) -> Self {
@@ -614,6 +636,7 @@ impl Data {
             publish_empty: false,
             relations: relations.unwrap_or_default(),
             relation_error,
+            labels: Labels::default(),
         }
     }
     pub fn status(&self) -> &'static str {
@@ -637,6 +660,7 @@ impl Data {
         self.tables = [0; 6];
         self.check = Instant::now();
         self.finished = false;
+        self.labels = Labels::default();
         self.status = "Waiting for game parameters";
         self.publish_empty = self.publish(Catalog::default()).is_some();
     }
@@ -649,12 +673,14 @@ impl Data {
         Some(self.catalog.clone())
     }
     pub fn update(&mut self) -> Option<Arc<Catalog>> {
+        self.update_at(Instant::now())
+    }
+    fn update_at(&mut self, now: Instant) -> Option<Arc<Catalog>> {
         if self.publish_empty {
             self.publish_empty = false;
             return Some(self.catalog.clone());
         }
-        let now = Instant::now();
-        let until = now + UPDATE_BUDGET;
+        let until = Instant::now() + UPDATE_BUDGET;
         if now >= self.check {
             self.check = now + Duration::from_millis(500);
             let tables = PARAM_GROUPS.map(|group| self.host.param(group));
@@ -664,17 +690,18 @@ impl Data {
                 }
                 self.tables = tables;
                 self.finished = false;
+                self.labels = Labels::default();
                 self.status = "Waiting for game parameters";
                 if self.publish(Catalog::default()).is_some() {
                     return Some(self.catalog.clone());
                 }
             }
-            if self.loading.is_none()
-                && !self.finished
-                && tables.iter().all(|t| *t != 0)
-                && self.host.state().is_some_and(|s| s.valid != 0)
-            {
-                self.loading = Loading::new(self.host, tables);
+            if self.loading.is_none() && !self.finished && tables.iter().all(|t| *t != 0) {
+                let Some(language) = current_language(self.host) else {
+                    self.set_status("Waiting for game language");
+                    return None;
+                };
+                self.loading = Loading::with_language(self.host, tables, Some(&language));
                 if self.loading.is_some() {
                     self.status = "Loading game text and Boss events";
                 }
@@ -709,7 +736,8 @@ impl Data {
         loading.filter_scenes();
         let loading = self.loading.take().unwrap();
         self.finished = true;
-        let catalog = loading.catalog(self.host, &self.relations);
+        let (catalog, labels) = loading.catalog_with_labels(self.host, &self.relations);
+        self.labels = labels;
         let status = if catalog.rows.is_empty() {
             if loading.failures != 0 || loading.timeouts != 0 {
                 "Boss data unavailable; reload game data"
@@ -723,6 +751,50 @@ impl Data {
         };
         self.set_status(status);
         self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional resources, {} unresolved event calls, {} absent scene bars excluded, {} request timeouts, first_failure={:?}\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing,loading.excluded.len(),loading.timeouts,loading.first_failure));
+        self.publish(catalog)
+    }
+    /// Story-dependent place labels are separate from static discovery. Only a
+    /// valid save permits these reads; no PARAM/resource/event work is repeated.
+    pub fn refresh_places(&mut self, state: &eroverlay_abi::BossState) -> Option<Arc<Catalog>> {
+        if state.valid == 0 || self.labels.ids.is_empty() {
+            return None;
+        }
+        let mut values = vec![2; self.labels.ids.len()];
+        self.host.flags(&self.labels.ids, &mut values);
+        if values == self.labels.values {
+            return None;
+        }
+        self.labels.values = values;
+        let flags: BTreeMap<_, _> = self
+            .labels
+            .ids
+            .iter()
+            .copied()
+            .zip(self.labels.values.iter().copied())
+            .collect();
+        let changes: Vec<_> = self
+            .labels
+            .rows
+            .iter()
+            .enumerate()
+            .filter_map(|(i, row)| {
+                let place = row.select(&flags);
+                (self.catalog.rows[i].place != place).then_some((i, place.to_owned()))
+            })
+            .collect();
+        if changes.is_empty() {
+            return None;
+        }
+        let mut catalog = (*self.catalog).clone();
+        for (i, place) in changes {
+            let row = &mut catalog.rows[i];
+            row.place = place;
+            row.search = format!(
+                "{} {} {}",
+                row.name, row.place, catalog.groups[row.group].name
+            )
+            .to_lowercase();
+        }
         self.publish(catalog)
     }
 }
@@ -745,17 +817,45 @@ fn map_label(map: u32) -> String {
 fn distance(a: [f32; 3], b: [f32; 3]) -> f32 {
     a.into_iter().zip(b).map(|(x, y)| (x - y) * (x - y)).sum()
 }
-fn place_text<'a>(
-    choices: &[TextChoice; 8],
-    text: &'a TextCatalog,
-    flags: &BTreeMap<u32, bool>,
-) -> Option<&'a str> {
-    choices
-        .iter()
-        .filter(|t| t.kind == 0 && t.id > 0)
-        .filter(|t| t.enable_flag == 0 || flags.get(&t.enable_flag) == Some(&true))
-        .filter(|t| t.disable_flag == 0 || flags.get(&t.disable_flag) != Some(&true))
-        .find_map(|t| text.place(t.id))
+#[derive(Default)]
+struct Labels {
+    ids: Vec<u32>,
+    values: Vec<u8>,
+    rows: Vec<PlaceLabel>,
+}
+struct PlaceChoice {
+    text: String,
+    enable: u32,
+    disable: u32,
+}
+struct PlaceLabel {
+    choices: Vec<PlaceChoice>,
+    fallback: String,
+}
+impl PlaceLabel {
+    fn add(&mut self, choices: &[TextChoice; 8], text: &TextCatalog) {
+        self.choices.extend(
+            choices
+                .iter()
+                .filter(|t| t.kind == 0 && t.id > 0)
+                .filter_map(|t| {
+                    text.place(t.id).map(|text| PlaceChoice {
+                        text: text.to_owned(),
+                        enable: t.enable_flag,
+                        disable: t.disable_flag,
+                    })
+                }),
+        );
+    }
+    fn select(&self, flags: &BTreeMap<u32, u8>) -> &str {
+        self.choices
+            .iter()
+            .find(|c| {
+                (c.enable == 0 || flags.get(&c.enable) == Some(&1))
+                    && (c.disable == 0 || flags.get(&c.disable) == Some(&0))
+            })
+            .map_or(&self.fallback, |c| &c.text)
+    }
 }
 
 struct EncounterGroup<'a> {
@@ -821,26 +921,12 @@ fn build_catalog(
     subcategories: &[SubcategoryRecord],
     tabs: &[TabRecord],
     texts: &TextCatalog,
-    host: Host,
+    _host: Host,
     relations: &Relations,
-) -> Catalog {
-    let ids: BTreeSet<u32> = graces
-        .iter()
-        .flat_map(|g| &g.texts)
-        .chain(points.iter().flat_map(|p| &p.texts))
-        .flat_map(|t| [t.enable_flag, t.disable_flag])
-        .filter(|f| *f != 0)
-        .collect();
-    let ids: Vec<_> = ids.into_iter().collect();
-    let mut values = vec![2; ids.len()];
-    host.flags(&ids, &mut values);
-    let flags: BTreeMap<_, _> = ids
-        .into_iter()
-        .zip(values)
-        .filter(|(_, v)| *v < 2)
-        .map(|(id, v)| (id, v != 0))
-        .collect();
+) -> (Catalog, Labels) {
+    let unknown = BTreeMap::new();
     let mut catalog = Catalog::default();
+    let mut labels = Labels::default();
     let mut group_indices = BTreeMap::new();
     let mut group_order = BTreeMap::new();
     for EncounterGroup {
@@ -902,16 +988,20 @@ fn build_catalog(
             }
         }
         let name = names.join(" / ");
-        let place = points
-            .iter()
-            .filter(|p| {
-                flag != 0
-                    && (p.cleared_flag == flag || p.texts.iter().any(|t| t.disable_flag == flag))
-            })
-            .find_map(|p| place_text(&p.texts, texts, &flags))
-            .or_else(|| grace.and_then(|g| place_text(&g.texts, texts, &flags)))
-            .map(str::to_owned)
-            .unwrap_or_else(|| map_label(packed));
+        let mut label = PlaceLabel {
+            choices: Vec::new(),
+            fallback: map_label(packed),
+        };
+        for point in points.iter().filter(|p| {
+            flag != 0 && (p.cleared_flag == flag || p.texts.iter().any(|t| t.disable_flag == flag))
+        }) {
+            label.add(&point.texts, texts);
+        }
+        if let Some(grace) = grace {
+            label.add(&grace.texts, texts);
+        }
+        let place = label.select(&unknown).to_owned();
+        labels.rows.push(label);
         let search = format!("{} {} {}", name, place, catalog.groups[group].name).to_lowercase();
         if flag == 0 {
             catalog.unknown_count += 1;
@@ -956,12 +1046,24 @@ fn build_catalog(
     for row in &mut catalog.rows {
         row.group = remap[row.group];
     }
-    catalog.rows.sort_by(|a, b| {
+    let mut rows: Vec<_> = catalog.rows.into_iter().zip(labels.rows).collect();
+    rows.sort_by(|(a, _), (b, _)| {
         a.group
             .cmp(&b.group)
             .then_with(|| a.flag.cmp(&b.flag))
             .then_with(|| a.name.cmp(&b.name))
     });
+    (catalog.rows, labels.rows) = rows.into_iter().unzip();
+    labels.ids = labels
+        .rows
+        .iter()
+        .flat_map(|row| &row.choices)
+        .flat_map(|c| [c.enable, c.disable])
+        .filter(|id| *id != 0)
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    labels.values = vec![2; labels.ids.len()];
     catalog.flag_ids = catalog
         .rows
         .iter()
@@ -970,7 +1072,7 @@ fn build_catalog(
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect();
-    catalog
+    (catalog, labels)
 }
 
 #[cfg(test)]
@@ -1043,6 +1145,8 @@ mod tests {
         Pending,
         Zero,
         Delayed(Vec<u8>),
+        NextTick(Vec<u8>),
+        MissingNextTick,
     }
     #[derive(Default)]
     struct Transport {
@@ -1054,6 +1158,14 @@ mod tests {
         next: u64,
         param: usize,
         state: Option<abi::BossState>,
+        tables: Option<[usize; 6]>,
+        language: Option<String>,
+        default_missing: bool,
+        peak_tokens: usize,
+        flag_calls: usize,
+        state_calls: usize,
+        flag_ids: Vec<Vec<u32>>,
+        flag_values: BTreeMap<u32, u8>,
     }
     impl Transport {
         fn host(&mut self) -> Host {
@@ -1066,12 +1178,19 @@ mod tests {
                 let path = std::str::from_utf8(bytes).unwrap();
                 let path = path.strip_suffix(".dcx").unwrap_or(path).to_owned();
                 transport.requests.push(path.clone());
+                if transport.default_missing {
+                    transport
+                        .replies
+                        .entry(path.clone())
+                        .or_insert(Reply::MissingNextTick);
+                }
                 if matches!(transport.replies.get(&path), None | Some(Reply::Zero)) {
                     return 0;
                 }
                 transport.next += 1;
                 let token = transport.next;
                 transport.active.insert(token, path);
+                transport.peak_tokens = transport.peak_tokens.max(transport.active.len());
                 token
             }
             unsafe extern "C" fn poll(
@@ -1099,6 +1218,15 @@ mod tests {
                             ..Default::default()
                         }
                     }
+                    Reply::NextTick(bytes) if *count > 1 => abi::FileView {
+                        status: abi::FILE_READY,
+                        bytes: abi::ByteSlice::new(bytes),
+                        ..Default::default()
+                    },
+                    Reply::NextTick(_) | Reply::MissingNextTick if *count == 1 => abi::FileView {
+                        status: abi::FILE_PENDING,
+                        ..Default::default()
+                    },
                     Reply::Pending | Reply::Delayed(_) => abi::FileView {
                         status: abi::FILE_PENDING,
                         ..Default::default()
@@ -1119,12 +1247,23 @@ mod tests {
                 assert!(transport.active.remove(&token).is_some());
                 transport.released.push(token);
             }
-            unsafe extern "C" fn param(user: *mut c_void, _: u32) -> usize {
-                unsafe { (*user.cast::<Transport>()).param }
+            unsafe extern "C" fn param(user: *mut c_void, group: u32) -> usize {
+                let transport = unsafe { &*user.cast::<Transport>() };
+                transport
+                    .tables
+                    .and_then(|tables| {
+                        PARAM_GROUPS
+                            .iter()
+                            .position(|g| *g == group)
+                            .map(|i| tables[i])
+                    })
+                    .unwrap_or(transport.param)
             }
             unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
                 // SAFETY: the Host supplies a complete writable BossState.
-                if let Some(state) = unsafe { (*user.cast::<Transport>()).state } {
+                let transport = unsafe { &mut *user.cast::<Transport>() };
+                transport.state_calls += 1;
+                if let Some(state) = transport.state {
                     unsafe {
                         out.write(state);
                     }
@@ -1133,6 +1272,42 @@ mod tests {
                     abi::ERR_UNAVAILABLE
                 }
             }
+            unsafe extern "C" fn config(
+                user: *mut c_void,
+                key: abi::ByteSlice,
+                out: *mut u8,
+                cap: usize,
+            ) -> usize {
+                let transport = unsafe { &*user.cast::<Transport>() };
+                let key = unsafe { std::slice::from_raw_parts(key.data, key.len) };
+                let value = if key == b"common.language" {
+                    transport.language.as_deref().unwrap_or("")
+                } else {
+                    ""
+                };
+                if value.len() <= cap {
+                    unsafe { std::ptr::copy_nonoverlapping(value.as_ptr(), out, value.len()) };
+                }
+                value.len()
+            }
+            unsafe extern "C" fn flags(
+                user: *mut c_void,
+                ids: *const u32,
+                out: *mut u8,
+                len: usize,
+            ) -> i32 {
+                let transport = unsafe { &mut *user.cast::<Transport>() };
+                transport.flag_calls += 1;
+                let ids = unsafe { std::slice::from_raw_parts(ids, len) };
+                transport.flag_ids.push(ids.to_vec());
+                for (id, value) in ids
+                    .iter()
+                    .zip(unsafe { std::slice::from_raw_parts_mut(out, len) })
+                {
+                    *value = transport.flag_values.get(id).copied().unwrap_or(2);
+                }
+                abi::OK
+            }
             let mut host = host();
             host.0.user = (self as *mut Self).cast();
             host.0.request_file = Some(request);
@@ -1140,6 +1315,8 @@ mod tests {
             host.0.release_file = Some(release);
             host.0.find_param_table = Some(param);
             host.0.read_boss_state = Some(state);
+            host.0.config_get = Some(config);
+            host.0.read_event_flags = Some(flags);
             host
         }
     }
@@ -1214,6 +1391,35 @@ mod tests {
         assert!(transport.active.is_empty());
         assert!(run_files(&mut load, host, now + JOB_TIMEOUT));
         assert_eq!(transport.requests.len(), 71);
+    }
+    #[test]
+    fn new_required_dependencies_precede_broad_probes_without_reordering_an_existing_upgrade() {
+        let mut load = empty_loading();
+        load.event("optional_first.emevd", false);
+        load.event("optional_second.emevd", false);
+        load.event("linked_dependency.emevd", true);
+        assert_eq!(
+            load.jobs
+                .iter()
+                .map(|j| j.path.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "event:/linked_dependency.emevd",
+                "event:/optional_first.emevd",
+                "event:/optional_second.emevd"
+            ]
+        );
+        load.event("optional_second.emevd", true);
+        assert_eq!(
+            load.jobs.back().unwrap().path,
+            "event:/optional_second.emevd"
+        );
+        assert!(matches!(
+            load.jobs.back().unwrap().kind,
+            Kind::Event { required: true }
+        ));
+        load.event("linked_dependency.emevd", true);
+        assert_eq!(load.jobs.len(), 3);
     }
     #[test]
     fn rejected_busy_and_pending_jobs_expire_without_sleep_and_a_fresh_load_recovers() {
@@ -1816,6 +2022,223 @@ mod tests {
     }
 
     #[test]
+    fn menu_catalogue_does_not_read_save_state_or_flags_and_labels_wait_for_a_valid_save() {
+        for state in [None, Some(abi::BossState::default())] {
+            let mut transport = Transport {
+                state,
+                ..Default::default()
+            };
+            let host = transport.host();
+            let mut load = empty_loading();
+            load.displays.push(display(0x0a000000, 0, 7, 1, Some(7)));
+            load.areas.push(GameAreaRecord {
+                row: 7,
+                flag: 7,
+                map: [10, 0, 0],
+                pos: [0.; 3],
+                found_text: 0,
+            });
+            let mut data = Data::new(host);
+            data.loading = Some(load);
+            data.relation_error = false;
+            for _ in 0..4 {
+                data.update();
+            }
+            assert!(data.finished);
+            assert_eq!(data.catalog.rows.len(), 1);
+            assert_eq!(data.status(), "Ready");
+            assert_eq!((transport.state_calls, transport.flag_calls), (0, 0));
+
+            data.labels = Labels {
+                ids: vec![11, 12],
+                values: vec![2, 2],
+                rows: vec![PlaceLabel {
+                    choices: vec![
+                        PlaceChoice {
+                            text: "Conditional place".into(),
+                            enable: 11,
+                            disable: 12,
+                        },
+                        PlaceChoice {
+                            text: "Unconditional place".into(),
+                            enable: 0,
+                            disable: 0,
+                        },
+                    ],
+                    fallback: "m10_00_00_00".into(),
+                }],
+            };
+            assert!(data.refresh_places(&abi::BossState::default()).is_none());
+            assert_eq!(transport.flag_calls, 0);
+            let valid = abi::BossState {
+                valid: 1,
+                ..Default::default()
+            };
+            transport.flag_values.insert(11, 1);
+            // Missing disable evidence cannot select the conditional place.
+            assert_eq!(
+                data.refresh_places(&valid).unwrap().rows[0].place,
+                "Unconditional place"
+            );
+            transport.flag_values.insert(12, 0);
+            let c = data.refresh_places(&valid).unwrap();
+            assert_eq!(c.rows[0].place, "Conditional place");
+            assert!(c.rows[0].search.contains("conditional place"));
+            let revision = data.revision();
+            assert!(data.refresh_places(&valid).is_none());
+            assert_eq!(data.revision(), revision);
+            transport.flag_values.insert(12, 1);
+            assert_eq!(
+                data.refresh_places(&valid).unwrap().rows[0].place,
+                "Unconditional place"
+            );
+            assert!(transport.flag_ids.iter().all(|ids| ids == &[11, 12]));
+            assert!(transport.requests.is_empty());
+        }
+    }
+    #[test]
+    fn menu_initialization_retries_late_parameters_language_and_vfs_without_save_queries() {
+        let native: Vec<_> = [
+            ("GAME_AREA_PARAM_ST", 3),
+            ("BONFIRE_WARP_PARAM_ST", 6),
+            ("WORLD_MAP_POINT_PARAM_ST", 6),
+            ("BONFIRE_WARP_SUB_CATEGORY_PARAM_ST", 1),
+            ("BONFIRE_WARP_TAB_PARAM_ST", 2),
+            ("MAP_DEFAULT_INFO_PARAM_ST", 6),
+        ]
+        .iter()
+        .map(|(kind, version)| {
+            let mut n = vec![0; 16 + 0x180 + kind.len() + 1];
+            let len = n.len() - 16;
+            n[..4].copy_from_slice(&(len as u32).to_le_bytes());
+            let b = &mut n[16..];
+            b[..4].copy_from_slice(&0x180u32.to_le_bytes());
+            b[8..10].copy_from_slice(&(*version as u16).to_le_bytes());
+            b[10..12].copy_from_slice(&1u16.to_le_bytes());
+            b[16..24].copy_from_slice(&0x180u64.to_le_bytes());
+            b[45] = 0x85;
+            b[46] = 2;
+            b[0x48..0x50].copy_from_slice(&0x80u64.to_le_bytes());
+            b[0x180..0x180 + kind.len()].copy_from_slice(kind.as_bytes());
+            n
+        })
+        .collect();
+        let tables = std::array::from_fn(|i| native[i].as_ptr() as usize + 16);
+        for state in [None, Some(abi::BossState::default())] {
+            let mut transport = Transport {
+                state,
+                ..Default::default()
+            };
+            let host = transport.host();
+            let mut data = Data::new(host);
+            let now = Instant::now();
+            data.update_at(now);
+            assert!(data.loading.is_none());
+            transport.tables = Some(tables);
+            data.update_at(now + Duration::from_millis(500));
+            assert!(data.loading.is_none());
+            assert_eq!(data.status(), "Waiting for game language");
+            transport.language = Some("engUS".into());
+            data.update_at(now + Duration::from_millis(1000));
+            assert!(data.loading.is_some());
+            let attempts = transport.requests.len();
+            data.update_at(now + Duration::from_millis(1001));
+            assert_eq!(
+                transport.requests.len(),
+                attempts,
+                "rejected admission backs off"
+            );
+            let paths = text::binder_paths("engUS").unwrap();
+            transport.replies.insert(
+                paths[0].clone(),
+                Reply::Ready(text_binder(&[
+                    ("NpcName.fmg", Some("boss")),
+                    ("PlaceName.fmg", Some("place")),
+                ])),
+            );
+            transport.replies.insert(
+                paths[1].clone(),
+                Reply::Ready(text_binder(&[("GR_MenuText.fmg", Some("menu"))])),
+            );
+            for name in ["common.emevd", "common_func.emevd"] {
+                transport
+                    .replies
+                    .insert(format!("event:/{name}"), Reply::Ready(empty_emevd()));
+            }
+            for i in 0..4 {
+                data.update_at(now + Duration::from_millis(1250 + i));
+            }
+            assert!(data.finished);
+            assert_eq!((transport.state_calls, transport.flag_calls), (0, 0));
+            assert!(transport.active.is_empty());
+            assert!(transport.requests.len() <= attempts * 2);
+            let requests = transport.requests.len();
+            transport.state = Some(abi::BossState {
+                valid: 1,
+                ..Default::default()
+            });
+            data.update_at(now + Duration::from_millis(2000));
+            assert_eq!(
+                transport.requests.len(),
+                requests,
+                "entering a save does not restart discovery"
+            );
+            transport.tables = None;
+            data.update_at(now + Duration::from_millis(2500));
+            assert!(
+                data.finished,
+                "temporarily unavailable PARAMs keep the catalogue"
+            );
+            assert_eq!(transport.requests.len(), requests);
+            transport.tables = Some(tables);
+            data.update_at(now + Duration::from_millis(3000));
+            assert_eq!(transport.requests.len(), requests);
+
+            // Relocate actual valid PARAM buffers, rather than substituting
+            // invalid fake addresses, and require a new resource generation.
+            let relocated = native.clone();
+            let replacement = std::array::from_fn(|i| relocated[i].as_ptr() as usize + 16);
+            assert_ne!(tables, replacement);
+            transport.tables = Some(replacement);
+            for i in 0..4 {
+                data.update_at(now + Duration::from_millis(3500 + i));
+            }
+            assert_eq!(data.tables, replacement);
+            assert!(data.finished);
+            assert!(transport.requests.len() > requests);
+            assert!(transport.active.is_empty());
+
+            // Same-address Mod/text changes have no trustworthy automatic
+            // version signal. Explicit reload must resample language and files.
+            let requests = transport.requests.len();
+            transport.language = Some("zhoCN".into());
+            let translated = text::binder_paths("zhoCN").unwrap();
+            transport.replies.insert(
+                translated[0].clone(),
+                Reply::Ready(text_binder(&[
+                    ("NpcName.fmg", Some("translated boss")),
+                    ("PlaceName.fmg", Some("translated place")),
+                ])),
+            );
+            transport.replies.insert(
+                translated[1].clone(),
+                Reply::Ready(text_binder(&[("GR_MenuText.fmg", Some("translated menu"))])),
+            );
+            data.reload();
+            for i in 0..4 {
+                data.update_at(now + Duration::from_millis(4000 + i));
+            }
+            assert!(data.finished);
+            assert_eq!(data.tables, replacement);
+            for path in &translated[..2] {
+                assert!(transport.requests[requests..].contains(path));
+            }
+            assert!(transport.active.is_empty());
+            assert_eq!((transport.state_calls, transport.flag_calls), (0, 0));
+        }
+    }
+
+    #[test]
     #[ignore = "requires original PARAM/EMEVD/FMG exports; see docs/boss-events.md"]
     fn archived_catalog_uses_param_map_plan_and_current_game_text() {
         let root = PathBuf::from(std::env::var_os("EROVERLAY_BOSS_PARAM_DIR").unwrap());
@@ -1912,6 +2335,205 @@ mod tests {
                 row.place,
                 catalog.groups[row.group].name,
                 map_label(row.map_id)
+            );
+        }
+    }
+
+    #[test]
+    #[ignore = "explicit archived PARAM/EMEVD/FMG/MSB inputs; profiles production initialization"]
+    fn archived_loading_scheduler_profile() {
+        let root = PathBuf::from(std::env::var_os("EROVERLAY_BOSS_PARAM_DIR").unwrap());
+        let events = PathBuf::from(std::env::var_os("EROVERLAY_BOSS_EVENTS_DIR").unwrap());
+        let scenes = PathBuf::from(std::env::var_os("EROVERLAY_BOSS_SCENE_DIR").unwrap());
+        let native: Vec<_> = [
+            "GameAreaParam",
+            "BonfireWarpParam",
+            "WorldMapPointParam",
+            "BonfireWarpSubCategoryParam",
+            "BonfireWarpTabParam",
+            "MapDefaultInfoParam",
+        ]
+        .iter()
+        .map(|name| {
+            let b = std::fs::read(root.join(format!("{name}.param"))).unwrap();
+            let mut n = vec![0; 16];
+            n[..4].copy_from_slice(&(b.len() as u32).to_le_bytes());
+            n.extend(b);
+            n
+        })
+        .collect();
+        let tables = std::array::from_fn(|i| native[i].as_ptr() as usize + 16);
+        let mut replies = BTreeMap::new();
+        for file in std::fs::read_dir(events).unwrap() {
+            let path = file.unwrap().path();
+            if path.extension().is_some_and(|e| e == "emevd") {
+                replies.insert(
+                    format!("event:/{}", path.file_name().unwrap().to_str().unwrap()),
+                    Reply::NextTick(std::fs::read(path).unwrap()),
+                );
+            }
+        }
+        let text_paths = text::binder_paths("engUS").unwrap();
+        for (i, name) in ["item_dlc02.bnd", "menu_dlc02.bnd"].iter().enumerate() {
+            replies.insert(
+                text_paths[i].clone(),
+                Reply::NextTick(std::fs::read(root.join(name)).unwrap()),
+            );
+        }
+        for file in std::fs::read_dir(scenes).unwrap() {
+            let path = file.unwrap().path();
+            if path.extension().is_some_and(|e| e == "msb") {
+                for mount in ["mapstudio", "mapstudio_dlc2"] {
+                    replies.insert(
+                        format!("{mount}:/{}", path.file_name().unwrap().to_str().unwrap()),
+                        Reply::NextTick(std::fs::read(&path).unwrap()),
+                    );
+                }
+            }
+        }
+        let relations = crate::encounters::load(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../..")
+                .as_path(),
+        )
+        .unwrap();
+        for round in 0..3 {
+            let mut transport = Transport {
+                replies: replies.clone(),
+                tables: Some(tables),
+                language: Some("engUS".into()),
+                default_missing: true,
+                ..Default::default()
+            };
+            let host = transport.host();
+            let start = Instant::now();
+            let mut load = Loading::new(host, tables).unwrap();
+            let init = start.elapsed();
+            let mut ticks = 0;
+            let mut updates = Vec::new();
+            let mut final_times = [Duration::ZERO; 2];
+            loop {
+                let now = load.started + Duration::from_nanos(ticks * 1_000_000_000 / 60);
+                let tick = Instant::now();
+                let until = tick + UPDATE_BUDGET;
+                ticks += 1;
+                if load.files_at(host, now, until)
+                    && load.discover_until(until)
+                    && !load.prepare_scenes()
+                    && Instant::now() < until
+                {
+                    let stage = Instant::now();
+                    load.filter_scenes();
+                    final_times[0] = stage.elapsed();
+                    let stage = Instant::now();
+                    let (catalog, labels) = load.catalog_with_labels(host, &relations);
+                    final_times[1] = stage.elapsed();
+                    updates.push(tick.elapsed());
+                    assert_eq!(catalog.rows.len(), 207);
+                    assert_eq!(transport.flag_calls, 0);
+                    let conditional_rows = labels
+                        .rows
+                        .iter()
+                        .filter(|r| r.choices.iter().any(|c| c.enable != 0 || c.disable != 0))
+                        .count();
+                    let old_unknown_differences = labels
+                        .rows
+                        .iter()
+                        .filter(|r| {
+                            let old = r
+                                .choices
+                                .iter()
+                                .find(|c| c.enable == 0)
+                                .map_or(&r.fallback, |c| &c.text);
+                            old != r.select(&BTreeMap::new())
+                        })
+                        .count();
+                    println!(
+                        "profile label_flags={} conditional_rows={conditional_rows} conservative_menu_label_changes={old_unknown_differences}",
+                        labels.ids.len()
+                    );
+                    let mut data = Data::new(host);
+                    data.catalog = Arc::new(catalog.clone());
+                    data.labels = labels;
+                    let refresh = Instant::now();
+                    data.refresh_places(&abi::BossState {
+                        valid: 1,
+                        ..Default::default()
+                    });
+                    let refresh = refresh.elapsed();
+                    assert_eq!(
+                        transport.flag_calls,
+                        usize::from(!data.labels.ids.is_empty())
+                    );
+                    println!(
+                        "profile first_valid_labels_us={} flag_query_ids={} no_resource_rescan=true",
+                        refresh.as_micros(),
+                        data.labels.ids.len()
+                    );
+                    println!(
+                        "profile round={round} tokens={MAX_PENDING} rows={} scripts={} requests={} ticks={ticks} virtual_ms={} init_us={} filter_us={} catalog_us={} flag_calls={} peak_tokens={}",
+                        catalog.rows.len(),
+                        load.scripts.len(),
+                        transport.requests.len(),
+                        ticks * 1000 / 60,
+                        init.as_micros(),
+                        final_times[0].as_micros(),
+                        final_times[1].as_micros(),
+                        transport.flag_calls,
+                        transport.peak_tokens
+                    );
+                    break;
+                }
+                updates.push(tick.elapsed());
+                assert!(ticks < 2000);
+            }
+            let cpu: Duration = updates.iter().sum();
+            updates.sort_unstable();
+            println!(
+                "profile round={round} update_cpu_us={} p50_us={} p95_us={} p99_us={} max_us={}",
+                cpu.as_micros(),
+                updates[updates.len() / 2].as_micros(),
+                updates[updates.len() * 95 / 100].as_micros(),
+                updates[updates.len() * 99 / 100].as_micros(),
+                updates.last().unwrap().as_micros()
+            );
+        }
+        for state in [None, Some(abi::BossState::default())] {
+            let mut transport = Transport {
+                replies: replies.clone(),
+                tables: Some(tables),
+                language: Some("engUS".into()),
+                default_missing: true,
+                state,
+                ..Default::default()
+            };
+            let host = transport.host();
+            let mut data = Data::new(host);
+            data.relations = crate::encounters::load(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../..")
+                    .as_path(),
+            )
+            .unwrap();
+            data.relation_error = false;
+            let start = Instant::now();
+            let mut ticks = 0;
+            while !data.finished {
+                data.update_at(start + Duration::from_nanos(ticks * 1_000_000_000 / 60));
+                ticks += 1;
+                assert!(ticks < 2000);
+            }
+            assert_eq!(data.catalog.rows.len(), 207);
+            assert_eq!((transport.flag_calls, transport.state_calls), (0, 0));
+            let requests = transport.requests.len();
+            transport.state = Some(abi::BossState {
+                valid: 1,
+                ..Default::default()
+            });
+            data.update_at(start + Duration::from_secs(20));
+            assert_eq!(transport.requests.len(), requests);
+            println!(
+                "profile menu state={state:?} rows=207 ticks={ticks} requests={requests} flag_queries=0 state_queries=0 enter_save_rescans=0"
             );
         }
     }

@@ -14,6 +14,9 @@ struct NativeSceneVerifier {
         std::array<QueueEntry, 16> records{};
         std::array<Command, 16> commands{};
         std::string order;
+        uintptr_t context = 0;
+        void (*nativeCommand)(void *) = nullptr;
+        void *nativeUser = nullptr;
         void append(uint8_t opcode, char tag, uint32_t priority, UiSceneBridge::Draw callback = nullptr, UiSceneBridge::Invocation *data = nullptr) {
             commands[count] = {opcode, tag, callback, data};
             records[count] = {reinterpret_cast<uintptr_t>(&commands[count]), priority, 0};
@@ -69,6 +72,88 @@ struct NativeSceneVerifier {
         std::puts(ok ? "PASS: exact native UI command boundary survives later native work; stale/missing boundaries suppress only the lower stage."
                      : "FAIL: native UI command boundary/order fixture");
         return ok;
+    }
+    static uint32_t fixturePixelFormat(uint32_t format) { return format; }
+    static void consumeFrameFixture(uintptr_t, void *opaque) {
+        auto &queue = *static_cast<LayerQueue *>(opaque);
+        std::sort(queue.records.begin(), queue.records.begin() + queue.count, [](const auto &a, const auto &b) { return a.priority < b.priority; });
+        for (uint32_t i = 0; i < queue.count; ++i) {
+            auto &command = *reinterpret_cast<LayerQueue::Command *>(queue.records[i].command);
+            queue.order += command.tag;
+            if (command.tag == 'U' && queue.nativeCommand)
+                queue.nativeCommand(queue.nativeUser);
+            if (command.callback)
+                command.callback(queue.context, command.data, nullptr);
+        }
+    }
+    static bool driveFrame(Callback callback, void *user, const NativeFrame &above, void *aboveResource,
+                           const NativeFrame &below, void *belowResource, void (*nativeCommand)(void *), void *nativeUser, uint32_t scenario) {
+        if (!callback || !aboveResource || !belowResource || !nativeCommand || scenario > 4 || gSceneBridge.load()) return false;
+        HMODULE module = nullptr;
+        if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                               reinterpret_cast<LPCWSTR>(&fixturePixelFormat), &module)) return false;
+        UiSceneBridge bridge(callback, user);
+        bridge.module_ = reinterpret_cast<uintptr_t>(module);
+        auto localFunction = reinterpret_cast<uintptr_t>(&fixturePixelFormat);
+        if (localFunction < bridge.module_ || localFunction - bridge.module_ > UINT32_MAX) return false;
+        bridge.addresses_.pixelFormat = static_cast<uint32_t>(localFunction - bridge.module_);
+        bridge.addresses_.renderViewVtable = bridge.addresses_.textureVtable = bridge.addresses_.pixelFormat;
+        bridge.addresses_.queueIndexOffset = 0x10;
+        bridge.addresses_.queuesOffset = 0x20;
+        bridge.addresses_.swapChainsOffset = 0x40;
+        bridge.addresses_.renderPostOffset = 0x80;
+        bridge.addresses_.viewportOffset = 0x20;
+        bridge.addresses_.contextEnvironmentOffset = 0x10;
+        bridge.addresses_.backendOffset = bridge.addresses_.queueOffset = 0x10;
+        bridge.originalComposite_ = &compositeFixture;
+        bridge.original_ = &consumeFrameFixture;
+        bridge.enqueue_ = &enqueueLayerFixture;
+        bridge.invocations_ = above.sequence ? above.sequence - 1 : 0;
+        bridge.accepting_ = true;
+        std::array<uintptr_t, 32> drawSystem{}, swap{}, post{}, belowHolder{}, context{}, environment{}, backend{};
+        std::array<uintptr_t, 8> aboveView{}, belowView{}, aboveTexture{}, belowTexture{};
+        LayerQueue queue;
+        drawSystem[0x20 / 8] = reinterpret_cast<uintptr_t>(&queue);
+        drawSystem[0x40 / 8] = reinterpret_cast<uintptr_t>(swap.data());
+        swap[0] = reinterpret_cast<uintptr_t>(swap.data()); // Only non-null interface identity is read.
+        swap[0x70 / 8] = reinterpret_cast<uintptr_t>(aboveView.data());
+        swap[0x80 / 8] = reinterpret_cast<uintptr_t>(post.data());
+        post[0x78 / 8] = reinterpret_cast<uintptr_t>(belowHolder.data());
+        belowHolder[0] = reinterpret_cast<uintptr_t>(belowView.data());
+        for (auto pair: {std::pair{aboveView.data(), aboveTexture.data()}, std::pair{belowView.data(), belowTexture.data()}}) {
+            pair.first[0] = pair.second[0] = localFunction;
+            pair.first[1] = reinterpret_cast<uintptr_t>(pair.second);
+        }
+        aboveView[0x10 / 8] = above.target;
+        belowView[0x10 / 8] = below.target;
+        aboveView[0x18 / 8] = above.format;
+        belowView[0x18 / 8] = below.format;
+        aboveTexture[0x20 / 8] = reinterpret_cast<uintptr_t>(aboveResource);
+        belowTexture[0x20 / 8] = reinterpret_cast<uintptr_t>(belowResource);
+        context[0x10 / 8] = reinterpret_cast<uintptr_t>(environment.data());
+        environment[0x10 / 8] = reinterpret_cast<uintptr_t>(backend.data());
+        backend[0x10 / 8] = reinterpret_cast<uintptr_t>(above.queue);
+        D3D12_VIEWPORT viewport{0, 0, above.width, above.height, 0, 1};
+        if (above.queue != below.queue || above.width != below.width || above.height != below.height) return false;
+        std::memcpy(reinterpret_cast<uint8_t *>(context.data()) + 0x20, &viewport, sizeof(viewport));
+        queue.context = reinterpret_cast<uintptr_t>(context.data());
+        queue.nativeCommand = nativeCommand;
+        queue.nativeUser = nativeUser;
+        gSceneBridge = &bridge;
+        struct ClearFixtureBridge {
+            ~ClearFixtureBridge() { gSceneBridge = nullptr; }
+        } clearBridge;
+        const auto draw = reinterpret_cast<uintptr_t>(drawSystem.data());
+        queue.append(0, 'S', 0x800000);
+        if (scenario != 1 && scenario != 4)
+            UiSceneBridge::composite(draw, queue.context);
+        else
+            compositeFixture(draw, queue.context);
+        if (scenario == 2) queue.records[1].priority += 10;
+        if (scenario == 3) UiSceneBridge::composite(draw, queue.context);
+        queue.append(0, 'T', queue.lastPriority + 0x800000);
+        UiSceneBridge::submit(draw, &queue);
+        return bridge.accepting_.load() && bridge.callbacks_.load() == ((scenario == 1 || scenario == 2 || scenario == 4) ? 1u : 2u);
     }
     struct QueueFixture {
         UiSceneBridge::Draw callback = nullptr;
@@ -286,5 +371,11 @@ struct NativeSceneVerifier {
 } // namespace er
 extern "C" bool er_rust_scene_lifecycle_check() noexcept {
     try { return er::NativeSceneVerifier::bridgeCheck() && er::NativeSceneVerifier::outsideGateCheck() && er::NativeSceneVerifier::disableFailureCheck() && er::NativeSceneVerifier::boundaryCheck(); }
+    catch (...) { return false; }
+}
+extern "C" bool er_rust_scene_drive_fixture(Callback callback, void *user, const NativeFrame *above, void *aboveResource,
+                                           const NativeFrame *below, void *belowResource, void (*nativeCommand)(void *), void *nativeUser, uint32_t scenario) noexcept {
+    if (!above || !below) return false;
+    try { return er::NativeSceneVerifier::driveFrame(callback, user, *above, aboveResource, *below, belowResource, nativeCommand, nativeUser, scenario); }
     catch (...) { return false; }
 }

@@ -227,6 +227,7 @@ pub struct Renderer {
     composite_hdr: [ID3D12PipelineState; 2],
     slots: Vec<Slot>,
     next_slot: usize,
+    above_slot_reserve: usize,
     textures: HashMap<u64, Texture>,
     free_descriptors: Vec<u32>,
     retired: Vec<Retired>,
@@ -390,6 +391,7 @@ impl Renderer {
             composite_hdr,
             slots,
             next_slot: 0,
+            above_slot_reserve: 0,
             textures: HashMap::with_capacity(1024),
             free_descriptors: ((SLOT_COUNT as u32)..DESCRIPTORS).rev().collect(),
             retired: Vec::with_capacity(DESCRIPTORS as usize),
@@ -410,6 +412,14 @@ impl Renderer {
 
     pub fn matches_device(&self, frame: &NativeFrame) -> bool {
         self.device.as_raw() == frame.device && self.queue.as_raw() == frame.queue
+    }
+
+    /// Keep lower-layer work from consuming the last slots needed by loaded
+    /// upper-layer plugin groups. This never waits for GPU work or grows the pool.
+    pub fn reserve_above_slots(&mut self, groups: usize) {
+        // More upper groups remain best effort: even an idle pool must leave
+        // one lower opportunity instead of starving it for the entire session.
+        self.above_slot_reserve = groups.min(SLOT_COUNT - 1);
     }
 
     /// Uploads premultiplied sRGBA pixels. Copies only on a dirty texture update.
@@ -676,6 +686,25 @@ impl Renderer {
                 "frame_budget"
             };
             return Ok(RenderStats {
+                resident_bytes: self.committed_bytes(),
+                ..Default::default()
+            });
+        }
+        // A lower group can otherwise consume the last free slot and leave the
+        // upper group invisible in the same native queue. Preserve the normal
+        // nonblocking drop policy, but give the upper stage its own opportunity.
+        if frame.layer == LAYER_BELOW_UI
+            && self.above_slot_reserve > 0
+            && self
+                .slots
+                .iter()
+                .filter(|slot| slot.fence <= completed)
+                .count()
+                <= self.above_slot_reserve
+        {
+            self.upload_block = "reserved_above_slots";
+            return Ok(RenderStats {
+                dropped: true,
                 resident_bytes: self.committed_bytes(),
                 ..Default::default()
             });
@@ -2091,6 +2120,167 @@ mod tests {
             let events = WAIT_EVENT_CREATES.with(|count| count.get());
             assert!(renderer.wait_idle(0));
             assert_eq!(WAIT_EVENT_CREATES.with(|count| count.get()), events);
+            no_debug_errors(&device);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn warp_lower_cannot_take_upper_layers_last_free_slot() -> Result<()> {
+        unsafe {
+            let (device, queue, target, _rtv, mut frame) = context(DXGI_FORMAT_R10G10B10A2_UNORM)?;
+            let mut renderer = Renderer::new(&frame)?;
+            renderer.render(&frame, &[], RenderOptions::default())?;
+            assert!(renderer.wait_idle(10000));
+            let indices = [0, 1, 2, 0, 2, 3];
+            for reserved in [0, 1] {
+                renderer.reserve_above_slots(reserved);
+                run_list(&device, &queue, |list| {
+                    list.ClearRenderTargetView(
+                        D3D12_CPU_DESCRIPTOR_HANDLE { ptr: frame.target },
+                        &[0.0, 0.0, 0.0, 1.0],
+                        None,
+                    );
+                })?;
+                let gate = hold_uploads(&device, &queue)?;
+                let mut vertices = [
+                    Vertex {
+                        pos: [8.0, 8.0],
+                        uv: [0.0, 0.0],
+                        color: 0,
+                    },
+                    Vertex {
+                        pos: [56.0, 8.0],
+                        uv: [1.0, 0.0],
+                        color: 0,
+                    },
+                    Vertex {
+                        pos: [56.0, 56.0],
+                        uv: [1.0, 1.0],
+                        color: 0,
+                    },
+                    Vertex {
+                        pos: [8.0, 56.0],
+                        uv: [0.0, 1.0],
+                        color: 0,
+                    },
+                ];
+                let mesh = Mesh {
+                    texture: 0,
+                    vertices: vertices.as_ptr(),
+                    vertex_count: 4,
+                    indices: indices.as_ptr(),
+                    index_count: 6,
+                    clip: [8.0, 8.0, 56.0, 56.0],
+                };
+                frame.layer = 0;
+                for _ in 0..SLOT_COUNT - 1 {
+                    assert!(
+                        !renderer
+                            .render(&frame, &[mesh], RenderOptions::default())?
+                            .dropped
+                    );
+                }
+                for vertex in &mut vertices {
+                    vertex.color = 0xff0000ff;
+                }
+                frame.layer = LAYER_BELOW_UI;
+                let below = renderer.render(&frame, &[mesh], RenderOptions::default())?;
+                for vertex in &mut vertices {
+                    vertex.color = 0xff00ff00;
+                }
+                frame.layer = 0;
+                let above = renderer.render(&frame, &[mesh], RenderOptions::default())?;
+                assert_eq!(below.dropped, reserved == 1);
+                assert_eq!(above.dropped, reserved == 0);
+                drop(gate);
+                assert!(renderer.wait_idle(10000));
+                let pixels = readback(&device, &queue, &target, DXGI_FORMAT_R10G10B10A2_UNORM)?;
+                let offset = 32 * 256 + 32 * 4;
+                let color = u32::from_le_bytes(pixels[offset..offset + 4].try_into().unwrap());
+                let red = color & 1023;
+                let green = (color >> 10) & 1023;
+                assert_eq!(
+                    (red, green),
+                    if reserved == 0 { (1023, 0) } else { (0, 1023) }
+                );
+                println!(
+                    "WARP reserved={reserved}: lower_dropped={}, upper_dropped={}, overlap RGB10=({red},{green},0)",
+                    below.dropped, above.dropped
+                );
+            }
+            // Loading more upper plugins than the pool must not permanently
+            // suppress a visible lower group, even when all slots are idle.
+            renderer.reserve_above_slots(usize::MAX);
+            frame.layer = LAYER_BELOW_UI;
+            run_list(&device, &queue, |list| {
+                list.ClearRenderTargetView(
+                    D3D12_CPU_DESCRIPTOR_HANDLE { ptr: frame.target },
+                    &[0.0, 0.0, 0.0, 1.0],
+                    None,
+                );
+            })?;
+            let lower = renderer.render(
+                &frame,
+                &[],
+                RenderOptions {
+                    border_width: 2.0,
+                    border_color: 0xffffffff,
+                    ..Default::default()
+                },
+            )?;
+            assert!(!lower.dropped);
+            assert_eq!(lower.draw_calls, 1);
+            assert!(renderer.wait_idle(10000));
+            let pixels = readback(&device, &queue, &target, DXGI_FORMAT_R10G10B10A2_UNORM)?;
+            let offset = 32 * 256;
+            let edge = u32::from_le_bytes(pixels[offset..offset + 4].try_into().unwrap());
+            assert_eq!(edge & 0x3fff_ffff, 0x3fff_ffff);
+            no_debug_errors(&device);
+        }
+        Ok(())
+    }
+
+    #[cfg(feature = "native-scene-fixture")]
+    #[test]
+    fn warp_native_queue_fixture_uses_production_frame_adapter() -> Result<()> {
+        struct Observation(Vec<(u32, u64)>);
+        unsafe extern "C" fn frame(user: *mut c_void, frame: *const NativeFrame) {
+            let observed = unsafe { &mut *user.cast::<Observation>() };
+            let frame = unsafe { &*frame };
+            observed.0.push((frame.layer, frame.sequence));
+        }
+        unsafe extern "C" fn native(user: *mut c_void) {
+            unsafe { &mut *user.cast::<Observation>() }.0.push((2, 0));
+        }
+        let _guard = crate::NATIVE_SCENE_TEST_LOCK.lock().unwrap();
+        unsafe {
+            let (device, _queue, target, _rtv, mut native_frame) =
+                context(DXGI_FORMAT_R10G10B10A2_UNORM)?;
+            native_frame.sequence = 17;
+            for scenario in 0..=4 {
+                let mut observed = Observation(Vec::new());
+                let user = std::ptr::from_mut(&mut observed).cast();
+                assert!(crate::drive_scene_fixture(
+                    frame,
+                    user,
+                    &native_frame,
+                    target.as_raw(),
+                    &native_frame,
+                    target.as_raw(),
+                    native,
+                    user,
+                    scenario,
+                ));
+                assert_eq!(
+                    observed.0,
+                    match scenario {
+                        0 => vec![(LAYER_BELOW_UI, 17), (2, 0), (0, 17)],
+                        3 => vec![(2, 0), (LAYER_BELOW_UI, 17), (2, 0), (0, 17)],
+                        _ => vec![(2, 0), (0, 17)],
+                    }
+                );
+            }
             no_debug_errors(&device);
         }
         Ok(())

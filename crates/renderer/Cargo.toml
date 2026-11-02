@@ -5,6 +5,9 @@ edition.workspace = true
 license.workspace = true
 build = "build.rs"
 
+[features]
+native-scene-fixture = []
+
 [dependencies]
 eroverlay-abi.workspace = true
 eroverlay-game.workspace = true

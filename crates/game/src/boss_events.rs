@@ -3,7 +3,10 @@
 //! No NPC/stat heuristic defines a boss here: the source is enabled 2003[11].
 //! Completion flags require a conditional read and a true write in an event
 //! which handles a boss defeat, then an exact entity/guard relationship.
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, BTreeSet, VecDeque},
+};
 
 const MAX_BYTES: usize = 64 * 1024 * 1024;
 const MAX_EVENTS: usize = 32768;
@@ -485,51 +488,46 @@ fn discover_with_inspector(
         if expanded > MAX_EXPANDED_INSTRUCTIONS {
             return Err(EventError::Budget);
         }
-        let mut instructions = event.instructions.clone();
+        // Constructor/local events often have no instance parameters. Borrow
+        // their immutable instructions; clone only when a substitution writes.
+        let mut instructions = Cow::Borrowed(event.instructions.as_slice());
         for p in &event.parameters {
             let bytes = slice(&instance.parameters, p.source, p.size)
                 .map_err(|_| EventError::MissingParameters)?;
-            instructions[p.instruction].arguments[p.target..p.target + p.size]
+            instructions.to_mut()[p.instruction].arguments[p.target..p.target + p.size]
                 .copy_from_slice(bytes);
         }
         if !inspect(instance.variant, &instructions) {
             return Err(EventError::Unsupported);
         }
-        let guards: BTreeSet<u32> = instructions
-            .iter()
-            .filter_map(|i| conditional_flag(i, instance.completion))
-            .collect();
-        let writes: BTreeSet<u32> = instructions
-            .iter()
-            .filter_map(|i| {
-                if i.bank != 2003 || !matches!(i.opcode, 66 | 69) || *i.arguments.get(8)? != 1 {
-                    return None;
+        let mut guards = BTreeSet::new();
+        let mut writes = BTreeSet::new();
+        let mut related_entities = BTreeSet::new();
+        let mut death_entities = BTreeSet::new();
+        for i in instructions.iter() {
+            if let Some(flag) = conditional_flag(i, instance.completion) {
+                guards.insert(flag);
+            }
+            if i.bank == 2003
+                && matches!(i.opcode, 66 | 69)
+                && i.arguments.get(8) == Some(&1)
+                && let (Some(kind), Ok(id)) = (i.arguments.first(), u32_at(&i.arguments, 4))
+                && let Some(flag) = resolved_flag(*kind, id, instance.completion)
+            {
+                writes.insert(flag);
+            }
+            if i.bank == 4
+                && matches!(i.opcode, 0 | 2 | 9 | 14)
+                && let Ok(id) = u32_at(&i.arguments, 4)
+                && id != 0
+                && id != 10000
+            {
+                related_entities.insert(id);
+                if i.opcode != 9 {
+                    death_entities.insert(id);
                 }
-                resolved_flag(
-                    *i.arguments.first()?,
-                    u32_at(&i.arguments, 4).ok()?,
-                    instance.completion,
-                )
-            })
-            .collect();
-        let related_entities: BTreeSet<u32> = instructions
-            .iter()
-            .filter_map(|i| {
-                (i.bank == 4 && matches!(i.opcode, 0 | 2 | 9 | 14))
-                    .then(|| u32_at(&i.arguments, 4).ok())
-                    .flatten()
-                    .filter(|id| *id != 0 && *id != 10000)
-            })
-            .collect();
-        let death_entities: BTreeSet<u32> = instructions
-            .iter()
-            .filter_map(|i| {
-                (i.bank == 4 && matches!(i.opcode, 0 | 2 | 14))
-                    .then(|| u32_at(&i.arguments, 4).ok())
-                    .flatten()
-                    .filter(|id| *id != 0 && *id != 10000)
-            })
-            .collect();
+            }
+        }
         for (index, i) in instructions.iter().enumerate() {
             let proof = || EventProof {
                 source: script.name.clone(),
@@ -803,6 +801,144 @@ mod tests {
             result.missing_events,
             vec![("m10_00_00_00.emevd".into(), 999)]
         );
+    }
+
+    #[test]
+    fn linked_priority_and_parameter_instances_preserve_native_root_and_ordinal_order() {
+        let mut second = instruction(2000, 6, &args(&[0, 90005870, 121, 901]));
+        second.common_ordinal = Some(1);
+        let mut third = instruction(2000, 6, &args(&[0, 90005870, 122, 902]));
+        third.common_ordinal = Some(2);
+        let mut map = script(
+            "m60_42_36_00.emevd",
+            vec![
+                (
+                    0,
+                    vec![
+                        instruction(2000, 6, &args(&[0, 90005870, 120, 900])),
+                        second,
+                    ],
+                    vec![],
+                ),
+                (100, vec![third], vec![]),
+            ],
+        );
+        map.linked = vec!["first.emevd".into(), "common_func.emevd".into()];
+        let first = script(
+            "first.emevd",
+            vec![(
+                90005870,
+                vec![instruction(2003, 11, &args(&[1, 0, 0, 0]))],
+                vec![
+                    Parameter {
+                        instruction: 0,
+                        target: 4,
+                        source: 0,
+                        size: 4,
+                    },
+                    Parameter {
+                        instruction: 0,
+                        target: 12,
+                        source: 4,
+                        size: 4,
+                    },
+                ],
+            )],
+        );
+        let shadowed = script(
+            "common_func.emevd",
+            vec![(
+                90005870,
+                vec![instruction(2003, 11, &args(&[1, 999, 0, 999]))],
+                vec![],
+            )],
+        );
+        // Script-array order differs from native link precedence deliberately.
+        let scripts = [shadowed, first];
+        let unchanged = format!("{map:?}{scripts:?}");
+        let result = discover_boss_displays(&map, &scripts).unwrap();
+        assert_eq!(
+            result
+                .displays
+                .iter()
+                .map(|d| (
+                    d.entity_id,
+                    d.name_id,
+                    d.runtime_variant,
+                    d.proof.event_completion_flag
+                ))
+                .collect::<Vec<_>>(),
+            vec![
+                (120, 900, 0, Some(1042365000)),
+                (121, 901, 0, Some(1042365001)),
+                (122, 902, 1, Some(1142365002))
+            ]
+        );
+        assert!(
+            result
+                .displays
+                .iter()
+                .all(|d| d.proof.source == "first.emevd")
+        );
+        assert_eq!(
+            format!("{map:?}{scripts:?}"),
+            unchanged,
+            "instance substitution must never mutate a shared event template"
+        );
+    }
+
+    #[test]
+    fn instantiated_call_targets_are_resolved_after_parameter_substitution() {
+        let mut map = script(
+            "m10_00_00_00.emevd",
+            vec![
+                (
+                    0,
+                    vec![
+                        instruction(2000, 0, &args(&[0, 300, 8000])),
+                        instruction(2000, 0, &args(&[1, 300, 8001])),
+                    ],
+                    vec![],
+                ),
+                (
+                    300,
+                    vec![instruction(2000, 0, &args(&[0, 0]))],
+                    vec![Parameter {
+                        instruction: 0,
+                        target: 4,
+                        source: 0,
+                        size: 4,
+                    }],
+                ),
+                (
+                    8000,
+                    vec![instruction(2003, 11, &args(&[1, 120, 0, 900]))],
+                    vec![],
+                ),
+                (
+                    8001,
+                    vec![instruction(2003, 11, &args(&[1, 121, 0, 901]))],
+                    vec![],
+                ),
+            ],
+        );
+        let result = discover_boss_displays(&map, &[]).unwrap();
+        assert_eq!(
+            result
+                .displays
+                .iter()
+                .map(|d| d.entity_id)
+                .collect::<Vec<_>>(),
+            vec![120, 121]
+        );
+        assert_eq!(result.instances, 5);
+        // An unresolved substitution remains an error, rather than expanding a
+        // stale/static target cached from a previous invocation.
+        map.events.get_mut(&300).unwrap().parameters[0].source = 4;
+        assert!(matches!(
+            discover_boss_displays(&map, &[]),
+            Err(EventError::MissingParameters)
+        ));
     }
 
     fn locality_fixture() -> (EventScript, EventScript, BossDisplay) {

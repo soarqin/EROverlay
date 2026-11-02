@@ -233,7 +233,7 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
                         u.result = None;
                     }
                     Action::BeginChallenge => {
-                        if let Some(s) = instance.host.state() {
+                        if let Some(s) = instance.host.state().filter(|s| s.valid != 0) {
                             u.challenge.begin(&s);
                             let root = u.root.clone();
                             if let Err(e) = u.challenge.save(&root) {
@@ -248,7 +248,7 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
             }
         }
         // File retirement and bounded initialization continue while a panel is
-        // closed. Metadata discovery starts only after a valid save is present.
+        // closed, including the main menu. Discovery does not depend on a save.
         if let Some(catalog) = u.data.update() {
             u.catalog = Some(catalog);
         }
@@ -256,13 +256,19 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
             u.catalog_revision = u.data.revision();
             u.next = None;
         }
-        let catalog = u.catalog.clone();
         let now = Instant::now();
         if u.next.is_some_and(|next| now < next) {
             return abi::OK;
         }
         u.next = Some(now + Duration::from_millis(500));
-        let state = instance.host.state();
+        let state = instance.host.state().filter(|s| s.valid != 0);
+        if let Some(state) = state.as_ref()
+            && let Some(catalog) = u.data.refresh_places(state)
+        {
+            u.catalog = Some(catalog);
+            u.catalog_revision = u.data.revision();
+        }
+        let catalog = u.catalog.clone();
         let states = if let (Some(_), Some(c)) = (state.as_ref(), catalog.as_ref()) {
             u.flag_values.resize(c.flag_ids.len(), 2);
             instance.host.flags(&c.flag_ids, &mut u.flag_values);
@@ -276,7 +282,7 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
             as u32;
         let kills = states.iter().filter(|v| **v == 1).count() as u32;
         let settings = u.settings.clone();
-        if settings.challenge_mode {
+        if settings.challenge_mode && state.is_some() {
             let root = u.root.clone();
             u.challenge.check_external(&root);
             if let Some(s) = state.as_ref()

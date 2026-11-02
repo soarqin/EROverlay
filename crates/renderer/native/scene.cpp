@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <memory>
 #include <algorithm>
 #include <thread>

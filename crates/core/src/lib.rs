@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 mod config;
+#[cfg(feature = "layer-order-fixture")]
+mod layer_fixture;
 mod logging;
 mod plugin;
 mod staging;
@@ -495,6 +497,8 @@ impl Runtime {
             read_event_flags: Some(event_flags),
             revive_boss: Some(revive_boss),
         });
+        #[cfg(feature = "layer-order-fixture")]
+        let api = layer_fixture::configure_api(api);
         let mut plugins = Vec::new();
         let mut rejected = 0;
         let mut paths: Vec<_> = std::fs::read_dir(directory.join("overlays"))
@@ -739,6 +743,12 @@ impl Runtime {
             renderer, staging, ..
         } = &mut *state;
         let renderer = renderer.as_mut().unwrap();
+        renderer.reserve_above_slots(
+            self.plugins
+                .iter()
+                .filter(|plugin| plugin.layer() == LAYER_ABOVE_UI)
+                .count(),
+        );
         {
             let _phase = self.diagnostics.stage(logging::Stage::Transfer);
             self.host.textures.synchronize(renderer, frame.sequence);
