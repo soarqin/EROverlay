@@ -8,6 +8,9 @@ license.workspace = true
 name = "Boss"
 crate-type = ["cdylib", "rlib"]
 
+[features]
+continuity-fixture = []
+
 [dependencies]
 eroverlay-abi.workspace = true
 eroverlay-game.workspace = true

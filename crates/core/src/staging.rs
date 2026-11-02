@@ -41,6 +41,13 @@ impl Staging {
         self.meshes.clear();
         self.options = RenderOptions::default();
     }
+    pub fn has_paint(&self) -> bool {
+        (!self.commands.is_empty() && self.options.opacity > 0.0)
+            || (self.options.border_width > 0.0 && self.options.border_color >> 24 != 0)
+    }
+    pub fn mesh_count(&self) -> usize {
+        self.commands.len()
+    }
     /// # Safety
     /// Mesh buffers must be readable for their specified lengths during this call.
     /// Plugins are trusted native code; structural checks cannot validate arbitrary pointers.

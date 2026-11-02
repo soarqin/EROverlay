@@ -25,8 +25,30 @@ pub struct WarpHost {
     root: ID3D12RootSignature,
     pipeline: ID3D12PipelineState,
     pending: Vec<(ID3D12CommandAllocator, ID3D12GraphicsCommandList)>,
+    pending_readbacks: Vec<ID3D12Resource>,
     pub command_error: Option<String>,
     pub composites: usize,
+    capture_fence: ID3D12Fence,
+    capture_value: u64,
+}
+/// One exact presented image, copied before the following frame clears its target.
+/// The ticket and queued command owners must survive until this fence completes.
+pub struct Capture {
+    resource: ID3D12Resource,
+    layout: D3D12_PLACED_SUBRESOURCE_FOOTPRINT,
+    bytes: u64,
+    width: u32,
+    height: u32,
+    fence: ID3D12Fence,
+    value: u64,
+}
+impl Drop for WarpHost {
+    fn drop(&mut self) {
+        // Probe failures must not destroy caller-owned targets/command objects
+        // while real core submissions still reference them. Queue gates have
+        // their own RAII release and are declared after this host.
+        let _ = self.drain();
+    }
 }
 impl WarpHost {
     pub fn new_size(width: u32, height: u32) -> Result<Self> {
@@ -122,6 +144,7 @@ impl WarpHost {
                 srv.GetCPUDescriptorHandleForHeapStart(),
             );
             let (root, pipeline) = compositor(&device)?;
+            let capture_fence = device.CreateFence(0, D3D12_FENCE_FLAG_NONE)?;
             let mut host = Self {
                 device,
                 queue,
@@ -132,8 +155,11 @@ impl WarpHost {
                 root,
                 pipeline,
                 pending: Vec::new(),
+                pending_readbacks: Vec::new(),
                 command_error: None,
                 composites: 0,
+                capture_fence,
+                capture_value: 0,
             };
             host.clear_async()?;
             host.drain()?;
@@ -166,9 +192,14 @@ impl WarpHost {
     }
     /// Controlled-host readback; never called by a production render callback.
     pub fn readback(&mut self) -> Result<(u32, u32, Vec<u8>)> {
+        let capture = self.capture_async()?;
+        self.drain()?;
+        Self::finish_capture(&capture)
+    }
+    /// Queue a copy at this exact position; never wait inside a render callback.
+    pub fn capture_async(&mut self) -> Result<Capture> {
         use std::mem::ManuallyDrop;
         unsafe {
-            self.drain()?;
             let desc = self._target.GetDesc();
             let mut layout = D3D12_PLACED_SUBRESOURCE_FOOTPRINT::default();
             let mut bytes = 0;
@@ -261,18 +292,50 @@ impl WarpHost {
             ManuallyDrop::drop(&mut (*to_target.Anonymous.Transition).pResource);
             list.Close()?;
             self.queue.ExecuteCommandLists(&[Some(list.cast()?)]);
-            self.drain()?;
+            self.pending.push((allocator, list));
+            self.capture_value += 1;
+            self.queue.Signal(&self.capture_fence, self.capture_value)?;
+            // Keep the queued copy's destination alive even if an assertion
+            // unwinds and drops its Capture ticket before the host drains.
+            self.pending_readbacks.push(readback.clone());
+            Ok(Capture {
+                resource: readback,
+                layout,
+                bytes,
+                width: desc.Width as u32,
+                height: desc.Height,
+                fence: self.capture_fence.clone(),
+                value: self.capture_value,
+            })
+        }
+    }
+    pub fn finish_capture(capture: &Capture) -> Result<(u32, u32, Vec<u8>)> {
+        unsafe {
+            if capture.fence.GetCompletedValue() < capture.value {
+                return Err(windows::core::Error::new(
+                    windows::core::HRESULT(0x800700aau32 as i32),
+                    "capture is still in flight",
+                ));
+            }
+            let Capture {
+                resource: readback,
+                layout,
+                bytes,
+                width,
+                height,
+                ..
+            } = capture;
             let mut data = std::ptr::null_mut();
             readback.Map(
                 0,
                 Some(&D3D12_RANGE {
                     Begin: 0,
-                    End: bytes as usize,
+                    End: *bytes as usize,
                 }),
                 Some(&mut data),
             )?;
-            let input = std::slice::from_raw_parts(data.cast::<u8>(), bytes as usize);
-            let (width, height) = (desc.Width as u32, desc.Height);
+            let input = std::slice::from_raw_parts(data.cast::<u8>(), *bytes as usize);
+            let (width, height) = (*width, *height);
             let mut rgba = vec![0; width as usize * height as usize * 4];
             for y in 0..height as usize {
                 for x in 0..width as usize {
@@ -325,6 +388,7 @@ impl WarpHost {
             let _ = CloseHandle(event);
             if result.is_ok() {
                 self.pending.clear();
+                self.pending_readbacks.clear();
             }
             result
         }

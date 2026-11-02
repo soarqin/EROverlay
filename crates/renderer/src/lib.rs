@@ -3,7 +3,9 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 mod gpu;
 pub mod scene_scan;
-pub use gpu::{PreparedTexture, RenderStats, Renderer, RendererDiagnostics};
+pub use gpu::{
+    PreparedTexture, Presentation, PresentationHandle, RenderStats, Renderer, RendererDiagnostics,
+};
 use std::ffi::c_void;
 
 #[cfg(test)]

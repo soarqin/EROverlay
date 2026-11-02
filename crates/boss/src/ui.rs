@@ -1,8 +1,16 @@
-use crate::{Action, Instance, Snapshot, host::Host, settings::Settings};
+use crate::{
+    Action, Instance, Snapshot,
+    host::{Host, Visibility},
+    settings::Settings,
+};
 use egui::{Align2, Color32, RichText};
 use eroverlay_abi as abi;
 use eroverlay_ui::{fonts, input::Input, meshes::Meshes};
-use std::{collections::BTreeSet, path::PathBuf, sync::atomic::Ordering};
+use std::{
+    collections::BTreeSet,
+    path::PathBuf,
+    sync::{Arc, atomic::Ordering},
+};
 
 enum Row {
     Header { group: usize, text: String },
@@ -27,6 +35,8 @@ pub struct Ui {
     current: Option<usize>,
     modal: Option<(u32, u64, String)>,
     last_sequence: Option<u64>,
+    last_snapshot: Option<Arc<Snapshot>>,
+    last_visible: bool,
     time: f64,
     style_size: f32,
 }
@@ -79,6 +89,8 @@ impl Ui {
             current: None,
             modal: None,
             last_sequence: None,
+            last_snapshot: None,
+            last_visible: false,
             time: 0.0,
             style_size: 0.0,
         }
@@ -86,6 +98,8 @@ impl Ui {
     pub fn reset(&mut self, host: Host) {
         self.meshes.reset(&host.0);
         self.last_sequence = None;
+        self.last_snapshot = None;
+        self.last_visible = false;
         self.input.clear();
         self.modal = None;
         self.context = egui::Context::default();
@@ -227,23 +241,58 @@ impl Ui {
             }
         });
     }
+    pub fn render_latest(&mut self, i: &Instance, frame: &abi::FrameInfo) -> i32 {
+        if let Ok(snapshot) = i.snapshot.try_lock() {
+            self.last_snapshot = snapshot.clone();
+        }
+        let Some(snapshot) = self.last_snapshot.clone() else {
+            i.host.capture(0);
+            return abi::ERR_BUSY;
+        };
+        self.render(i, &snapshot, frame)
+    }
+    pub fn hide(&mut self, host: Host) {
+        self.last_visible = false;
+        self.input.clear();
+        self.modal = None;
+        host.capture(0);
+        host.clear_input();
+    }
     pub fn render(&mut self, i: &Instance, s: &Snapshot, frame: &abi::FrameInfo) -> i32 {
+        let visibility = i.host.visibility();
+        let shown = i.shown.load(Ordering::Relaxed);
+        if !shown || visibility == Visibility::Hidden {
+            self.hide(i.host);
+            return abi::OK;
+        }
+        if visibility == Visibility::Unknown {
+            i.host.capture(0);
+            i.host.clear_input();
+            self.modal = None;
+            if !self.last_visible {
+                self.input.clear();
+                return abi::OK;
+            }
+        }
         if self.last_sequence == Some(frame.sequence) {
             return abi::OK;
         }
-        self.last_sequence = Some(frame.sequence);
-        let shown = i.shown.load(Ordering::Relaxed) && i.host.visible();
-        if !shown {
-            i.host.capture(0);
-            i.host.clear_input();
-            self.input.clear();
-            self.modal = None;
-            return abi::OK;
+        let options = abi::RenderOptions {
+            clip_rect: [0., 0., frame.width, frame.height],
+            opacity: self.settings.opacity,
+            ..Default::default()
+        };
+        if let Some(f) = i.host.0.set_render_options {
+            let result = unsafe { f(i.host.0.user, &options) };
+            if result != abi::OK {
+                return result;
+            }
         }
         let full = i.full.load(Ordering::Relaxed);
+        let interactive = full && visibility == Visibility::Visible;
         let mut events = [abi::UiInput::default(); abi::MAX_UI_INPUT_EVENTS];
         let mut count = 0;
-        if full {
+        if interactive {
             i.host
                 .capture(abi::UI_CAPTURE_MOUSE | abi::UI_CAPTURE_KEYBOARD);
             if let Some(f) = i.host.0.ui_input_poll {
@@ -256,23 +305,23 @@ impl Ui {
             }
         } else {
             i.host.capture(0);
-            self.input.clear();
+            i.host.clear_input();
             self.modal = None;
+            // Release egui's held keys/buttons too, without accepting new input.
+            events[0] = abi::UiInput {
+                size: size_of::<abi::UiInput>() as u32,
+                kind: abi::UI_INPUT_FOCUS,
+                code: 0,
+                ..Default::default()
+            };
+            count = 1;
         }
         self.time += f64::from(frame.delta_seconds.clamp(0.001, 0.1));
         let raw = self
             .input
             .raw(frame, self.time, &events[..count.min(events.len())]);
-        let options = abi::RenderOptions {
-            clip_rect: [0., 0., frame.width, frame.height],
-            opacity: self.settings.opacity,
-            ..Default::default()
-        };
-        if let Some(f) = i.host.0.set_render_options {
-            let result = unsafe { f(i.host.0.user, &options) };
-            if result != abi::OK {
-                return result;
-            }
+        if !interactive {
+            self.input.clear();
         }
         if let Some(state) = s.state
             && state.raw_map_id != self.map
@@ -317,9 +366,9 @@ impl Ui {
                 }
                 return;
             }
-            if ctx.input(|input|input.key_pressed(egui::Key::Escape))&&self.modal.is_none(){full_open=false;}
+            if interactive&&ctx.input(|input|input.key_pressed(egui::Key::Escape))&&self.modal.is_none(){full_open=false;}
             let title=self.label("Boss progress","Boss 进度");
-            egui::Window::new(title).id("boss-list".into()).open(&mut full_open).collapsible(false).resizable(true)
+            egui::Window::new(title).id("boss-list".into()).open(&mut full_open).collapsible(false).resizable(interactive).interactable(interactive)
                 .default_pos([frame.width-self.settings.width-10.,10.])
                 .default_size([self.settings.width,self.settings.height.min(frame.height-20.)])
                 .max_size([frame.width.max(280.)-10.,frame.height.max(220.)-10.]).show(ctx,|ui|{
@@ -337,10 +386,10 @@ impl Ui {
                     self.settings_panel(ui);
                     if self.settings.challenge_mode {
                         ui.small(self.label("When switching saves, start a new attempt to set its death baseline.","切换存档后，请开始本轮以设置死亡基线。"));
-                        if ui.add_enabled(s.state.is_some(),egui::Button::new(self.label("Start this attempt","开始本轮"))).clicked(){Self::queue(i,Action::BeginChallenge);}
+                        if ui.add_enabled(interactive&&s.state.is_some(),egui::Button::new(self.label("Start this attempt","开始本轮"))).clicked(){Self::queue(i,Action::BeginChallenge);}
                         if s.state.is_some_and(|state|state.graveyard_reached>1){ui.small(self.label("Challenge tracking is waiting for its start flag.","挑战记录正在等待有效起始旗标。"));}
                     }
-                    if ui.small_button(self.label("Reload game data","重新读取游戏数据")).clicked(){Self::queue(i,Action::Reload);self.modal=None;}
+                    if ui.small_button(self.label("Reload game data","重新读取游戏数据")).clicked()&&interactive{Self::queue(i,Action::Reload);self.modal=None;}
                     ui.separator();
                     let mut filter_changed=ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(if self.chinese{"搜索 Boss 或地点"}else{"Search boss or location"})).changed();
                     filter_changed|=ui.checkbox(&mut self.remaining,if self.chinese{"只看未完成"}else{"Remaining only"}).changed();
@@ -365,7 +414,7 @@ impl Ui {
                                 let boss=&c.rows[row];let state=s.states.get(row).copied().unwrap_or(2);
                                 let status=match state{1=>"[+]",0=>"[ ]",_=>"[?]"};
                                 ui.horizontal(|ui|{
-                                    let enabled=self.settings.allow_revive&&state==1&&s.revivable.get(row)==Some(&1)&&s.state.is_some();
+                                    let enabled=interactive&&self.settings.allow_revive&&state==1&&s.revivable.get(row)==Some(&1)&&s.state.is_some();
                                     if ui.add_enabled(enabled,egui::Button::new(status).small()).on_hover_text(self.label("Revive this boss","复活此 Boss")).clicked(){
                                         self.modal=Some((boss.flag,s.state.unwrap().context,boss.name.clone()));
                                     }
@@ -393,13 +442,20 @@ impl Ui {
             }
             // Game cursor visibility is independent of egui. Draw a small cursor
             // only while this full panel owns mouse capture; no ShowCursor counter.
-            if let Some(pos)=ctx.pointer_latest_pos(){
+            if let Some(pos)=ctx.pointer_latest_pos().filter(|_|interactive){
                 let p=ctx.layer_painter(egui::LayerId::new(egui::Order::Tooltip,"boss-cursor".into()));
                 p.line_segment([pos,pos+egui::vec2(0.,16.)],egui::Stroke::new(2.0_f32,Color32::WHITE));
                 p.line_segment([pos,pos+egui::vec2(10.,11.)],egui::Stroke::new(2.0_f32,Color32::WHITE));
                 p.line_segment([pos+egui::vec2(0.,16.),pos+egui::vec2(10.,11.)],egui::Stroke::new(2.0_f32,Color32::WHITE));
             }
         });
+        // A built egui frame cannot consume input twice, even if mesh submission
+        // then fails. The core retains the last complete paint for that case.
+        self.last_sequence = Some(frame.sequence);
+        self.last_visible = true;
+        if !interactive {
+            full_open = full;
+        }
         if !full_open {
             i.full.store(false, Ordering::Relaxed);
             i.host.capture(0);
@@ -408,7 +464,8 @@ impl Ui {
         }
         // Dragging controls changes only local state. Persist once after release
         // or when closing the panel; the render callback never performs IO.
-        if self.settings_dirty
+        if interactive
+            && self.settings_dirty
             && (!ctx.input(|v| v.pointer.any_down()) || !full_open)
             && Self::queue(i, Action::Settings(self.settings.clone()))
         {
@@ -427,7 +484,477 @@ mod tests {
         data::{Catalog, Data, Encounter, Group},
         revival::Revival,
     };
-    use std::sync::{Arc, Mutex, atomic::AtomicBool};
+    use std::{
+        cell::{Cell, RefCell},
+        ffi::c_void,
+        sync::{Arc, Mutex, atomic::AtomicBool},
+    };
+
+    struct Callbacks {
+        display: Cell<abi::DisplayState>,
+        display_code: Cell<i32>,
+        capture: Cell<u32>,
+        clears: Cell<usize>,
+        events: RefCell<Vec<abi::UiInput>>,
+        options_code: Cell<i32>,
+        mesh_code: Cell<i32>,
+        meshes: Cell<usize>,
+        state: Cell<Option<abi::BossState>>,
+        state_reads: Cell<usize>,
+        flag_reads: Cell<usize>,
+        revivals: Cell<usize>,
+    }
+    struct Harness {
+        callbacks: Box<Callbacks>,
+        instance: Box<Instance>,
+        frame: abi::FrameInfo,
+    }
+    impl Harness {
+        fn new() -> Self {
+            unsafe fn callbacks<'a>(user: *mut c_void) -> &'a Callbacks {
+                // SAFETY: the harness keeps this boxed callback state alive.
+                unsafe { &*user.cast::<Callbacks>() }
+            }
+            unsafe extern "C" fn display(user: *mut c_void, out: *mut abi::DisplayState) -> i32 {
+                let c = unsafe { callbacks(user) };
+                // SAFETY: Host::visibility supplies a complete output slot.
+                unsafe { out.write(c.display.get()) };
+                c.display_code.get()
+            }
+            unsafe extern "C" fn capture(user: *mut c_void, mask: u32) -> i32 {
+                unsafe { callbacks(user) }.capture.set(mask);
+                abi::OK
+            }
+            unsafe extern "C" fn clear(user: *mut c_void) -> i32 {
+                let c = unsafe { callbacks(user) };
+                c.clears.set(c.clears.get() + 1);
+                c.events.borrow_mut().clear();
+                abi::OK
+            }
+            unsafe extern "C" fn input(
+                user: *mut c_void,
+                out: *mut abi::UiInput,
+                len: usize,
+                count: *mut usize,
+            ) -> i32 {
+                let c = unsafe { callbacks(user) };
+                let mut events = c.events.borrow_mut();
+                let n = len.min(events.len());
+                // SAFETY: Ui::render owns len writable events and one count slot.
+                unsafe {
+                    std::ptr::copy_nonoverlapping(events.as_ptr(), out, n);
+                    count.write(n);
+                }
+                events.drain(..n);
+                abi::OK
+            }
+            unsafe extern "C" fn options(user: *mut c_void, _: *const abi::RenderOptions) -> i32 {
+                unsafe { callbacks(user) }.options_code.get()
+            }
+            unsafe extern "C" fn texture(_: *mut c_void, _: u32, _: u32, _: abi::ByteSlice) -> u64 {
+                1
+            }
+            unsafe extern "C" fn poll(_: *mut c_void, _: u64, out: *mut abi::TextureView) -> i32 {
+                // SAFETY: Meshes supplies one complete TextureView slot.
+                unsafe {
+                    out.write(abi::TextureView {
+                        status: abi::TEXTURE_READY,
+                        ..Default::default()
+                    })
+                };
+                abi::OK
+            }
+            unsafe extern "C" fn mesh(user: *mut c_void, _: *const abi::Mesh) -> i32 {
+                let c = unsafe { callbacks(user) };
+                c.meshes.set(c.meshes.get() + 1);
+                c.mesh_code.get()
+            }
+            unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
+                let c = unsafe { callbacks(user) };
+                c.state_reads.set(c.state_reads.get() + 1);
+                let Some(value) = c.state.get() else {
+                    return abi::ERR_UNAVAILABLE;
+                };
+                // SAFETY: Host::state supplies one complete BossState slot.
+                unsafe { out.write(value) };
+                abi::OK
+            }
+            unsafe extern "C" fn flags(
+                user: *mut c_void,
+                _: *const u32,
+                out: *mut u8,
+                len: usize,
+            ) -> i32 {
+                let c = unsafe { callbacks(user) };
+                c.flag_reads.set(c.flag_reads.get() + 1);
+                // SAFETY: Host::flags supplies len writable output bytes.
+                unsafe { std::slice::from_raw_parts_mut(out, len).fill(1) };
+                abi::OK
+            }
+            unsafe extern "C" fn revive(
+                user: *mut c_void,
+                _: u64,
+                _: u32,
+                _: *const abi::FlagWrite,
+                _: usize,
+            ) -> i32 {
+                let c = unsafe { callbacks(user) };
+                c.revivals.set(c.revivals.get() + 1);
+                abi::OK
+            }
+            let callbacks = Box::new(Callbacks {
+                display: Cell::new(abi::DisplayState {
+                    valid: 1,
+                    ..Default::default()
+                }),
+                display_code: Cell::new(abi::OK),
+                capture: Cell::new(0),
+                clears: Cell::new(0),
+                events: RefCell::new(Vec::new()),
+                options_code: Cell::new(abi::OK),
+                mesh_code: Cell::new(abi::OK),
+                meshes: Cell::new(0),
+                state: Cell::new(None),
+                state_reads: Cell::new(0),
+                flag_reads: Cell::new(0),
+                revivals: Cell::new(0),
+            });
+            // SAFETY: this table consists of integers and nullable pointers. The
+            // synchronous test uses only these populated callbacks.
+            let mut api: abi::HostApi = unsafe { std::mem::zeroed() };
+            api.user = (&*callbacks as *const Callbacks).cast_mut().cast();
+            api.read_display_state = Some(display);
+            api.ui_input_capture = Some(capture);
+            api.ui_input_clear = Some(clear);
+            api.ui_input_poll = Some(input);
+            api.set_render_options = Some(options);
+            api.texture_create_rgba = Some(texture);
+            api.texture_poll = Some(poll);
+            api.submit_mesh = Some(mesh);
+            api.read_boss_state = Some(state);
+            api.read_event_flags = Some(flags);
+            api.revive_boss = Some(revive);
+            let host = Host(api);
+            let settings = Arc::new(Settings {
+                allow_revive: true,
+                ..Default::default()
+            });
+            let catalog = Arc::new(Catalog {
+                groups: vec![Group {
+                    id: 1,
+                    name: "Test group".into(),
+                }],
+                rows: vec![Encounter {
+                    flag: 10,
+                    completion: vec![10],
+                    name: "Test boss".into(),
+                    place: "Test place".into(),
+                    group: 0,
+                    map_id: 0x0a00_0000,
+                    search: "test boss".into(),
+                }],
+                unknown_count: 0,
+                flag_ids: vec![10],
+            });
+            let snapshot = Arc::new(Snapshot {
+                catalog: Some(catalog.clone()),
+                states: vec![1].into(),
+                revivable: vec![1].into(),
+                state: Some(abi::BossState {
+                    size: size_of::<abi::BossState>() as u32,
+                    valid: 1,
+                    context: 42,
+                    raw_map_id: 0x0a00_0000,
+                    in_game_time_ms: 10_000,
+                    ..Default::default()
+                }),
+                settings: settings.clone(),
+                kills: 1,
+                total: 1,
+                deaths: 0,
+                best: 0,
+                tries: 0,
+                compact: "1/1".into(),
+                status: "Ready",
+                revision: 1,
+                result: None,
+            });
+            let instance = Box::new(Instance {
+                host,
+                update: Mutex::new(Update {
+                    data: Data::new(host),
+                    root: PathBuf::new(),
+                    settings: settings.clone(),
+                    keys: [0; 2],
+                    catalog: Some(catalog),
+                    catalog_revision: 0,
+                    challenge: Challenge::default(),
+                    revival: Revival::default(),
+                    next: None,
+                    revision: 0,
+                    result: None,
+                    flag_values: Vec::new(),
+                }),
+                ui: Mutex::new(Ui::new(host, &settings)),
+                snapshot: Mutex::new(Some(snapshot)),
+                actions: Mutex::new(Vec::new()),
+                full: AtomicBool::new(true),
+                shown: AtomicBool::new(true),
+                hide_pending: AtomicBool::new(false),
+            });
+            Self {
+                callbacks,
+                instance,
+                frame: abi::FrameInfo {
+                    size: size_of::<abi::FrameInfo>() as u32,
+                    layer: abi::LAYER_ABOVE_UI,
+                    width: 1280.,
+                    height: 900.,
+                    pixels_per_point: 1.,
+                    delta_seconds: 1. / 60.,
+                    ..Default::default()
+                },
+            }
+        }
+        fn render(&mut self) -> i32 {
+            self.frame.sequence += 1;
+            self.render_same_sequence()
+        }
+        fn render_same_sequence(&self) -> i32 {
+            self.callbacks.meshes.set(0);
+            // SAFETY: the boxed instance and complete frame live throughout render.
+            unsafe {
+                crate::render(
+                    (&*self.instance as *const Instance).cast_mut().cast(),
+                    &self.frame,
+                )
+            }
+        }
+        fn warm(&mut self) {
+            for _ in 0..3 {
+                assert_eq!(self.render(), abi::OK);
+            }
+            assert!(self.callbacks.meshes.get() > 0);
+        }
+    }
+
+    #[test]
+    fn snapshot_contention_keeps_the_published_panel_and_first_snapshot_remains_retryable() {
+        let mut h = Harness::new();
+        h.warm();
+        let old = h.instance.ui.lock().unwrap().last_snapshot.clone().unwrap();
+        let slot = h.instance.snapshot.lock().unwrap();
+        h.frame.sequence += 1;
+        assert_eq!(h.render_same_sequence(), abi::OK);
+        assert!(
+            h.callbacks.meshes.get() > 0,
+            "a busy snapshot must not erase the panel"
+        );
+        assert!(Arc::ptr_eq(
+            &old,
+            h.instance
+                .ui
+                .lock()
+                .unwrap()
+                .last_snapshot
+                .as_ref()
+                .unwrap()
+        ));
+        drop(slot);
+        let mut first = Harness::new();
+        let snapshot = first.instance.snapshot.lock().unwrap().take();
+        assert_eq!(first.render(), abi::ERR_BUSY);
+        assert_eq!(first.instance.ui.lock().unwrap().last_sequence, None);
+        *first.instance.snapshot.lock().unwrap() = snapshot;
+        assert_eq!(first.render_same_sequence(), abi::OK);
+        assert!(first.instance.ui.lock().unwrap().last_snapshot.is_some());
+    }
+
+    #[test]
+    fn explicit_hide_precedes_a_busy_ui_and_reopening_unknown_does_not_restore_the_panel() {
+        let mut h = Harness::new();
+        h.warm();
+        h.frame.sequence += 1;
+        let ui = h.instance.ui.lock().unwrap();
+        h.instance.shown.store(false, Ordering::Relaxed);
+        assert_eq!(h.render_same_sequence(), abi::OK);
+        assert_eq!(h.callbacks.meshes.get(), 0);
+        assert_eq!(h.callbacks.capture.get(), 0);
+        assert!(h.instance.hide_pending.load(Ordering::Relaxed));
+        drop(ui);
+        h.instance.shown.store(true, Ordering::Relaxed);
+        h.callbacks.display_code.set(abi::ERR_UNAVAILABLE);
+        assert_eq!(h.render(), abi::OK);
+        assert_eq!(h.callbacks.meshes.get(), 0);
+        assert!(!h.instance.hide_pending.load(Ordering::Relaxed));
+        assert!(!h.instance.ui.lock().unwrap().last_visible);
+        h.callbacks.display_code.set(abi::OK);
+        assert_eq!(h.render(), abi::OK);
+        assert!(h.callbacks.meshes.get() > 0);
+    }
+
+    #[test]
+    fn unknown_display_preserves_only_an_existing_panel_without_input_and_known_hides_clear_it() {
+        let mut h = Harness::new();
+        h.callbacks.display_code.set(abi::ERR_UNAVAILABLE);
+        assert_eq!(h.render(), abi::OK);
+        assert_eq!(h.callbacks.meshes.get(), 0);
+        assert!(!h.instance.ui.lock().unwrap().last_visible);
+        h.callbacks.display_code.set(abi::OK);
+        h.warm();
+        assert_eq!(
+            h.callbacks.capture.get(),
+            abi::UI_CAPTURE_MOUSE | abi::UI_CAPTURE_KEYBOARD
+        );
+        for code in [abi::ERR_UNAVAILABLE, abi::ERR_BUSY, abi::OK] {
+            h.instance.ui.lock().unwrap().modal = Some((10, 42, "Test boss".into()));
+            h.callbacks.events.borrow_mut().push(abi::UiInput {
+                size: size_of::<abi::UiInput>() as u32,
+                kind: abi::UI_INPUT_KEY,
+                code: 0x1b,
+                flags: abi::UI_INPUT_DOWN,
+                ..Default::default()
+            });
+            h.callbacks.display_code.set(code);
+            h.callbacks.display.set(abi::DisplayState::default());
+            assert_eq!(h.render(), abi::OK);
+            assert!(h.callbacks.meshes.get() > 0);
+            assert_eq!(h.callbacks.capture.get(), 0);
+            assert!(h.callbacks.events.borrow().is_empty());
+            assert!(h.instance.actions.lock().unwrap().is_empty());
+            let ui = h.instance.ui.lock().unwrap();
+            assert!(ui.modal.is_none());
+            assert!(!ui.context.input(|input| input.focused));
+            assert!(h.instance.full.load(Ordering::Relaxed));
+        }
+        for display in [
+            abi::DisplayState {
+                valid: 1,
+                loading_or_logo: 1,
+                full_screen_map: 0,
+            },
+            abi::DisplayState {
+                valid: 1,
+                loading_or_logo: 0,
+                full_screen_map: 1,
+            },
+        ] {
+            h.callbacks.display_code.set(abi::OK);
+            h.callbacks.display.set(display);
+            assert_eq!(h.render(), abi::OK);
+            assert_eq!(h.callbacks.meshes.get(), 0);
+            h.callbacks.display_code.set(abi::ERR_UNAVAILABLE);
+            assert_eq!(h.render(), abi::OK);
+            assert_eq!(
+                h.callbacks.meshes.get(),
+                0,
+                "unknown cannot reopen a known hidden panel"
+            );
+            h.callbacks.display_code.set(abi::OK);
+            h.callbacks.display.set(abi::DisplayState {
+                valid: 1,
+                ..Default::default()
+            });
+            assert_eq!(h.render(), abi::OK);
+            assert!(h.callbacks.meshes.get() > 0);
+        }
+        h.instance.shown.store(false, Ordering::Relaxed);
+        assert_eq!(h.render(), abi::OK);
+        assert_eq!(h.callbacks.meshes.get(), 0);
+        h.instance.shown.store(true, Ordering::Relaxed);
+        h.callbacks.display_code.set(abi::ERR_UNAVAILABLE);
+        assert_eq!(h.render(), abi::OK);
+        assert_eq!(h.callbacks.meshes.get(), 0);
+        h.callbacks.display_code.set(abi::OK);
+        assert_eq!(h.render(), abi::OK);
+        assert!(h.callbacks.meshes.get() > 0);
+        h.callbacks.events.borrow_mut().push(abi::UiInput {
+            size: size_of::<abi::UiInput>() as u32,
+            kind: abi::UI_INPUT_KEY,
+            code: 0x1b,
+            flags: abi::UI_INPUT_DOWN,
+            ..Default::default()
+        });
+        assert_eq!(h.render(), abi::OK);
+        assert!(!h.instance.full.load(Ordering::Relaxed));
+        assert_eq!(h.callbacks.capture.get(), 0);
+        h.instance.full.store(true, Ordering::Relaxed);
+        assert_eq!(h.render(), abi::OK);
+        assert!(h.callbacks.meshes.get() > 0);
+    }
+
+    #[test]
+    fn preframe_failure_can_retry_but_a_built_frame_never_advances_twice() {
+        let mut h = Harness::new();
+        h.warm();
+        let before = h.instance.ui.lock().unwrap().context.cumulative_frame_nr();
+        h.callbacks.options_code.set(abi::ERR_BUSY);
+        assert_eq!(h.render(), abi::ERR_BUSY);
+        assert_eq!(
+            h.instance.ui.lock().unwrap().context.cumulative_frame_nr(),
+            before
+        );
+        h.callbacks.options_code.set(abi::OK);
+        assert_eq!(h.render_same_sequence(), abi::OK);
+        assert!(h.callbacks.meshes.get() > 0);
+        let built = h.instance.ui.lock().unwrap().context.cumulative_frame_nr();
+        assert!(built > before);
+        assert_eq!(h.render_same_sequence(), abi::OK);
+        assert_eq!(
+            h.instance.ui.lock().unwrap().context.cumulative_frame_nr(),
+            built
+        );
+        h.callbacks.mesh_code.set(abi::ERR_BUSY);
+        assert_eq!(h.render(), abi::ERR_BUSY);
+        let built = h.instance.ui.lock().unwrap().context.cumulative_frame_nr();
+        h.callbacks.mesh_code.set(abi::OK);
+        assert_eq!(h.render_same_sequence(), abi::OK);
+        assert_eq!(
+            h.instance.ui.lock().unwrap().context.cumulative_frame_nr(),
+            built
+        );
+        assert_eq!(
+            h.callbacks.meshes.get(),
+            0,
+            "the core replays paint after post-build failure"
+        );
+    }
+
+    #[test]
+    fn cached_visual_state_never_authorizes_revival_without_a_fresh_matching_context() {
+        let mut h = Harness::new();
+        h.warm();
+        for fresh in [
+            None,
+            Some(abi::BossState {
+                size: size_of::<abi::BossState>() as u32,
+                valid: 1,
+                context: 43,
+                in_game_time_ms: 10_000,
+                ..Default::default()
+            }),
+        ] {
+            h.callbacks.state.set(fresh);
+            h.callbacks.flag_reads.set(0);
+            h.instance.actions.lock().unwrap().push(Action::Revive {
+                flag: 10,
+                context: 42,
+            });
+            // SAFETY: the boxed instance remains valid through the real update callback.
+            assert_eq!(
+                unsafe { crate::update((&*h.instance as *const Instance).cast_mut().cast()) },
+                abi::OK
+            );
+            assert_eq!(h.callbacks.revivals.get(), 0);
+            assert_eq!(
+                h.callbacks.flag_reads.get(),
+                usize::from(fresh.is_some()),
+                "only normal fresh progress reads are permitted"
+            );
+            assert_eq!(h.instance.update.lock().unwrap().result, Some(false));
+        }
+        assert!(h.callbacks.state_reads.get() >= 2);
+    }
 
     unsafe extern "C" fn visible(_: *mut std::ffi::c_void, out: *mut abi::DisplayState) -> i32 {
         // SAFETY: Ui::render supplies one live DisplayState output slot.
@@ -443,9 +970,13 @@ mod tests {
     #[test]
     fn compact_revisions_defer_95_group_211_boss_list_until_full_render() {
         // No native hooks/GPU: call the actual Ui::render path with prepared
-        // snapshots. Missing texture admission cannot change list construction.
+        // snapshots and accepted atlas handles; test only list construction.
+        unsafe extern "C" fn atlas(_: *mut c_void, _: u32, _: u32, _: abi::ByteSlice) -> u64 {
+            1
+        }
         let mut api: abi::HostApi = unsafe { std::mem::zeroed() };
         api.read_display_state = Some(visible);
+        api.texture_create_rgba = Some(atlas);
         let host = Host(api);
         let settings = Arc::new(Settings::default());
         let instance = Instance {
@@ -469,6 +1000,7 @@ mod tests {
             actions: Mutex::new(Vec::new()),
             full: AtomicBool::new(false),
             shown: AtomicBool::new(true),
+            hide_pending: AtomicBool::new(false),
         };
         let catalog = Arc::new(Catalog {
             groups: (0..95)

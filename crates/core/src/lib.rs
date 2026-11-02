@@ -3,14 +3,16 @@ mod config;
 #[cfg(feature = "layer-order-fixture")]
 mod layer_fixture;
 mod logging;
+mod painting;
 mod plugin;
+mod rendering;
 mod staging;
 mod texture;
 mod ui_input;
 
 use eroverlay_abi::*;
 use eroverlay_game::GameServices;
-use eroverlay_renderer::{NativeBridge, NativeFrame, Renderer};
+use eroverlay_renderer::{NativeBridge, NativeFrame, PresentationHandle, Renderer};
 use std::{
     cell::Cell,
     ffi::c_void,
@@ -43,7 +45,6 @@ struct Host {
 }
 struct RenderState {
     renderer: Option<Renderer>,
-    staging: staging::Staging,
     identity: (usize, usize),
     generation: u64,
 }
@@ -55,6 +56,13 @@ struct Runtime {
     accepting: AtomicBool,
     callbacks: RwLock<()>,
     render: Mutex<RenderState>,
+    painting: Mutex<painting::Painting>,
+    presentation: Mutex<Option<PresentationHandle>>,
+    upper_groups: Vec<usize>,
+    continuity: [AtomicU64; 6],
+    renderer_generation: AtomicU64,
+    display_hidden: AtomicBool,
+    invalidate_presentation: AtomicBool,
     bridge: Mutex<Option<NativeBridge>>,
     native_input: Mutex<Option<ui_input::NativeInput>>,
     worker: Mutex<Option<JoinHandle<()>>>,
@@ -382,6 +390,10 @@ unsafe extern "C" fn texture_rgba(
     height: u32,
     data: ByteSlice,
 ) -> u64 {
+    #[cfg(feature = "layer-order-fixture")]
+    if layer_fixture::reject_rgba() {
+        return 0;
+    }
     let (Some(h), Some(b)) = (unsafe { host(user) }, unsafe {
         bytes(data, MAX_FILE_BYTES)
     }) else {
@@ -523,6 +535,13 @@ impl Runtime {
         let render_layers = plugins
             .iter()
             .fold(0, |mask, plugin| mask | (1 << plugin.layer()));
+        let painting = painting::Painting::new(plugins.len());
+        let upper_groups = plugins
+            .iter()
+            .enumerate()
+            .filter(|(_, plugin)| plugin.layer() == LAYER_ABOVE_UI)
+            .map(|(index, _)| index + 1)
+            .collect();
         let runtime = Arc::new(Self {
             host,
             _api: api,
@@ -532,10 +551,18 @@ impl Runtime {
             callbacks: RwLock::new(()),
             render: Mutex::new(RenderState {
                 renderer: None,
-                staging: staging::Staging::default(),
                 identity: (0, 0),
                 generation: 0,
             }),
+            painting: Mutex::new(painting),
+            presentation: Mutex::new(None),
+            upper_groups,
+            continuity: std::array::from_fn(|_| AtomicU64::new(0)),
+            renderer_generation: AtomicU64::new(0),
+            // Unknown startup is not a confirmed global hide. Each plugin
+            // decides its initial visibility; Boss has no initial cached image.
+            display_hidden: AtomicBool::new(false),
+            invalidate_presentation: AtomicBool::new(false),
             bridge: Mutex::new(None),
             native_input: Mutex::new(None),
             worker: Mutex::new(None),
@@ -651,6 +678,11 @@ impl Runtime {
             });
             self.host.log.write(format!("core-queues update={tick} renders={} dropped={} last_error={} display_map_state={reason:#x} textures={textures:?} renderer_identity_generation_state={gpu:?}",
                 self.renders.load(Ordering::Relaxed), self.dropped.load(Ordering::Relaxed), self.error.load(Ordering::Relaxed)).as_bytes());
+            let continuity = self
+                .continuity
+                .each_ref()
+                .map(|c| c.load(Ordering::Relaxed));
+            self.host.log.write(format!("core-continuity [gpu_busy,gate_busy,paint_busy,plugin_busy_or_duplicate,replay,known_hide]={continuity:?}").as_bytes());
             if let Ok(game) = self.host.game.try_lock() {
                 let snapshot = game.diagnostics();
                 let files = game.file_diagnostics();
@@ -664,154 +696,6 @@ impl Runtime {
                 );
             }
         }
-    }
-    fn render(&self, frame: &NativeFrame) {
-        if !self.accepting.load(Ordering::Acquire) {
-            return;
-        }
-        eroverlay_game::memory::set_tracking(self.host.log.enabled());
-        let _total = self.diagnostics.stage(logging::Stage::Render);
-        // A native queue also calls layers that no loaded plugin consumes.
-        // Their target dimensions may differ (UI intermediate versus main).
-        // They must not change renderer identity or reset plugin state.
-        // Hidden consuming-layer calls still service pending/retired textures;
-        // stop handles final cleanup if that native boundary is unavailable.
-        if frame.layer > LAYER_BELOW_UI || self.render_layers & (1 << frame.layer) == 0 {
-            self.diagnostics.unconsumed_layer();
-            return;
-        }
-        let Ok(mut state) = self.render.try_lock() else {
-            self.diagnostics.render_skip();
-            self.dropped.fetch_add(1, Ordering::Relaxed);
-            return;
-        };
-        // Viewports are per native layer and may change without changing GPU
-        // ownership. The backend validates each frame's dimensions and resizes
-        // only the selected, fence-complete offscreen slot when needed.
-        let identity = (frame.device as usize, frame.queue as usize);
-        let rebuild = state.identity != identity || state.renderer.is_none();
-        let (_shared, _exclusive) = if rebuild {
-            let Ok(guard) = self.callbacks.try_write() else {
-                self.diagnostics.gate_skip();
-                return;
-            };
-            (None, Some(guard))
-        } else {
-            let Ok(guard) = self.callbacks.try_read() else {
-                self.diagnostics.gate_skip();
-                return;
-            };
-            (Some(guard), None)
-        };
-        // An offline caller can have entered before stop disabled callbacks,
-        // then acquire this gate after stop finished clearing GPU resources.
-        if !self.accepting.load(Ordering::Acquire) {
-            return;
-        }
-        if rebuild {
-            // A device/queue change skips frames until old owned GPU work has
-            // completed. Renderer teardown never waits on the game render thread.
-            if state.renderer.as_mut().is_some_and(|r| !r.wait_idle(0)) {
-                self.dropped.fetch_add(1, Ordering::Relaxed);
-                return;
-            }
-            if let Some(renderer) = state.renderer.as_mut()
-                && !self.host.textures.reset(renderer)
-            {
-                self.diagnostics.reset_failure();
-                return;
-            }
-            state.renderer = None;
-            state.generation += 1;
-            self.diagnostics.rebuild();
-            let init = self.diagnostics.stage(logging::Stage::RendererInit);
-            let renderer = unsafe { Renderer::new(frame) };
-            drop(init);
-            match renderer {
-                Ok(r) => state.renderer = Some(r),
-                Err(_) => {
-                    self.error.store(ERR_UNAVAILABLE, Ordering::Relaxed);
-                    return;
-                }
-            }
-            state.identity = identity;
-            for p in &self.plugins {
-                p.reset(state.generation);
-            }
-        }
-        let RenderState {
-            renderer, staging, ..
-        } = &mut *state;
-        let renderer = renderer.as_mut().unwrap();
-        renderer.reserve_above_slots(
-            self.plugins
-                .iter()
-                .filter(|plugin| plugin.layer() == LAYER_ABOVE_UI)
-                .count(),
-        );
-        {
-            let _phase = self.diagnostics.stage(logging::Stage::Transfer);
-            self.host.textures.synchronize(renderer, frame.sequence);
-        }
-        for position in 0..self.plugins.len() {
-            // Behind-UI composition places the new group behind prior groups.
-            // Reverse below-UI traversal to preserve normal plugin draw order.
-            let index = if frame.layer == LAYER_BELOW_UI {
-                self.plugins.len() - 1 - position
-            } else {
-                position
-            };
-            let plugin = &self.plugins[index];
-            if plugin.layer() != frame.layer {
-                continue;
-            }
-            staging.clear();
-            STAGING.with(|s| s.set(staging));
-            let info = FrameInfo {
-                size: size_of::<FrameInfo>() as u32,
-                layer: frame.layer,
-                sequence: frame.sequence,
-                width: frame.width,
-                height: frame.height,
-                pixels_per_point: 1.0,
-                delta_seconds: 1.0 / 60.0,
-            };
-            let phase = self.diagnostics.stage(logging::Stage::RenderPlugin);
-            let code = plugin.render(&info);
-            drop(phase);
-            STAGING.with(|s| s.set(std::ptr::null_mut()));
-            if code != OK && code != ERR_BUSY {
-                self.error.store(code, Ordering::Relaxed);
-                continue;
-            }
-            let options = staging.options;
-            let meshes = staging.meshes();
-            self.meshes
-                .fetch_add(meshes.len() as u64, Ordering::Relaxed);
-            // Empty geometry may still carry pending uploads (including the
-            // first atlas when the border is disabled). Backend keeps idle
-            // calls submission-free and retires completed resources while hidden.
-            let phase = self.diagnostics.stage(logging::Stage::Gpu);
-            let result = unsafe { renderer.render(frame, meshes, options) };
-            drop(phase);
-            match result {
-                Ok(stats) => {
-                    if stats.dropped {
-                        self.dropped.fetch_add(1, Ordering::Relaxed);
-                    }
-                }
-                Err(_) => {
-                    self.error.store(ERR_UNAVAILABLE, Ordering::Relaxed);
-                    state.identity = (0, 0);
-                    break;
-                }
-            }
-        }
-        self.gpu_bytes.store(
-            state.renderer.as_ref().map_or(0, Renderer::committed_bytes),
-            Ordering::Relaxed,
-        );
-        self.renders.fetch_add(1, Ordering::Relaxed);
     }
     fn stop(&self) -> i32 {
         self.accepting.store(false, Ordering::Release);
@@ -838,6 +722,14 @@ impl Runtime {
             return ERR_BUSY;
         }
         render.renderer = None;
+        self.presentation
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take();
+        self.painting
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .reset(0);
         self.gpu_bytes.store(0, Ordering::Relaxed);
         if !self
             .host

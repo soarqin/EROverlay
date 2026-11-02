@@ -7,7 +7,13 @@ use std::{
     ffi::c_void,
     mem::{ManuallyDrop, size_of},
     ptr,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
+    },
 };
+mod presentation;
+pub use presentation::{Presentation, PresentationHandle};
 use windows::{
     Win32::{
         Foundation::{CloseHandle, RECT, WAIT_OBJECT_0},
@@ -64,6 +70,7 @@ pub struct RenderStats {
     pub uploaded_bytes: u64,
     pub resident_bytes: u64,
     pub dropped: bool,
+    pub retained: bool,
 }
 #[derive(Debug)]
 pub struct RendererDiagnostics {
@@ -241,6 +248,8 @@ pub struct Renderer {
     failed: bool,
     timing: Option<GpuTiming>,
     resident_bytes: u64,
+    presentation: PresentationHandle,
+    presentation_bytes: Arc<AtomicU64>,
 }
 // Core transfers exclusive ownership only while its nonblocking render gate is
 // held. Raw mapped pointers refer to this renderer's owned upload resources.
@@ -376,6 +385,18 @@ impl Renderer {
                 fence: 0,
             });
         }
+        let presentation_bytes = Arc::new(AtomicU64::new(0));
+        let presentation = Arc::new(Mutex::new(unsafe {
+            Presentation::new(
+                &device,
+                &queue,
+                &fence,
+                &root,
+                &composite_rgba[0],
+                &composite_hdr[0],
+                presentation_bytes.clone(),
+            )?
+        }));
         let mut renderer = Self {
             device,
             queue,
@@ -405,6 +426,8 @@ impl Renderer {
             failed: false,
             timing: None,
             resident_bytes: 0,
+            presentation,
+            presentation_bytes,
         };
         renderer.upload_rgba(0, 1, 1, &[255, 255, 255, 255]);
         Ok(renderer)
@@ -420,6 +443,10 @@ impl Renderer {
         // More upper groups remain best effort: even an idle pool must leave
         // one lower opportunity instead of starving it for the entire session.
         self.above_slot_reserve = groups.min(SLOT_COUNT - 1);
+    }
+
+    pub fn presentation_handle(&self) -> PresentationHandle {
+        self.presentation.clone()
     }
 
     /// Uploads premultiplied sRGBA pixels. Copies only on a dirty texture update.
@@ -552,10 +579,43 @@ impl Renderer {
         meshes: &[Mesh],
         options: RenderOptions,
     ) -> Result<RenderStats> {
+        unsafe { self.render_with_group(frame, meshes, options, 0) }
+    }
+
+    /// Renders one plugin's image atomically. Temporary geometry/texture pressure
+    /// retains its previous owned image; no borrowed game target is cached.
+    /// # Safety
+    /// Same frame and mesh borrowing requirements as `render`.
+    pub unsafe fn render_with_group(
+        &mut self,
+        frame: &NativeFrame,
+        meshes: &[Mesh],
+        options: RenderOptions,
+        key: usize,
+    ) -> Result<RenderStats> {
         if self.failed {
             return Err(invalid());
         }
-        let result = unsafe { self.render_inner(frame, meshes, options) };
+        let mut result = unsafe { self.render_inner(frame, meshes, options, key) };
+        if key != 0
+            && frame.layer == 0
+            && let Ok(stats) = result.as_mut()
+            && stats.dropped
+        {
+            let retained = self
+                .presentation
+                .try_lock()
+                .ok()
+                .map(|mut p| unsafe { p.replay(frame, &[key]) });
+            if let Some(Ok(replay)) = retained {
+                stats.draw_calls += replay.draw_calls;
+                stats.retained = replay.retained;
+                stats.dropped = replay.dropped;
+                stats.resident_bytes = self.committed_bytes();
+            } else if let Some(Err(error)) = retained {
+                result = Err(error);
+            }
+        }
         if result.is_err() {
             self.failed = true;
         }
@@ -566,6 +626,7 @@ impl Renderer {
         frame: &NativeFrame,
         meshes: &[Mesh],
         options: RenderOptions,
+        key: usize,
     ) -> Result<RenderStats> {
         self.upload_block = "none";
         if !self.matches_device(frame)
@@ -626,9 +687,17 @@ impl Renderer {
         let right = options.clip_rect[2].clamp(0.0, frame.width).ceil();
         let bottom = options.clip_rect[3].clamp(0.0, frame.height).ceil();
         let border_visible = options.border_width > 0.0 && (options.border_color >> 24) > 0;
-        let visible = ((indices > 0 && options.opacity > 0.0) || border_visible)
+        let mut visible = ((indices > 0 && options.opacity > 0.0) || border_visible)
             && right > left
             && bottom > top;
+        let presentation = self.presentation.clone();
+        if key != 0
+            && frame.layer == 0
+            && !visible
+            && let Ok(mut p) = presentation.try_lock()
+        {
+            p.invalidate(key);
+        }
         let maintenance =
             !self.retired.is_empty() || self.slots.iter().any(|slot| !slot.uploads.is_empty());
         let completed = if maintenance {
@@ -849,6 +918,26 @@ impl Renderer {
                 }
             }
         }
+        // Do not replace a complete UI image with a partially missing atlas.
+        // Upload-only work still proceeds, so the new packet can become ready.
+        if visible
+            && key != 0
+            && frame.layer == 0
+            && meshes.iter().any(|mesh| {
+                mesh.index_count > 0
+                    && mesh.clip[0] < right
+                    && mesh.clip[2] > left
+                    && mesh.clip[1] < bottom
+                    && mesh.clip[3] > top
+                    && !self
+                        .textures
+                        .get(&mesh.texture)
+                        .is_some_and(|t| t.gpu.is_some() && !t.dirty)
+            })
+        {
+            visible = false;
+            stats.dropped = true;
+        }
         if !visible && stats.uploaded_bytes == 0 {
             // A pending upload may be blocked by a fence-owned staging budget.
             // Closing an unsubmitted list does not consume a slot or GPU work.
@@ -856,10 +945,13 @@ impl Renderer {
                 slot.list.Close()?;
             }
             return Ok(RenderStats {
+                dropped: stats.dropped,
                 resident_bytes: self.committed_bytes(),
                 ..Default::default()
             });
         }
+        let mut publish = None;
+        let mut presentation_guard = None;
         if visible {
             let width = (right - left) as u32;
             let height = (bottom - top) as u32;
@@ -1040,6 +1132,21 @@ impl Renderer {
                     D3D12_RESOURCE_STATE_RENDER_TARGET,
                     D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                 );
+                if key != 0
+                    && frame.layer == 0
+                    && let Ok(mut p) = presentation.try_lock()
+                {
+                    publish = p.record_copy(
+                        key,
+                        frame,
+                        options,
+                        [left, top, right, bottom],
+                        &offscreen.resource,
+                        list,
+                        self.fence_value + 1,
+                    )?;
+                    presentation_guard = Some(p);
+                }
                 list.OMSetRenderTargets(
                     1,
                     Some(&D3D12_CPU_DESCRIPTOR_HANDLE { ptr: frame.target }),
@@ -1110,6 +1217,9 @@ impl Renderer {
         unsafe {
             self.queue.Signal(&self.fence, self.fence_value)?;
         }
+        if let (Some(key), Some(p)) = (publish, presentation_guard.as_mut()) {
+            p.confirm_copy(key);
+        }
         stats.resident_bytes = self.committed_bytes();
         Ok(stats)
     }
@@ -1118,6 +1228,7 @@ impl Renderer {
     /// buffers, upload staging and group targets. This is not DXGI process VRAM.
     pub fn committed_bytes(&self) -> u64 {
         self.resident_bytes
+            + self.presentation_bytes.load(Ordering::Relaxed)
             + if self.timing.is_some() { 65536 } else { 0 }
             + self
                 .slots
@@ -1219,6 +1330,19 @@ impl Renderer {
 
     /// Only shutdown/harness uses a CPU wait. Normal frames skip a busy slot.
     pub fn wait_idle(&self, timeout_ms: u32) -> bool {
+        let started = std::time::Instant::now();
+        if !self.wait_geometry_idle(timeout_ms) {
+            return false;
+        }
+        let Ok(presentation) = self.presentation.try_lock() else {
+            return false;
+        };
+        presentation.wait_idle(
+            timeout_ms
+                .saturating_sub(started.elapsed().as_millis().min(u128::from(u32::MAX)) as u32),
+        )
+    }
+    fn wait_geometry_idle(&self, timeout_ms: u32) -> bool {
         unsafe {
             if self.fence.GetCompletedValue() >= self.fence_value {
                 return true;
@@ -1936,6 +2060,315 @@ mod tests {
             readback.Unmap(0, Some(&D3D12_RANGE { Begin: 0, End: 0 }));
         }
         Ok(result)
+    }
+
+    struct PixelTicket {
+        _allocator: ID3D12CommandAllocator,
+        _list: ID3D12GraphicsCommandList,
+        pixels: ID3D12Resource,
+    }
+    unsafe fn submit_async(
+        device: &ID3D12Device,
+        queue: &ID3D12CommandQueue,
+        record: impl FnOnce(&ID3D12GraphicsCommandList),
+    ) -> Result<(ID3D12CommandAllocator, ID3D12GraphicsCommandList)> {
+        unsafe {
+            let allocator = device.CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT)?;
+            let list: ID3D12GraphicsCommandList =
+                device.CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, &allocator, None)?;
+            record(&list);
+            list.Close()?;
+            queue.ExecuteCommandLists(&[Some(list.cast()?)]);
+            Ok((allocator, list))
+        }
+    }
+    unsafe fn capture_async(
+        device: &ID3D12Device,
+        queue: &ID3D12CommandQueue,
+        target: &ID3D12Resource,
+    ) -> Result<PixelTicket> {
+        unsafe {
+            let pixels = buffer(
+                device,
+                64 * 256,
+                D3D12_HEAP_TYPE_READBACK,
+                D3D12_RESOURCE_STATE_COPY_DEST,
+            )?;
+            let (allocator, list) = submit_async(device, queue, |list| {
+                barrier(
+                    list,
+                    target,
+                    D3D12_RESOURCE_STATE_RENDER_TARGET,
+                    D3D12_RESOURCE_STATE_COPY_SOURCE,
+                );
+                let mut source = D3D12_TEXTURE_COPY_LOCATION {
+                    pResource: ManuallyDrop::new(Some(target.clone())),
+                    Type: D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX,
+                    Anonymous: D3D12_TEXTURE_COPY_LOCATION_0 {
+                        SubresourceIndex: 0,
+                    },
+                };
+                let mut destination = D3D12_TEXTURE_COPY_LOCATION {
+                    pResource: ManuallyDrop::new(Some(pixels.clone())),
+                    Type: D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+                    Anonymous: D3D12_TEXTURE_COPY_LOCATION_0 {
+                        PlacedFootprint: D3D12_PLACED_SUBRESOURCE_FOOTPRINT {
+                            Offset: 0,
+                            Footprint: D3D12_SUBRESOURCE_FOOTPRINT {
+                                Format: DXGI_FORMAT_R10G10B10A2_UNORM,
+                                Width: 64,
+                                Height: 64,
+                                Depth: 1,
+                                RowPitch: 256,
+                            },
+                        },
+                    },
+                };
+                list.CopyTextureRegion(&destination, 0, 0, 0, &source, None);
+                barrier(
+                    list,
+                    target,
+                    D3D12_RESOURCE_STATE_COPY_SOURCE,
+                    D3D12_RESOURCE_STATE_RENDER_TARGET,
+                );
+                ManuallyDrop::drop(&mut source.pResource);
+                ManuallyDrop::drop(&mut destination.pResource);
+            })?;
+            Ok(PixelTicket {
+                _allocator: allocator,
+                _list: list,
+                pixels,
+            })
+        }
+    }
+    unsafe fn ticket_rgb(ticket: &PixelTicket) -> Result<[u32; 3]> {
+        unsafe {
+            let mut mapped = ptr::null_mut();
+            ticket.pixels.Map(
+                0,
+                Some(&D3D12_RANGE {
+                    Begin: 0,
+                    End: 64 * 256,
+                }),
+                Some(&mut mapped),
+            )?;
+            let color = mapped
+                .cast::<u8>()
+                .add(32 * 256 + 32 * 4)
+                .cast::<u32>()
+                .read_unaligned();
+            ticket
+                .pixels
+                .Unmap(0, Some(&D3D12_RANGE { Begin: 0, End: 0 }));
+            Ok([color & 1023, (color >> 10) & 1023, (color >> 20) & 1023])
+        }
+    }
+
+    fn green_quad() -> [Vertex; 4] {
+        [
+            Vertex {
+                pos: [8.0, 8.0],
+                uv: [0.0, 0.0],
+                color: 0xff00ff00,
+            },
+            Vertex {
+                pos: [56.0, 8.0],
+                uv: [1.0, 0.0],
+                color: 0xff00ff00,
+            },
+            Vertex {
+                pos: [56.0, 56.0],
+                uv: [1.0, 1.0],
+                color: 0xff00ff00,
+            },
+            Vertex {
+                pos: [8.0, 56.0],
+                uv: [0.0, 1.0],
+                color: 0xff00ff00,
+            },
+        ]
+    }
+
+    #[test]
+    fn warp_retained_image_survives_missing_atlas_and_sixteen_busy_presentations() -> Result<()> {
+        unsafe {
+            let (device, queue, target, _rtv, mut frame) = context(DXGI_FORMAT_R10G10B10A2_UNORM)?;
+            frame.layer = 0;
+            let mut renderer = Renderer::new(&frame)?;
+            let handle = renderer.presentation_handle();
+            let vertices = green_quad();
+            let indices = [0, 1, 2, 0, 2, 3];
+            let mesh = Mesh {
+                texture: 0,
+                vertices: vertices.as_ptr(),
+                vertex_count: 4,
+                indices: indices.as_ptr(),
+                index_count: 6,
+                clip: [8.0, 8.0, 56.0, 56.0],
+            };
+            assert!(
+                !renderer
+                    .render_with_group(&frame, &[mesh], RenderOptions::default(), 1)?
+                    .dropped
+            );
+            assert!(renderer.wait_idle(10000));
+            assert!(handle.lock().unwrap().committed_bytes() > 0);
+            assert!(handle.lock().unwrap().matches_device(&frame));
+            assert!(!handle.lock().unwrap().matches_device(&NativeFrame {
+                device: ptr::null_mut(),
+                ..frame
+            }));
+            // A newly admitted atlas has no GPU record yet. Old code cleared its
+            // private target and drew no mesh; the new path retains the green UI.
+            run_list(&device, &queue, |list| {
+                list.ClearRenderTargetView(
+                    D3D12_CPU_DESCRIPTOR_HANDLE { ptr: frame.target },
+                    &[1.0, 0.0, 0.0, 1.0],
+                    None,
+                )
+            })?;
+            let pending = Mesh {
+                texture: 99,
+                ..mesh
+            };
+            renderer.render(&frame, &[pending], RenderOptions::default())?;
+            assert!(renderer.wait_idle(10000));
+            let old_atlas = capture_async(&device, &queue, &target)?;
+            run_list(&device, &queue, |_| {})?;
+            assert_eq!(ticket_rgb(&old_atlas)?, [1023, 0, 0]);
+            // Contention never waits or submits through an unowned presenter.
+            let busy_presenter = handle.lock().unwrap();
+            let busy =
+                renderer.render_with_group(&frame, &[pending], RenderOptions::default(), 1)?;
+            assert!(busy.dropped && !busy.retained);
+            drop(busy_presenter);
+            let retained =
+                renderer.render_with_group(&frame, &[pending], RenderOptions::default(), 1)?;
+            assert!(retained.retained && !retained.dropped);
+            assert!(renderer.wait_idle(10000));
+            let snapshot = capture_async(&device, &queue, &target)?;
+            run_list(&device, &queue, |_| {})?;
+            assert_eq!(ticket_rgb(&snapshot)?, [0, 1023, 0]);
+
+            let gate = hold_uploads(&device, &queue)?;
+            for _ in 0..SLOT_COUNT {
+                assert!(
+                    !renderer
+                        .render(&frame, &[mesh], RenderOptions::default())?
+                        .dropped
+                );
+            }
+            let events = WAIT_EVENT_CREATES.with(|count| count.get());
+            let mut clears = Vec::new();
+            let mut old_captures = Vec::new();
+            let mut captures = Vec::new();
+            for present in 0..17 {
+                frame.sequence += 1;
+                clears.push(submit_async(&device, &queue, |list| {
+                    list.ClearRenderTargetView(
+                        D3D12_CPU_DESCRIPTOR_HANDLE { ptr: frame.target },
+                        &[1.0, 0.0, 0.0, 1.0],
+                        None,
+                    )
+                })?);
+                assert!(
+                    renderer
+                        .render(&frame, &[mesh], RenderOptions::default())?
+                        .dropped
+                );
+                old_captures.push(capture_async(&device, &queue, &target)?);
+                let stats =
+                    renderer.render_with_group(&frame, &[mesh], RenderOptions::default(), 1)?;
+                assert_eq!(stats.retained, present < 16);
+                assert_eq!(stats.dropped, present >= 16);
+                captures.push(capture_async(&device, &queue, &target)?);
+            }
+            assert_eq!(WAIT_EVENT_CREATES.with(|count| count.get()), events);
+            assert!(!renderer.wait_idle(0));
+            drop(gate);
+            run_list(&device, &queue, |_| {})?;
+            for (present, capture) in captures.iter().enumerate() {
+                assert_eq!(ticket_rgb(&old_captures[present])?, [1023, 0, 0]);
+                assert_eq!(
+                    ticket_rgb(capture)?,
+                    if present < 16 {
+                        [0, 1023, 0]
+                    } else {
+                        [1023, 0, 0]
+                    },
+                    "present={present}"
+                );
+            }
+            println!(
+                "WARP retained: missing-atlas old=red/new=green; 17 cleared presents old=17 red, retained=16 green + 1 explicit pool-cap red; zero render wait events"
+            );
+            assert!(renderer.wait_idle(0));
+            // Successful empty paint is an intentional hide, not a retained frame.
+            renderer.render_with_group(&frame, &[], RenderOptions::default(), 1)?;
+            assert_eq!(handle.lock().unwrap().committed_bytes(), 0);
+            assert!(handle.lock().unwrap().replay(&frame, &[1])?.dropped);
+            renderer.render_with_group(&frame, &[mesh], RenderOptions::default(), 1)?;
+            assert!(renderer.wait_idle(10000));
+            let resized = NativeFrame {
+                width: 32.0,
+                ..frame
+            };
+            assert!(handle.lock().unwrap().replay(&resized, &[1])?.dropped);
+            assert_eq!(handle.lock().unwrap().committed_bytes(), 0);
+            println!(
+                "WARP retained: confirmed hide and viewport invalidation release completed images"
+            );
+            no_debug_errors(&device);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn warp_retained_surfaces_retire_after_both_copy_and_replay_fences() -> Result<()> {
+        unsafe {
+            let (device, queue, _target, _rtv, mut frame) = context(DXGI_FORMAT_R10G10B10A2_UNORM)?;
+            frame.layer = 0;
+            let mut renderer = Renderer::new(&frame)?;
+            renderer.render(&frame, &[], RenderOptions::default())?;
+            assert!(renderer.wait_idle(10000));
+            let handle = renderer.presentation_handle();
+            let vertices = green_quad();
+            let indices = [0, 1, 2, 0, 2, 3];
+            let mesh = Mesh {
+                texture: 0,
+                vertices: vertices.as_ptr(),
+                vertex_count: 4,
+                indices: indices.as_ptr(),
+                index_count: 6,
+                clip: [8.0, 8.0, 56.0, 56.0],
+            };
+            let copy_gate = hold_uploads(&device, &queue)?;
+            renderer.render_with_group(&frame, &[mesh], RenderOptions::default(), 1)?;
+            let replay_gate = hold_uploads(&device, &queue)?;
+            assert!(handle.lock().unwrap().replay(&frame, &[1])?.retained);
+            let bytes = handle.lock().unwrap().committed_bytes();
+            handle.lock().unwrap().invalidate(1);
+            assert_eq!(handle.lock().unwrap().committed_bytes(), bytes);
+            assert!(bytes > 0);
+            drop(copy_gate);
+            assert!(renderer.wait_geometry_idle(10000));
+            handle.lock().unwrap().invalidate_all();
+            assert_eq!(
+                handle.lock().unwrap().committed_bytes(),
+                bytes,
+                "replay still owns the descriptor and image"
+            );
+            assert!(!renderer.wait_idle(0));
+            drop(replay_gate);
+            assert!(renderer.wait_idle(10000));
+            handle.lock().unwrap().invalidate_all();
+            assert_eq!(handle.lock().unwrap().committed_bytes(), 0);
+            println!(
+                "WARP retained: image and descriptor survive copy-only completion; retire after both main and presentation fences"
+            );
+            no_debug_errors(&device);
+        }
+        Ok(())
     }
 
     #[test]

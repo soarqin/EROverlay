@@ -8,6 +8,17 @@ struct Forward(HostApi);
 // Registration is forbidden while a Runtime exists; the table is copied once.
 unsafe impl Send for Forward {}
 static FORWARD: Mutex<Option<Forward>> = Mutex::new(None);
+static TRANSFERS_PAUSED: AtomicBool = AtomicBool::new(false);
+static REJECT_RGBA: AtomicU32 = AtomicU32::new(0);
+
+pub(super) fn transfers_paused() -> bool {
+    TRANSFERS_PAUSED.load(Ordering::Acquire)
+}
+pub(super) fn reject_rgba() -> bool {
+    REJECT_RGBA
+        .try_update(Ordering::AcqRel, Ordering::Acquire, |n| n.checked_sub(1))
+        .is_ok()
+}
 
 fn table() -> Option<Forward> {
     *FORWARD.lock().unwrap_or_else(|e| e.into_inner())
@@ -139,6 +150,8 @@ pub unsafe extern "C" fn eroverlay_test_layer_host(api: *const HostApi) -> i32 {
             return ERR_ABI;
         }
         *FORWARD.lock().unwrap_or_else(|e| e.into_inner()) = Some(Forward(*header));
+        TRANSFERS_PAUSED.store(false, Ordering::Release);
+        REJECT_RGBA.store(0, Ordering::Release);
         OK
     })
 }
@@ -216,6 +229,164 @@ pub unsafe extern "C" fn eroverlay_test_layer_busy(frame: *const NativeFrame, ga
             let _busy = runtime.callbacks.write().unwrap_or_else(|e| e.into_inner());
             runtime.render(frame);
         }
+        OK
+    })
+}
+
+struct DriveContext {
+    runtime: Arc<Runtime>,
+    mode: u32,
+}
+unsafe extern "C" fn busy_frame(user: *mut c_void, frame: *const NativeFrame) {
+    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let context = unsafe { &*user.cast::<DriveContext>() };
+        let Some(frame) = (unsafe { frame.as_ref() }) else {
+            return;
+        };
+        let target_layer = if context.mode <= 2 || context.mode >= 5 {
+            LAYER_ABOVE_UI
+        } else {
+            LAYER_BELOW_UI
+        };
+        if frame.layer == target_layer && context.mode != 0 {
+            if context.mode == 6 {
+                let handle = context
+                    .runtime
+                    .presentation
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner())
+                    .clone();
+                let _busy = handle
+                    .as_ref()
+                    .map(|p| p.lock().unwrap_or_else(|e| e.into_inner()));
+                context.runtime.render(frame);
+            } else if context.mode == 5 {
+                let _busy = context
+                    .runtime
+                    .painting
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                context.runtime.render(frame);
+            } else if context.mode % 2 == 1 {
+                let _busy = context
+                    .runtime
+                    .render
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner());
+                context.runtime.render(frame);
+            } else {
+                let _busy = context
+                    .runtime
+                    .callbacks
+                    .write()
+                    .unwrap_or_else(|e| e.into_inner());
+                context.runtime.render(frame);
+            }
+        } else {
+            context.runtime.render(frame);
+        }
+    }));
+    STAGING.with(|s| s.set(std::ptr::null_mut()));
+}
+
+/// Full native L/UI/H sequence with deterministic contention only at the selected callback.
+/// # Safety
+/// Same borrowed resources and synchronous callback contract as `eroverlay_test_layer_drive`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn eroverlay_test_layer_drive_busy(
+    above: *const NativeFrame,
+    above_resource: *mut c_void,
+    below: *const NativeFrame,
+    below_resource: *mut c_void,
+    native_command: Option<NativeCommand>,
+    native_user: *mut c_void,
+    scenario: u32,
+    mode: u32,
+) -> i32 {
+    guarded(|| {
+        let (Some(above), Some(below), Some(command)) = (
+            unsafe { above.as_ref() },
+            unsafe { below.as_ref() },
+            native_command,
+        ) else {
+            return ERR_INVALID;
+        };
+        if mode > 6 {
+            return ERR_INVALID;
+        }
+        let Some(runtime) = RUNTIME
+            .get_or_init(|| Mutex::new(None))
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+        else {
+            return ERR_UNAVAILABLE;
+        };
+        let mut context = DriveContext { runtime, mode };
+        if unsafe {
+            eroverlay_renderer::drive_scene_fixture(
+                busy_frame,
+                (&mut context as *mut DriveContext).cast(),
+                above,
+                above_resource,
+                below,
+                below_resource,
+                command,
+                native_user,
+                scenario,
+            )
+        } {
+            OK
+        } else {
+            ERR_UNAVAILABLE
+        }
+    })
+}
+
+/// # Safety
+/// Offline fixture only; changes transfer scheduling without changing texture state.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn eroverlay_test_layer_texture_gate(paused: u32) -> i32 {
+    TRANSFERS_PAUSED.store(paused != 0, Ordering::Release);
+    OK
+}
+
+/// One or more real create calls can be refused, matching registry contention.
+/// # Safety
+/// Offline fixture only; no handle or texture state is fabricated.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn eroverlay_test_layer_texture_reject(count: u32) -> i32 {
+    REJECT_RGBA.store(count.min(1024), Ordering::Release);
+    OK
+}
+
+/// # Safety
+/// `out` points to at least five writable u64 values.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn eroverlay_test_layer_texture_stats(out: *mut u64, capacity: usize) -> i32 {
+    guarded(|| {
+        if out.is_null() || !out.is_aligned() || capacity < 5 {
+            return ERR_INVALID;
+        }
+        let Some(runtime) = RUNTIME
+            .get_or_init(|| Mutex::new(None))
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+        else {
+            return ERR_UNAVAILABLE;
+        };
+        let Some(d) = runtime.host.textures.diagnostics() else {
+            return ERR_BUSY;
+        };
+        let values = [
+            d.rgba_requests,
+            d.prepared as u64,
+            d.uploading as u64,
+            d.ready as u64,
+            d.source_bytes,
+        ];
+        unsafe { std::ptr::copy_nonoverlapping(values.as_ptr(), out, values.len()) };
         OK
     })
 }

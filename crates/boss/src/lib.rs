@@ -65,6 +65,20 @@ struct Instance {
     actions: Mutex<Vec<Action>>,
     full: AtomicBool,
     shown: AtomicBool,
+    hide_pending: AtomicBool,
+}
+#[cfg(feature = "continuity-fixture")]
+static NEXT_RENDER_FAULT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// Offline fixture only; the installed plugin does not export test controls.
+#[cfg(feature = "continuity-fixture")]
+#[unsafe(no_mangle)]
+pub extern "C" fn eroverlay_test_boss_fault(mask: u32) -> i32 {
+    if mask & !3 != 0 {
+        return abi::ERR_INVALID;
+    }
+    NEXT_RENDER_FAULT.store(mask, Ordering::Relaxed);
+    abi::OK
 }
 fn guard(f: impl FnOnce() -> i32) -> i32 {
     catch_unwind(AssertUnwindSafe(f)).unwrap_or(abi::ERR_PANIC)
@@ -147,6 +161,7 @@ unsafe extern "C" fn init(api: *const abi::HostApi, out: *mut *mut c_void) -> i3
             actions: Mutex::new(Vec::with_capacity(8)),
             full: AtomicBool::new(false),
             shown: AtomicBool::new(true),
+            hide_pending: AtomicBool::new(false),
         };
         unsafe { out.write(Box::into_raw(Box::new(instance)).cast()) };
         host.log("Boss Rust/egui initialized; native UI_SCENE above game UI\n");
@@ -161,7 +176,7 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
         let Ok(mut u) = instance.update.try_lock() else {
             return abi::ERR_BUSY;
         };
-        let visible = instance.host.visible();
+        let visible = instance.host.visibility() == host::Visibility::Visible;
         if !visible {
             instance.host.capture(0);
         }
@@ -402,15 +417,27 @@ unsafe extern "C" fn render(instance: *mut c_void, frame: *const abi::FrameInfo)
             return abi::ERR_INVALID;
         }
         let instance = unsafe { &*instance.cast::<Instance>() };
-        let snapshot = instance.snapshot.try_lock().ok().and_then(|s| s.clone());
-        let Some(snapshot) = snapshot else {
+        #[cfg(feature = "continuity-fixture")]
+        let fault = NEXT_RENDER_FAULT.swap(0, Ordering::Relaxed);
+        #[cfg(feature = "continuity-fixture")]
+        let _snapshot_fault =
+            (fault & 1 != 0).then(|| instance.snapshot.lock().unwrap_or_else(|e| e.into_inner()));
+        #[cfg(feature = "continuity-fixture")]
+        let _ui_fault =
+            (fault & 2 != 0).then(|| instance.ui.lock().unwrap_or_else(|e| e.into_inner()));
+        if !instance.shown.load(Ordering::Relaxed) {
+            instance.hide_pending.store(true, Ordering::Relaxed);
             instance.host.capture(0);
+            instance.host.clear_input();
             return abi::OK;
-        };
+        }
         let Ok(mut ui) = instance.ui.try_lock() else {
             return abi::ERR_BUSY;
         };
-        ui.render(instance, &snapshot, &frame)
+        if instance.hide_pending.swap(false, Ordering::Relaxed) {
+            ui.hide(instance.host);
+        }
+        ui.render_latest(instance, &frame)
     })
 }
 unsafe extern "C" fn reset(instance: *mut c_void, _generation: u64) -> i32 {

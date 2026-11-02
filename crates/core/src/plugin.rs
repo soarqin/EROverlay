@@ -158,6 +158,12 @@ mod tests {
     }
 
     fn fixture(count: &AtomicU64) -> ManuallyDrop<Plugin> {
+        fixture_callback((count as *const AtomicU64).cast_mut().cast(), count_render)
+    }
+    fn fixture_callback(
+        instance: *mut c_void,
+        render: unsafe extern "C" fn(*mut c_void, *const FrameInfo) -> i32,
+    ) -> ManuallyDrop<Plugin> {
         // Callback dispatch only: no fake module is passed to FreeLibrary.
         ManuallyDrop::new(Plugin {
             module: HMODULE::default(),
@@ -172,11 +178,11 @@ mod tests {
                 name: ByteSlice::new(b"frame-counter"),
                 init: None,
                 update: None,
-                render: Some(count_render),
+                render: Some(render),
                 renderer_reset: None,
                 destroy: None,
             },
-            instance: (count as *const AtomicU64).cast_mut().cast(),
+            instance,
             gate: Mutex::new(()),
             rendered_sequence: AtomicU64::new(0),
             has_rendered: AtomicBool::new(false),
@@ -214,5 +220,64 @@ mod tests {
         assert_eq!(plugin.render(&frame), OK);
         assert_eq!(plugin.render(&frame), ERR_BUSY);
         assert_eq!(count.load(Ordering::Relaxed), 1);
+    }
+
+    #[test]
+    fn copied_paint_is_committed_only_after_a_complete_successful_callback() {
+        use std::sync::atomic::AtomicI32;
+        unsafe extern "C" fn paint(user: *mut c_void, _: *const FrameInfo) -> i32 {
+            let code = unsafe { &*user.cast::<AtomicI32>() }.load(Ordering::Relaxed);
+            if code == ERR_UNAVAILABLE {
+                return OK;
+            } // Explicitly empty/hidden frame.
+            let vertices = [Vertex::default(); 3];
+            let indices = [0, 1, 2];
+            let mesh = Mesh {
+                texture: if code == OK { 7 } else { 99 },
+                vertices: vertices.as_ptr(),
+                vertex_count: 3,
+                indices: indices.as_ptr(),
+                index_count: 3,
+                clip: [0., 0., 100., 100.],
+            };
+            assert_eq!(
+                unsafe { crate::submit_mesh(std::ptr::null_mut(), &mesh) },
+                OK
+            );
+            code
+        }
+        let code = AtomicI32::new(OK);
+        let plugin = fixture_callback((&code as *const AtomicI32).cast_mut().cast(), paint);
+        let mut packets = crate::painting::Painting::new(1);
+        let mut frame = FrameInfo {
+            width: 100.,
+            height: 100.,
+            sequence: 1,
+            ..Default::default()
+        };
+        assert_eq!(packets.prepare(0, &plugin, &frame), OK);
+        // The callback's stack vertices have already expired. Only copied data survives.
+        assert_eq!(packets.packets[0].staging.meshes()[0].texture, 7);
+        code.store(ERR_BUSY, Ordering::Relaxed);
+        frame.sequence += 1;
+        assert_eq!(packets.prepare(0, &plugin, &frame), ERR_BUSY);
+        assert!(packets.packets[0].valid);
+        assert!(!packets.packets[0].fresh);
+        assert_eq!(packets.packets[0].staging.meshes()[0].texture, 7);
+        assert_eq!(packets.prepare(0, &plugin, &frame), ERR_BUSY);
+        frame.width = 120.;
+        assert_eq!(packets.prepare(0, &plugin, &frame), ERR_BUSY);
+        assert!(!packets.packets[0].valid);
+        code.store(ERR_INVALID, Ordering::Relaxed);
+        frame.sequence += 1;
+        assert_eq!(packets.prepare(0, &plugin, &frame), ERR_INVALID);
+        assert!(!packets.packets[0].valid);
+        code.store(ERR_UNAVAILABLE, Ordering::Relaxed);
+        frame.sequence += 1;
+        assert_eq!(packets.prepare(0, &plugin, &frame), OK);
+        assert!(packets.packets[0].valid);
+        assert!(!packets.packets[0].staging.has_paint());
+        packets.reset(2);
+        assert!(!packets.packets[0].valid);
     }
 }

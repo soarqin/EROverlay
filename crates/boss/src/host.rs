@@ -1,6 +1,12 @@
 use eroverlay_abi as abi;
 #[derive(Clone, Copy)]
 pub struct Host(pub abi::HostApi);
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Visibility {
+    Visible,
+    Hidden,
+    Unknown,
+}
 // SAFETY: the immutable host table/user outlive this plugin. Render uses only
 // callbacks explicitly documented as nonblocking and render-safe.
 unsafe impl Send for Host {}
@@ -26,14 +32,20 @@ impl Host {
             unsafe { f(self.0.user, 1, abi::ByteSlice::new(text.as_bytes())) };
         }
     }
-    pub fn visible(self) -> bool {
+    pub fn visibility(self) -> Visibility {
         let mut v = abi::DisplayState::default();
-        self.0
+        if !self
+            .0
             .read_display_state
             .is_some_and(|f| unsafe { f(self.0.user, &mut v) } == abi::OK)
-            && v.valid != 0
-            && v.loading_or_logo == 0
-            && v.full_screen_map == 0
+            || v.valid == 0
+        {
+            Visibility::Unknown
+        } else if v.loading_or_logo != 0 || v.full_screen_map != 0 {
+            Visibility::Hidden
+        } else {
+            Visibility::Visible
+        }
     }
     pub fn key(self, key: u32) -> bool {
         key != 0
