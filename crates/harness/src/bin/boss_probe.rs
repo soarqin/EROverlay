@@ -72,7 +72,7 @@ struct UiGroup {
     id: u32,
     flags: u32,
     logical_bosses: u32,
-    reserved: u32,
+    interaction_flags: u32,
     header_rect: [f32; 4],
 }
 #[repr(C)]
@@ -84,6 +84,8 @@ struct UiRow {
     state: u32,
     status_rect: [f32; 4],
     name_rect: [f32; 4],
+    interaction_flags: u32,
+    reserved: u32,
 }
 #[repr(C)]
 #[derive(Clone, Copy, Default, Debug)]
@@ -128,6 +130,7 @@ struct Observation {
 }
 struct Fixture {
     root: String,
+    view: BTreeMap<String, String>,
     params: BTreeMap<u32, Vec<u8>>,
     files: BTreeMap<String, Vec<u8>>,
     scenes: Option<PathBuf>,
@@ -194,16 +197,13 @@ unsafe extern "C" fn config(
     capacity: usize,
 ) -> usize {
     let f = unsafe { fixture(user) };
-    let value = match unsafe { text(key) } {
-        "runtime.directory" => f.root.as_str(),
-        "runtime.game_language" | "common.language" => "engUS",
-        "boss.toggle_full_mode" => "=",
-        "boss.toggle" => "F9",
-        "boss.allow_revive" => "true",
-        "boss.width" => "440",
-        "boss.height" => "800",
-        "boss.font_size" => "20",
-        _ => return usize::MAX,
+    let key = unsafe { text(key) };
+    let value = if key == "runtime.directory" {
+        f.root.as_str()
+    } else if let Some(value) = f.view.get(key) {
+        value.as_str()
+    } else {
+        return usize::MAX;
     };
     if !out.is_null() {
         unsafe { std::ptr::copy_nonoverlapping(value.as_ptr(), out, value.len().min(capacity)) };
@@ -684,6 +684,371 @@ struct Probe {
     cpu: Duration,
 }
 impl Probe {
+    fn list_clip(&self) -> Result<[f32; 4], String> {
+        let region = self.observed()?.ui.region_rect;
+        self.fixture
+            .meshes
+            .iter()
+            .map(|m| m.clip)
+            .filter(|r| r[1] >= region[3] && r[3] - r[1] > 60. && r[2] - r[0] > 100.)
+            .max_by(|a, b| (a[3] - a[1]).total_cmp(&(b[3] - b[1])))
+            .ok_or("real ScrollArea clip unavailable".into())
+    }
+    fn scroll_list(&mut self, lines: f32) -> Result<(), String> {
+        let clip = self.list_clip()?;
+        self.pointer((clip[0] + clip[2]) / 2., (clip[1] + clip[3]) / 2.)?;
+        self.fixture
+            .input
+            .push_back(event(abi::UI_INPUT_WHEEL, 0, 0, 0., lines));
+        for _ in 0..12 {
+            self.frame()?;
+        }
+        Ok(())
+    }
+    fn visible_row(&mut self, flag: u32) -> Result<UiRow, String> {
+        for _ in 0..24 {
+            let observed = self.observed()?;
+            let clip = self.list_clip()?;
+            let lines = if let Some(row) = observed.rows.iter().find(|r| r.flag == flag) {
+                if row.status_rect[1] >= clip[1] && row.status_rect[3] <= clip[3] {
+                    return Ok(*row);
+                }
+                if row.status_rect[1] < clip[1] {
+                    2.
+                } else {
+                    -2.
+                }
+            } else {
+                let index = observed
+                    .catalog
+                    .iter()
+                    .position(|r| r.flag == flag)
+                    .ok_or("row not in catalogue")?;
+                let first = observed
+                    .rows
+                    .first()
+                    .and_then(|r| observed.catalog.iter().position(|c| c.flag == r.flag));
+                if first.is_some_and(|first| index < first) {
+                    2.
+                } else {
+                    -2.
+                }
+            };
+            self.scroll_list(lines)?;
+        }
+        Err(format!(
+            "real wheel could not expose entire status response for {flag}"
+        ))
+    }
+    fn pointer(&mut self, x: f32, y: f32) -> Result<(), String> {
+        self.fixture
+            .input
+            .push_back(event(abi::UI_INPUT_POINTER, 0, 0, x, y));
+        for _ in 0..3 {
+            self.frame()?;
+        }
+        Ok(())
+    }
+    fn press_key(&mut self, key: u32) -> Result<(), String> {
+        self.fixture
+            .input
+            .push_back(event(abi::UI_INPUT_KEY, key, abi::UI_INPUT_DOWN, 0., 0.));
+        self.fixture
+            .input
+            .push_back(event(abi::UI_INPUT_KEY, key, 0, 0., 0.));
+        self.frame()?;
+        Ok(())
+    }
+    fn visual_matrix(&mut self, host: &abi::HostApi) -> Result<(), String> {
+        if self.observe()?.is_none() {
+            return Err(
+                "visual interaction matrix requires the read-only schema2 feature DLL".into(),
+            );
+        }
+        let base = PathBuf::from(&self.fixture.root);
+        let language = self
+            .fixture
+            .view
+            .get("common.language")
+            .cloned()
+            .unwrap_or_default();
+        println!(
+            "Visual matrix: language={language}; actual archived FMG labels, no offline name replacement."
+        );
+        for (width, font, allowed) in [
+            (440, 20, true),
+            (280, 12, true),
+            (280, 20, true),
+            (280, 40, true),
+            (440, 20, false),
+        ] {
+            let case = format!("w{width}-f{font}-revive{allowed}");
+            let output = base.join(&case);
+            std::fs::create_dir_all(output.join("configs")).map_err(|e| e.to_string())?;
+            for name in ["boss-revival.json", "boss-encounters.json"] {
+                std::fs::copy(
+                    base.join("configs").join(name),
+                    output.join("configs").join(name),
+                )
+                .map_err(|e| e.to_string())?;
+            }
+            unsafe { self.plugin.api.destroy.unwrap()(self.plugin.instance) };
+            self.plugin.instance = std::ptr::null_mut();
+            self.fixture.root = output.to_string_lossy().into_owned();
+            self.fixture
+                .view
+                .insert("boss.width".into(), width.to_string());
+            self.fixture
+                .view
+                .insert("boss.font_size".into(), font.to_string());
+            self.fixture.view.insert("boss.height".into(), "880".into());
+            self.fixture
+                .view
+                .insert("boss.allow_revive".into(), allowed.to_string());
+            self.fixture.region = Some(6102000);
+            self.fixture.flags.clear();
+            self.fixture.directory_count = 0;
+            let code = unsafe { self.plugin.api.init.unwrap()(host, &mut self.plugin.instance) };
+            if code != abi::OK || self.plugin.instance.is_null() {
+                return Err(format!("{case}: init failed{code}"));
+            }
+            self.wait_catalog()?;
+            self.hotkey(abi::parse_chord("="))?;
+            for _ in 0..12 {
+                self.frame()?;
+            }
+            let observed = self.observed()?;
+            Self::expect_open(
+                &observed,
+                61002,
+                &[61002],
+                &format!("{case}: initial Weeping region"),
+            )?;
+            let flags: Vec<_> = observed
+                .catalog
+                .iter()
+                .filter(|r| r.group == 61002)
+                .take(3)
+                .map(|r| r.flag)
+                .collect();
+            if flags.len() != 3 {
+                self.screenshot("initial-visible-row-limit")?;
+                return Err(format!("{case}: three real visible Boss rows unavailable"));
+            }
+            let mut changes = Vec::new();
+            for (flag, state) in flags.iter().zip([1, 0, 2]) {
+                let row = observed
+                    .catalog
+                    .iter()
+                    .find(|r| r.flag == *flag)
+                    .ok_or("visual catalogue row missing")?;
+                changes.extend(
+                    row.completion[..row.completion_count as usize]
+                        .iter()
+                        .map(|&id| (id, state)),
+                );
+            }
+            self.refresh_flags(&changes)?;
+            self.screenshot("expanded-collapsed-current-three-states")?;
+            for (flag, state) in flags.iter().zip([1, 0, 2]) {
+                let row = self.visible_row(*flag)?;
+                if row.state != state || (row.interaction_flags & 8 != 0) != (allowed && state == 1)
+                {
+                    return Err(format!(
+                        "{case}: actual response permission mismatch: {row:?}"
+                    ));
+                }
+                if font == 40 {
+                    self.screenshot(&format!("entire-visible-state-{state}-after-real-wheel"))?;
+                }
+            }
+            self.scroll_list(50.)?;
+            let observed = self.observed()?;
+            let group = observed
+                .groups
+                .iter()
+                .find(|g| g.id == 61002)
+                .ok_or("current header missing")?;
+            let bounds = group.header_rect;
+            // Keep clear of egui's floating vertical scrollbar; the progress
+            // count side remains inside the real full-width header response.
+            let right_hit = bounds[2] - 20.;
+            self.pointer(right_hit, (bounds[1] + bounds[3]) / 2.)?;
+            if self
+                .observed()?
+                .groups
+                .iter()
+                .find(|g| g.id == 61002)
+                .unwrap()
+                .interaction_flags
+                & 1
+                == 0
+            {
+                return Err(format!("{case}: right-edge header not hoverable"));
+            }
+            self.screenshot("header-hover-right-edge")?;
+            self.click(right_hit, (bounds[1] + bounds[3]) / 2.)?;
+            let clicked = self.observed()?;
+            if clicked
+                .groups
+                .iter()
+                .find(|g| g.id == 61002)
+                .unwrap()
+                .interaction_flags
+                & 4
+                == 0
+            {
+                return Err(format!("{case}: right-edge header response not clicked"));
+            }
+            self.frame()?;
+            if self.observed()?.rows.iter().any(|r| r.group == 61002) {
+                return Err(format!(
+                    "{case}: right-edge click did not collapse real rows"
+                ));
+            }
+            self.screenshot("all-collapsed-header-focused")?;
+            self.click(bounds[0] + 3., (bounds[1] + bounds[3]) / 2.)?;
+            self.frame()?;
+            if !self.observed()?.rows.iter().any(|r| r.group == 61002) {
+                return Err(format!("{case}: left-edge click did not expand real rows"));
+            }
+            let mut header_focused = false;
+            for _ in 0..48 {
+                if self
+                    .observed()?
+                    .groups
+                    .iter()
+                    .any(|g| g.id == 61002 && g.interaction_flags & 2 != 0)
+                {
+                    header_focused = true;
+                    break;
+                }
+                self.press_key(0x09)?;
+            }
+            if !header_focused {
+                return Err(format!("{case}: Tab could not focus the current header"));
+            }
+            self.press_key(0x0d)?;
+            self.frame()?;
+            if self
+                .observed()?
+                .groups
+                .iter()
+                .find(|g| g.id == 61002)
+                .unwrap()
+                .flags
+                & 1
+                != 0
+            {
+                let state = self.observed()?;
+                std::fs::write(
+                    output.join("keyboard-failure-response.txt"),
+                    format!(
+                        "ui={:?}\ngroups={:?}\nrows={:?}",
+                        state.ui, state.groups, state.rows
+                    ),
+                )
+                .map_err(|e| e.to_string())?;
+                return Err(format!(
+                    "{case}: keyboard Enter did not collapse focused header; actual={:?}",
+                    state.groups.iter().find(|g| g.id == 61002)
+                ));
+            }
+            self.screenshot("header-keyboard-focus")?;
+            self.press_key(0x0d)?;
+            self.frame()?;
+            if self
+                .observed()?
+                .groups
+                .iter()
+                .find(|g| g.id == 61002)
+                .unwrap()
+                .flags
+                & 1
+                == 0
+            {
+                return Err(format!(
+                    "{case}: keyboard Enter did not reopen focused header"
+                ));
+            }
+            let writes = self.fixture.writes.len();
+            for flag in &flags[1..] {
+                let row = self.visible_row(*flag)?;
+                self.click_rect(row.status_rect)?;
+                if self.observed()?.ui.flags & 8 != 0 || self.fixture.writes.len() != writes {
+                    return Err(format!(
+                        "{case}: disabled status opened modal or wrote flags"
+                    ));
+                }
+            }
+            let done = self.visible_row(flags[0])?;
+            self.pointer(
+                (done.status_rect[0] + done.status_rect[2]) / 2.,
+                (done.status_rect[1] + done.status_rect[3]) / 2.,
+            )?;
+            self.screenshot("done-status-hover")?;
+            if allowed {
+                // Real Tab traversal must reach the actual enabled status widget.
+                let mut focused = false;
+                for _ in 0..48 {
+                    self.press_key(0x09)?;
+                    if self
+                        .observed()?
+                        .rows
+                        .iter()
+                        .any(|r| r.flag == flags[0] && r.interaction_flags & 2 != 0)
+                    {
+                        focused = true;
+                        break;
+                    }
+                }
+                if !focused {
+                    return Err(format!("{case}: Tab could not focus enabled status widget"));
+                }
+                self.screenshot("done-status-keyboard-focus")?;
+                self.press_key(0x0d)?;
+                if self.observed()?.ui.flags & 8 == 0 || self.fixture.writes.len() != writes {
+                    return Err(format!("{case}: Enter did not open confirmation safely"));
+                }
+                self.screenshot("allowed-revival-keyboard-confirmation")?;
+                self.hotkey(abi::parse_chord("F9"))?;
+                if self.frame()? != 0 || self.fixture.capture != 0 {
+                    return Err(format!("{case}: hide while modal retained pixels/capture"));
+                }
+                self.hotkey(abi::parse_chord("F9"))?;
+                for _ in 0..12 {
+                    self.frame()?;
+                }
+            } else {
+                self.click_rect(done.status_rect)?;
+                if self.observed()?.ui.flags & 8 != 0 || self.fixture.writes.len() != writes {
+                    return Err(format!(
+                        "{case}: allow_revive=false opened modal or wrote flags"
+                    ));
+                }
+                self.screenshot("revival-setting-disabled")?;
+            }
+            let observations = self.observed()?;
+            std::fs::write(
+                output.join("responses.txt"),
+                format!(
+                    "{case} language={language}\n{:?}\ngroups={:?}\nrows={:?}\n",
+                    observations.ui, observations.groups, observations.rows
+                ),
+            )
+            .map_err(|e| e.to_string())?;
+            println!(
+                "PASS: {case}: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture={}, no writes={}",
+                self.fixture.capture,
+                self.fixture.writes.len() == writes
+            );
+        }
+        println!(
+            "PASS: actual DLL visual/input matrix complete. UTF-8 labels came from the supplied real-language BNDs; output {}",
+            base.display()
+        );
+        Ok(())
+    }
     fn glyphs_where(&self, include: impl Fn(&Geometry) -> bool) -> Vec<Glyph> {
         let mut glyphs = Vec::new();
         for mesh in &self.fixture.meshes {
@@ -864,7 +1229,7 @@ impl Probe {
         }
         if samples.windows(2).any(|v| v[0].0 != v[1].0) {
             return Err(format!(
-                "actual normal-DLL [+]/[ ]/[?] shifts Boss name x: {:?}",
+                "actual normal-DLL done/remaining/unknown states shift Boss name x: {:?}",
                 samples.iter().map(|s| s.0).collect::<Vec<_>>()
             ));
         }
@@ -902,7 +1267,7 @@ impl Probe {
                 catalog.len(),
             )
         };
-        if code != abi::OK || ui.schema != 1 || ui.size as usize != size_of::<UiProbe>() {
+        if code != abi::OK || ui.schema != 2 || ui.size as usize != size_of::<UiProbe>() {
             return Err(format!(
                 "layout observation failed: code={code}, header={ui:?}"
             ));
@@ -1580,15 +1945,29 @@ impl Probe {
                 .iter()
                 .map(|g| (g.bounds[1] + g.bounds[3]) / 2.)
                 .fold(f32::NEG_INFINITY, f32::max);
-            let left = glyphs
+            let name_left = glyphs
                 .iter()
                 .filter(|g| (g.bounds[1] + g.bounds[3]) / 2. > bottom - 10.)
                 .map(|g| g.bounds[0])
                 .fold(f32::INFINITY, f32::min);
-            if !left.is_finite() || !bottom.is_finite() {
+            let rightmost_vector = self
+                .fixture
+                .meshes
+                .iter()
+                .filter(|m| m.clip[0] >= 700. && m.clip[1] >= 300.)
+                .flat_map(|m| &m.vertices)
+                .filter(|v| {
+                    v.pos[0] < name_left - 2.
+                        && v.pos[0] > name_left - 100.
+                        && (v.pos[1] - bottom).abs() < 12.
+                        && v.uv == [0., 0.]
+                })
+                .map(|v| v.pos[0])
+                .fold(f32::NEG_INFINITY, f32::max);
+            if !rightmost_vector.is_finite() || !bottom.is_finite() {
                 return Err("canonical row status glyphs missing".into());
             }
-            self.click(left + 5., bottom - 2.)?;
+            self.click(rightmost_vector - 5., bottom - 2.)?;
         }
         let mut after = 0;
         for _ in 0..6 {
@@ -1876,8 +2255,16 @@ fn run() -> Result<(), String> {
         params.insert(group, mapped);
     }
     let mut files = BTreeMap::new();
+    let language = std::env::var("EROVERLAY_BOSS_LANGUAGE").unwrap_or_else(|_| "engUS".into());
+    let text_archive = std::env::var_os("EROVERLAY_BOSS_TEXT_DIR").map(PathBuf::from);
+    if !language.eq_ignore_ascii_case("engUS") && text_archive.is_none() {
+        return Err("non-English probe requires explicit EROVERLAY_BOSS_TEXT_DIR with real language binders".into());
+    }
     for name in ["item_dlc02.bnd", "menu_dlc02.bnd"] {
-        files.insert(name.into(), read(&archive.join(name))?);
+        files.insert(
+            name.into(),
+            read(&text_archive.as_ref().unwrap_or(&archive).join(name))?,
+        );
     }
     for entry in std::fs::read_dir(events).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
@@ -1891,6 +2278,19 @@ fn run() -> Result<(), String> {
     let renderer = unsafe { Renderer::new(&native) }.map_err(|e| e.to_string())?;
     let mut fixture = Box::new(Fixture {
         root: root.to_string_lossy().into_owned(),
+        view: [
+            ("runtime.game_language", language.as_str()),
+            ("common.language", language.as_str()),
+            ("boss.toggle_full_mode", "="),
+            ("boss.toggle", "F9"),
+            ("boss.allow_revive", "true"),
+            ("boss.width", "440"),
+            ("boss.height", "800"),
+            ("boss.font_size", "20"),
+        ]
+        .into_iter()
+        .map(|(k, v)| (k.into(), v.into()))
+        .collect(),
         params,
         files,
         scenes,
@@ -2054,6 +2454,9 @@ fn run() -> Result<(), String> {
         cpu: Duration::ZERO,
     };
     probe.preload_before_save()?;
+    if std::env::var_os("EROVERLAY_BOSS_VISUAL_MATRIX").is_some() {
+        return probe.visual_matrix(&host);
+    }
     println!(
         "Full232-byte host optional context-checked region callback calls={}",
         probe.fixture.region_calls

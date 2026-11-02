@@ -34,7 +34,7 @@ pub struct UiGroup {
     pub id: u32,
     pub flags: u32,
     pub logical_bosses: u32,
-    pub reserved: u32,
+    pub interaction_flags: u32,
     pub header_rect: [f32; 4],
 }
 #[repr(C)]
@@ -46,6 +46,8 @@ pub struct UiRow {
     pub state: u32,
     pub status_rect: [f32; 4],
     pub name_rect: [f32; 4],
+    pub interaction_flags: u32,
+    pub reserved: u32,
 }
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -67,7 +69,7 @@ pub(crate) struct Layout {
     pub region_rect: [f32; 4],
     pub reload_rect: [f32; 4],
     drawn: Vec<UiRow>,
-    headers: BTreeMap<u32, [f32; 4]>,
+    headers: BTreeMap<u32, ([f32; 4], u32)>,
 }
 impl Layout {
     pub fn begin(&mut self, sequence: u64, full: bool, interactive: bool) {
@@ -81,29 +83,38 @@ impl Layout {
         self.drawn.clear();
         self.headers.clear();
     }
-    pub fn header(&mut self, group: u32, bounds: egui::Rect) {
-        self.headers.insert(group, rect(bounds));
+    pub fn header(&mut self, group: u32, response: &egui::Response) {
+        self.headers
+            .insert(group, (rect(response.rect), interaction_flags(response)));
     }
     pub fn boss_row(
         &mut self,
         boss: &Encounter,
         group: u32,
         state: u8,
-        status: egui::Rect,
-        name: egui::Rect,
+        status: &egui::Response,
+        name: &egui::Response,
     ) {
         self.drawn.push(UiRow {
             flag: boss.flag,
             map: boss.map_id,
             group,
             state: state.into(),
-            status_rect: rect(status),
-            name_rect: rect(name),
+            status_rect: rect(status.rect),
+            name_rect: rect(name.rect),
+            interaction_flags: interaction_flags(status),
+            reserved: 0,
         });
     }
 }
 pub(crate) fn rect(value: egui::Rect) -> [f32; 4] {
     [value.min.x, value.min.y, value.max.x, value.max.y]
+}
+fn interaction_flags(response: &egui::Response) -> u32 {
+    u32::from(response.hovered())
+        | (u32::from(response.has_focus()) << 1)
+        | (u32::from(response.clicked()) << 2)
+        | (u32::from(response.enabled()) << 3)
 }
 pub(crate) struct State<'a> {
     pub revision: u64,
@@ -111,6 +122,7 @@ pub(crate) struct State<'a> {
     pub current: Option<u32>,
     pub selected: Option<u32>,
     pub remaining: bool,
+    pub modal: bool,
     pub closed: &'a BTreeSet<u32>,
     pub logical_rows: usize,
     pub layout: &'a Layout,
@@ -159,7 +171,7 @@ pub unsafe extern "C" fn eroverlay_test_boss_ui(
         let layout = state.layout;
         let result = UiProbe {
             size: size_of::<UiProbe>() as u32,
-            schema: 1,
+            schema: 2,
             sequence: layout.sequence,
             revision: state.revision,
             raw_map: state.raw_map,
@@ -167,7 +179,8 @@ pub unsafe extern "C" fn eroverlay_test_boss_ui(
             selected_group: state.selected.unwrap_or(u32::MAX),
             flags: u32::from(layout.full)
                 | (u32::from(layout.interactive) << 1)
-                | (u32::from(state.remaining) << 2),
+                | (u32::from(state.remaining) << 2)
+                | (u32::from(state.modal) << 3),
             group_count: data.groups.len() as u32,
             drawn_count: layout.drawn.len() as u32,
             catalog_count: data.rows.len() as u32,
@@ -201,8 +214,8 @@ pub unsafe extern "C" fn eroverlay_test_boss_ui(
                     | (u32::from(state.current == Some(group.id)) << 1)
                     | (u32::from(header.is_some()) << 2),
                 logical_bosses: data.rows.iter().filter(|row| row.group == i).count() as u32,
-                reserved: 0,
-                header_rect: header.copied().unwrap_or_default(),
+                interaction_flags: header.map_or(0, |h| h.1),
+                header_rect: header.map_or([0.; 4], |h| h.0),
             };
             unsafe { groups.add(i).write(value) };
         }
@@ -233,7 +246,7 @@ mod tests {
     fn observation_pods_have_fixed_c_layouts() {
         assert_eq!(size_of::<UiProbe>(), 128);
         assert_eq!(size_of::<UiGroup>(), 32);
-        assert_eq!(size_of::<UiRow>(), 48);
+        assert_eq!(size_of::<UiRow>(), 56);
         assert_eq!(size_of::<CatalogRow>(), 32);
     }
 }

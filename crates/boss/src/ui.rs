@@ -13,22 +13,130 @@ use std::{
 };
 
 enum Row {
-    Header { group: usize, text: String },
+    Header { group: usize, progress: String },
     Boss(usize),
 }
 
 fn status_width(ui: &egui::Ui) -> f32 {
-    let font = egui::TextStyle::Button.resolve(ui.style());
-    ["[+]", "[ ]", "[?]"]
-        .into_iter()
-        .map(|text| {
-            ui.painter()
-                .layout_no_wrap(text.into(), font.clone(), Color32::WHITE)
-                .size()
-                .x
-        })
-        .fold(0., f32::max)
-        + 2. * ui.spacing().button_padding.x
+    (ui.text_style_height(&egui::TextStyle::Body) + 6.).max(24.)
+}
+
+fn chevron(painter: &egui::Painter, rect: egui::Rect, open: bool, color: Color32) {
+    let center = rect.center();
+    let r = rect.height().min(rect.width()) * 0.15;
+    let points = if open {
+        [
+            egui::vec2(-r, -r * 0.5),
+            egui::vec2(0., r * 0.5),
+            egui::vec2(r, -r * 0.5),
+        ]
+    } else {
+        [
+            egui::vec2(-r * 0.5, -r),
+            egui::vec2(r * 0.5, 0.),
+            egui::vec2(-r * 0.5, r),
+        ]
+    };
+    painter.add(egui::Shape::line(
+        points.into_iter().map(|p| center + p).collect(),
+        egui::Stroke::new((rect.height() * 0.055).max(1.), color),
+    ));
+}
+
+fn group_header(
+    ui: &mut egui::Ui,
+    name: &str,
+    progress: &str,
+    open: bool,
+    current: bool,
+    height: f32,
+) -> egui::Response {
+    let (rect, response) = ui.allocate_exact_size(
+        egui::vec2(ui.available_width(), height),
+        egui::Sense::click(),
+    );
+    response.widget_info(|| {
+        egui::WidgetInfo::selected(
+            egui::WidgetType::CollapsingHeader,
+            ui.is_enabled(),
+            open,
+            name,
+        )
+    });
+    let visuals = ui.visuals();
+    let bg = if response.hovered() || response.has_focus() {
+        visuals.widgets.hovered.weak_bg_fill
+    } else if current {
+        visuals.selection.bg_fill.gamma_multiply(0.16)
+    } else if open {
+        visuals
+            .widgets
+            .noninteractive
+            .weak_bg_fill
+            .gamma_multiply(0.35)
+    } else {
+        Color32::TRANSPARENT
+    };
+    let painter = ui.painter();
+    painter.rect_filled(rect, 3., bg);
+    if current {
+        let x = rect.left() + 1.;
+        painter.line_segment(
+            [
+                egui::pos2(x, rect.top() + 4.),
+                egui::pos2(x, rect.bottom() - 4.),
+            ],
+            egui::Stroke::new(2.0_f32, visuals.selection.stroke.color),
+        );
+    }
+    if response.has_focus() {
+        painter.rect_stroke(rect, 3., visuals.selection.stroke, egui::StrokeKind::Inside);
+    }
+    let padding = height * 0.22;
+    chevron(
+        painter,
+        egui::Rect::from_min_size(
+            rect.min + egui::vec2(padding, 0.),
+            egui::vec2(height, height),
+        ),
+        open,
+        visuals.text_color(),
+    );
+    let text_left = rect.left() + height + padding;
+    let right = rect.right() - padding;
+    let font = egui::TextStyle::Body.resolve(ui.style());
+    let count = painter.layout_no_wrap(progress.into(), font, visuals.weak_text_color());
+    let count_left = (right - count.size().x).max(text_left);
+    let text_width = (count_left - ui.spacing().item_spacing.x - text_left).max(0.);
+    let title = egui::WidgetText::from(RichText::new(name).strong()).into_galley(
+        ui,
+        Some(egui::TextWrapMode::Truncate),
+        text_width,
+        egui::TextStyle::Body,
+    );
+    let title_rect = egui::Rect::from_min_max(
+        egui::pos2(text_left, rect.top()),
+        egui::pos2(text_left + text_width, rect.bottom()),
+    );
+    painter
+        .with_clip_rect(title_rect.intersect(ui.clip_rect()))
+        .galley(
+            egui::pos2(text_left, rect.center().y - title.size().y * 0.5),
+            title,
+            visuals.text_color(),
+        );
+    let count_rect = egui::Rect::from_min_max(
+        egui::pos2(count_left, rect.top()),
+        egui::pos2(right.max(count_left), rect.bottom()),
+    );
+    painter
+        .with_clip_rect(count_rect.intersect(ui.clip_rect()))
+        .galley(
+            egui::pos2(count_left, rect.center().y - count.size().y * 0.5),
+            count,
+            visuals.weak_text_color(),
+        );
+    response.on_hover_text(name)
 }
 
 fn boss_widgets(
@@ -39,18 +147,86 @@ fn boss_widgets(
     width: f32,
 ) -> (egui::Response, egui::Response) {
     ui.horizontal(|ui| {
-        let status = match state {
-            1 => "[+]",
-            0 => "[ ]",
-            _ => "[?]",
-        };
+        let guide_x = ui.cursor().left() + width * 0.2;
+        let guide_top = ui.cursor().top() - ui.spacing().item_spacing.y;
+        ui.painter().line_segment(
+            [
+                egui::pos2(guide_x, guide_top),
+                egui::pos2(guide_x, guide_top + width + ui.spacing().item_spacing.y),
+            ],
+            egui::Stroke::new(
+                1.0_f32,
+                ui.visuals()
+                    .widgets
+                    .noninteractive
+                    .bg_stroke
+                    .color
+                    .gamma_multiply(0.5),
+            ),
+        );
+        ui.add_space(width * 0.5);
         let button = ui
             .add_enabled_ui(enabled, |ui| {
-                ui.add_sized([width, 0.], egui::Button::new(status).small())
+                ui.allocate_exact_size(egui::vec2(width, width), egui::Sense::click())
+                    .1
             })
             .inner;
+        button.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, enabled, name));
+        let painter = ui.painter();
+        let center = button.rect.center();
+        let color = ui
+            .visuals()
+            .text_color()
+            .lerp_to_gamma(ui.visuals().weak_text_color(), 0.25);
+        if button.hovered() || button.has_focus() {
+            painter.circle_filled(
+                center,
+                width * 0.43,
+                ui.visuals().widgets.hovered.weak_bg_fill,
+            );
+        }
+        if button.has_focus() {
+            painter.circle_stroke(center, width * 0.43, ui.visuals().selection.stroke);
+        }
+        let stroke = egui::Stroke::new((width * 0.055).max(1.1), color);
+        match state {
+            0 => {
+                painter.circle_stroke(center, width * 0.19, stroke);
+            }
+            1 => {
+                painter.add(egui::Shape::line(
+                    [
+                        egui::vec2(-0.22, 0.),
+                        egui::vec2(-0.05, 0.16),
+                        egui::vec2(0.25, -0.19),
+                    ]
+                    .into_iter()
+                    .map(|p| center + p * width)
+                    .collect(),
+                    stroke,
+                ));
+            }
+            _ => {
+                let r = width * 0.22;
+                painter.add(egui::Shape::closed_line(
+                    [
+                        egui::vec2(0., -r),
+                        egui::vec2(r, 0.),
+                        egui::vec2(0., r),
+                        egui::vec2(-r, 0.),
+                    ]
+                    .into_iter()
+                    .map(|p| center + p)
+                    .collect(),
+                    stroke,
+                ));
+                painter.circle_filled(center, (width * 0.035).max(1.), color);
+            }
+        }
         let color = if state == 1 {
-            ui.visuals().weak_text_color()
+            ui.visuals()
+                .text_color()
+                .lerp_to_gamma(ui.visuals().weak_text_color(), 0.4)
         } else {
             ui.visuals().text_color()
         };
@@ -173,6 +349,7 @@ impl Ui {
             current: self.current,
             selected: self.selected,
             remaining: self.remaining,
+            modal: self.modal.is_some(),
             closed: &self.closed,
             logical_rows: self.rows.len(),
             layout: &self.probe,
@@ -307,14 +484,9 @@ impl Ui {
                 .iter()
                 .filter(|r| r.group == group && r.flag != 0)
                 .count();
-            let arrow = if self.closed.contains(&g.id) {
-                ">"
-            } else {
-                "v"
-            };
             self.rows.push(Row::Header {
                 group,
-                text: format!("{arrow} {}  {killed}/{total}", g.name),
+                progress: format!("{killed}/{total}"),
             });
             if !self.closed.contains(&g.id) {
                 self.rows.extend(relevant.into_iter().map(Row::Boss));
@@ -326,45 +498,54 @@ impl Ui {
     fn settings_panel(&mut self, ui: &mut egui::Ui) {
         let chinese = self.chinese;
         let l = |en, zh| if chinese { zh } else { en };
-        egui::CollapsingHeader::new(l("Settings", "设置")).show(ui, |ui| {
-            let before = self.settings.clone();
-            ui.add(
-                egui::Slider::new(&mut self.settings.opacity, 0.1..=1.)
-                    .text(l("Opacity", "透明度")),
-            );
-            ui.add(
-                egui::Slider::new(&mut self.settings.font_size, 12.0..=40.0)
-                    .text(l("Text size", "字号")),
-            );
-            ui.checkbox(
-                &mut self.settings.allow_revive,
-                l("Allow revival", "允许复活"),
-            );
-            ui.checkbox(
-                &mut self.settings.challenge_mode,
-                l("Challenge mode", "挑战模式"),
-            );
-            if self.settings.challenge_mode {
-                ui.horizontal(|ui| {
-                    ui.label(l("Death limit", "死亡上限"));
-                    ui.add(
-                        egui::DragValue::new(&mut self.settings.challenge_death_count)
-                            .range(0..=1_000_000),
-                    );
-                });
-            }
-            ui.label(l("Compact status template", "紧凑状态模板"));
-            ui.text_edit_singleline(&mut self.settings.boss_kill_text);
-            if self.settings.challenge_mode {
-                ui.label(l("Challenge status template", "挑战状态模板"));
-                ui.text_edit_multiline(&mut self.settings.challenge_status_text);
-            }
-            ui.small("{kills} {total} {deaths} {igt} {pb} {tries}  $n");
-            if before != self.settings {
-                self.settings.sanitize();
-                self.settings_dirty = true;
-            }
-        });
+        egui::CollapsingHeader::new(l("Settings", "设置"))
+            .icon(|ui, openness, response| {
+                chevron(
+                    ui.painter(),
+                    response.rect,
+                    openness >= 0.5,
+                    ui.visuals().text_color(),
+                );
+            })
+            .show(ui, |ui| {
+                let before = self.settings.clone();
+                ui.add(
+                    egui::Slider::new(&mut self.settings.opacity, 0.1..=1.)
+                        .text(l("Opacity", "透明度")),
+                );
+                ui.add(
+                    egui::Slider::new(&mut self.settings.font_size, 12.0..=40.0)
+                        .text(l("Text size", "字号")),
+                );
+                ui.checkbox(
+                    &mut self.settings.allow_revive,
+                    l("Allow revival", "允许复活"),
+                );
+                ui.checkbox(
+                    &mut self.settings.challenge_mode,
+                    l("Challenge mode", "挑战模式"),
+                );
+                if self.settings.challenge_mode {
+                    ui.horizontal(|ui| {
+                        ui.label(l("Death limit", "死亡上限"));
+                        ui.add(
+                            egui::DragValue::new(&mut self.settings.challenge_death_count)
+                                .range(0..=1_000_000),
+                        );
+                    });
+                }
+                ui.label(l("Compact status template", "紧凑状态模板"));
+                ui.text_edit_singleline(&mut self.settings.boss_kill_text);
+                if self.settings.challenge_mode {
+                    ui.label(l("Challenge status template", "挑战状态模板"));
+                    ui.text_edit_multiline(&mut self.settings.challenge_status_text);
+                }
+                ui.small("{kills} {total} {deaths} {igt} {pb} {tries}  $n");
+                if before != self.settings {
+                    self.settings.sanitize();
+                    self.settings_dirty = true;
+                }
+            });
     }
     pub fn render_latest(&mut self, i: &Instance, frame: &abi::FrameInfo) -> i32 {
         if let Ok(snapshot) = i.snapshot.try_lock() {
@@ -486,14 +667,22 @@ impl Ui {
                 .default_size([self.settings.width,self.settings.height.min(frame.height-20.)])
                 .max_size([frame.width.max(280.)-10.,frame.height.max(220.)-10.]).show(ctx,|ui|{
                     ui.label(RichText::new(&s.compact).strong());
-                    ui.add(egui::ProgressBar::new(if s.total==0{0.0}else{s.kills as f32/s.total as f32}).text(format!("{}/{}",s.kills,s.total)));
+                    ui.add(egui::ProgressBar::new(if s.total==0{0.0}else{s.kills as f32/s.total as f32}).desired_height(ui.text_style_height(&egui::TextStyle::Body)+4.).text(format!("{}/{}",s.kills,s.total)));
                     ui.horizontal_wrapped(|ui|{
                         ui.label(format!("{}: {}",self.label("Deaths","死亡"),s.deaths));
                         if let Some(state)=s.state{let sec=state.in_game_time_ms/1000;ui.label(format!("IGT {}:{:02}:{:02}",sec/3600,sec/60%60,sec%60));}
                         if s.settings.challenge_mode{ui.label(format!("PB {}  {} {}",s.best,self.label("Tries","失败尝试"),s.tries));}
                     });
                     let status=self.status(s.status);
-                    if !status.is_empty(){ui.label(status);}
+                    if !status.is_empty(){
+                        let summary=match s.status{
+                            "Ready; some game resources are unavailable"=>self.label("Resource warning","资源异常"),
+                            "Boss data unavailable; reload game data"=>self.label("Data unavailable","数据不可用"),
+                            "Loading Boss data; some requests timed out"=>self.label("Resource timeout","读取超时"),
+                            _=>status,
+                        };
+                        ui.add(egui::Label::new(summary).truncate()).on_hover_text(status);
+                    }
                     if s.state.is_none(){ui.label(self.label("Waiting for a valid save","等待有效存档"));}
                     if let Some(result)=s.result{ui.label(if result{self.label("Revived. Travel or reload the area.","已复活。请传送或重新加载区域。")}else{self.label("Revival failed: save or flags changed. Reopen the confirmation.","复活失败：存档或旗标已变化，请重新确认。")});}
                     self.settings_panel(ui);
@@ -502,7 +691,7 @@ impl Ui {
                         if ui.add_enabled(interactive&&s.state.is_some(),egui::Button::new(self.label("Start this attempt","开始本轮"))).clicked(){Self::queue(i,Action::BeginChallenge);}
                         if s.state.is_some_and(|state|state.graveyard_reached>1){ui.small(self.label("Challenge tracking is waiting for its start flag.","挑战记录正在等待有效起始旗标。"));}
                     }
-                    let reload=ui.small_button(self.label("Reload game data","重新读取游戏数据"));
+                    let reload=ui.small_button(self.label("Reload data","重新读取")).on_hover_text(self.label("Reload game data","重新读取游戏数据"));
                     #[cfg(feature = "continuity-fixture")]
                     {self.probe.reload_rect=crate::probe::rect(reload.rect);}
                     if reload.clicked()&&interactive{Self::queue(i,Action::Reload);self.modal=None;}
@@ -513,7 +702,7 @@ impl Ui {
                     #[cfg(feature = "continuity-fixture")]
                     {self.probe.search_rect=crate::probe::rect(search.rect);self.probe.remaining_rect=crate::probe::rect(remaining.rect);}
                     if let Some(c)=s.catalog.as_ref(){
-                        let region=egui::ComboBox::from_id_salt("boss-region").selected_text(self.selected.and_then(|id|c.groups.iter().find(|g|g.id==id)).map(|g|g.name.as_str()).unwrap_or(if self.chinese{"全部地区"}else{"All regions"})).show_ui(ui,|ui|{
+                        let region=egui::ComboBox::from_id_salt("boss-region").icon(|ui,rect,visuals,_|{chevron(ui.painter(),rect,true,visuals.fg_stroke.color);}).selected_text(self.selected.and_then(|id|c.groups.iter().find(|g|g.id==id)).map(|g|g.name.as_str()).unwrap_or(if self.chinese{"全部地区"}else{"All regions"})).show_ui(ui,|ui|{
                             filter_changed|=ui.selectable_value(&mut self.selected,None,if self.chinese{"全部地区"}else{"All regions"}).changed();
                             for group in &c.groups{filter_changed|=ui.selectable_value(&mut self.selected,Some(group.id),&group.name).changed();}
                         });
@@ -524,27 +713,31 @@ impl Ui {
                         if c.unknown_count>0{ui.small(format!("{}: {}",self.label("Unresolved completion conditions","尚未确定的完成条件"),c.unknown_count));}
                     }
                     if filter_changed{self.sync_region(s);self.rows_dirty=true;self.rebuild(s);}
-                    let row_height=ui.text_style_height(&egui::TextStyle::Body)+ui.spacing().item_spacing.y;
                     let status_width=status_width(ui);
-                    egui::ScrollArea::vertical().auto_shrink([false,false]).show_rows(ui,row_height,self.rows.len(),|ui,range|{
+                    egui::ScrollArea::vertical().auto_shrink([false,false]).show_rows(ui,status_width,self.rows.len(),|ui,range|{
                         let Some(c)=s.catalog.as_ref()else{return};
                         for index in range{match &self.rows[index]{
-                            Row::Header{group,text}=>{
+                            Row::Header{group,progress}=>{
                                 let id=c.groups[*group].id;
-                                let label=RichText::new(text).strong().color(if self.current==Some(id){Color32::GOLD}else{ui.visuals().text_color()});
-                                let header=ui.selectable_label(false,label);
+                                let header=ui.push_id(("boss-group",id),|ui|group_header(ui,&c.groups[*group].name,progress,!self.closed.contains(&id),self.current==Some(id),status_width)).inner;
                                 #[cfg(feature = "continuity-fixture")]
-                                self.probe.header(id,header.rect);
-                                if header.clicked(){if !self.closed.remove(&id){self.closed.insert(id);}self.rows_dirty=true;}
+                                self.probe.header(id,&header);
+                                if header.clicked()&&interactive{if !self.closed.remove(&id){self.closed.insert(id);}self.rows_dirty=true;}
                             }
                             Row::Boss(row)=>{
                                 let row=*row;
                                 let boss=&c.rows[row];let state=s.states.get(row).copied().unwrap_or(2);
                                 let enabled=interactive&&self.settings.allow_revive&&state==1&&s.revivable.get(row)==Some(&1)&&s.state.is_some();
-                                let (status,name)=boss_widgets(ui,&boss.name,state,enabled,status_width);
+                                let (status,name)=ui.push_id(("boss-row",row),|ui|boss_widgets(ui,&boss.name,state,enabled,status_width)).inner;
                                 #[cfg(feature = "continuity-fixture")]
-                                self.probe.boss_row(boss,c.groups[boss.group].id,state,status.rect,name.rect);
-                                if status.on_hover_text(self.label("Revive this boss","复活此 Boss")).clicked(){
+                                self.probe.boss_row(boss,c.groups[boss.group].id,state,&status,&name);
+                                let hint=match (state,enabled){
+                                    (1,true)=>self.label("Defeated. Click to revive this boss.","已击杀，点击复活此 Boss"),
+                                    (1,false)=>self.label("Defeated. Revival is unavailable or disabled.","已击杀，复活未启用或当前不可用"),
+                                    (0,_)=>self.label("Not defeated","未击杀"),
+                                    _=>self.label("Completion state unknown","完成状态未知"),
+                                };
+                                if status.on_hover_text(hint).on_disabled_hover_text(hint).clicked()&&enabled{
                                     self.modal=Some((boss.flag,s.state.unwrap().context,boss.name.clone()));
                                 }
                                 name.on_hover_ui(|ui|{
@@ -871,7 +1064,8 @@ mod tests {
     fn actual_egui_status_column_aligns_all_states_and_long_names_at_each_font_size() {
         let h = Harness::new();
         let context = h.instance.ui.lock().unwrap().context.clone();
-        for size in [12., 20., 40.] {
+        for (size, scale) in [(12., 1.), (20., 1.), (40., 1.), (20., 1.5), (20., 2.)] {
+            context.set_pixels_per_point(scale);
             context.set_style(egui::Style {
                 text_styles: [egui::TextStyle::Body, egui::TextStyle::Button]
                     .map(|kind| (kind, egui::FontId::proportional(size)))
@@ -910,6 +1104,67 @@ mod tests {
                     name.width() > 0. && name.width() < 280.,
                     "name={name:?}, status={status:?}, size={size}"
                 );
+            }
+        }
+    }
+
+    #[test]
+    fn actual_group_header_reserves_progress_and_a_full_row_hit_rect_at_narrow_widths() {
+        let h = Harness::new();
+        let context = h.instance.ui.lock().unwrap().context.clone();
+        let name = "A long region title that must truncate before its progress";
+        for size in [12., 20., 40.] {
+            context.set_style(egui::Style {
+                text_styles: [(egui::TextStyle::Body, egui::FontId::proportional(size))].into(),
+                ..Default::default()
+            });
+            for width in [280., 440.] {
+                let mut rects = Vec::new();
+                let output = context.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(width, 500.),
+                        )),
+                        ..Default::default()
+                    },
+                    |ctx| {
+                        egui::CentralPanel::default().show(ctx, |ui| {
+                            let height = status_width(ui);
+                            for (open, current) in [(false, false), (true, false), (true, true)] {
+                                let available = ui.available_width();
+                                let header =
+                                    group_header(ui, name, "12/207", open, current, height);
+                                assert_eq!(header.rect.width(), available);
+                                assert_eq!(header.rect.height(), height);
+                                rects.push(header.rect);
+                            }
+                        });
+                    },
+                );
+                let texts: Vec<_> = output
+                    .shapes
+                    .iter()
+                    .filter_map(|shape| {
+                        if let egui::Shape::Text(text) = &shape.shape {
+                            Some((shape.clip_rect, text))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                assert_eq!(texts.len(), 6);
+                for (index, pair) in texts.as_chunks::<2>().0.iter().enumerate() {
+                    let (title_clip, title) = pair[0];
+                    let (progress_clip, progress) = pair[1];
+                    assert_eq!(title.galley.job.text, name);
+                    assert_eq!(progress.galley.job.text, "12/207");
+                    assert!(title_clip.right() < progress_clip.left());
+                    assert!(progress.pos.x + progress.galley.size().x <= rects[index].right());
+                    if width == 280. {
+                        assert!(title.galley.elided);
+                    }
+                }
             }
         }
     }
@@ -1403,7 +1658,7 @@ mod tests {
         assert_eq!(ui.rows.len(), 95 + 211);
         assert_eq!(ui.revision, 4);
         assert!(!ui.rows_dirty);
-        assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  3/3"));
+        assert!(matches!(&ui.rows[0],Row::Header {progress,..} if progress=="3/3"));
 
         instance.full.store(false, Ordering::Relaxed);
         snapshot.states = vec![0; 211].into();
@@ -1419,7 +1674,7 @@ mod tests {
                 ui.revision != snapshot.revision,
                 "pending changes must survive compact renders"
             );
-            assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  3/3"));
+            assert!(matches!(&ui.rows[0],Row::Header {progress,..} if progress=="3/3"));
         }
         instance.full.store(true, Ordering::Relaxed);
         frame.sequence += 1;
@@ -1427,6 +1682,6 @@ mod tests {
         assert_eq!(ui.rows.len(), 95 + 211);
         assert_eq!(ui.revision, 8);
         assert!(!ui.rows_dirty);
-        assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  0/3"));
+        assert!(matches!(&ui.rows[0],Row::Header {progress,..} if progress=="0/3"));
     }
 }
