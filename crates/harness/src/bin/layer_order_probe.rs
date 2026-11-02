@@ -158,8 +158,20 @@ fn run() -> Result<(), String> {
         .next()
         .map(|v| v.to_string_lossy().into_owned())
         .unwrap_or_else(|| "all".into());
-    if !["all", "basic", "duplicate", "atlas", "snapshot"].contains(&case.as_str()) {
-        return Err("case must be all, basic, duplicate, atlas or snapshot".into());
+    if ![
+        "all",
+        "basic",
+        "duplicate",
+        "atlas",
+        "snapshot",
+        "presenter",
+        "presenter-atlas",
+        "presenter-duplicate",
+        "presenter-render",
+    ]
+    .contains(&case.as_str())
+    {
+        return Err("unknown layer probe case".into());
     }
     std::fs::create_dir_all(&output).map_err(err)?;
     let output = output.canonicalize().map_err(err)?;
@@ -576,6 +588,107 @@ struct Continuity<'a> {
     view: View<'a>,
 }
 impl Continuity<'_> {
+    fn presenter(&mut self, case: &str) -> Result<(), String> {
+        if case == "presenter" || case == "all" {
+            for _ in 0..3 {
+                self.frame("presenter-other-cpu-publish-lock", Coverage::Boss, 7)?;
+            }
+        }
+        if case == "presenter-atlas" || case == "all" {
+            let gate = self
+                .fixture
+                .texture_gate
+                .ok_or("missing real atlas transfer gate")?;
+            self.events([
+                event(UI_INPUT_POINTER, 0, 0, 1000., 255.),
+                event(UI_INPUT_BUTTON, 0, UI_INPUT_DOWN, 1000., 255.),
+            ]);
+            self.frame("presenter-atlas-focus", Coverage::Boss, 0)?;
+            self.events([event(UI_INPUT_BUTTON, 0, 0, 1000., 255.)]);
+            self.frame("presenter-atlas-focus-release", Coverage::Boss, 0)?;
+            let before = texture_stats(self.fixture)?.ok_or("missing texture counters")?;
+            check(
+                unsafe { gate(1) },
+                "hold real atlas transfer during publisher contention",
+            )?;
+            self.events(
+                "叠层竞争"
+                    .chars()
+                    .map(|c| event(UI_INPUT_TEXT, c as u32, 0, 0., 0.)),
+            );
+            let held: Result<(), String> = (|| {
+                for _ in 0..3 {
+                    self.frame(
+                        "presenter-other-cpu-and-new-atlas-pending",
+                        Coverage::Boss,
+                        7,
+                    )?;
+                }
+                let pending = texture_stats(self.fixture)?.unwrap();
+                if pending[0] <= before[0] || pending[1] == 0 || pending[4] == 0 {
+                    return Err(format!(
+                        "CPU publisher test did not retain a genuinely pending new atlas: {before:?}→{pending:?}"
+                    ));
+                }
+                println!(
+                    "other-CPU publisher contention overlaps real new atlas: {before:?}→{pending:?}"
+                );
+                // The very same pending image must also survive duplicate and
+                // renderer-lock fallback callbacks before any upload is allowed.
+                for _ in 0..3 {
+                    self.frame_at(
+                        "presenter-pending-cleared-duplicate",
+                        *self.seq,
+                        Coverage::Boss,
+                        7,
+                        [1280., 900.],
+                    )?;
+                    self.frame("presenter-pending-render-lock-fallback", Coverage::Boss, 8)?;
+                }
+                Ok(())
+            })();
+            println!(
+                "publisher contention texture counters before transfer release: {:?}",
+                texture_stats(self.fixture)?
+            );
+            check(
+                unsafe { gate(0) },
+                "release real atlas transfer after publisher contention",
+            )?;
+            held?;
+            for _ in 0..10 {
+                self.frame("presenter-atlas-ready-transition", Coverage::Boss, 0)?;
+            }
+        }
+        if case == "presenter-duplicate" || case == "all" {
+            let polls = self.control.input_polls.load(Ordering::Acquire);
+            for _ in 0..3 {
+                self.frame_at(
+                    "presenter-other-cpu-cleared-duplicate",
+                    *self.seq,
+                    Coverage::Boss,
+                    7,
+                    [1280., 900.],
+                )?;
+            }
+            if self.control.input_polls.load(Ordering::Acquire) != polls {
+                return Err("CPU-contention duplicate callbacks advanced the Boss UI".into());
+            }
+        }
+        if case == "presenter-render" || case == "all" {
+            for _ in 0..3 {
+                self.frame(
+                    "presenter-other-cpu-render-lock-fallback",
+                    Coverage::Boss,
+                    8,
+                )?;
+            }
+        }
+        println!(
+            "continuity PASS: {case}; another acknowledged CPU context owns the real publisher/maintenance lock throughout each affected native H callback, each target is freshly cleared and independently captured"
+        );
+        Ok(())
+    }
     fn frame(&mut self, label: &str, expected: Coverage, mode: u32) -> Result<(), String> {
         *self.seq += 1;
         self.frame_at(label, *self.seq, expected, mode, [1280., 900.])
@@ -826,7 +939,7 @@ impl Continuity<'_> {
     fn visibility(&mut self) -> Result<(), String> {
         for mode in [1, 2, 3] {
             self.control.display_mode.store(mode, Ordering::Release);
-            for busy in [0, 1, 2, 5] {
+            for busy in [0, 1, 2, 5, 7, 8] {
                 self.frame(
                     &format!("display-unknown-{mode}-core-{busy}"),
                     Coverage::Boss,
@@ -892,12 +1005,19 @@ impl Continuity<'_> {
                 Coverage::Hidden,
                 1,
             )?;
+            for busy in [7, 8] {
+                self.frame(
+                    &format!("explicit-game-hide-publisher-{mode}-{busy}"),
+                    Coverage::Hidden,
+                    busy,
+                )?;
+            }
             if self.control.capture.load(Ordering::Acquire) != 0 {
                 return Err("true loading/full-map hide retained input capture".into());
             }
             for unknown in [1, 2, 3] {
                 self.control.display_mode.store(unknown, Ordering::Release);
-                for busy in [0, 1, 2, 5] {
+                for busy in [0, 1, 2, 5, 7, 8] {
                     self.frame(
                         &format!("known-hide-{mode}-then-unknown-{unknown}-busy-{busy}"),
                         Coverage::Hidden,
@@ -918,8 +1038,12 @@ impl Continuity<'_> {
         if let Some(fault) = self.fixture.boss_fault {
             check(unsafe { fault(2) }, "hide while the real UI mutex is busy")?;
         }
-        self.frame("user-hide", Coverage::Lower, 0)?;
-        self.frame("user-hide-beats-busy", Coverage::Lower, 2)?;
+        self.frame("user-hide-other-cpu-publisher-busy", Coverage::Lower, 7)?;
+        self.frame(
+            "user-hide-beats-publisher-and-render-busy",
+            Coverage::Lower,
+            8,
+        )?;
         if self.control.capture.load(Ordering::Acquire) != 0 {
             return Err("user hide retained input capture".into());
         }
@@ -940,12 +1064,12 @@ impl Continuity<'_> {
         await_key(&self.control.toggle_shown)?;
         self.frame("fresh-empty-reshow", Coverage::Boss, 0)?;
         self.events([event(UI_INPUT_KEY, 0x1b, UI_INPUT_DOWN, 0., 0.)]);
-        self.frame("user-close-escape-intentional-fade", Coverage::Closing, 0)?;
+        self.frame("user-close-escape-intentional-fade", Coverage::Closing, 7)?;
         if self.control.capture.load(Ordering::Acquire) != 0 {
             return Err("explicit close did not release input capture".into());
         }
         self.events([event(UI_INPUT_KEY, 0x1b, 0, 0., 0.)]);
-        self.frame("closed-panel-stays-empty", Coverage::Lower, 1)?;
+        self.frame("closed-panel-stays-empty", Coverage::Lower, 8)?;
         self.control.toggle.store(true, Ordering::Release);
         await_key(&self.control.toggle)?;
         // Only an explicit Window reopen permits a bounded fade-in. Once the
@@ -1063,11 +1187,15 @@ fn continuity(
         },
     };
     match case {
+        "presenter" | "presenter-atlas" | "presenter-duplicate" | "presenter-render" => {
+            return test.presenter(case);
+        }
         "duplicate" => return test.duplicate(),
         "atlas" => return test.atlas(),
         "snapshot" => return test.snapshot(),
         _ => {}
     }
+    test.presenter("all")?;
     test.atlas()?;
     test.duplicate()?;
     if fixture.boss_fault.is_some() {

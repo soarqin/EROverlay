@@ -29,6 +29,13 @@ The upstream font collection's MIT, OFL-1.1 and Ubuntu-font-1.0 notices are reta
 Their source packages retain their own license
 files and Cargo license metadata; they are not copied from the legacy project.
 
+Renderer uses `arc-swap = 1.9.3` for safe publication and reclamation of immutable
+retained images. Its only added transitive dependency is the compile-time
+`rustversion = 1.0.23`. Both offer MIT OR Apache-2.0; this distribution uses their
+MIT licenses, copied unchanged from those pinned source packages under
+[`third_party/arc-swap`](third_party/arc-swap/LICENSE-MIT) and
+[`third_party/rustversion`](third_party/rustversion/LICENSE-MIT).
+
 [MapForGoblins ABI](docs/api/mfg_map_api.h) is an MIT public C interface declaration
 retained for interoperation documentation, not the old Minimap implementation.
 Game executables and game assets are not distributed.

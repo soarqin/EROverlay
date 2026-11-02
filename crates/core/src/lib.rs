@@ -57,7 +57,7 @@ struct Runtime {
     callbacks: RwLock<()>,
     render: Mutex<RenderState>,
     painting: Mutex<painting::Painting>,
-    presentation: Mutex<Option<PresentationHandle>>,
+    presentation: RwLock<Option<PresentationHandle>>,
     upper_groups: Vec<usize>,
     continuity: [AtomicU64; 6],
     renderer_generation: AtomicU64,
@@ -555,7 +555,7 @@ impl Runtime {
                 generation: 0,
             }),
             painting: Mutex::new(painting),
-            presentation: Mutex::new(None),
+            presentation: RwLock::new(None),
             upper_groups,
             continuity: std::array::from_fn(|_| AtomicU64::new(0)),
             renderer_generation: AtomicU64::new(0),
@@ -718,12 +718,22 @@ impl Runtime {
         }
         let _guard = self.callbacks.write().unwrap_or_else(|e| e.into_inner());
         let mut render = self.render.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(presentation) = self
+            .presentation
+            .read()
+            .unwrap_or_else(|e| e.into_inner())
+            .as_ref()
+        {
+            // A fallback may hold an Arc after leaving the callback gate. Close
+            // admission before draining its independent command slots.
+            presentation.close();
+        }
         if render.renderer.as_mut().is_some_and(|r| !r.wait_idle(5000)) {
             return ERR_BUSY;
         }
         render.renderer = None;
         self.presentation
-            .lock()
+            .write()
             .unwrap_or_else(|e| e.into_inner())
             .take();
         self.painting

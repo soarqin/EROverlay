@@ -27,6 +27,9 @@ try {
     New-Item -ItemType Directory -Path $minhookNotices -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $rustRoot 'third_party/minhook/LICENSE.txt') -Destination $minhookNotices
     Copy-Item -LiteralPath (Join-Path $rustRoot 'third_party/font-licenses') -Destination $noticeRoot -Recurse -Force
+    foreach ($dependency in @('arc-swap', 'rustversion')) {
+        Copy-Item -LiteralPath (Join-Path $rustRoot "third_party/$dependency") -Destination $noticeRoot -Recurse -Force
+    }
     Copy-Item -LiteralPath (Join-Path $rustRoot 'docs') -Destination $packageRoot -Recurse -Force
     foreach ($module in @('minimap', 'boss', 'renderer', 'game', 'ui')) {
         $moduleDocs = Join-Path $packageRoot "crates/$module"

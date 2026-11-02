@@ -17,15 +17,13 @@ impl Runtime {
             unsafe { clear(self._api.user) };
         }
     }
-    fn with_presentation(&self, apply: impl FnOnce(&mut eroverlay_renderer::Presentation)) -> bool {
-        let handle = self.presentation.try_lock().ok().and_then(|p| p.clone());
-        if let Some(handle) = handle
-            && let Ok(mut presentation) = handle.try_lock()
-        {
+    fn with_presentation(&self, apply: impl FnOnce(&eroverlay_renderer::Presentation)) -> bool {
+        let handle = self.presentation.try_read().ok().and_then(|p| p.clone());
+        if let Some(presentation) = handle {
             if self.invalidate_presentation.swap(false, Ordering::AcqRel) {
                 presentation.invalidate_all();
             }
-            apply(&mut presentation);
+            apply(&presentation);
             return true;
         }
         false
@@ -84,12 +82,9 @@ impl Runtime {
             return;
         };
         let identity = (frame.device as usize, frame.queue as usize);
-        if state.identity == identity
-            && let Some(renderer) = state.renderer.as_ref()
-        {
-            if let Ok(mut slot) = self.presentation.try_lock() {
-                *slot = Some(renderer.presentation_handle());
-            }
+        if state.identity == identity && state.renderer.is_some() {
+            // Ordinary callbacks only share-read the published handle. A writer
+            // exists only before a new renderer has any valid image, or at stop.
             return;
         }
         let Ok(_exclusive) = self.callbacks.try_write() else {
@@ -118,9 +113,11 @@ impl Runtime {
             self.error.store(ERR_UNAVAILABLE, Ordering::Relaxed);
             return;
         };
-        if let Ok(mut slot) = self.presentation.try_lock() {
-            *slot = Some(renderer.presentation_handle());
-        }
+        let Ok(mut published) = self.presentation.try_write() else {
+            return;
+        };
+        *published = Some(renderer.presentation_handle());
+        drop(published);
         state.renderer = Some(renderer);
         state.identity = identity;
         state.generation += 1;
