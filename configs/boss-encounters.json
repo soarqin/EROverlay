@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "primary": 1034420800,
+      "members": [1034500800],
+      "progress": "primary"
+    },
+    {
+      "primary": 1041520800,
+      "members": [1037510800],
+      "progress": "any"
+    },
+    {
+      "primary": 31000800,
+      "members": [31000850],
+      "progress": "primary"
+    }
+  ]
+}

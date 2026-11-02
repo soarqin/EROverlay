@@ -362,6 +362,82 @@ fn conditional_flag(i: &Instruction, completion: Option<u32>) -> Option<u32> {
 /// common_func.emevd). Missing links are returned explicitly and never guessed.
 /// Call on a worker after loading a bounded map catalogue, never while rendering.
 pub fn discover_boss_displays(map: &EventScript, scripts: &[EventScript]) -> Result<Discovery> {
+    discover_with_inspector(map, scripts, None, &mut |_, _| true)
+}
+
+/// A negative-evidence guard, not a proof of runtime reachability. Only the
+/// observed local condition/state/display instruction shapes are accepted.
+/// Unknown operations or possible warp/summon/damage proxies keep the row.
+pub fn scene_absence_is_local(
+    display: &BossDisplay,
+    map: &EventScript,
+    scripts: &[EventScript],
+) -> bool {
+    if map.map_id != Some(display.map_id) || matches!(display.entity_id, 0 | u32::MAX) {
+        return false;
+    }
+    let targets: Vec<_> = std::iter::once(display.entity_id)
+        .chain(display.related_entities.iter().copied())
+        .filter(|id| *id != 0 && *id != u32::MAX)
+        .map(u32::to_le_bytes)
+        .collect();
+    discover_with_inspector(
+        map,
+        scripts,
+        Some(display.runtime_variant),
+        &mut |_, instructions| {
+            instructions.iter().all(|instruction| {
+                !targets
+                    .iter()
+                    .any(|id| instruction.arguments.windows(4).any(|bytes| bytes == id))
+                    || scene_local_instruction(instruction)
+            })
+        },
+    )
+    .is_ok_and(|result| {
+        result.missing_events.is_empty()
+            && result.displays.iter().any(|candidate| {
+                candidate.entity_id == display.entity_id
+                    && candidate.name_id == display.name_id
+                    && candidate.slot == display.slot
+                    && candidate.proof == display.proof
+                    && candidate.runtime_variant == display.runtime_variant
+            })
+    })
+}
+
+fn scene_local_instruction(i: &Instruction) -> bool {
+    // Calls are followed by the same bounded interpreter as discovery. Their
+    // parameter bytes alone say nothing about the eventual operation.
+    if i.bank == 2000 && matches!(i.opcode, 0 | 6) {
+        return i.arguments.len() >= 8;
+    }
+    if (i.bank, i.opcode) == (2004, 76) {
+        // The inspected EMEDF identifies flag/item-lot operands, not an actor.
+        // shortcut: only the observed no-item-lot form is understood here;
+        // retain other forms until their native semantics are verified.
+        return i.arguments.len() == 8 && i.arguments[4..] == [0; 4];
+    }
+    matches!(
+        (i.bank, i.opcode, i.arguments.len()),
+        (4, 0 | 9, 16)
+            | (4, 14, 24)
+            | (1000, 10, 12)
+            | (1003, 101, 8)
+            | (2003, 11, 16)
+            | (2003, 12, 8)
+            | (2003, 66, 12)
+            | (2004, 4 | 5 | 28 | 34 | 39, 8)
+            | (2010, 2, 12)
+    )
+}
+
+fn discover_with_inspector(
+    map: &EventScript,
+    scripts: &[EventScript],
+    variant: Option<u8>,
+    inspect: &mut dyn FnMut(u8, &[Instruction]) -> bool,
+) -> Result<Discovery> {
     let map_id = map.map_id.ok_or(EventError::Invalid)?;
     let mut resources: Vec<&EventScript> = Vec::new();
     for name in &map.linked {
@@ -389,6 +465,9 @@ pub fn discover_boss_displays(map: &EventScript, scripts: &[EventScript]) -> Res
     let mut seen = BTreeSet::new();
     let mut expanded = 0usize;
     while let Some(instance) = queue.pop_front() {
+        if variant.is_some_and(|variant| instance.variant != variant) {
+            continue;
+        }
         if seen.contains(&instance) {
             continue;
         }
@@ -412,6 +491,9 @@ pub fn discover_boss_displays(map: &EventScript, scripts: &[EventScript]) -> Res
                 .map_err(|_| EventError::MissingParameters)?;
             instructions[p.instruction].arguments[p.target..p.target + p.size]
                 .copy_from_slice(bytes);
+        }
+        if !inspect(instance.variant, &instructions) {
+            return Err(EventError::Unsupported);
         }
         let guards: BTreeSet<u32> = instructions
             .iter()
@@ -720,6 +802,178 @@ mod tests {
         assert_eq!(
             result.missing_events,
             vec![("m10_00_00_00.emevd".into(), 999)]
+        );
+    }
+
+    fn locality_fixture() -> (EventScript, EventScript, BossDisplay) {
+        let mut map = script(
+            "m60_38_54_00.emevd",
+            vec![(
+                0,
+                vec![instruction(2000, 6, &args(&[0, 90005870, 123]))],
+                vec![],
+            )],
+        );
+        map.linked.push("common_func.emevd".into());
+        let common = script(
+            "common_func.emevd",
+            vec![(
+                90005870,
+                vec![instruction(2003, 11, &args(&[1, 0, 0, 900]))],
+                vec![Parameter {
+                    instruction: 0,
+                    target: 4,
+                    source: 0,
+                    size: 4,
+                }],
+            )],
+        );
+        let display = discover_boss_displays(&map, std::slice::from_ref(&common))
+            .unwrap()
+            .displays
+            .remove(0);
+        (map, common, display)
+    }
+
+    #[test]
+    fn scene_locality_rejects_proxy_summon_copy_and_unknown_target_operations() {
+        let (map, mut common, display) = locality_fixture();
+        assert!(scene_absence_is_local(
+            &display,
+            &map,
+            std::slice::from_ref(&common)
+        ));
+        common
+            .events
+            .get_mut(&90005870)
+            .unwrap()
+            .instructions
+            .push(instruction(2004, 76, &args(&[display.entity_id, 0])));
+        assert!(scene_absence_is_local(
+            &display,
+            &map,
+            std::slice::from_ref(&common)
+        ));
+        common.events.get_mut(&90005870).unwrap().instructions.pop();
+        for (bank, opcode) in [
+            (2004, 33),
+            (2004, 40),
+            (2004, 42),
+            (2004, 74),
+            (2004, 67),
+            (2004, 78),
+            (2003, 25),
+            (2004, 999),
+            (9999, 0),
+        ] {
+            let event = common.events.get_mut(&90005870).unwrap();
+            event
+                .instructions
+                .push(instruction(bank, opcode, &args(&[0, 0, 0])));
+            // The target exists only after the native event parameter patch.
+            event.parameters.push(Parameter {
+                instruction: 1,
+                target: 4,
+                source: 0,
+                size: 4,
+            });
+            assert!(
+                !scene_absence_is_local(&display, &map, std::slice::from_ref(&common)),
+                "{bank}[{opcode}]"
+            );
+            let event = common.events.get_mut(&90005870).unwrap();
+            event.instructions.pop();
+            event.parameters.pop();
+        }
+        let mut packed = vec![0xaa];
+        packed.extend(123u32.to_le_bytes());
+        common
+            .events
+            .get_mut(&90005870)
+            .unwrap()
+            .instructions
+            .push(instruction(9999, 0, &packed));
+        assert!(!scene_absence_is_local(&display, &map, &[common]));
+    }
+
+    #[test]
+    fn scene_locality_is_variant_scoped_and_missing_data_stays_unknown() {
+        let (mut map, common, display) = locality_fixture();
+        let warp = Event {
+            instructions: vec![instruction(2004, 40, &args(&[123]))],
+            parameters: vec![],
+        };
+        map.events.insert(100, warp.clone());
+        assert!(scene_absence_is_local(
+            &display,
+            &map,
+            std::slice::from_ref(&common)
+        ));
+        map.events.insert(50, warp);
+        assert!(!scene_absence_is_local(
+            &display,
+            &map,
+            std::slice::from_ref(&common)
+        ));
+        map.events.remove(&50);
+        map.events
+            .get_mut(&0)
+            .unwrap()
+            .instructions
+            .push(instruction(2000, 0, &args(&[0, 12345])));
+        assert!(!scene_absence_is_local(
+            &display,
+            &map,
+            std::slice::from_ref(&common)
+        ));
+        map.events.get_mut(&0).unwrap().instructions.pop();
+        assert!(!scene_absence_is_local(&display, &map, &[]));
+        let mut common = common;
+        common.events.get_mut(&90005870).unwrap().parameters[0].source = 100;
+        assert!(!scene_absence_is_local(&display, &map, &[common]));
+    }
+
+    #[test]
+    #[ignore = "requires decompressed original EMEVDs in EROVERLAY_BOSS_EVENT_DIR"]
+    fn archived_residual_template_has_only_local_actor_operations() {
+        let root = std::path::PathBuf::from(std::env::var_os("EROVERLAY_BOSS_EVENT_DIR").unwrap());
+        let name = "m60_38_54_00.emevd";
+        let map = parse_emevd(name, &std::fs::read(root.join(name)).unwrap()).unwrap();
+        let mut links: Vec<_> = map
+            .linked
+            .iter()
+            .filter_map(|name| {
+                std::fs::read(root.join(name))
+                    .ok()
+                    .map(|bytes| parse_emevd(name, &bytes).unwrap())
+            })
+            .collect();
+        let result = discover_boss_displays(&map, &links).unwrap();
+        let displays: Vec<_> = result
+            .displays
+            .iter()
+            .filter(|d| d.entity_id == 1038540800)
+            .collect();
+        assert_eq!(displays.len(), 2);
+        assert!(
+            displays
+                .iter()
+                .all(|display| scene_absence_is_local(display, &map, &links))
+        );
+        let common = links
+            .iter_mut()
+            .find(|s| s.name == "common_func.emevd")
+            .unwrap();
+        common
+            .events
+            .get_mut(&90005870)
+            .unwrap()
+            .instructions
+            .push(instruction(9999, 0, &args(&[displays[0].entity_id])));
+        assert!(
+            displays
+                .iter()
+                .all(|display| !scene_absence_is_local(display, &map, &links))
         );
     }
 

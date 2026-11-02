@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "reader": "E:/Projects/ERToolsDotNet/SoulsFormats/bin/Release/net9.0/SoulsFormats.dll",
+  "reader_sha256": "8252eb8bdbb0ed88bb26691e6c1de5f071ef388bd31eb1834e39126ccb9a1805",
+  "source_directory": "D:/Games/fog/eldendata/Vanilla",
+  "comparison": "All Enemy/DummyEnemy fields exposed by SceneActor, 8 groups, all other-Part IDs/groups, all Region IDs",
+  "fixtures": [
+    {
+      "file": "m31_00_00_00.msb",
+      "bytes": 465336,
+      "sha256": "99cf0a2ad7940d2accabdba8e5246f3c5209577557dce0db95dd4d009fd42487",
+      "expected_sha256": "85bdbecf46c23bcc9f1a1d158df011e07eb55012294e3ada97651e475f774264"
+    },
+    {
+      "file": "m60_34_50_00.msb",
+      "bytes": 2049488,
+      "sha256": "da93cb7b170713fb924f2f655ecfbcfcc262749c845be5845df54ba126499bbe",
+      "expected_sha256": "4ff50f97b5211274926901ba019cc4219dd1d3872ab72c0c9ad1ff9351cfb886"
+    },
+    {
+      "file": "m60_37_51_00.msb",
+      "bytes": 1088216,
+      "sha256": "b61587d195debf8dc51e08cd7d13aa90e46d263695ab439d41e6c86f75367ec3",
+      "expected_sha256": "6413974098039969f9f6c13adfbae0e7473c8aba250e76ba5657e2236024173d"
+    },
+    {
+      "file": "m60_38_54_00.msb",
+      "bytes": 1238752,
+      "sha256": "cb6dbadee95f79ac9eb0876d340a7a9b74657d85bd6fc5068524f3e62d08d9fc",
+      "expected_sha256": "36dc65d37c908e92470f163f70c8403463f3f843b2d84fdbf1b61c85c9877b82"
+    },
+    {
+      "file": "m61_49_44_00.msb",
+      "bytes": 2826656,
+      "sha256": "69c7f03ee8876fbe2e8b878368301145b2837808e2f4c2d3a168556609fad754",
+      "expected_sha256": "c74794925e193f65dcd101ba1501e4645076de304377144bba5ddc3658100e62"
+    }
+  ],
+  "result": "exact match, 5 scenes",
+  "limits": "Offline scene membership only; no game VFS request or quest reachability test."
+}

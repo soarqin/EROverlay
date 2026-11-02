@@ -2,6 +2,7 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 mod challenge;
 mod data;
+mod encounters;
 mod host;
 mod revival;
 mod settings;
@@ -54,6 +55,7 @@ struct Update {
     next: Option<Instant>,
     revision: u64,
     result: Option<bool>,
+    flag_values: Vec<u8>,
 }
 struct Instance {
     host: Host,
@@ -138,6 +140,7 @@ unsafe extern "C" fn init(api: *const abi::HostApi, out: *mut *mut c_void) -> i3
                 next: None,
                 revision: 0,
                 result: None,
+                flag_values: Vec::new(),
             }),
             ui: Mutex::new(ui::Ui::new(host, &settings)),
             snapshot: Mutex::new(None),
@@ -196,9 +199,27 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
                         }
                     }
                     Action::Revive { flag, context } => {
-                        let allowed = u.settings.allow_revive && u.revival.recipe(flag).is_some();
-                        let ok=allowed&&instance.host.0.revive_boss.is_some_and(|f|unsafe{f(instance.host.0.user,context,flag,
-                        u.revival.recipe(flag).unwrap().as_ptr(),u.revival.recipe(flag).unwrap().len())}==abi::OK);
+                        let completion = u
+                            .catalog
+                            .as_ref()
+                            .and_then(|c| c.rows.iter().find(|r| r.flag == flag && flag != 0))
+                            .map(|r| r.completion.clone());
+                        let operation = completion
+                            .filter(|_| {
+                                u.settings.allow_revive
+                                    && instance
+                                        .host
+                                        .state()
+                                        .is_some_and(|s| s.valid != 0 && s.context == context)
+                            })
+                            .and_then(|ids| {
+                                let mut values = vec![2; ids.len()];
+                                instance.host.flags(&ids, &mut values);
+                                u.revival.operation(flag, &ids, &values)
+                            });
+                        let ok = operation.is_some_and(|op| instance.host.0.revive_boss.is_some_and(|f| unsafe {
+                            f(instance.host.0.user, context, op.primary, op.extras.as_ptr(), op.extras.len())
+                        } == abi::OK));
                         u.result = Some(ok);
                         u.next = None;
                         if !ok {
@@ -242,13 +263,13 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
         }
         u.next = Some(now + Duration::from_millis(500));
         let state = instance.host.state();
-        let mut states = vec![2; catalog.as_ref().map_or(0, |c| c.rows.len())];
-        if state.is_some()
-            && let Some(c) = catalog.as_ref()
-        {
-            let ids: Vec<_> = c.rows.iter().map(|r| r.flag).collect();
-            instance.host.flags(&ids, &mut states);
-        }
+        let states = if let (Some(_), Some(c)) = (state.as_ref(), catalog.as_ref()) {
+            u.flag_values.resize(c.flag_ids.len(), 2);
+            instance.host.flags(&c.flag_ids, &mut u.flag_values);
+            c.states(&u.flag_values)
+        } else {
+            vec![2; catalog.as_ref().map_or(0, |c| c.rows.len())]
+        };
         let total = catalog
             .as_ref()
             .map_or(0, |c| c.rows.iter().filter(|r| r.flag != 0).count())
@@ -292,7 +313,7 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
             |c| {
                 c.rows
                     .iter()
-                    .map(|r| u8::from(u.revival.recipe(r.flag).is_some()))
+                    .map(|r| u8::from(u.revival.supports(r.flag, &r.completion)))
                     .collect::<Vec<_>>()
                     .into()
             },

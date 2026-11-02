@@ -14,9 +14,16 @@ def main():
     parser.add_argument("--params", required=True, type=Path)
     parser.add_argument("--events", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--scope", choices=("static", "selected"), default="static")
+    parser.add_argument("--scenes", type=Path, help="explicit decompressed MSB directory for selected scope")
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     env = os.environ.copy()
+    env["EROVERLAY_BOSS_AUDIT_SCOPE"] = args.scope
+    if args.scenes is not None:
+        env["EROVERLAY_BOSS_SCENE_DIR"] = str(args.scenes.resolve())
+    else:
+        env.pop("EROVERLAY_BOSS_SCENE_DIR", None)
     for key, value in (
         ("EROVERLAY_CPP_REFERENCE", args.reference),
         ("EROVERLAY_BOSS_PARAM_DIR", args.params),
@@ -46,7 +53,14 @@ def main():
         fingerprint("text", args.params, name)
     for name in sorted(set(artifact["scripts"]) | set(artifact["inventory_scripts"])):
         fingerprint("event", args.events, name)
+    for name in artifact.get("configuration_inputs", []):
+        fingerprint("configuration", root, name)
+    for name in artifact.get("scene_inputs", []):
+        if args.scenes is None:
+            raise ValueError("audit reported scene inputs without an explicit scene directory")
+        fingerprint("scene", args.scenes, name)
     for name in ("crates/game/src/boss_events.rs", "crates/game/src/boss_params.rs",
+                 "crates/game/src/boss_scene.rs", "crates/boss/src/encounters.rs",
                  "crates/game/src/text.rs", "crates/boss/src/data.rs",
                  "crates/boss/src/data_audit.rs", "tools/audit_boss_catalog.py"):
         fingerprint("producer", root, name)

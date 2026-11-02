@@ -108,6 +108,7 @@ impl Ui {
             "Waiting for game parameters" => "正在等待游戏参数",
             "Loading game text and Boss events" => "正在读取游戏文本与 Boss 事件",
             "Discovering named Boss health bars" => "正在核对具名 Boss 生命条",
+            "Checking Boss scene entities" => "正在核对 Boss 场景实体",
             "No named Boss health bars found" => "未发现具名 Boss 生命条，可尝试重新读取游戏数据",
             "Ready; some game resources are unavailable" => {
                 "部分游戏资源不可用，目录可能不完整，可重新读取游戏数据"
@@ -454,6 +455,7 @@ mod tests {
                 next: None,
                 revision: 0,
                 result: None,
+                flag_values: Vec::new(),
             }),
             ui: Mutex::new(Ui::new(host, &settings)),
             snapshot: Mutex::new(None),
@@ -471,6 +473,7 @@ mod tests {
             rows: (0..211)
                 .map(|row| Encounter {
                     flag: row + 1,
+                    completion: vec![row + 1],
                     name: format!("Boss {row}"),
                     place: format!("Place {}", row % 95),
                     group: row as usize % 95,
@@ -479,6 +482,7 @@ mod tests {
                 })
                 .collect(),
             unknown_count: 0,
+            flag_ids: (1..=211).collect(),
         });
         let mut snapshot = Snapshot {
             catalog: Some(catalog),

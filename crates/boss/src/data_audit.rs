@@ -547,6 +547,25 @@ fn write_json(path: &Path, value: &Value) -> Result<()> {
 #[test]
 #[ignore = "explicit C++/PARAM/EMEVD/FMG exports; writes a complete optional evidence audit"]
 fn archived_old_207_to_rust_member_audit() -> Result<()> {
+    let selected_scope = match std::env::var("EROVERLAY_BOSS_AUDIT_SCOPE").as_deref() {
+        Ok("selected") => true,
+        Ok("static") | Err(_) => false,
+        Ok(value) => return Err(format!("unknown audit scope {value:?}").into()),
+    };
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .ok_or("workspace root unavailable")?;
+    let relations = if selected_scope {
+        crate::encounters::load(root)?
+    } else {
+        Relations::default()
+    };
+    let relationship_config = if selected_scope {
+        serde_json::from_slice::<Value>(&std::fs::read(root.join("configs/boss-encounters.json"))?)?
+    } else {
+        Value::Null
+    };
     let reference = required_env("EROVERLAY_CPP_REFERENCE")?;
     let metadata: Value =
         serde_json::from_slice(&std::fs::read(reference.join("reference.json"))?)?;
@@ -627,6 +646,119 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
             .map_err(|e| format!("{name}: {e:?}"))?;
     }
     while !load.discover() {}
+    let static_display_count = load.displays.len();
+    let mut scene_inputs = Vec::new();
+    let mut scene_requests = Vec::new();
+    let mut scene_checks = Vec::new();
+    if selected_scope {
+        let scene_root = std::env::var_os("EROVERLAY_BOSS_SCENE_DIR").map(PathBuf::from);
+        load.prepare_scenes();
+        let mut maps = BTreeMap::<u32, Vec<String>>::new();
+        while let Some(job) = load.jobs.pop_front() {
+            let Kind::Scene { map } = job.kind else {
+                return Err("unexpected non-scene job after discovery".into());
+            };
+            maps.entry(map).or_default().push(job.path);
+        }
+        for (map, aliases) in maps {
+            let name = format!("{}.msb", map_label(map));
+            if matches!(name.as_str(), "m31_00_00_00.msb" | "m60_38_54_00.msb") {
+                assert_eq!(aliases, [format!("mapstudio:/{name}")]);
+            } else if name == "m61_49_44_00.msb" {
+                assert_eq!(
+                    aliases,
+                    [
+                        format!("mapstudio:/{name}"),
+                        format!("mapstudio_dlc2:/{name}")
+                    ]
+                );
+            }
+            let bytes = scene_root
+                .as_ref()
+                .map(|root| std::fs::read(root.join(&name)));
+            let accepted = match bytes {
+                Some(Ok(bytes)) => {
+                    scene_inputs.push(name.clone());
+                    Some(load.accept_scene(map, &bytes))
+                }
+                None => None,
+                Some(Err(error)) if error.kind() == std::io::ErrorKind::NotFound => None,
+                Some(Err(error)) => return Err(error.into()),
+            };
+            scene_requests.push(
+                json!({"map":map_label(map),"requested_runtime_aliases":aliases,
+                "explicit_input":accepted.map(|_|name),"accepted":accepted}),
+            );
+        }
+        for d in &load.displays {
+            if !scene_requests
+                .iter()
+                .any(|request| request["map"] == map_label(d.map_id))
+            {
+                continue;
+            }
+            let targets: BTreeSet<_> = std::iter::once(d.entity_id)
+                .chain(d.related_entities.iter().copied())
+                .collect();
+            let scenes = load.scenes.get(&d.map_id);
+            let script = load.scripts.iter().find(|s| s.map_id == Some(d.map_id));
+            let linked_only: Vec<_> = load
+                .scripts
+                .iter()
+                .filter(|candidate| {
+                    candidate.map_id == Some(d.map_id)
+                        || script.is_some_and(|map| {
+                            map.linked.iter().any(|name| name == &candidate.name)
+                        })
+                })
+                .cloned()
+                .collect();
+            let local = |scripts: &[EventScript]| {
+                script.is_some_and(|script| {
+                    eroverlay_game::boss_events::scene_absence_is_local(d, script, scripts)
+                })
+            };
+            scene_checks.push(json!({"map":map_label(d.map_id),"variant":d.runtime_variant,
+                "entity":d.entity_id,"name_id":d.name_id,"source":d.proof.source,"related":d.related_entities,
+                "param_locates":load.param_locates(d),
+                "contains_actor":scenes.is_some_and(|scenes|scenes.iter().any(|s|targets.iter().any(|id|s.contains_actor(*id)))),
+                "other_part_collisions":scenes.into_iter().flatten().flat_map(|s|targets.intersection(&s.other_part_entities)).copied().collect::<BTreeSet<_>>(),
+                "region_collisions":scenes.into_iter().flatten().flat_map(|s|targets.intersection(&s.region_entities)).copied().collect::<BTreeSet<_>>(),
+                "foreign_actor":load.displays.iter().any(|other|other.entity_id==d.entity_id && map3(other.map_id)!=map3(d.map_id)),
+                "untrusted_scene":load.scene_untrusted.contains(&d.map_id),
+                "local_event_operations_all_scripts":local(&load.scripts),
+                "local_event_operations_linked_only":local(&linked_only)}));
+        }
+        if scene_inputs.iter().any(|name| name == "m60_38_54_00.msb") {
+            // Real absent-actor template: a failed alternate mount cannot
+            // supply negative evidence, and another bar with an exact PARAM
+            // relationship protects the whole scoped entity from deletion.
+            let original = load.displays.clone();
+            let original_failures = load.failures;
+            let map = u32::from_be_bytes([60, 38, 54, 0]);
+            let ghost = original
+                .iter()
+                .find(|d| d.completion_flag == Some(1038540800))
+                .expect("archived residual template");
+            load.scene_untrusted.insert(map);
+            load.filter_scenes();
+            assert!(load.excluded.is_empty());
+            assert_eq!(load.displays.len(), original.len());
+            load.scene_untrusted.remove(&map);
+            load.displays = original.clone();
+            load.failures = original_failures;
+            let mut located = ghost.clone();
+            located.completion_flag = Some(load.areas.iter().find(|a| a.flag != 0).unwrap().flag);
+            assert!(load.param_locates(&located));
+            load.displays.push(located);
+            load.filter_scenes();
+            assert!(load.excluded.is_empty());
+            assert_eq!(load.displays.len(), original.len() + 1);
+            load.displays = original;
+            load.failures = original_failures;
+        }
+        load.filter_scenes();
+    }
     // A full directory superset exposes omissions in the production resource
     // plan. Both sides use the actual parser/discovery/grouping, not a frozen
     // reader copy or an ignored pre-generated inventory.
@@ -666,7 +798,7 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
                 .displays,
         );
     }
-    let inventory_groups = encounter_groups(&inventory_displays);
+    let inventory_groups = encounter_groups(&inventory_displays, &Relations::default());
     let inventory: BTreeMap<_, _> = old
         .iter()
         .map(|entry| {
@@ -687,9 +819,23 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
         defeats.extend(found.defeats);
         missing.extend(found.missing_events);
     }
-    let catalog = load.catalog(host());
-    let groups = encounter_groups(&load.displays);
+    let catalog = load.catalog(host(), &relations);
+    let groups = encounter_groups(&load.displays, &relations);
     assert_archive_member_cases(&groups);
+    if selected_scope {
+        for (primary, completion) in [
+            (1034420800, vec![1034420800]),
+            (1041520800, vec![1041520800, 1037510800]),
+            (31000800, vec![31000800]),
+        ] {
+            let row = catalog
+                .rows
+                .iter()
+                .find(|row| row.flag == primary)
+                .ok_or("configured primary absent from production catalogue")?;
+            assert_eq!(row.completion, completion);
+        }
+    }
     assert_eq!(
         groups.len(),
         catalog.rows.len(),
@@ -753,7 +899,8 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
                 "runtime_variant":d.runtime_variant,"entity":d.entity_id,"name_id":d.name_id,
                 "game_name":load.texts.npc(d.name_id as i32),"healthbar_slot":d.slot,
                 "original_completion_flag":d.completion_flag,"group_completion_flag":group.flag,
-                "completion_basis":if d.completion_flag.is_some(){"production_event_read_write_defeat_resolution"}
+                "completion_basis":if d.completion_flag.is_some_and(|flag| flag != group.flag && relations.canonical(flag)==group.flag){"external_relationship_canonical_primary_with_original_event_defeat_resolution"}
+                    else if d.completion_flag.is_some(){"production_event_read_write_defeat_resolution"}
                     else if group.flag!=0{"same_exact_map_variant_entity_unique_resolved_flag"}else{"unresolved"},
                 "inherited_from_members":if d.completion_flag.is_none(){inherited}else{Vec::new()},
                 "display_guard_flags":d.guard_flags,"display_related_entities":d.related_entities,
@@ -772,7 +919,8 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
             "raw_member_count":group.members.len(),"scoped_entity_count":scoped_entities.len(),
             "name_id_count":name_ids.len(),"maps":maps,"runtime_variants":variants,
             "cross_map_or_variant":maps.len()>1 || variants.len()>1,
-            "production_merge_basis":if group.flag!=0{"same_resolved_completion_flag"}else{"same_exact_map_variant_entity"},
+            "production_merge_basis":if group.members.iter().any(|m|m.completion_flag.is_some_and(|flag|flag!=group.flag && relations.canonical(flag)==group.flag)){"external_relationship_and_resolved_completion_flags"}
+                else if group.flag!=0{"same_resolved_completion_flag"}else{"same_exact_map_variant_entity"},
             "structural_components":parts,"structural_edges":edges,
             "structural_review_required":parts.len()>1,
             "old_entries":old.iter().enumerate().filter(|(_,o)|group.flag!=0 && o.boss.flag_id==group.flag)
@@ -884,6 +1032,8 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
         .map(|b| b["battle"].clone())
         .collect();
     let summary = json!({"old_records":old.len(),"rust_battles":battles.len(),"raw_bar_members":load.displays.len(),
+        "static_raw_bar_members":static_display_count,"scene_excluded_bar_members":load.excluded.len(),
+        "scene_inputs":scene_inputs.len(),"scene_untrusted_maps":load.scene_untrusted.len(),
         "catalogue_rows":catalog.rows.len(),"old_one_to_one":rows.len()-missing_old.len()-one_to_many.len(),
         "missing_old":missing_old,"one_old_to_many_battles":one_to_many,"many_old_to_one_battle":many_to_one,
         "extra_battles":extras,"structurally_disconnected_battles":review.iter().map(|&i|battles[i]["battle"].clone()).collect::<Vec<_>>(),
@@ -897,16 +1047,31 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
         "known_cross_map_count":battles.iter().filter(|b|b["completion_flag"]!=0 && b["maps"].as_array().unwrap().len()>1).count(),
         "known_cross_variant_count":battles.iter().filter(|b|b["completion_flag"]!=0 && b["runtime_variants"].as_array().unwrap().len()>1).count(),
         "scripts":load.scripts.len(),"requested_paths":load.queued.len(),"unresolved_event_calls":missing.len()});
+    let scope_name = if selected_scope { "selected" } else { "static" };
+    let record_scope = if selected_scope {
+        "production selected scope using external cross-location relationships and available scene evidence; no live-game observation"
+    } else {
+        "static EMEVD candidates; not a count of confirmed live battles or MSB-present entities"
+    };
     let artifact = json!({"schema":1,"cpp_commit":commit,"summary":summary,
-        "record_scope":"static EMEVD candidates; not a count of confirmed live battles or MSB-present entities",
+        "audit_scope":scope_name,"record_scope":record_scope,
+        "relationship_configuration":relationship_config,
+        "configuration_inputs":if selected_scope{vec!["configs/boss-encounters.json"]}else{Vec::<&str>::new()},
+        "scene_inputs":scene_inputs,
+        "scene_evidence":{"transport":"explicit decompressed map-name MSB exports, fed once per requested map; native VFS alias availability or priority is not inferred",
+            "requests":scene_requests,"untrusted_maps":load.scene_untrusted.iter().map(|&map|map_label(map)).collect::<Vec<_>>(),
+            "candidate_checks":scene_checks,"loading_failures":load.failures,
+            "excluded_displays":load.excluded.iter().map(|d|json!({"map":map_label(d.map_id),"runtime_variant":d.runtime_variant,
+                "entity":d.entity_id,"name_id":d.name_id,"completion_flag":d.completion_flag,
+                "guard_flags":d.guard_flags,"related_entities":d.related_entities,"proof":proof(&d.proof)})).collect::<Vec<_>>()},
         "member_comparison_scope":"same production parser/grouping over the full explicit directory versus the production Param-derived resource plan; not an independent instruction decoder oracle",
         "limits":["Old JSON contains no entity/event identity. Its primary flag locates candidate groups, not semantic proof of the battle boundary.",
             "Disconnected structural components require review; they are not automatically declared separate battles.",
             "FMG names are presentation evidence, not a grouping criterion. English title differences are review items, not missing-boss proofs.",
-            "Reachable enabled EMEVD bar instructions do not by themselves prove that an entity exists in MSB or that a live-game bar was observed.",
+            "Reachable enabled EMEVD bar instructions do not by themselves prove that an entity exists in MSB or that a live-game bar was observed; selected scope additionally uses only the explicitly available scene inputs.",
             "Place conditional flags are unknown in this offline audit; locality is not checked against the manually authored old places."],
         "old_to_rust":rows,"rust_battles":battles,"catalogue":catalog.rows.iter().enumerate().map(|(i,r)|json!({"row":i,
-            "flag":r.flag,"name":r.name,"place":r.place,"group":catalog.groups[r.group].name,"map":map_label(r.map_id)})).collect::<Vec<_>>(),
+            "flag":r.flag,"completion_flags":r.completion,"name":r.name,"place":r.place,"group":catalog.groups[r.group].name,"map":map_label(r.map_id)})).collect::<Vec<_>>(),
         "defeat_events":used_defeats.iter().map(|&i|{
             let mut value=defeat(&defeats[i]); value["defeat"]=json!(format!("D{:05}",i+1)); value
         }).collect::<Vec<_>>(),"different_flag_correlations":correlations(&groups,&defeats),
@@ -916,7 +1081,7 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
     write_json(&output.join("audit.json"), &artifact)?;
     std::fs::write(output.join("old-to-rust.csv"), csv)?;
     let mut md = format!(
-        "# 旧 Boss 207 项到当前静态候选记录的逐项审计\n\n固定 C++ 提交：`{commit}`。本产物复用生产 Param 资源计划、事件发现和 `encounter_groups`；另直接遍历显式归档目录形成完整资源上集，不依赖临时库存或冻结读取器。\n\n| 核对项 | 结果 |\n|---|---:|\n| 旧记录 | {} |\n| 当前静态候选记录 | {} |\n| 生产计划脚本／全目录脚本 | {} / {} |\n| 生产具名条指令／全目录具名条指令 | {} / {} |\n| 旧项主旗标定位一对一 | {} |\n| 旧项具名成员完整 | {} |\n| 缺少原归档显示指令的旧项 | {} |\n| 多成员候选组 | {} |\n| 同旗标跨资源地图／跨 runtime variant | {} / {} |\n\n「静态候选」不等于已确认存在的游戏战斗；本工具未读 MSB 或观察实时生命条。模板及实体不存在的附加候选需另外核对，不能把候选总数宣称为真实 Boss 总数。\n\n旧 JSON 没有实体／事件身份。完成旗标仅用于定位候选组；各组完整成员和死亡事件证明见 `audit.json`，逐项映射见 `old-to-rust.csv`。名称差异只标记待核对，不作为合并或缺失判定。成员完整性比较 map、variant、entity、name ID、slot、原事件／指令／实例旗标、guards 和 related entities；两个输入都使用同一生产解析器，因此这是资源计划覆盖证明，不是独立解码器差分。\n\n## 缺少直接结构连接的组\n\n分量之间没有本工具列出的直接事件连接时需要人工核对，不自动认定为不同战斗。\n\n| 当前组 | 完成旗标 | 名称 | 分量 | 旧项 |\n|---|---:|---|---:|---|\n",
+        "# 旧 Boss 207 项到当前目录记录的逐项审计\n\n本次审计范围：`{scope_name}`。选定范围从实际 `configs/boss-encounters.json` 读取跨场关系，完整配置收录于 JSON 元数据；原始静态范围不应用外部关系。完成旗标列表见各目录行的 `completion_flags`，不代表复活写入清单。\n\n固定 C++ 提交：`{commit}`。本产物复用生产 Param 资源计划、事件发现和 `encounter_groups`；另直接遍历显式归档目录形成完整资源上集，不依赖临时库存或冻结读取器。\n\n| 核对项 | 结果 |\n|---|---:|\n| 旧记录 | {} |\n| 当前目录记录 | {} |\n| 生产计划脚本／全目录脚本 | {} / {} |\n| 生产具名条指令／全目录具名条指令 | {} / {} |\n| 旧项主旗标定位一对一 | {} |\n| 旧项具名成员完整 | {} |\n| 缺少原归档显示指令的旧项 | {} |\n| 多成员候选组 | {} |\n| 同旗标跨资源地图／跨 runtime variant | {} / {} |\n\n静态候选不等于已观察到的游戏战斗，场景实体证据的可用情况另列于 JSON；本工具未观察实时生命条，不能把候选总数宣称为真实 Boss 总数。\n\n旧 JSON 没有实体／事件身份。完成旗标仅用于定位候选组；各组完整成员和死亡事件证明见 `audit.json`，逐项映射见 `old-to-rust.csv`。名称差异只标记待核对，不作为合并或缺失判定。成员完整性比较 map、variant、entity、name ID、slot、原事件／指令／实例旗标、guards 和 related entities；两个输入都使用同一生产解析器，因此这是资源计划覆盖证明，不是独立解码器差分。\n\n## 缺少直接结构连接的组\n\n分量之间没有本工具列出的直接事件连接时需要人工核对，不自动认定为不同战斗。\n\n| 当前组 | 完成旗标 | 名称 | 分量 | 旧项 |\n|---|---:|---|---:|---|\n",
         old.len(),
         groups.len(),
         load.scripts.len(),

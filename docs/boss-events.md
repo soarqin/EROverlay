@@ -7,11 +7,13 @@ does not establish that the character has a named bottom-of-screen health bar.
 The PARAM and current-language text readers are described in
 [Boss data sources](boss-data-sources.md).
 
-The [complete battle-count audit](boss-battle-count-2026-11-02.md) supersedes
-earlier references to 211 playable battles: 211 is the static candidate count.
-One enabled common-event template references an entity absent from the archived
-scene. Early dragon routes and Patches' later rematch also require explicit
-completion/scope semantics; merging simultaneous bars does not yield 207.
+The current product uses the user-approved old **207-entry scope**, keeping the
+two Hinterland encounters separate. The [207-entry scope](boss-207-scope-2026-11-02.md)
+describes the three external cross-location relationships and conservative
+scene validation. The earlier [battle-count audit](boss-battle-count-2026-11-02.md)
+records **211 static candidates**, rather than 211 confirmed playable battles.
+One common-event template references entity `1038540800`, which is absent from
+the archived scene; its name does not establish a first Fallingstar Beast fight.
 
 ## Event contract
 
@@ -48,8 +50,10 @@ For proxy bars, the display event's explicit dead/HP/AI targets can establish
 the relationship. Conflicting candidates stay unknown; numerical similarity
 between IDs never establishes a relationship.
 These are structural event associations, not a full event-interpreter proof.
-The catalogue treats their flags as encounter completion: surrender or
-withdrawal can complete a named-bar encounter without killing its character.
+Raw event results can represent surrender or withdrawal without killing the
+character. The selected scope applies the explicit rules below: Patches'
+initial surrender counts, while the early dragon withdrawal is not a separate
+completed progress entry.
 `GameAreaParam` is an optional exact flag-to-map/position lookup, not a required
 membership list or an authority for substituting similar-looking flag IDs.
 
@@ -77,7 +81,7 @@ Catalogue preparation runs on the overlay update thread. At most two native
 file jobs are pending. A rejected request backs off; an accepted failed request
 gets one delayed retry. At most one completed resource is parsed and one map
 is expanded per update. Limits are 4,096 distinct resource paths and 32 MiB of
-parsed EMEVD source. Ordinary absent optional map versions are not reported as
+parsed EMEVD source, plus 32 MiB of accepted decompressed scene input. Ordinary absent optional map versions are not reported as
 on-screen errors. Invalid resource metadata and unavailable required links are
 tracked separately. Native file ownership still ends through `release_file`.
 
@@ -87,8 +91,9 @@ catalogue IO. A complete nonzero PARAM-pointer change or the settings action to
 reload game data starts a fresh catalogue and releases obsolete pending jobs.
 Rendering only reads the published catalogue and completion-state snapshot.
 
-Known progress entries merge by their proved completion flag, preserving
-multiple phase names without counting them twice. Unknown entries carry flag
+Known progress entries merge by their proved completion flag and the configured
+cross-location relationships, preserving multiple phase names without counting
+them twice. Unknown entries carry flag
 zero, display `?`, do not contribute to progress totals and cannot revive.
 Unknown bars merge only for the same map, runtime ceremony variant and exact
 entity. Reusing an entity number in another map or variant does not join those
@@ -97,6 +102,51 @@ multiple names.
 Missing native text is shown as `NpcName#<id>`; no offline language catalogue is
 bundled. The archived production-input check currently has no unknown entries
 or missing Boss names.
+
+After event discovery, candidates without a precise PARAM relationship request
+scene indexes using the native area-selection rule. The archived executable's
+`0x140e07940–0x140e07c39` calls `0x140e09fa0`: with
+`CS.DLC.IsEnableDlcFileMount` false it selects `mapstudio:/<map>.msb`. DLC2 is
+selected only when the switch is true, the packed map's highest area byte is
+at most 61, and bitset `0x20000f0012700000` contains that area. Candidate areas
+are 20, 21, 22, 25, 28, 40, 41, 42, 43 and 61.
+
+The production `scene_mounts` function always selects only base for other areas,
+including this audit's `m31` and `m60` scenes. It does not read the global switch,
+so it conservatively requests both base and `mapstudio_dlc2:/<map>.msb` for a
+possible DLC2 area, including this audit's `m61` scene. These requests use the same pending-job, parse and
+cancellation lifecycle. Filtering runs once after this stage. A supported actor
+or actor group in any selected scene keeps the candidate. Unknown read/parse results,
+unsupported operations, proxy/foreign-map ambiguity or an exhausted request or
+byte budget also keep it; failure is not proof that an actor is absent. Only
+understood local operations and confirmed local scene absence can remove a
+residual template. The executable establishes this selection rule; native VFS
+calls, the current global-switch value and live Mod overrides have not been
+verified in-game.
+
+## External encounter scope
+
+`configs/boss-encounters.json` contains only versioned cross-location
+relationships. It does not contain a full catalogue, names, regions or positions:
+
+| Primary | Extra member | Progress | Selected meaning |
+|---|---|---|---|
+| Adula late `1034420800` | Early `1034500800` | `primary` | Only the late encounter completes progress |
+| Lansseax late `1041520800` | Early kill `1037510800` | `any` | Either actual kill completes progress; retreat `1037510810` does not |
+| Patches initial `31000800` | Later `31000850` | `primary` | The initial fight/surrender is the progress entry; the later rematch is not separate |
+
+For `any`, a true value wins over an unknown value. All false values mean
+incomplete; false plus unknown remains unknown. Each journey contributes at
+most one completion. Relationships only take effect when the primary has an
+event-proved completion flag in the discovered input. If a Mod removes that
+primary event, its remaining member keeps its own event flag instead of
+inventing the old primary's completion condition.
+
+The plugin reads this JSON at initialization. Game-data reload does not reload
+relationships or revival recipes. Missing/invalid configuration disables links
+and reports an error, without a compiled-in mapping. Validation rejects duplicate,
+overlapping, chained, cyclic, zero, self-linked and unknown-field definitions.
+Neither names nor shared global guards merge the two Hinterland records.
 
 Item text jobs require both NpcName and PlaceName; menu jobs require GR_MenuText.
 A valid binder containing only other FMGs does not satisfy those requirements.
@@ -125,14 +175,24 @@ The 38 empty arrays deliberately authorize reviewed primary-only resets.
 An absent key does not authorize revival of a newly discovered/Mod battle.
 The DLL contains neither this table nor fallback copies of its entries.
 
-At execution, the core validates the confirmation's live context, the primary
-flag and every target address before the first write. It then applies auxiliary
-writes in their configured order and clears the primary flag last. Repeated
+At execution, the plugin refreshes context and completion values. The core
+validates the confirmation's live context, a currently true completion witness
+and every target address before the first write. Ordinary recipes apply auxiliary
+writes in their configured order and clear the primary flag last. Repeated
 identical auxiliary writes are deduplicated without changing their first
 position; conflicting values reject the configuration. Each byte operation
 preserves neighboring bits, but the whole recipe is not a transaction against
 the concurrently running game event interpreter. Recipes are loaded when the
 plugin starts; the game-data reload action does not reload this JSON.
+
+For Lansseax's early-kill-only completion, the early kill flag becomes that
+currently true witness. The operation moves the canonical late flag into the
+auxiliary clears and clears the early witness last. The complete target/value
+set remains the original reviewed recipe plus its implicit canonical clear;
+no inferred flags are added. An alternate completion is eligible only when the
+reviewed recipe already clears that flag. A missing address or changed context
+rejects the whole operation before any write. Patches' later flag neither blocks
+the initial recipe nor becomes an extra write in it.
 
 The initial configuration preserves all 207 recipes and 955 auxiliary writes
 from the reviewed C++ source `src/boss/data/gen/revival.json` at commit
@@ -186,15 +246,37 @@ The input directory contains `GameAreaParam.param`, `BonfireWarpParam.param`,
 `menu_dlc02.bnd`. Original resource bytes are not distributed or required by
 ordinary tests/builds.
 
-The checked input set requests 1,075 distinct paths and loads 555 EMEVDs. It
-produces **211 battles, 211 proved completion flags, zero unknowns and zero
-missing Boss names**. All 207 old entries remain covered. Four additional real
-bar encounters were outside the old manual list: the later Patches encounter
-(`31000850`), Adula's earlier encounter (`1034500800`), Lansseax's earlier
-encounter (`1037510800`) and the first Mt. Gelmir Fallingstar Beast
-(`1038540800`). These count named-bar encounters rather than distinct NPC
-species or exclusively lethal victories. Their absent revival keys leave them
-read-only.
+That original static check requests 1,075 candidate event paths and loads 555
+EMEVDs. It produces **211 static candidates and 347 named-bar instructions**,
+with no unresolved completion flags or missing Boss names in that input. The
+four candidates beyond the old 207 records are the three early/later routes
+listed above and the residual `1038540800` template. This remains historical
+pre-scope evidence, not a claim of four additional real fights.
+
+The selected-scope audit additionally loads the external relationship JSON and
+three explicit decompressed MSBs: `m31_00_00_00.msb` (465,336 B),
+`m60_38_54_00.msb` (1,238,752 B) and `m61_49_44_00.msb` (2,826,656 B), totaling
+**4,530,744 B**. Production scene filtering removes the residual template's two
+bar instructions, leaving **345 instructions and 207 progress entries**. All old
+207 entries map one-to-one, all named members are present, no archived display
+instructions are missing, and the two Hinterland records remain independent.
+The explicit audit transport feeds each scene once; it does not establish both
+possible DLC2 aliases' native availability. Without scene input it retains 208 candidates
+instead of forcing the count to 207.
+
+Reproduce the selected audit with independently exported assets:
+
+```powershell
+python tools/audit_boss_catalog.py --reference <pinned-C++-export> --params <PARAM-and-BND-directory> --events <decompressed-EMEVD-directory> --scope selected --scenes <decompressed-MSB-directory> --output target/boss-207-delivery-audit
+```
+
+The final output `target/boss-207-delivery-audit` contains the complete
+member/event/defeat evidence, relation configuration, explicit scene inputs,
+excluded-display proofs and per-candidate scene checks. The wrapper fingerprints
+all actual inputs. Its default `--scope static` preserves the original static
+audit. The full-directory member comparison uses 588 archived scripts against
+the 555-script production plan, allowing only explicitly recorded identical
+field-tile LOD aliases.
 
 The grouping is generated from PARAM data, not the old 32 manual regions.
 Nearest same-map graces provide approximate locality and subcategory membership;

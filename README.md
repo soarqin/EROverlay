@@ -4,7 +4,7 @@
 
 Boss 从游戏 Param、具名大生命条事件和当前语言文本生成目录，保留地区进度、筛选、死亡数、游戏时间、挑战记录及可选复活。默认按 `=` 打开或关闭完整列表。额外复活旗标仍在外部配置，发行包不再包含旧多语言名单。操作与限制见 [Boss 说明](crates/boss/README.md)、[数据来源](docs/boss-data-sources.md) 和 [事件证据](docs/boss-events.md)。
 
-核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；Boss 的首交结果见 [Boss 验证记录](docs/boss-validation.md)，后续修复见 [Boss 验收修复](docs/boss-review-2026-11-02.md)。[战斗数量核对](docs/boss-battle-count-2026-11-02.md) 给出完整旧 207 项映射：当前 211 为静态候选，含一个已确认的残留模板，不能当作 211 场真实战斗。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
+核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；Boss 的首交结果见 [Boss 验证记录](docs/boss-validation.md)，后续修复见 [Boss 验收修复](docs/boss-review-2026-11-02.md)。按用户选择恢复旧 207 项范围后，真实归档生成 **207 条记录，与 C++ 207 项逐项一一对应**，DLC 后门双守卫仍各占一条。完整映射、三条外部关系与场景残留检查见 [207 项范围与验证](docs/boss-207-scope-2026-11-02.md)。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
 
 DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)：Minimap 移除未使用的等宽和 emoji 字库，保留比例字体后备、自定义字体及系统语言字体。
 
@@ -33,6 +33,7 @@ package/
   configs/minimap.ini
   configs/boss.ini
   configs/boss-revival.json
+  configs/boss-encounters.json
   README.md
   LICENSE
   THIRD_PARTY.md
@@ -45,7 +46,7 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。本次 Boss 包需要同时更新 `EROverlay.dll`、`overlays/Minimap.dll` 并新增 `overlays/Boss.dll`、`configs/boss.ini` 和 `configs/boss-revival.json`。保留其他现有配置，包括日志设置。旧 Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。新界面设置保存到 `configs/boss-ui.json`，挑战记录继续保存在 `Challenge.txt`。
+升级前须完全退出游戏。本次 Boss 包需要同时更新 `EROverlay.dll`、`overlays/Minimap.dll`、`overlays/Boss.dll`，并加入 `configs/boss-encounters.json`。首次安装 Boss 还需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。
 
 ## 加载与退出
 

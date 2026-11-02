@@ -18,6 +18,7 @@ try {
         Copy-Item -LiteralPath (Join-Path $rustRoot "configs/$name.ini") -Destination $configRoot
     }
     Copy-Item -LiteralPath (Join-Path $rustRoot 'configs/boss-revival.json') -Destination $configRoot
+    Copy-Item -LiteralPath (Join-Path $rustRoot 'configs/boss-encounters.json') -Destination $configRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'README.md') -Destination $packageRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'LICENSE') -Destination $packageRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'THIRD_PARTY.md') -Destination $packageRoot

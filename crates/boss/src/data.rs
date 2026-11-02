@@ -1,5 +1,6 @@
 //! Update-only catalogue preparation. File jobs and EMEVD expansion are bounded;
 //! the renderer receives only the final immutable catalogue.
+use crate::encounters::Relations;
 use crate::host::Host;
 use eroverlay_game::{
     boss_events::{BossDisplay, EventScript, discover_boss_displays, parse_emevd},
@@ -7,6 +8,7 @@ use eroverlay_game::{
         self as params, BonfireRecord, GameAreaRecord, MapPointRecord, SubcategoryRecord,
         TabRecord, TextChoice,
     },
+    boss_scene::{SceneIndex, parse_msb},
     text::{self, TextCatalog, TextNamespaces},
 };
 use std::{
@@ -26,10 +28,12 @@ const PARAM_GROUPS: [u32; 6] = [
 const MAX_FILES: usize = 4096;
 const MAX_SCRIPT_BYTES: usize = 32 * 1024 * 1024;
 const MAX_PENDING: usize = 2;
+const MAX_SCENE_BYTES: usize = 32 * 1024 * 1024;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Encounter {
     pub flag: u32,
+    pub completion: Vec<u32>,
     pub name: String,
     pub place: String,
     pub group: usize,
@@ -46,6 +50,34 @@ pub struct Catalog {
     pub rows: Vec<Encounter>,
     pub groups: Vec<Group>,
     pub unknown_count: usize,
+    pub flag_ids: Vec<u32>,
+}
+impl Catalog {
+    pub fn states(&self, values: &[u8]) -> Vec<u8> {
+        self.rows
+            .iter()
+            .map(|row| {
+                if row.completion.is_empty() || values.len() != self.flag_ids.len() {
+                    return 2;
+                }
+                let mut result = 0;
+                for flag in &row.completion {
+                    let value = self
+                        .flag_ids
+                        .binary_search(flag)
+                        .ok()
+                        .map_or(2, |i| values[i]);
+                    if value == 1 {
+                        return 1;
+                    }
+                    if value != 0 {
+                        result = 2;
+                    }
+                }
+                result
+            })
+            .collect()
+    }
 }
 
 #[derive(Clone)]
@@ -56,6 +88,9 @@ enum Kind {
     },
     Event {
         required: bool,
+    },
+    Scene {
+        map: u32,
     },
 }
 struct Job {
@@ -83,10 +118,18 @@ struct Loading {
     failures: usize,
     absent: BTreeSet<String>,
     budget_exhausted: bool,
+    scene_started: bool,
+    scene_bytes: usize,
+    scenes: BTreeMap<u32, Vec<SceneIndex>>,
+    scene_untrusted: BTreeSet<u32>,
+    excluded: Vec<BossDisplay>,
 }
 impl Loading {
     fn queue(&mut self, path: String, kind: Kind) {
         if self.queued.len() >= MAX_FILES && !self.queued.contains(&path) {
+            if let Kind::Scene { map } = kind {
+                self.scene_untrusted.insert(map);
+            }
             if !self.budget_exhausted {
                 self.budget_exhausted = true;
                 self.failures += 1;
@@ -154,6 +197,11 @@ impl Loading {
             failures: 0,
             absent: BTreeSet::new(),
             budget_exhausted: false,
+            scene_started: false,
+            scene_bytes: 0,
+            scenes: BTreeMap::new(),
+            scene_untrusted: BTreeSet::new(),
+            excluded: Vec::new(),
         };
         let language = host
             .config("common.language")
@@ -260,6 +308,10 @@ impl Loading {
                         false
                     }
                 }
+                Kind::Scene { map } => {
+                    retryable = false;
+                    self.accept_scene(*map, &bytes)
+                }
             },
             Err(()) => false,
         };
@@ -280,6 +332,10 @@ impl Loading {
                         fallback: None,
                     },
                 );
+            } else if let Kind::Scene { map } = job.kind {
+                // The host does not distinguish not-found from unsupported,
+                // copy-budget or native read failures. None prove absence.
+                self.scene_untrusted.insert(map);
             } else if !was_read && matches!(job.kind, Kind::Event { required: false }) {
                 self.absent.insert(job.path);
             } else {
@@ -305,7 +361,134 @@ impl Loading {
         }
         true
     }
-    fn catalog(&self, host: Host) -> Catalog {
+    fn param_locates(&self, display: &BossDisplay) -> bool {
+        self.areas.iter().any(|area| {
+            area.flag != 0
+                && (display.completion_flag == Some(area.flag)
+                    || display.entity_id == area.flag
+                    || (display.completion_flag == Some(area.row)
+                        && area.map == map3(display.map_id)))
+        })
+    }
+    /// Only unresolved Param relationships need a scene read. No old boss list
+    /// or flag-specific exclusion participates in this resource plan.
+    fn prepare_scenes(&mut self) -> bool {
+        if self.scene_started {
+            return !self.jobs.is_empty();
+        }
+        self.scene_started = true;
+        let maps: BTreeSet<_> = self
+            .displays
+            .iter()
+            .filter(|d| !self.param_locates(d))
+            .map(|d| d.map_id)
+            .collect();
+        for map in maps {
+            if map.to_be_bytes()[3] != 0 {
+                self.scene_untrusted.insert(map);
+                continue;
+            }
+            let name = map_label(map);
+            // The native area bitset proves base-only areas. DLC2 candidates
+            // also depend on an unread engine setting, so keep both aliases
+            // there; any supported actor wins and failures never prove absence.
+            for mount in eroverlay_game::boss_scene::scene_mounts(map) {
+                self.queue(format!("{mount}:/{name}.msb"), Kind::Scene { map });
+            }
+        }
+        !self.jobs.is_empty()
+    }
+    fn accept_scene(&mut self, map: u32, bytes: &[u8]) -> bool {
+        let parsed = self
+            .scene_bytes
+            .checked_add(bytes.len())
+            .filter(|n| *n <= MAX_SCENE_BYTES)
+            .and_then(|n| parse_msb(bytes).ok().map(|scene| (n, scene)));
+        if let Some((n, scene)) = parsed {
+            self.scene_bytes = n;
+            self.scenes.entry(map).or_default().push(scene);
+            true
+        } else {
+            self.scene_untrusted.insert(map);
+            false
+        }
+    }
+    fn filter_scenes(&mut self) {
+        let mut exclude = BTreeSet::new();
+        let mut uncertain = BTreeSet::new();
+        let located: BTreeSet<_> = self
+            .displays
+            .iter()
+            .filter(|d| self.param_locates(d))
+            .map(|d| (d.map_id, d.runtime_variant, d.entity_id))
+            .collect();
+        for d in &self.displays {
+            if self.param_locates(d) {
+                continue;
+            }
+            let Some(scenes) = self.scenes.get(&d.map_id).filter(|s| !s.is_empty()) else {
+                uncertain.insert(d.map_id);
+                continue;
+            };
+            let targets: BTreeSet<_> = std::iter::once(d.entity_id)
+                .chain(d.related_entities.iter().copied())
+                .collect();
+            if scenes
+                .iter()
+                .any(|s| targets.iter().any(|id| s.contains_actor(*id)))
+            {
+                continue;
+            }
+            let aliases_unknown = self.scene_untrusted.contains(&d.map_id);
+            let proxy = scenes.iter().any(|s| {
+                targets
+                    .iter()
+                    .any(|id| s.other_part_entities.contains(id) || s.region_entities.contains(id))
+            });
+            let foreign = self.displays.iter().any(|other| {
+                other.entity_id == d.entity_id && map3(other.map_id) != map3(d.map_id)
+            });
+            let local = !aliases_unknown
+                && !proxy
+                && !foreign
+                && d.runtime_variant == 0
+                && d.map_id.to_be_bytes()[3] == 0
+                && d.proof.source == "common_func.emevd"
+                && !d.related_entities.is_empty()
+                && d.related_entities.iter().all(|id| *id == d.entity_id)
+                && self
+                    .scripts
+                    .iter()
+                    .find(|s| s.map_id == Some(d.map_id))
+                    .is_some_and(|script| {
+                        eroverlay_game::boss_events::scene_absence_is_local(
+                            d,
+                            script,
+                            &self.scripts,
+                        )
+                    });
+            if local {
+                exclude.insert((d.map_id, d.runtime_variant, d.entity_id));
+            } else {
+                uncertain.insert(d.map_id);
+            }
+        }
+        // An ambiguous branch keeps all candidates in that map conservative.
+        self.failures += uncertain.len();
+        let mut retained = Vec::with_capacity(self.displays.len());
+        for display in self.displays.drain(..) {
+            if exclude.contains(&(display.map_id, display.runtime_variant, display.entity_id))
+                && !located.contains(&(display.map_id, display.runtime_variant, display.entity_id))
+                && !uncertain.contains(&display.map_id)
+            {
+                self.excluded.push(display);
+            } else {
+                retained.push(display);
+            }
+        }
+        self.displays = retained;
+    }
+    fn catalog(&self, host: Host, relations: &Relations) -> Catalog {
         build_catalog(
             &self.displays,
             &self.areas,
@@ -315,6 +498,7 @@ impl Loading {
             &self.tabs,
             &self.texts,
             host,
+            relations,
         )
     }
 }
@@ -329,9 +513,19 @@ pub struct Data {
     status: &'static str,
     finished: bool,
     publish_empty: bool,
+    relations: Relations,
+    relation_error: bool,
 }
 impl Data {
     pub fn new(host: Host) -> Self {
+        let root = std::path::PathBuf::from(host.config("runtime.directory").unwrap_or_default());
+        let relations = crate::encounters::load(&root);
+        if let Err(error) = &relations {
+            host.log(&format!(
+                "boss-encounters: {error}; cross-location links disabled\n"
+            ));
+        }
+        let relation_error = relations.is_err();
         Self {
             host,
             tables: [0; 6],
@@ -342,6 +536,8 @@ impl Data {
             status: "Waiting for game parameters",
             finished: false,
             publish_empty: false,
+            relations: relations.unwrap_or_default(),
+            relation_error,
         }
     }
     pub fn status(&self) -> &'static str {
@@ -409,17 +605,22 @@ impl Data {
         if !loading.discover() {
             return None;
         }
+        if loading.prepare_scenes() {
+            self.status = "Checking Boss scene entities";
+            return None;
+        }
+        loading.filter_scenes();
         let loading = self.loading.take().unwrap();
         self.finished = true;
-        let catalog = loading.catalog(self.host);
+        let catalog = loading.catalog(self.host, &self.relations);
         self.status = if catalog.rows.is_empty() {
             "No named Boss health bars found"
-        } else if loading.failures != 0 {
+        } else if loading.failures != 0 || self.relation_error {
             "Ready; some game resources are unavailable"
         } else {
             "Ready"
         };
-        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional maps, {} unresolved event calls\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing));
+        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional resources, {} unresolved event calls, {} absent scene bars excluded\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing,loading.excluded.len()));
         self.publish(catalog)
     }
 }
@@ -460,7 +661,11 @@ struct EncounterGroup<'a> {
     members: Vec<&'a BossDisplay>,
 }
 
-fn encounter_groups(displays: &[BossDisplay]) -> Vec<EncounterGroup<'_>> {
+fn encounter_groups<'a>(
+    displays: &'a [BossDisplay],
+    relations: &Relations,
+) -> Vec<EncounterGroup<'a>> {
+    let proved: BTreeSet<_> = displays.iter().filter_map(|d| d.completion_flag).collect();
     let mut grouped: BTreeMap<(u32, u32, u8, u32), Vec<&BossDisplay>> = BTreeMap::new();
     for display in displays {
         // An exact scoped entity resolves duplicate slot-switch helpers.
@@ -476,6 +681,15 @@ fn encounter_groups(displays: &[BossDisplay]) -> Vec<EncounterGroup<'_>> {
         let flag = display
             .completion_flag
             .or_else(|| (resolved.len() == 1).then(|| *resolved.first().unwrap()));
+        // Never invent a missing Mod completion event from an old relationship.
+        let flag = flag.map(|flag| {
+            let canonical = relations.canonical(flag);
+            if proved.contains(&canonical) {
+                canonical
+            } else {
+                flag
+            }
+        });
         grouped
             .entry(if let Some(flag) = flag {
                 (flag, 0, 0, 0)
@@ -506,6 +720,7 @@ fn build_catalog(
     tabs: &[TabRecord],
     texts: &TextCatalog,
     host: Host,
+    relations: &Relations,
 ) -> Catalog {
     let ids: BTreeSet<u32> = graces
         .iter()
@@ -529,7 +744,7 @@ fn build_catalog(
     for EncounterGroup {
         flag,
         members: evidence,
-    } in encounter_groups(displays)
+    } in encounter_groups(displays, relations)
     {
         let first = evidence[0];
         let area = areas
@@ -601,6 +816,24 @@ fn build_catalog(
         }
         catalog.rows.push(Encounter {
             flag,
+            completion: if flag == 0 {
+                Vec::new()
+            } else {
+                relations
+                    .completion_flags(flag)
+                    .filter(|_| relations.canonical(flag) == flag)
+                    .map_or_else(
+                        || vec![flag],
+                        |ids| {
+                            ids.iter()
+                                .copied()
+                                .filter(|id| {
+                                    displays.iter().any(|d| d.completion_flag == Some(*id))
+                                })
+                                .collect()
+                        },
+                    )
+            },
             name,
             place,
             group,
@@ -627,6 +860,14 @@ fn build_catalog(
             .then_with(|| a.flag.cmp(&b.flag))
             .then_with(|| a.name.cmp(&b.name))
     });
+    catalog.flag_ids = catalog
+        .rows
+        .iter()
+        .flat_map(|r| &r.completion)
+        .copied()
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
     catalog
 }
 
@@ -664,6 +905,11 @@ mod tests {
             failures: 0,
             absent: BTreeSet::new(),
             budget_exhausted: false,
+            scene_started: false,
+            scene_bytes: 0,
+            scenes: BTreeMap::new(),
+            scene_untrusted: BTreeSet::new(),
+            excluded: Vec::new(),
         }
     }
     fn display(map: u32, variant: u8, entity: u32, name: u32, flag: Option<u32>) -> BossDisplay {
@@ -685,6 +931,35 @@ mod tests {
         }
     }
     #[test]
+    fn failed_or_budget_dropped_scene_alias_is_unknown_not_absent() {
+        unsafe extern "C" fn failed(_: *mut c_void, _: u64, out: *mut abi::FileView) -> i32 {
+            // SAFETY: the production Host provides a valid output FileView.
+            unsafe {
+                out.write(abi::FileView {
+                    status: abi::FILE_FAILED,
+                    ..Default::default()
+                });
+            }
+            abi::OK
+        }
+        let map = u32::from_be_bytes([60, 38, 54, 0]);
+        let mut load = empty_loading();
+        load.queue("mapstudio:/scene.msb".into(), Kind::Scene { map });
+        load.jobs[0].token = 1;
+        load.jobs[0].attempts = 1;
+        let mut host = host();
+        host.0.poll_file = Some(failed);
+        assert!(load.files(host));
+        assert!(load.scene_untrusted.contains(&map));
+        assert!(load.absent.is_empty());
+        load.scene_untrusted.clear();
+        load.queued = (0..MAX_FILES).map(|i| i.to_string()).collect();
+        load.queue("mapstudio_dlc2:/scene.msb".into(), Kind::Scene { map });
+        assert!(load.jobs.is_empty());
+        assert!(load.scene_untrusted.contains(&map));
+        assert!(load.budget_exhausted);
+    }
+    #[test]
     fn unknown_entities_merge_only_within_the_same_map_and_variant() {
         let mut load = empty_loading();
         load.displays = vec![
@@ -694,7 +969,7 @@ mod tests {
             display(0x0a000000, 1, 7, 4, None),
             display(0x0a000000, 1, 8, 5, None),
         ];
-        let catalog = load.catalog(host());
+        let catalog = load.catalog(host(), &Relations::default());
         assert_eq!(catalog.rows.len(), 4);
         assert_eq!(catalog.unknown_count, 4);
         assert!(catalog.rows.iter().all(|r| r.flag == 0));
@@ -715,7 +990,7 @@ mod tests {
             display(0x0a000000, 0, 7, 4, None),
             display(0x0a000000, 1, 7, 5, None),
         ];
-        let catalog = load.catalog(host());
+        let catalog = load.catalog(host(), &Relations::default());
         assert_eq!(catalog.rows.len(), 2);
         assert_eq!(catalog.unknown_count, 1);
         let known = catalog.rows.iter().find(|r| r.flag == 100).unwrap();
@@ -750,7 +1025,7 @@ mod tests {
             member.guard_flags = vec![2050470800, 2050480860];
             member.related_entities = vec![2050470800, 2050480860];
         }
-        let catalog = load.catalog(host());
+        let catalog = load.catalog(host(), &Relations::default());
         assert_eq!(catalog.rows.len(), 4);
         assert_eq!(catalog.unknown_count, 0);
         let names: BTreeMap<_, _> = catalog
@@ -762,6 +1037,55 @@ mod tests {
         assert_eq!(names[&2050470800], "NpcName#906251600");
         assert_eq!(names[&2050480860], names[&2050470800]);
         assert_eq!(names[&11050800], "NpcName#904720000 / NpcName#904720001");
+    }
+
+    #[test]
+    fn selected_journeys_count_alternative_kills_once_and_ignore_retreat_or_rematch_flags() {
+        let relations = crate::encounters::load(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../..")
+                .as_path(),
+        )
+        .unwrap();
+        let mut load = empty_loading();
+        load.displays = vec![
+            display(0x3c223200, 0, 1034500800, 1, Some(1034500800)),
+            display(0x3c222a00, 0, 1034420800, 2, Some(1034420800)),
+            display(0x3c253300, 0, 1037510800, 3, Some(1037510800)),
+            display(0x3c293400, 0, 1041520800, 4, Some(1041520800)),
+            display(0x1f000000, 0, 31000800, 5, Some(31000800)),
+            display(0x1f000000, 0, 31000850, 6, Some(31000850)),
+            display(0x3d322f00, 0, 2050470800, 7, Some(2050470800)),
+            display(0x3d322f00, 0, 2050480860, 7, Some(2050480860)),
+        ];
+        let c = load.catalog(host(), &relations);
+        assert_eq!(c.rows.len(), 5);
+        assert_eq!(c.flag_ids.len(), 6);
+        assert!(!c.flag_ids.contains(&1034500800));
+        assert!(!c.flag_ids.contains(&1037510810));
+        assert!(!c.flag_ids.contains(&31000850));
+        let row = |flag| c.rows.iter().position(|r| r.flag == flag).unwrap();
+        assert_eq!(c.rows[row(1034420800)].name, "NpcName#1 / NpcName#2");
+        let mut values = vec![0; c.flag_ids.len()];
+        values[c.flag_ids.binary_search(&1037510800).unwrap()] = 1;
+        assert_eq!(c.states(&values).iter().filter(|v| **v == 1).count(), 1);
+        assert_eq!(c.states(&values)[row(1041520800)], 1);
+        values[c.flag_ids.binary_search(&1041520800).unwrap()] = 2;
+        assert_eq!(c.states(&values)[row(1041520800)], 1);
+        values[c.flag_ids.binary_search(&1037510800).unwrap()] = 0;
+        assert_eq!(c.states(&values)[row(1041520800)], 2);
+        values.fill(0);
+        values[c.flag_ids.binary_search(&2050470800).unwrap()] = 1;
+        let states = c.states(&values);
+        assert_eq!(states[row(2050470800)], 1);
+        assert_eq!(states[row(2050480860)], 0);
+        assert!(c.states(&[]).iter().all(|v| *v == 2));
+        // Removing the canonical event in a Mod must not invent its progress.
+        load.displays
+            .retain(|d| d.completion_flag != Some(1034420800));
+        let modified = load.catalog(host(), &relations);
+        let early = modified.rows.iter().find(|r| r.flag == 1034500800).unwrap();
+        assert_eq!(early.completion, [1034500800]);
     }
 
     // Small valid BND4/FMG files drive the production parser and file-job state
@@ -974,6 +1298,7 @@ mod tests {
         let old = Arc::new(Catalog {
             rows: vec![Encounter {
                 flag: 7,
+                completion: vec![7],
                 name: "Boss".into(),
                 place: "Place".into(),
                 group: 0,
@@ -985,6 +1310,7 @@ mod tests {
                 name: "Region".into(),
             }],
             unknown_count: 0,
+            flag_ids: vec![7],
         });
         data.catalog = old.clone();
         data.tables = [1; 6];
@@ -1045,7 +1371,7 @@ mod tests {
             .merge_binder(&std::fs::read(root.join("menu_dlc02.bnd")).unwrap())
             .unwrap();
         while !load.discover() {}
-        let catalog = load.catalog(host());
+        let catalog = load.catalog(host(), &Relations::default());
         let flags: BTreeSet<_> = catalog
             .rows
             .iter()

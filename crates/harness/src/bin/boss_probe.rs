@@ -1,4 +1,4 @@
-//! Optional production-DLL probe. PARAM/EMEVD/FMG are real archived resources;
+//! Optional production-DLL probe. PARAM/EMEVD/FMG/MSB are real archived resources;
 //! save state, flags, input and writes are controlled fixtures, never a live game.
 #[path = "../gpu.rs"]
 #[allow(dead_code)]
@@ -36,13 +36,17 @@ struct Fixture {
     root: String,
     params: BTreeMap<u32, Vec<u8>>,
     files: BTreeMap<String, Vec<u8>>,
+    scenes: Option<PathBuf>,
+    scene_reads: BTreeSet<String>,
+    invalid_scene_aliases: BTreeSet<String>,
     requests: BTreeMap<u64, Option<String>>,
     keys: BTreeSet<u32>,
     input: VecDeque<abi::UiInput>,
     capture: u32,
     polls: u64,
     directory_count: usize,
-    last_flag_count: usize,
+    revival_denials: u64,
+    last_flag_ids: Vec<u32>,
     flags: BTreeMap<u32, u8>,
     display: abi::DisplayState,
     state: abi::BossState,
@@ -64,6 +68,9 @@ unsafe fn text<'a>(value: abi::ByteSlice) -> &'a str {
 }
 unsafe extern "C" fn log(user: *mut c_void, _level: u32, value: abi::ByteSlice) {
     let value = unsafe { text(value) };
+    if value.starts_with("boss-revival: context or flags unavailable") {
+        unsafe { fixture(user) }.revival_denials += 1;
+    }
     if let Some(rest) = value.strip_prefix("boss-catalog: ") {
         unsafe { fixture(user) }.directory_count = rest
             .split_whitespace()
@@ -108,11 +115,15 @@ unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
     abi::OK
 }
 unsafe extern "C" fn flags(user: *mut c_void, ids: *const u32, out: *mut u8, len: usize) -> i32 {
-    if len > 4096 {
+    if len > 4096 || (len != 0 && (ids.is_null() || out.is_null() || !ids.is_aligned())) {
         return abi::ERR_INVALID;
     }
     let f = unsafe { fixture(user) };
-    f.last_flag_count = len;
+    if len == 0 {
+        f.last_flag_ids.clear();
+        return abi::OK;
+    }
+    f.last_flag_ids = unsafe { std::slice::from_raw_parts(ids, len) }.to_vec();
     for (id, out) in unsafe { std::slice::from_raw_parts(ids, len) }
         .iter()
         .zip(unsafe { std::slice::from_raw_parts_mut(out, len) })
@@ -139,7 +150,20 @@ unsafe extern "C" fn revive(
     len: usize,
 ) -> i32 {
     let f = unsafe { fixture(user) };
-    if context != f.state.context || len > 2048 {
+    if primary == 0
+        || primary == u32::MAX
+        || len > 2048
+        || (len != 0 && (writes.is_null() || !writes.is_aligned()))
+    {
+        return abi::ERR_INVALID;
+    }
+    if context != f.state.context
+        || f.state.valid == 0
+        || f.display.valid == 0
+        || f.display.loading_or_logo != 0
+        || f.display.full_screen_map != 0
+        || f.flags.get(&primary).copied().unwrap_or(1) != 1
+    {
         return abi::ERR_UNAVAILABLE;
     }
     let writes = if len == 0 {
@@ -147,6 +171,28 @@ unsafe extern "C" fn revive(
     } else {
         unsafe { std::slice::from_raw_parts(writes, len) }.to_vec()
     };
+    // Controlled flag-address availability stands in for native prepare_writes.
+    // Validate the complete request before changing a single fixture bit.
+    let mut targets = BTreeMap::new();
+    for write in &writes {
+        if write.id == 0 || write.id == u32::MAX || write.id == primary || write.value > 1 {
+            return abi::ERR_INVALID;
+        }
+        if targets
+            .insert(write.id, write.value)
+            .is_some_and(|old| old != write.value)
+        {
+            return abi::ERR_INVALID;
+        }
+        if f.flags.get(&write.id).copied().unwrap_or(1) > 1 {
+            return abi::ERR_UNAVAILABLE;
+        }
+    }
+    for write in &writes {
+        f.flags.insert(write.id, write.value as u8);
+    }
+    // Match the real core's confirmation witness: it must be true, and is
+    // cleared last. A false canonical flag must never waive this check.
     f.flags.insert(primary, 0);
     f.writes.push((primary, writes));
     abi::OK
@@ -161,7 +207,35 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
     let f = unsafe { fixture(user) };
     let request = unsafe { &*request };
     let path = unsafe { text(request.path) };
-    let name = if let Some(name) = path.strip_prefix("event:/") {
+    let scene = path
+        .strip_prefix("mapstudio:/")
+        .or_else(|| path.strip_prefix("mapstudio_dlc2:/"));
+    // Independent archived-EXE expectation: areas 31 and 60 never select the
+    // DLC2 mount. Do not let a permissive fixture conceal a production error.
+    let invalid_scene_alias = path.starts_with("mapstudio_dlc2:/")
+        && matches!(scene, Some("m31_00_00_00.msb" | "m60_38_54_00.msb"));
+    if invalid_scene_alias {
+        f.invalid_scene_aliases.insert(path.to_owned());
+    }
+    if let Some(name) = scene
+        && !invalid_scene_alias
+        && !name.contains(['/', '\\'])
+        && name.starts_with('m')
+        && name.ends_with(".msb")
+        && !f.files.contains_key(path)
+        && let Some(root) = &f.scenes
+    {
+        // The explicit flat archive directory contains decompressed game bytes.
+        // For area 61, it models the same archived scene under both native
+        // aliases without claiming to reproduce the live switch/Mod priority.
+        if let Ok(bytes) = std::fs::read(root.join(name)) {
+            f.scene_reads.insert(name.to_owned());
+            f.files.insert(path.to_owned(), bytes);
+        }
+    }
+    let name = if scene.is_some() {
+        path
+    } else if let Some(name) = path.strip_prefix("event:/") {
         name
     } else if path.contains("item") {
         "item_dlc02.bnd"
@@ -170,7 +244,7 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
     } else {
         path
     };
-    let name = f.files.contains_key(name).then(|| name.to_owned());
+    let name = (!invalid_scene_alias && f.files.contains_key(name)).then(|| name.to_owned());
     f.next += 1;
     f.request_count += 1;
     f.requests.insert(f.next, name);
@@ -534,6 +608,220 @@ impl Probe {
         self.frame()?;
         self.frame()
     }
+    fn refresh_flags(&mut self, changes: &[(u32, u8)]) -> Result<Vec<u32>, String> {
+        self.fixture.flags.clear();
+        self.fixture.flags.extend(changes.iter().copied());
+        std::thread::sleep(Duration::from_millis(510));
+        self.update()?;
+        for _ in 0..12 {
+            self.frame()?;
+        }
+        Ok(self.geometry())
+    }
+    fn geometry(&self) -> Vec<u32> {
+        let mut out = Vec::new();
+        for mesh in &self.fixture.meshes {
+            out.extend(mesh.clip.map(f32::to_bits));
+            out.push(mesh.vertices.len() as u32);
+            for vertex in &mesh.vertices {
+                out.extend(vertex.pos.map(f32::to_bits));
+                out.extend(vertex.uv.map(f32::to_bits));
+                out.push(vertex.color);
+            }
+            out.extend_from_slice(&mesh.indices);
+        }
+        out
+    }
+    fn completion_counts(&mut self) -> Result<(), String> {
+        // Compare the actual compact label geometry against 207/206/205 killed
+        // reference states. Warm all digits first so atlas growth cannot be
+        // mistaken for a count change; no internal Boss ABI is added for tests.
+        self.refresh_flags(&[(2050470800, 0), (2050480860, 0)])?;
+        self.refresh_flags(&[(2050470800, 0)])?;
+        let all = self.refresh_flags(&[])?;
+        let one = self.refresh_flags(&[(2050470800, 0)])?;
+        let two = self.refresh_flags(&[(2050470800, 0), (2050480860, 0)])?;
+        if all.is_empty() || all == one || one == two || all == two {
+            return Err("compact 207/206/205 reference geometries were not distinct".into());
+        }
+        for (name, changes, expected) in [
+            (
+                "Lansseax early kill OR late",
+                vec![(1041520800, 0), (1037510800, 1)],
+                &all,
+            ),
+            (
+                "Lansseax retreat is not a kill",
+                vec![(1041520800, 0), (1037510800, 0), (1037510810, 1)],
+                &one,
+            ),
+            (
+                "Adula early is not late completion",
+                vec![(1034420800, 0), (1034500800, 1)],
+                &one,
+            ),
+            (
+                "Patches late is not initial completion",
+                vec![(31000800, 0), (31000850, 1)],
+                &one,
+            ),
+            (
+                "Hinterland first remains independent",
+                vec![(2050470800, 0), (2050480860, 1)],
+                &one,
+            ),
+            (
+                "Hinterland second remains independent",
+                vec![(2050470800, 1), (2050480860, 0)],
+                &one,
+            ),
+            (
+                "Hinterland both unfinished",
+                vec![(2050470800, 0), (2050480860, 0)],
+                &two,
+            ),
+        ] {
+            if self.refresh_flags(&changes)? != *expected {
+                return Err(format!("real DLL compact count mismatch: {name}"));
+            }
+            println!("PASS: real DLL compact geometry: {name}");
+        }
+        self.refresh_flags(&[])?;
+        Ok(())
+    }
+    fn wait_catalog(&mut self) -> Result<(), String> {
+        let deadline = Instant::now() + Duration::from_secs(35);
+        while self.fixture.directory_count == 0 {
+            self.update()?;
+            if Instant::now() >= deadline {
+                return Err("real archive catalogue did not finish in 35 seconds".into());
+            }
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        std::thread::sleep(Duration::from_millis(510));
+        self.update()?;
+        let ids = &self.fixture.last_flag_ids;
+        if !self.fixture.invalid_scene_aliases.is_empty() {
+            return Err(format!(
+                "production requested a DLC2 alias for a base-only scene: {:?}",
+                self.fixture.invalid_scene_aliases
+            ));
+        }
+        if self.fixture.directory_count != 207
+            || ids.len() != 208
+            || ids.iter().copied().collect::<BTreeSet<_>>().len() != 208
+            || ![
+                1034420800, 1041520800, 1037510800, 31000800, 2050470800, 2050480860,
+            ]
+            .iter()
+            .all(|id| ids.contains(id))
+            || [1034500800, 31000850, 1037510810, 1038540800]
+                .iter()
+                .any(|id| ids.contains(id))
+            || self.fixture.scene_reads.is_empty()
+        {
+            return Err(format!(
+                "expected real-scene 207 catalogue / 208 unique completion flags; got rows={}, ids={}, real scenes={}. Supply EROVERLAY_BOSS_SCENE_DIR with decompressed archived MSBs",
+                self.fixture.directory_count,
+                ids.len(),
+                self.fixture.scene_reads.len()
+            ));
+        }
+        Ok(())
+    }
+    fn fresh_full(&mut self, host: &abi::HostApi) -> Result<(), String> {
+        // Isolate negative confirmations from prior result banners/layout. This
+        // is a fresh production plugin instance, not a private testing entry.
+        unsafe { self.plugin.api.destroy.unwrap()(self.plugin.instance) };
+        self.plugin.instance = std::ptr::null_mut();
+        self.fixture.directory_count = 0;
+        let code = unsafe { self.plugin.api.init.unwrap()(host, &mut self.plugin.instance) };
+        if code != abi::OK || self.plugin.instance.is_null() {
+            return Err(format!("fresh Boss init failed: {code}"));
+        }
+        self.wait_catalog()?;
+        self.hotkey(abi::parse_chord("="))?;
+        for _ in 0..12 {
+            self.frame()?;
+        }
+        self.click(1000., 255.)?;
+        let no_match = self.query("zzzzzznonexistent")?;
+        let matched = self.query("Ancient Dragon Lansseax")?;
+        if matched <= no_match + 100 {
+            return Err("real canonical Lansseax search did not produce a row".into());
+        }
+        Ok(())
+    }
+    fn open_confirmation(&mut self) -> Result<(), String> {
+        let before = self.frame()?;
+        self.click(850., 377.)?;
+        let mut after = 0;
+        for _ in 0..6 {
+            after = self.frame()?;
+        }
+        if after <= before + 500 {
+            return Err("actual canonical row did not open its confirmation modal".into());
+        }
+        Ok(())
+    }
+    fn reject_changed_confirmations(&mut self, host: &abi::HostApi) -> Result<(), String> {
+        for changed_context in [false, true] {
+            self.fixture.flags.clear();
+            self.fixture.flags.insert(1041520800, 0);
+            self.fixture.flags.insert(1037510800, 1);
+            self.fresh_full(host)?;
+            self.open_confirmation()?;
+            let modal = self.frame()?;
+            self.screenshot(if changed_context {
+                "boss-context-confirm"
+            } else {
+                "boss-unknown-confirm"
+            })?;
+            let writes = self.fixture.writes.len();
+            let denials = self.fixture.revival_denials;
+            self.click(460., 524.)?;
+            let mut after = 0;
+            for _ in 0..6 {
+                after = self.frame()?;
+            }
+            if modal <= after + 500 {
+                return Err("negative case did not dismiss the actual confirmation".into());
+            }
+            let before = self.fixture.flags.clone();
+            let context = self.fixture.state.context;
+            if changed_context {
+                self.fixture.state.context ^= 0x100;
+            } else {
+                self.fixture.flags.insert(1041520800, 2);
+                self.fixture.flags.insert(1037510800, 2);
+            }
+            let unchanged = self.fixture.flags.clone();
+            self.update()?;
+            self.frame()?;
+            if self.fixture.writes.len() != writes
+                || self.fixture.flags != unchanged
+                || self.fixture.revival_denials != denials + 1
+            {
+                return Err("changed context / unknown completion accepted a revival".into());
+            }
+            self.screenshot(if changed_context {
+                "boss-context-rejected"
+            } else {
+                "boss-unknown-rejected"
+            })?;
+            self.fixture.state.context = context;
+            self.fixture.flags = before;
+            println!(
+                "PASS: actual DLL confirmation rejected {} without controlled writes",
+                if changed_context {
+                    "changed save context"
+                } else {
+                    "unknown completion flags"
+                }
+            );
+        }
+        Ok(())
+    }
     fn measure(&mut self, name: &str) -> Result<(), String> {
         for _ in 0..5 {
             self.frame()?;
@@ -603,6 +891,106 @@ impl Probe {
 fn read(path: &Path) -> Result<Vec<u8>, String> {
     std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))
 }
+fn check_controlled_revive(fixture: &mut Fixture) -> Result<(), String> {
+    let valid = abi::FlagWrite {
+        id: 1041520820,
+        value: 0,
+    };
+    for (name, context, primary, extras, values) in [
+        (
+            "false canonical despite true early witness",
+            fixture.state.context,
+            1041520800,
+            vec![valid],
+            vec![(1041520800, 0), (1037510800, 1)],
+        ),
+        (
+            "unknown primary",
+            fixture.state.context,
+            1041520800,
+            vec![valid],
+            vec![(1041520800, 2)],
+        ),
+        (
+            "unknown auxiliary target",
+            fixture.state.context,
+            1041520800,
+            vec![valid],
+            vec![(valid.id, 2)],
+        ),
+        (
+            "changed context",
+            fixture.state.context ^ 1,
+            1041520800,
+            vec![valid],
+            vec![],
+        ),
+        (
+            "invalid target",
+            fixture.state.context,
+            1041520800,
+            vec![abi::FlagWrite { id: 0, value: 0 }],
+            vec![],
+        ),
+        (
+            "invalid value",
+            fixture.state.context,
+            1041520800,
+            vec![abi::FlagWrite {
+                id: valid.id,
+                value: 2,
+            }],
+            vec![],
+        ),
+        (
+            "conflicting duplicate",
+            fixture.state.context,
+            1041520800,
+            vec![
+                valid,
+                abi::FlagWrite {
+                    id: valid.id,
+                    value: 1,
+                },
+            ],
+            vec![],
+        ),
+        (
+            "primary repeated in extras",
+            fixture.state.context,
+            1041520800,
+            vec![abi::FlagWrite {
+                id: 1041520800,
+                value: 0,
+            }],
+            vec![],
+        ),
+    ] {
+        fixture.flags.clear();
+        fixture.flags.extend(values);
+        let before = fixture.flags.clone();
+        let writes = fixture.writes.len();
+        let result = unsafe {
+            revive(
+                (fixture as *mut Fixture).cast(),
+                context,
+                primary,
+                extras.as_ptr(),
+                extras.len(),
+            )
+        };
+        if result == abi::OK || fixture.flags != before || fixture.writes.len() != writes {
+            return Err(format!(
+                "controlled native-contract fixture accepted {name}"
+            ));
+        }
+    }
+    fixture.flags.clear();
+    println!(
+        "PASS: controlled revival host rejects false/unknown primary, unknown targets, stale context, invalid IDs/values and conflicts before any write; this fixture is not the native game writer."
+    );
+    Ok(())
+}
 fn main() {
     if let Err(e) = run() {
         eprintln!("Boss 离线验证失败：{e}");
@@ -611,20 +999,31 @@ fn main() {
 }
 fn run() -> Result<(), String> {
     let mut args = std::env::args_os().skip(1);
-    let dll=PathBuf::from(args.next().ok_or("usage: boss_probe <Boss.dll> <raw-PARAM-directory> <raw-EMEVD-directory> [scratch-directory]")?).canonicalize().map_err(|e|e.to_string())?;
+    let dll=PathBuf::from(args.next().ok_or("usage: boss_probe <Boss.dll> <raw-PARAM-directory> <raw-EMEVD-directory> [scratch-directory] [raw-MSB-directory]; alternatively EROVERLAY_BOSS_SCENE_DIR")?).canonicalize().map_err(|e|e.to_string())?;
     let archive = PathBuf::from(args.next().ok_or("missing PARAM directory")?);
     let events = PathBuf::from(args.next().ok_or("missing EMEVD directory")?);
     let root = PathBuf::from(
         args.next()
             .unwrap_or_else(|| format!("target/boss-probe-{}", std::process::id()).into()),
     );
+    let scenes = args
+        .next()
+        .or_else(|| std::env::var_os("EROVERLAY_BOSS_SCENE_DIR"))
+        .map(PathBuf::from)
+        .map(|p| {
+            p.canonicalize()
+                .map_err(|e| format!("MSB directory {}: {e}", p.display()))
+        })
+        .transpose()?;
     std::fs::create_dir_all(root.join("configs")).map_err(|e| e.to_string())?;
     let root = root.canonicalize().map_err(|e| e.to_string())?;
-    std::fs::copy(
-        "configs/boss-revival.json",
-        root.join("configs/boss-revival.json"),
-    )
-    .map_err(|e| e.to_string())?;
+    for name in ["boss-revival.json", "boss-encounters.json"] {
+        std::fs::copy(
+            Path::new("configs").join(name),
+            root.join("configs").join(name),
+        )
+        .map_err(|e| e.to_string())?;
+    }
     let mut params = BTreeMap::new();
     for (group, name) in [
         (29, "GameAreaParam"),
@@ -658,13 +1057,17 @@ fn run() -> Result<(), String> {
         root: root.to_string_lossy().into_owned(),
         params,
         files,
+        scenes,
+        scene_reads: BTreeSet::new(),
+        invalid_scene_aliases: BTreeSet::new(),
         requests: BTreeMap::new(),
         keys: BTreeSet::new(),
         input: VecDeque::new(),
         capture: 0,
         polls: 0,
         directory_count: 0,
-        last_flag_count: 0,
+        revival_denials: 0,
+        last_flag_ids: Vec::new(),
         flags: BTreeMap::new(),
         display: abi::DisplayState {
             valid: 1,
@@ -689,6 +1092,7 @@ fn run() -> Result<(), String> {
         upload_count: 0,
         request_count: 0,
     });
+    check_controlled_revive(&mut fixture)?;
     // SAFETY: zero is valid for nullable callbacks/pointers and scalar POD fields.
     let mut host: abi::HostApi = unsafe { std::mem::zeroed() };
     host.magic = abi::ABI_MAGIC;
@@ -770,24 +1174,16 @@ fn run() -> Result<(), String> {
         sequence: 0,
         cpu: Duration::ZERO,
     };
-    let deadline = Instant::now() + Duration::from_secs(35);
-    while probe.fixture.directory_count == 0 {
-        probe.update()?;
-        if Instant::now() >= deadline {
-            return Err("real archive catalogue did not finish in 35 seconds".into());
-        }
-        std::thread::sleep(Duration::from_millis(2));
-    }
-    std::thread::sleep(Duration::from_millis(510));
-    probe.update()?;
+    probe.wait_catalog()?;
     println!(
-        "Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue={} rows, batch flags={}, file requests={}; save/flags/input/writes are controlled fixtures.",
-        probe.fixture.directory_count, probe.fixture.last_flag_count, probe.fixture.request_count
+        "Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue={} rows, unique completion flags={}, file requests={}, real scenes={:?}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.",
+        probe.fixture.directory_count,
+        probe.fixture.last_flag_ids.len(),
+        probe.fixture.request_count,
+        probe.fixture.scene_reads
     );
-    if probe.fixture.directory_count != 211 || probe.fixture.last_flag_count != 211 {
-        return Err("unexpectedly small production catalogue".into());
-    }
     probe.measure("compact")?;
+    probe.completion_counts()?;
     probe.hotkey(abi::parse_chord("="))?;
     for _ in 0..5 {
         probe.frame()?;
@@ -807,7 +1203,7 @@ fn run() -> Result<(), String> {
         "Full 500ms update with controlled batch flag reader: median={}us max={}us, ids={}, file requests={}",
         update_samples[5] / 1000,
         update_samples[9] / 1000,
-        probe.fixture.last_flag_count,
+        probe.fixture.last_flag_ids.len(),
         probe.fixture.request_count - requests_before
     );
     probe.frame()?;
@@ -878,14 +1274,12 @@ fn run() -> Result<(), String> {
         probe.frame()?;
     }
     probe.click(1000., 255.)?;
-    probe.query("Erdtree Burial Watchdog")?;
+    probe.query("Ancient Dragon Lansseax")?;
+    probe.refresh_flags(&[(1041520800, 0), (1037510800, 1)])?;
     for _ in 0..4 {
         probe.frame()?;
     }
-    probe.click(850., 377.)?;
-    for _ in 0..6 {
-        probe.frame()?;
-    }
+    probe.open_confirmation()?;
     probe.screenshot("boss-revival-reopened")?;
     probe.click(460., 524.)?;
     if !probe.fixture.writes.is_empty() {
@@ -895,13 +1289,34 @@ fn run() -> Result<(), String> {
     if probe.fixture.writes.len() != 1 {
         return Err("Revive confirmation did not issue exactly one update-side request".into());
     }
+    let (primary, extras) = &probe.fixture.writes[0];
+    let actual: Vec<_> = extras.iter().map(|w| (w.id, w.value)).collect();
+    // Exactly the original canonical recipe + canonical(false), with its
+    // already-reviewed early-kill clear moved to the core's true witness slot.
+    let expected = vec![
+        (1037510810, 0),
+        (1041520820, 0),
+        (1041522810, 0),
+        (1041520800, 0),
+    ];
+    if *primary != 1037510800
+        || actual != expected
+        || [1037510800, 1037510810, 1041520820, 1041522810, 1041520800]
+            .iter()
+            .any(|id| probe.fixture.flags.get(id) != Some(&0))
+    {
+        return Err(format!(
+            "early-only Lansseax revival changed the reviewed target/value set or failed to clear it: primary={primary}, extras={actual:?}"
+        ));
+    }
     println!(
-        "Cancel preserved flags; explicit Revive button queued exactly one update-side controlled request: primary={}, auxiliary writes={}",
+        "PASS: Cancel preserved flags; actual Lansseax search + early-only completion allowed one explicit update-side revival with a true early witness and the exact original five cleared targets: primary={}, auxiliary writes={}",
         probe.fixture.writes[0].0,
         probe.fixture.writes[0].1.len()
     );
     probe.frame()?;
     probe.screenshot("boss-revived")?;
+    probe.reject_changed_confirmations(&host)?;
     probe
         .fixture
         .input
@@ -957,7 +1372,7 @@ fn run() -> Result<(), String> {
         return Err("renderer drain timed out".into());
     }
     println!(
-        "PASS: actual Boss DLL + real archived parsers + WARP pixels/mesh/font rendering; search/settings persistence/cancel/explicit revival confirmation/wheel/full-map/loading/hide/reset/repeated-sequence contracts. Save/flags/writes are controlled fixtures; no live game/FPS claim. Scratch {}",
+        "PASS: actual Boss DLL + real archived PARAM/EMEVD/FMG/MSB parsers + WARP pixels/mesh/font rendering; 207 rows/208 unique completion flags, OR/count boundaries, strict controlled revival, search/settings persistence/cancel/explicit early-witness confirmation/unknown/context rejection/wheel/full-map/loading/hide/reset/repeated-sequence contracts. Save/flags/writes are controlled fixtures; no live game/FPS or mount-priority claim. Scratch {}",
         root.display()
     );
     Ok(())

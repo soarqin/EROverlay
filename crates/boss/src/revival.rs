@@ -52,6 +52,10 @@ impl<'de> Deserialize<'de> for Recipes {
 pub struct Revival {
     recipes: BTreeMap<u32, Vec<FlagWrite>>,
 }
+pub struct Operation {
+    pub primary: u32,
+    pub extras: Vec<FlagWrite>,
+}
 impl Revival {
     pub fn load(root: &Path) -> Result<Self, String> {
         let path = root.join("configs/boss-revival.json");
@@ -100,6 +104,48 @@ impl Revival {
     pub fn recipe(&self, flag: u32) -> Option<&[FlagWrite]> {
         self.recipes.get(&flag).map(Vec::as_slice)
     }
+    pub fn supports(&self, canonical: u32, completion: &[u32]) -> bool {
+        let Some(recipe) = self.recipe(canonical) else {
+            return false;
+        };
+        !completion.is_empty()
+            && completion.contains(&canonical)
+            && completion.iter().all(|flag| {
+                *flag == canonical || recipe.iter().any(|w| w.id == *flag && w.value == 0)
+            })
+    }
+    /// Keep the reviewed target/value set. The core still requires a currently
+    /// true completion witness, checks every address, and clears that bit last.
+    pub fn operation(
+        &self,
+        canonical: u32,
+        completion: &[u32],
+        values: &[u8],
+    ) -> Option<Operation> {
+        if completion.len() != values.len() || !self.supports(canonical, completion) {
+            return None;
+        }
+        let completed = |flag| {
+            completion
+                .iter()
+                .position(|id| *id == flag)
+                .is_some_and(|i| values[i] == 1)
+        };
+        let primary = if completed(canonical) {
+            canonical
+        } else {
+            *completion.iter().find(|id| completed(**id))?
+        };
+        let mut extras = self.recipe(canonical)?.to_vec();
+        if primary != canonical {
+            extras.retain(|w| w.id != primary);
+            extras.push(FlagWrite {
+                id: canonical,
+                value: 0,
+            });
+        }
+        Some(Operation { primary, extras })
+    }
 }
 #[cfg(test)]
 mod tests {
@@ -124,5 +170,55 @@ mod tests {
                 .collect::<Vec<_>>(),
             [11, 10, 9]
         );
+    }
+    #[test]
+    fn alternative_completion_uses_the_same_reviewed_writes_and_a_true_witness() {
+        let r = Revival::parse(br#"{"40":[30,31,42,43],"80":[81,{"flag_id":82,"value":true}]}"#)
+            .unwrap();
+        let direct = r.operation(40, &[40, 30], &[1, 0]).unwrap();
+        assert_eq!(direct.primary, 40);
+        assert_eq!(
+            direct
+                .extras
+                .iter()
+                .map(|w| (w.id, w.value))
+                .collect::<Vec<_>>(),
+            r.recipe(40)
+                .unwrap()
+                .iter()
+                .map(|w| (w.id, w.value))
+                .collect::<Vec<_>>()
+        );
+        let alternate = r.operation(40, &[40, 30], &[0, 1]).unwrap();
+        assert_eq!(alternate.primary, 30);
+        assert_eq!(
+            alternate
+                .extras
+                .iter()
+                .map(|w| (w.id, w.value))
+                .collect::<Vec<_>>(),
+            [(31, 0), (42, 0), (43, 0), (40, 0)]
+        );
+        let mut original = r
+            .recipe(40)
+            .unwrap()
+            .iter()
+            .map(|w| (w.id, w.value))
+            .chain([(40, 0)])
+            .collect::<Vec<_>>();
+        let mut actual = alternate
+            .extras
+            .iter()
+            .map(|w| (w.id, w.value))
+            .chain([(alternate.primary, 0)])
+            .collect::<Vec<_>>();
+        original.sort_unstable();
+        actual.sort_unstable();
+        assert_eq!(actual, original);
+        assert!(r.operation(40, &[40, 30], &[0, 2]).is_none());
+        assert!(r.operation(40, &[40, 30], &[0, 0]).is_none());
+        assert!(!r.supports(40, &[40, 32]));
+        assert!(!r.supports(80, &[80, 82]));
+        assert!(r.operation(40, &[40, 30], &[1]).is_none());
     }
 }

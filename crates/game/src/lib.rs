@@ -4,6 +4,7 @@ pub mod assets;
 pub mod boss_events;
 pub mod boss_params;
 pub mod boss_runtime;
+pub mod boss_scene;
 mod files;
 mod flags;
 mod language;
