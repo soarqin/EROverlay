@@ -4,6 +4,8 @@
 
 本页保留首交测量。`bab88d3` 之后的四项验收修复及复测见 [Boss 验收修复](boss-review-2026-11-02.md)，旗标读取的新旧数字见 [性能记录](boss-performance.md)。
 
+数量说明已由 [战斗记录核对](boss-battle-count-2026-11-02.md) 补正：本页的 211 是静态事件候选数，含已确认的无实体残留，不能解释为真实可玩战斗数；旧 207 逐项对应不代表范围完全等价。
+
 ## 来源与交付范围
 
 注册工作树为 `E:/Projects/EROverlay/.cindy-worktrees/gentle-darwin`，开发分支为 `cindy/gentle-darwin`。宿主最初创建的干净工作树位于 C++ 提交 `afab7e14db2b62ae0bede980d5d0c96634321350`；确认没有用户修改或独有提交后，在此隔离目录切换到已验收 Rust 基线 `765fdcd4d1f12a68563faec262be2ef19848102c`，然后开始实现。没有修改父工作树、`master`、`rust-rewrite` 或既有验收标签。

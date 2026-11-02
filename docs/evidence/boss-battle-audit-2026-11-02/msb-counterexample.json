@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "reader_sha256": "8252eb8bdbb0ed88bb26691e6c1de5f071ef388bd31eb1834e39126ccb9a1805",
+  "scene": "m60_38_54_00.msb",
+  "scene_sha256": "cb6dbadee95f79ac9eb0876d340a7a9b74657d85bd6fc5068524f3e62d08d9fc",
+  "enemies": 47,
+  "dummy_enemies": 65,
+  "requested_entities": [
+    1038540800
+  ],
+  "selected_entities": [],
+  "model_query": "c4680",
+  "model_matches": 0,
+  "limit": "Scene membership only; does not prove quest reachability or observed gameplay."
+}

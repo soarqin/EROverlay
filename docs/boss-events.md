@@ -7,6 +7,12 @@ does not establish that the character has a named bottom-of-screen health bar.
 The PARAM and current-language text readers are described in
 [Boss data sources](boss-data-sources.md).
 
+The [complete battle-count audit](boss-battle-count-2026-11-02.md) supersedes
+earlier references to 211 playable battles: 211 is the static candidate count.
+One enabled common-event template references an entity absent from the archived
+scene. Early dragon routes and Patches' later rematch also require explicit
+completion/scope semantics; merging simultaneous bars does not yield 207.
+
 ## Event contract
 
 `crates/game/src/boss_events.rs` accepts decompressed PC EMEVD v205 bytes. It

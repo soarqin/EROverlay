@@ -4,7 +4,7 @@
 
 Boss 从游戏 Param、具名大生命条事件和当前语言文本生成目录，保留地区进度、筛选、死亡数、游戏时间、挑战记录及可选复活。默认按 `=` 打开或关闭完整列表。额外复活旗标仍在外部配置，发行包不再包含旧多语言名单。操作与限制见 [Boss 说明](crates/boss/README.md)、[数据来源](docs/boss-data-sources.md) 和 [事件证据](docs/boss-events.md)。
 
-核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；Boss 的首交结果见 [Boss 验证记录](docs/boss-validation.md)，后续修复见 [Boss 验收修复](docs/boss-review-2026-11-02.md)。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
+核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；Boss 的首交结果见 [Boss 验证记录](docs/boss-validation.md)，后续修复见 [Boss 验收修复](docs/boss-review-2026-11-02.md)。[战斗数量核对](docs/boss-battle-count-2026-11-02.md) 给出完整旧 207 项映射：当前 211 为静态候选，含一个已确认的残留模板，不能当作 211 场真实战斗。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
 
 DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)：Minimap 移除未使用的等宽和 emoji 字库，保留比例字体后备、自定义字体及系统语言字体。
 

@@ -455,6 +455,47 @@ fn place_text<'a>(
         .find_map(|t| text.place(t.id))
 }
 
+struct EncounterGroup<'a> {
+    flag: u32,
+    members: Vec<&'a BossDisplay>,
+}
+
+fn encounter_groups(displays: &[BossDisplay]) -> Vec<EncounterGroup<'_>> {
+    let mut grouped: BTreeMap<(u32, u32, u8, u32), Vec<&BossDisplay>> = BTreeMap::new();
+    for display in displays {
+        // An exact scoped entity resolves duplicate slot-switch helpers.
+        let resolved: BTreeSet<_> = displays
+            .iter()
+            .filter(|d| {
+                d.map_id == display.map_id
+                    && d.runtime_variant == display.runtime_variant
+                    && d.entity_id == display.entity_id
+            })
+            .filter_map(|d| d.completion_flag)
+            .collect();
+        let flag = display
+            .completion_flag
+            .or_else(|| (resolved.len() == 1).then(|| *resolved.first().unwrap()));
+        grouped
+            .entry(if let Some(flag) = flag {
+                (flag, 0, 0, 0)
+            } else {
+                (
+                    0,
+                    display.map_id,
+                    display.runtime_variant,
+                    display.entity_id,
+                )
+            })
+            .or_default()
+            .push(display);
+    }
+    grouped
+        .into_iter()
+        .map(|((flag, ..), members)| EncounterGroup { flag, members })
+        .collect()
+}
+
 #[allow(clippy::too_many_arguments)]
 fn build_catalog(
     displays: &[BossDisplay],
@@ -482,41 +523,14 @@ fn build_catalog(
         .filter(|(_, v)| *v < 2)
         .map(|(id, v)| (id, v != 0))
         .collect();
-    let mut grouped: BTreeMap<(u32, u32, u8, u32), Vec<&BossDisplay>> = BTreeMap::new();
-    for display in displays {
-        // An exact entity match resolves duplicate slot-switch helpers. It
-        // never joins distinct entities merely because their IDs are close.
-        let resolved: BTreeSet<_> = displays
-            .iter()
-            .filter(|d| {
-                d.map_id == display.map_id
-                    && d.runtime_variant == display.runtime_variant
-                    && d.entity_id == display.entity_id
-            })
-            .filter_map(|d| d.completion_flag)
-            .collect();
-        let flag = display
-            .completion_flag
-            .or_else(|| (resolved.len() == 1).then(|| *resolved.first().unwrap()));
-        grouped
-            .entry(if let Some(flag) = flag {
-                (flag, 0, 0, 0)
-            } else {
-                // Entity numbers may be reused in another map or ceremony.
-                (
-                    0,
-                    display.map_id,
-                    display.runtime_variant,
-                    display.entity_id,
-                )
-            })
-            .or_default()
-            .push(display);
-    }
     let mut catalog = Catalog::default();
     let mut group_indices = BTreeMap::new();
     let mut group_order = BTreeMap::new();
-    for ((flag, ..), evidence) in grouped {
+    for EncounterGroup {
+        flag,
+        members: evidence,
+    } in encounter_groups(displays)
+    {
         let first = evidence[0];
         let area = areas
             .iter()
@@ -617,6 +631,10 @@ fn build_catalog(
 }
 
 #[cfg(test)]
+#[path = "data_audit.rs"]
+mod audit;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use eroverlay_abi as abi;
@@ -708,6 +726,42 @@ mod tests {
                 .iter()
                 .any(|r| r.flag == 0 && r.name == "NpcName#5")
         );
+    }
+
+    #[test]
+    fn shared_bars_and_phases_merge_but_independent_same_name_victories_do_not() {
+        let mut load = empty_loading();
+        let altus = u32::from_be_bytes([60, 41, 51, 0]);
+        let hinterland = u32::from_be_bytes([61, 50, 47, 0]);
+        let godfrey = u32::from_be_bytes([11, 5, 0, 0]);
+        load.displays = vec![
+            // Altus: two entities and identical names, one joint victory.
+            display(altus, 0, 1041510800, 903251600, Some(1041510800)),
+            display(altus, 0, 1041510801, 903251600, Some(1041510800)),
+            // Hinterland: even identical names and shared event operands must
+            // preserve its two independently persistent victories.
+            display(hinterland, 0, 2050470800, 906251600, Some(2050470800)),
+            display(hinterland, 0, 2050480860, 906251600, Some(2050480860)),
+            // Godfrey/Hoarah Loux: one bar changes name between phases.
+            display(godfrey, 0, 11050800, 904720000, Some(11050800)),
+            display(godfrey, 0, 11050800, 904720001, Some(11050800)),
+        ];
+        for member in &mut load.displays[2..4] {
+            member.guard_flags = vec![2050470800, 2050480860];
+            member.related_entities = vec![2050470800, 2050480860];
+        }
+        let catalog = load.catalog(host());
+        assert_eq!(catalog.rows.len(), 4);
+        assert_eq!(catalog.unknown_count, 0);
+        let names: BTreeMap<_, _> = catalog
+            .rows
+            .iter()
+            .map(|row| (row.flag, row.name.as_str()))
+            .collect();
+        assert_eq!(names[&1041510800], "NpcName#903251600");
+        assert_eq!(names[&2050470800], "NpcName#906251600");
+        assert_eq!(names[&2050480860], names[&2050470800]);
+        assert_eq!(names[&11050800], "NpcName#904720000 / NpcName#904720001");
     }
 
     // Small valid BND4/FMG files drive the production parser and file-job state

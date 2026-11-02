@@ -1,0 +1,4176 @@
+{
+  "schema_version": 1,
+  "source_commit": "8fb17bae4d18440104525f612d3b2febbaffeb7c",
+  "cpp_reader_commit": "afab7e14db2b62ae0bede980d5d0c96634321350",
+  "cpp_reader_sha256": "96e8a3c20240fa0924db0b26be80d7f8ef8ff22d48e25344d26e7c0292f9261c",
+  "scope_note": "Metadata and selected decoded functional instructions only. No original EMEVD/MSB/FMG bytes or full event dumps are included.",
+  "resources_sha256": {
+    "common_func.emevd": "8cb017e23aeb9c6850f7e42b6a52d9913d9043f0db1c6274b21e870aab3894c8",
+    "common.emevd": "aed6b1704a014f11011166a3354273c89dc483bca0e8c4a6882cd5609ae3218c",
+    "m60_34_50_00.emevd": "9c36814f45357ea0c5ce6f1d021fde86796d9f5f39f4811d74581d93c6b457e1",
+    "m60_34_42_00.emevd": "dc949c0b8a8001f3334a9d504e53f8b6dc3c0739b05102f9e10f3dca2a4a1d93",
+    "m60_37_51_00.emevd": "4502de3eef6c346b0085f3e1e4d2d07760dd871b33988cdceba24c5df2bd4228",
+    "m60_41_52_00.emevd": "634eb16658951b5e3bda2d9789a4b109b58db4249db1e95bb2202ece1c680eb1",
+    "m60_38_54_00.emevd": "b8043d5daf77d28b75e001d8ff0cf95ab9537225e3d571f845d8ed9a5322f41e",
+    "m60_36_54_00.emevd": "a9041282092ddc4ce013096a9ec0b3b551ed8ac785c7c79f76561585c7fedfb0",
+    "m60_41_50_00.emevd": "1b028801bbda9fa852bb63c096549fb0bb58e42e06a55a636da5bb71d9cefc81",
+    "m32_08_00_00.emevd": "eb7a3a4674b7700ca5b25d6ac9771ae04b6a592462812086903c46508d63fe06",
+    "m31_00_00_00.emevd": "1d132bb407d8d7bb0d3d2999077cfcf5cdb14f7c8476504f9b16f086bdbfa4d7"
+  },
+  "classifications": [
+    {
+      "flag": 1034500800,
+      "name_id": 904502601,
+      "entity": 1034500800,
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "relationship": "cross-map retreat encounter; late completion also resolves early flag",
+      "old_counterpart_flag": 1034420800,
+      "old_counterpart_entity": 1034420800,
+      "old_counterpart_map": "m60_34_42_00",
+      "old_counterpart_name_id": 904502602
+    },
+    {
+      "flag": 1037510800,
+      "name_id": 904510600,
+      "entity": 1037510800,
+      "map": "m60_37_51_00",
+      "runtime_variant": 0,
+      "relationship": "cross-map alternative kill route; retreat uses a different flag",
+      "retreat_flag": 1037510810,
+      "old_counterpart_flag": 1041520800,
+      "old_counterpart_entity": 1041520800,
+      "old_counterpart_map": "m60_41_52_00"
+    },
+    {
+      "flag": 1038540800,
+      "name_id": 904680601,
+      "entity": 1038540800,
+      "map": "m60_38_54_00",
+      "runtime_variant": 0,
+      "relationship": "initialized bar/defeat template without a scene enemy in the checked original MSBs"
+    },
+    {
+      "flag": 31000850,
+      "name_id": 130900,
+      "entity": 31000850,
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "relationship": "same arena, later quest-stage encounter; independent start/end paths",
+      "required_quest_stage_flag": 3691,
+      "old_counterpart_flag": 31000800,
+      "old_counterpart_entity": 31000800,
+      "old_counterpart_requires_quest_stage_flag": false
+    }
+  ],
+  "event_excerpts": [
+    {
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005870,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 9
+        }
+      ],
+      "instructions": [
+        {
+          "index": 1,
+          "opcode": "4[9]",
+          "name": "IF Character AI State",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "AI State",
+              3
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[33]",
+          "name": "IF Field Battle BGM Active",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "NPC Threat Level",
+              25
+            ],
+            [
+              "Is Active",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              9000
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904502601
+            ]
+          ]
+        },
+        {
+          "index": 19,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -2
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 20,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -2
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              9000
+            ]
+          ]
+        },
+        {
+          "index": 28,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              0
+            ],
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904502601
+            ]
+          ]
+        },
+        {
+          "index": 37,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904502601
+            ]
+          ]
+        },
+        {
+          "index": 53,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              0
+            ],
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904502601
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 10
+        }
+      ],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 21,
+          "opcode": "2003[12]",
+          "name": "Handle Boss Defeat and Display Banner",
+          "arguments": [
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Banner Type",
+              17
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "source": "m60_34_50_00.emevd",
+      "event": 1034502801,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 12
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[2]",
+          "name": "END IF Event Flag",
+          "arguments": [
+            [
+              "Execution End Type",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "2004[12]",
+          "name": "Set Character Immortality",
+          "arguments": [
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "4[2]",
+          "name": "IF Character HP Ratio",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "Comparison Type",
+              3
+            ],
+            [
+              "Target HP Ratio",
+              0.5
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "2004[15]",
+          "name": "Set Character Invincibility",
+          "arguments": [
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 11,
+          "opcode": "2003[18]",
+          "name": "Force Animation Playback",
+          "arguments": [
+            [
+              "Entity ID",
+              1034500800
+            ],
+            [
+              "Animation ID",
+              20009
+            ],
+            [
+              "Should Loop",
+              0
+            ],
+            [
+              "Should Wait For Completion",
+              0
+            ],
+            [
+              "Ignore Wait For Transition",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "source": "m60_34_50_00.emevd",
+      "event": 1034502804,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 13
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[2]",
+          "name": "END IF Event Flag",
+          "arguments": [
+            [
+              "Execution End Type",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "4[2]",
+          "name": "IF Character HP Ratio",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "Comparison Type",
+              3
+            ],
+            [
+              "Target HP Ratio",
+              0.5
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "4[5]",
+          "name": "IF Character Has SpEffect",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Target Entity ID",
+              1034500800
+            ],
+            [
+              "SpEffect ID",
+              10207
+            ],
+            [
+              "Should Have",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "1001[0]",
+          "name": "WAIT Fixed Time (Seconds)",
+          "arguments": [
+            [
+              "Number Of Seconds",
+              4.699999809265137
+            ]
+          ]
+        },
+        {
+          "index": 5,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 6,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1034500800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_50_00",
+      "runtime_variant": 0,
+      "source": "m60_34_50_00.emevd",
+      "event": 1034502802,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 14
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[2]",
+          "name": "END IF Event Flag",
+          "arguments": [
+            [
+              "Execution End Type",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034420800
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1034500800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034500800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_42_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005870,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 1
+        }
+      ],
+      "instructions": [
+        {
+          "index": 12,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1034420800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904502602
+            ]
+          ]
+        },
+        {
+          "index": 37,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1034420800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904502602
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_34_42_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 2
+        }
+      ],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034420800
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1034420800
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1034420800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1034420800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_37_51_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005870,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 2
+        }
+      ],
+      "instructions": [
+        {
+          "index": 1,
+          "opcode": "4[9]",
+          "name": "IF Character AI State",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Target Entity ID",
+              1037510800
+            ],
+            [
+              "AI State",
+              3
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[33]",
+          "name": "IF Field Battle BGM Active",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "NPC Threat Level",
+              28
+            ],
+            [
+              "Is Active",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              9000
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1037510800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        },
+        {
+          "index": 28,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              0
+            ],
+            [
+              "Entity ID",
+              1037510800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        },
+        {
+          "index": 37,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1037510800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        },
+        {
+          "index": 53,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              0
+            ],
+            [
+              "Entity ID",
+              1037510800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_37_51_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 3
+        }
+      ],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510800
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1037510800
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1037510800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_37_51_00",
+      "runtime_variant": 0,
+      "source": "m60_37_51_00.emevd",
+      "event": 1037512350,
+      "constructor_chain": [
+        {
+          "event": 50,
+          "instruction": 0
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510810
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510800
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041520820
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1037510800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        },
+        {
+          "index": 6,
+          "opcode": "3[2]",
+          "name": "IF In/Outside Area",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Desired State",
+              1
+            ],
+            [
+              "Target Entity ID",
+              10000
+            ],
+            [
+              "Area Entity ID",
+              1037512300
+            ],
+            [
+              "Number of Target Characters",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1037510800
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 14,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1037510800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_37_51_00",
+      "runtime_variant": 0,
+      "source": "m60_37_51_00.emevd",
+      "event": 1037512301,
+      "constructor_chain": [
+        {
+          "event": 50,
+          "instruction": 1
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[2]",
+          "name": "END IF Event Flag",
+          "arguments": [
+            [
+              "Execution End Type",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510810
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "4[5]",
+          "name": "IF Character Has SpEffect",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1037510800
+            ],
+            [
+              "SpEffect ID",
+              14887
+            ],
+            [
+              "Should Have",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510810
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1037510800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "2004[39]",
+          "name": "Change Character Collision State",
+          "arguments": [
+            [
+              "Entity ID",
+              1037510800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_41_52_00",
+      "runtime_variant": 0,
+      "source": "m60_41_52_00.emevd",
+      "event": 1041522320,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 1
+        }
+      ],
+      "instructions": [
+        {
+          "index": 12,
+          "opcode": "1003[1]",
+          "name": "SKIP IF Event Flag",
+          "arguments": [
+            [
+              "Number Of Skipped Lines",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510810
+            ]
+          ]
+        },
+        {
+          "index": 13,
+          "opcode": "2004[8]",
+          "name": "Set SpEffect",
+          "arguments": [
+            [
+              "Entity ID",
+              1041520800
+            ],
+            [
+              "SpEffect ID",
+              4401
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1041520800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        },
+        {
+          "index": 39,
+          "opcode": "1003[1]",
+          "name": "SKIP IF Event Flag",
+          "arguments": [
+            [
+              "Number Of Skipped Lines",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510810
+            ]
+          ]
+        },
+        {
+          "index": 40,
+          "opcode": "2004[8]",
+          "name": "Set SpEffect",
+          "arguments": [
+            [
+              "Entity ID",
+              1041520800
+            ],
+            [
+              "SpEffect ID",
+              4401
+            ]
+          ]
+        },
+        {
+          "index": 42,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1041520800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904510600
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_41_52_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 2
+        }
+      ],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041520800
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1041520800
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1041520800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041520800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_41_52_00",
+      "runtime_variant": 0,
+      "source": "m60_41_52_00.emevd",
+      "event": 1041522300,
+      "constructor_chain": [
+        {
+          "event": 50,
+          "instruction": 0
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041520800
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1037510800
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041522810
+            ]
+          ]
+        },
+        {
+          "index": 6,
+          "opcode": "3[2]",
+          "name": "IF In/Outside Area",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Desired State",
+              1
+            ],
+            [
+              "Target Entity ID",
+              10000
+            ],
+            [
+              "Area Entity ID",
+              1041522800
+            ],
+            [
+              "Number of Target Characters",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 8,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041520820
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1041522810
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 11,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1041520800
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 17,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              1041520800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        },
+        {
+          "index": 18,
+          "opcode": "2004[39]",
+          "name": "Change Character Collision State",
+          "arguments": [
+            [
+              "Entity ID",
+              1041520800
+            ],
+            [
+              "Disabled/Enabled",
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_38_54_00",
+      "runtime_variant": 0,
+      "source": "m60_38_54_00.emevd",
+      "event": 0,
+      "constructor_chain": [],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "2000[6]",
+          "name": "Initialize Common Event",
+          "arguments": [
+            [
+              "Unknown",
+              0
+            ],
+            [
+              "Event ID",
+              90005870
+            ],
+            [
+              "X0_4",
+              1038540800
+            ],
+            [
+              "X4_4",
+              904680601
+            ],
+            [
+              "X8_4",
+              19
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "2000[6]",
+          "name": "Initialize Common Event",
+          "arguments": [
+            [
+              "Unknown",
+              0
+            ],
+            [
+              "Event ID",
+              90005860
+            ],
+            [
+              "X0_4",
+              1038540800
+            ],
+            [
+              "X4_4",
+              1038540800
+            ],
+            [
+              "X8_4",
+              1038540800
+            ],
+            [
+              "X12_4",
+              0
+            ],
+            [
+              "X16_4",
+              0
+            ],
+            [
+              "X20_4",
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_38_54_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005870,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 2
+        }
+      ],
+      "instructions": [
+        {
+          "index": 1,
+          "opcode": "4[9]",
+          "name": "IF Character AI State",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Target Entity ID",
+              1038540800
+            ],
+            [
+              "AI State",
+              3
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[33]",
+          "name": "IF Field Battle BGM Active",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "NPC Threat Level",
+              19
+            ],
+            [
+              "Is Active",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 3,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              9000
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1038540800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              904680601
+            ]
+          ]
+        },
+        {
+          "index": 37,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              1038540800
+            ],
+            [
+              "Slot Number",
+              1
+            ],
+            [
+              "Name ID",
+              904680601
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m60_38_54_00",
+      "runtime_variant": 0,
+      "source": "common_func.emevd",
+      "event": 90005860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 3
+        }
+      ],
+      "instructions": [
+        {
+          "index": 2,
+          "opcode": "1003[101]",
+          "name": "GOTO IF Event Flag",
+          "arguments": [
+            [
+              "Label",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1038540800
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1038540800
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              1038540800
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1038540800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 29,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              1038540800
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "source": "m31_00_00_00.emevd",
+      "event": 31002810,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 2
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000800
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3691
+            ]
+          ]
+        },
+        {
+          "index": 29,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              31000800
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              130900
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "source": "m31_00_00_00.emevd",
+      "event": 31002850,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 7
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3691
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "4[14]",
+          "name": "IF Character HP Value",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Target Entity ID",
+              31000850
+            ],
+            [
+              "Comparison Type",
+              5
+            ],
+            [
+              "Target HP",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "4[0]",
+          "name": "IF Character Dead/Alive",
+          "arguments": [
+            [
+              "Result Condition Group",
+              2
+            ],
+            [
+              "Target Entity ID",
+              31000850
+            ],
+            [
+              "Desired Life State",
+              1
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 14,
+          "opcode": "2003[69]",
+          "name": "Set Network-Connected Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 15,
+          "opcode": "2003[12]",
+          "name": "Handle Boss Defeat and Display Banner",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Banner Type",
+              18
+            ]
+          ]
+        },
+        {
+          "index": 16,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "source": "m31_00_00_00.emevd",
+      "event": 31002860,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 8
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3691
+            ]
+          ]
+        },
+        {
+          "index": 8,
+          "opcode": "1003[1]",
+          "name": "SKIP IF Event Flag",
+          "arguments": [
+            [
+              "Number Of Skipped Lines",
+              1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 19,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              2
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31002855
+            ]
+          ]
+        },
+        {
+          "index": 20,
+          "opcode": "3[2]",
+          "name": "IF In/Outside Area",
+          "arguments": [
+            [
+              "Result Condition Group",
+              2
+            ],
+            [
+              "Desired State",
+              1
+            ],
+            [
+              "Target Entity ID",
+              10000
+            ],
+            [
+              "Area Entity ID",
+              31002800
+            ],
+            [
+              "Number of Target Characters",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 26,
+          "opcode": "2004[2]",
+          "name": "Set Character Team Type",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Team Type",
+              6
+            ]
+          ]
+        },
+        {
+          "index": 27,
+          "opcode": "2004[1]",
+          "name": "Set Character AI State",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 29,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              130900
+            ]
+          ]
+        },
+        {
+          "index": 30,
+          "opcode": "2003[69]",
+          "name": "Set Network-Connected Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000861
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "source": "m31_00_00_00.emevd",
+      "event": 31002861,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 10
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3691
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31009889
+            ]
+          ]
+        },
+        {
+          "index": 5,
+          "opcode": "2004[2]",
+          "name": "Set Character Team Type",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Team Type",
+              26
+            ]
+          ]
+        },
+        {
+          "index": 6,
+          "opcode": "3[26]",
+          "name": "IF Player Is In World Type",
+          "arguments": [
+            [
+              "Result Condition Group",
+              2
+            ],
+            [
+              "World Type",
+              0
+            ]
+          ]
+        },
+        {
+          "index": 7,
+          "opcode": "4[5]",
+          "name": "IF Character Has SpEffect",
+          "arguments": [
+            [
+              "Result Condition Group",
+              2
+            ],
+            [
+              "Target Entity ID",
+              10000
+            ],
+            [
+              "SpEffect ID",
+              9646
+            ],
+            [
+              "Should Have",
+              0
+            ],
+            [
+              "Comparison Type",
+              0
+            ],
+            [
+              "Number of Target Characters",
+              1.0
+            ]
+          ]
+        },
+        {
+          "index": 10,
+          "opcode": "0[0]",
+          "name": "IF Condition Group",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Desired Condition Group State",
+              1
+            ],
+            [
+              "Target Condition Group",
+              -2
+            ]
+          ]
+        },
+        {
+          "index": 11,
+          "opcode": "2003[69]",
+          "name": "Set Network-Connected Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 13,
+          "opcode": "2003[12]",
+          "name": "Handle Boss Defeat and Display Banner",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Banner Type",
+              18
+            ]
+          ]
+        },
+        {
+          "index": 14,
+          "opcode": "2003[66]",
+          "name": "Set Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "map": "m31_00_00_00",
+      "runtime_variant": 0,
+      "source": "m31_00_00_00.emevd",
+      "event": 31002863,
+      "constructor_chain": [
+        {
+          "event": 0,
+          "instruction": 11
+        }
+      ],
+      "instructions": [
+        {
+          "index": 0,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000850
+            ]
+          ]
+        },
+        {
+          "index": 1,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              1
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3683
+            ]
+          ]
+        },
+        {
+          "index": 2,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              -1
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              3691
+            ]
+          ]
+        },
+        {
+          "index": 4,
+          "opcode": "3[0]",
+          "name": "IF Event Flag",
+          "arguments": [
+            [
+              "Result Condition Group",
+              0
+            ],
+            [
+              "Desired Flag State",
+              2
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31008523
+            ]
+          ]
+        },
+        {
+          "index": 5,
+          "opcode": "1003[2]",
+          "name": "END IF Event Flag",
+          "arguments": [
+            [
+              "Execution End Type",
+              0
+            ],
+            [
+              "Desired Flag State",
+              0
+            ],
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31008871
+            ]
+          ]
+        },
+        {
+          "index": 6,
+          "opcode": "2004[5]",
+          "name": "Change Character Enable State",
+          "arguments": [
+            [
+              "Character Entity ID",
+              31000850
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 8,
+          "opcode": "2004[2]",
+          "name": "Set Character Team Type",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Team Type",
+              6
+            ]
+          ]
+        },
+        {
+          "index": 9,
+          "opcode": "2004[1]",
+          "name": "Set Character AI State",
+          "arguments": [
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Disabled/Enabled",
+              1
+            ]
+          ]
+        },
+        {
+          "index": 12,
+          "opcode": "2003[11]",
+          "name": "Display Boss Health Bar",
+          "arguments": [
+            [
+              "Disabled/Enabled",
+              1
+            ],
+            [
+              "Entity ID",
+              31000850
+            ],
+            [
+              "Slot Number",
+              0
+            ],
+            [
+              "Name ID",
+              130900
+            ]
+          ]
+        },
+        {
+          "index": 13,
+          "opcode": "2003[69]",
+          "name": "Set Network-Connected Event Flag",
+          "arguments": [
+            [
+              "Target Event Flag Type",
+              0
+            ],
+            [
+              "Target Event Flag ID",
+              31000861
+            ],
+            [
+              "Desired Flag State",
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "global_write_scan": {
+    "resource_count": 588,
+    "constructed_instances": 16664,
+    "write_opcodes": [
+      "2003[66]",
+      "2003[69]",
+      "2003[22]",
+      "2003[63]"
+    ],
+    "target_writes": [
+      {
+        "map": "m31_00_00_00",
+        "event": 31002800,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002800,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 1
+          }
+        ],
+        "writes": [
+          {
+            "index": 14,
+            "opcode": 69,
+            "flag": 31000800,
+            "value": 1
+          },
+          {
+            "index": 16,
+            "opcode": 66,
+            "flag": 31000800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m31_00_00_00",
+        "event": 31002810,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002810,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 2
+          }
+        ],
+        "writes": [
+          {
+            "index": 9,
+            "opcode": 66,
+            "flag": 31000800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m31_00_00_00",
+        "event": 31002811,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002811,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 4
+          }
+        ],
+        "writes": [
+          {
+            "index": 11,
+            "opcode": 69,
+            "flag": 31000800,
+            "value": 1
+          },
+          {
+            "index": 14,
+            "opcode": 66,
+            "flag": 31000800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m31_00_00_00",
+        "event": 31002850,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002850,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 7
+          }
+        ],
+        "writes": [
+          {
+            "index": 14,
+            "opcode": 69,
+            "flag": 31000850,
+            "value": 1
+          },
+          {
+            "index": 16,
+            "opcode": 66,
+            "flag": 31000850,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m31_00_00_00",
+        "event": 31002860,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002860,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 8
+          }
+        ],
+        "writes": [
+          {
+            "index": 9,
+            "opcode": 66,
+            "flag": 31000850,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m31_00_00_00",
+        "event": 31002861,
+        "source_file": "m31_00_00_00.emevd",
+        "slot": 0,
+        "completion_flag": 31002861,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 10
+          }
+        ],
+        "writes": [
+          {
+            "index": 11,
+            "opcode": 69,
+            "flag": 31000850,
+            "value": 1
+          },
+          {
+            "index": 14,
+            "opcode": 66,
+            "flag": 31000850,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_34_42_00",
+        "event": 90005860,
+        "source_file": "common_func.emevd",
+        "slot": -1,
+        "completion_flag": 1034425001,
+        "runtime_variant": 0,
+        "parameters": "4002a83d000000004002a83d010000003476000000000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 2
+          }
+        ],
+        "writes": [
+          {
+            "index": 27,
+            "opcode": 66,
+            "flag": 1034420800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_34_50_00",
+        "event": 90005860,
+        "source_file": "common_func.emevd",
+        "slot": -1,
+        "completion_flag": 1034505006,
+        "runtime_variant": 0,
+        "parameters": "c03aa93d00000000c03aa93d010000000000000000000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 10
+          }
+        ],
+        "writes": [
+          {
+            "index": 27,
+            "opcode": 66,
+            "flag": 1034500800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_34_50_00",
+        "event": 1034502804,
+        "source_file": "m60_34_50_00.emevd",
+        "slot": 0,
+        "completion_flag": 1034502804,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 13
+          }
+        ],
+        "writes": [
+          {
+            "index": 5,
+            "opcode": 66,
+            "flag": 1034500800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_34_50_00",
+        "event": 1034502802,
+        "source_file": "m60_34_50_00.emevd",
+        "slot": 0,
+        "completion_flag": 1034502802,
+        "runtime_variant": 0,
+        "parameters": "00000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 14
+          }
+        ],
+        "writes": [
+          {
+            "index": 4,
+            "opcode": 66,
+            "flag": 1034500800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_37_51_00",
+        "event": 90005860,
+        "source_file": "common_func.emevd",
+        "slot": -1,
+        "completion_flag": 1037515002,
+        "runtime_variant": 0,
+        "parameters": "9028d73d000000009028d73d010000005c76000000000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 3
+          }
+        ],
+        "writes": [
+          {
+            "index": 27,
+            "opcode": 66,
+            "flag": 1037510800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_37_51_00",
+        "event": 1037512301,
+        "source_file": "m60_37_51_00.emevd",
+        "slot": 0,
+        "completion_flag": 1037512301,
+        "runtime_variant": 0,
+        "parameters": "9028d73d",
+        "callers": [
+          {
+            "event": 50,
+            "instruction": 1
+          }
+        ],
+        "writes": [
+          {
+            "index": 2,
+            "opcode": 66,
+            "flag": 1037510810,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_38_54_00",
+        "event": 90005860,
+        "source_file": "common_func.emevd",
+        "slot": -1,
+        "completion_flag": 1038545003,
+        "runtime_variant": 0,
+        "parameters": "00e0e63d00e0e63d00e0e63d000000000000000000000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 3
+          }
+        ],
+        "writes": [
+          {
+            "index": 27,
+            "opcode": 66,
+            "flag": 1038540800,
+            "value": 1
+          },
+          {
+            "index": 29,
+            "opcode": 66,
+            "flag": 1038540800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_41_52_00",
+        "event": 90005860,
+        "source_file": "common_func.emevd",
+        "slot": -1,
+        "completion_flag": 1041525000,
+        "runtime_variant": 0,
+        "parameters": "a058143e00000000a058143e010000005c76000000000000",
+        "callers": [
+          {
+            "event": 0,
+            "instruction": 2
+          }
+        ],
+        "writes": [
+          {
+            "index": 27,
+            "opcode": 66,
+            "flag": 1041520800,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "map": "m60_41_52_00",
+        "event": 1041522300,
+        "source_file": "m60_41_52_00.emevd",
+        "slot": 0,
+        "completion_flag": 1041522300,
+        "runtime_variant": 0,
+        "parameters": "a058143e",
+        "callers": [
+          {
+            "event": 50,
+            "instruction": 0
+          }
+        ],
+        "writes": [
+          {
+            "index": 8,
+            "opcode": 66,
+            "flag": 1041520820,
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  "msb_sources_and_entities": [
+    {
+      "map": "m60_34_50_00",
+      "enemies": 56,
+      "dummyEnemies": 4,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4502_9000",
+          "entity": 1034500800,
+          "model": "c4502",
+          "npc": 45021920,
+          "think": 45020920,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            22.054,
+            453.149,
+            59.607
+          ],
+          "groups": [
+            1034505100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_34_50_00.msb.dcx",
+      "raw_sha256": "da93cb7b170713fb924f2f655ecfbcfcc262749c845be5845df54ba126499bbe",
+      "compressed_sha256": "5c9efc92e66077b3086b4104e7d630b170bc3b2b67c79bb2548fc058f49ab1c2"
+    },
+    {
+      "map": "m60_34_42_00",
+      "enemies": 117,
+      "dummyEnemies": 28,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4502_9000",
+          "entity": 1034420800,
+          "model": "c4502",
+          "npc": 45021922,
+          "think": 45020922,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            128.241,
+            401.772,
+            -29.929
+          ],
+          "groups": [
+            1034425102,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_34_42_00.msb.dcx",
+      "raw_sha256": "d909dcb0b37280973bb8fb0cd8d989421209b1a4f8b7ab77f35da2db66dcac02",
+      "compressed_sha256": "bc542f47fb5ac49b68ae7486a46a9aa06f705ce538ad3b15c4776cd36ec012fb"
+    },
+    {
+      "map": "m60_37_51_00",
+      "enemies": 52,
+      "dummyEnemies": 0,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4510_9000",
+          "entity": 1037510800,
+          "model": "c4510",
+          "npc": 45102030,
+          "think": 45100930,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            110.761,
+            712.576,
+            49.405
+          ],
+          "groups": [
+            1037515100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_37_51_00.msb.dcx",
+      "raw_sha256": "b61587d195debf8dc51e08cd7d13aa90e46d263695ab439d41e6c86f75367ec3",
+      "compressed_sha256": "0511f7290d7728b9c7f6eff3f490d18af1fadbd3efee0bedc00b38e88b9d948e"
+    },
+    {
+      "map": "m60_41_52_00",
+      "enemies": 63,
+      "dummyEnemies": 0,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4510_9000",
+          "entity": 1041520800,
+          "model": "c4510",
+          "npc": 45102030,
+          "think": 45100900,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            46.598,
+            924.089,
+            -88.379
+          ],
+          "groups": [
+            1041525100,
+            1041525800,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_41_52_00.msb.dcx",
+      "raw_sha256": "8ab59f8e1fbe4b4319442b0e42323a58054a692a0bb9903d3aff66a496d90c9f",
+      "compressed_sha256": "c8cb00fa53a93f23f366a60a1d85c7af6e2ac5cdb05661055196a7b783413de6"
+    },
+    {
+      "map": "m60_38_54_00",
+      "enemies": 47,
+      "dummyEnemies": 65,
+      "selected": [],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_38_54_00.msb.dcx",
+      "raw_sha256": "cb6dbadee95f79ac9eb0876d340a7a9b74657d85bd6fc5068524f3e62d08d9fc",
+      "compressed_sha256": "a6ce03782e9f8b7081adb3fde646c2280f7be34e8435f47bcd3bf75954742b36"
+    },
+    {
+      "map": "m60_36_54_00",
+      "enemies": 30,
+      "dummyEnemies": 9,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4680_9000",
+          "entity": 1036540800,
+          "model": "c4680",
+          "npc": 46800032,
+          "think": 46800930,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            94.844,
+            1047.502,
+            -36.205
+          ],
+          "groups": [
+            1036545100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_36_54_00.msb.dcx",
+      "raw_sha256": "55a0750bda341f6d0912ac5c3caff5e715cd93f66417ed2a4c602611ab9da2ab",
+      "compressed_sha256": "7e034e01b722babc3ad3f61afe23e453d7170b35489e836715532ceb5b1bae2d"
+    },
+    {
+      "map": "m60_41_50_00",
+      "enemies": 13,
+      "dummyEnemies": 0,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c4680_9001",
+          "entity": 1041500800,
+          "model": "c4680",
+          "npc": 46801930,
+          "think": 46800930,
+          "charInit": -1,
+          "talk": 0,
+          "gameEditionDisable": 0,
+          "position": [
+            42.838,
+            834.146,
+            109.239
+          ],
+          "groups": [
+            1041505100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m60_41_50_00.msb.dcx",
+      "raw_sha256": "3e1684598a238945c7df6543afe80b989ba3c9c05b3d11c0c18d26b54da8ec7f",
+      "compressed_sha256": "93572b1dd40858aa04cc51c87dfe2bfe79d88eaceb2f3ed372f11c8635a5a1f6"
+    },
+    {
+      "map": "m31_00_00_00",
+      "enemies": 13,
+      "dummyEnemies": 7,
+      "selected": [
+        {
+          "kind": "Enemy",
+          "name": "c0000_9000",
+          "entity": 31000800,
+          "model": "c0000",
+          "npc": 523090010,
+          "think": 523090010,
+          "charInit": 23090,
+          "talk": 309003100,
+          "gameEditionDisable": 0,
+          "position": [
+            24.835,
+            52.972,
+            54.042
+          ],
+          "groups": [
+            31005100,
+            31005800,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        },
+        {
+          "kind": "Enemy",
+          "name": "c0000_9001",
+          "entity": 31000701,
+          "model": "c0000",
+          "npc": 523090110,
+          "think": 523090000,
+          "charInit": 23090,
+          "talk": 309003100,
+          "gameEditionDisable": 0,
+          "position": [
+            40.6,
+            45.96,
+            69.3
+          ],
+          "groups": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        },
+        {
+          "kind": "Enemy",
+          "name": "c0000_9002",
+          "entity": 31000850,
+          "model": "c0000",
+          "npc": 523090210,
+          "think": 523090010,
+          "charInit": 23090,
+          "talk": 309003100,
+          "gameEditionDisable": 0,
+          "position": [
+            24.835,
+            52.972,
+            54.042
+          ],
+          "groups": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        },
+        {
+          "kind": "Enemy",
+          "name": "c0000_9003",
+          "entity": 31000703,
+          "model": "c0000",
+          "npc": 523090310,
+          "think": 523090000,
+          "charInit": 23090,
+          "talk": 309003100,
+          "gameEditionDisable": 0,
+          "position": [
+            40.6,
+            45.957,
+            69.3
+          ],
+          "groups": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "activateCondition": 0
+        }
+      ],
+      "source": "D:\\Games\\fog\\eldendata\\Vanilla\\m31_00_00_00.msb.dcx",
+      "raw_sha256": "99cf0a2ad7940d2accabdba8e5246f3c5209577557dce0db95dd4d009fd42487",
+      "compressed_sha256": "13d8112f8f0da12bc33156203a94eeefb03cb101b10b3bd45da98556ae3dc03e"
+    }
+  ],
+  "global_msb_scan": {
+    "files": 1071,
+    "decompression_failures": 0,
+    "missing_entity": 1038540800,
+    "byte_candidate_only": {
+      "file": "m30_13_00_00.msb.dcx",
+      "offset": 588239,
+      "alignment": 3,
+      "structured_parts_entity_group_region_match": false
+    },
+    "note": "The only integer byte candidate outside m60_38_54_00 is unaligned and does not represent an MSB entity."
+  },
+  "param_rule_coverage": {
+    "param_rows": 216,
+    "param_nonzero_rows": 212,
+    "param_unique_flags": 207,
+    "event_unique_flags": 211,
+    "old_unique_flags": 207,
+    "rules": {
+      "exact_flag": {
+        "count": 199,
+        "old_members_kept": 197,
+        "missing": [
+          12030390,
+          30200800,
+          31000850,
+          1036450800,
+          1036480800,
+          1037420800,
+          1038540800,
+          1039430800,
+          1039510800,
+          1044530800,
+          1252520800,
+          2049440800
+        ],
+        "missing_old": [
+          12030390,
+          30200800,
+          1036450800,
+          1036480800,
+          1037420800,
+          1039430800,
+          1039510800,
+          1044530800,
+          1252520800,
+          2049440800
+        ],
+        "extra_kept": [
+          1034500800,
+          1037510800
+        ]
+      },
+      "flag_or_bar_entity": {
+        "count": 204,
+        "old_members_kept": 202,
+        "missing": [
+          12030390,
+          30200800,
+          31000850,
+          1038540800,
+          1039510800,
+          1044530800,
+          2049440800
+        ],
+        "missing_old": [
+          12030390,
+          30200800,
+          1039510800,
+          1044530800,
+          2049440800
+        ],
+        "extra_kept": [
+          1034500800,
+          1037510800
+        ]
+      },
+      "flag_or_entity_or_same_map_row_id": {
+        "count": 208,
+        "old_members_kept": 206,
+        "missing": [
+          31000850,
+          1038540800,
+          2049440800
+        ],
+        "missing_old": [
+          2049440800
+        ],
+        "extra_kept": [
+          1034500800,
+          1037510800
+        ]
+      },
+      "same_map_only": {
+        "count": 204,
+        "old_members_kept": 201,
+        "missing": [
+          21000850,
+          21010800,
+          1038540800,
+          1044350800,
+          2047450800,
+          2048380850,
+          2049440800
+        ],
+        "missing_old": [
+          21000850,
+          21010800,
+          1044350800,
+          2047450800,
+          2048380850,
+          2049440800
+        ],
+        "extra_kept": [
+          31000850,
+          1034500800,
+          1037510800
+        ]
+      }
+    }
+  },
+  "limits": [
+    "Static control-flow conditions are not executed against a running game.",
+    "Lansseax early and late kill flags have no cross-propagation in the scanned event writes and can be mutually exclusive.",
+    "Patches non-death end signal 31009889 is read here; its Talk ESD origin was not interpreted.",
+    "210 after excluding the proved missing-entity template is a candidate count, not a proof that all 210 are reachable or completable in one normal save.",
+    "This four-case audit alone does not independently certify scene-entity support for every other catalogue member."
+  ]
+}
