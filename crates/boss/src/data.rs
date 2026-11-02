@@ -7,7 +7,7 @@ use eroverlay_game::{
         self as params, BonfireRecord, GameAreaRecord, MapPointRecord, SubcategoryRecord,
         TabRecord, TextChoice,
     },
-    text::{self, TextCatalog},
+    text::{self, TextCatalog, TextNamespaces},
 };
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
@@ -50,8 +50,13 @@ pub struct Catalog {
 
 #[derive(Clone)]
 enum Kind {
-    Text { fallback: Option<String> },
-    Event { required: bool },
+    Text {
+        needed: TextNamespaces,
+        fallback: Option<String>,
+    },
+    Event {
+        required: bool,
+    },
 }
 struct Job {
     path: String,
@@ -110,6 +115,27 @@ impl Loading {
     fn event(&mut self, name: &str, required: bool) {
         self.queue(format!("event:/{name}"), Kind::Event { required });
     }
+    fn queue_text(&mut self, language: Option<&str>, host: Host) {
+        if let Some(paths) = language.and_then(text::binder_paths) {
+            self.queue(
+                paths[0].clone(),
+                Kind::Text {
+                    needed: TextNamespaces::ITEM,
+                    fallback: Some(paths[2].clone()),
+                },
+            );
+            self.queue(
+                paths[1].clone(),
+                Kind::Text {
+                    needed: TextNamespaces::MENU,
+                    fallback: Some(paths[3].clone()),
+                },
+            );
+        } else {
+            self.failures += 1;
+            host.log("boss-text: current game language is unavailable; using numeric labels\n");
+        }
+    }
     fn new(host: Host, tables: [usize; 6]) -> Option<Self> {
         let mut load = Self {
             areas: params::game_areas(tables[0])?,
@@ -133,20 +159,7 @@ impl Loading {
             .config("common.language")
             .filter(|s| !s.trim().is_empty())
             .or_else(eroverlay_game::game_language);
-        if let Some(paths) = language.as_deref().and_then(text::binder_paths) {
-            load.queue(
-                paths[0].clone(),
-                Kind::Text {
-                    fallback: Some(paths[2].clone()),
-                },
-            );
-            load.queue(
-                paths[1].clone(),
-                Kind::Text {
-                    fallback: Some(paths[3].clone()),
-                },
-            );
-        }
+        load.queue_text(language.as_deref(), host);
         load.event("common_func.emevd", true);
         load.event("common.emevd", false);
         for [area, block, sub, version] in params::event_maps(tables[5])? {
@@ -219,9 +232,20 @@ impl Loading {
         host.release(job.token);
         job.token = 0;
         let was_read = result.is_ok();
+        let mut retryable = true;
         let parsed = match result {
-            Ok(bytes) => match &job.kind {
-                Kind::Text { .. } => self.texts.merge_binder(&bytes).is_ok(),
+            Ok(bytes) => match &mut job.kind {
+                Kind::Text { needed, .. } => {
+                    match self.texts.merge_binder_for(&bytes, *needed) {
+                        Ok(merged) => {
+                            *needed = needed.missing_from(merged.namespaces);
+                            // A valid binder cannot gain a missing member on retry.
+                            retryable = false;
+                            needed.is_empty()
+                        }
+                        Err(_) => false,
+                    }
+                }
                 Kind::Event { .. } => {
                     if self.script_bytes + bytes.len() > MAX_SCRIPT_BYTES {
                         false
@@ -241,14 +265,21 @@ impl Loading {
         };
         if !parsed {
             job.attempts += 1;
-            if job.attempts < 2 {
+            if retryable && job.attempts < 2 {
                 job.retry = now + Duration::from_secs(1);
                 self.jobs.push_back(job);
             } else if let Kind::Text {
+                needed,
                 fallback: Some(path),
             } = job.kind
             {
-                self.queue(path, Kind::Text { fallback: None });
+                self.queue(
+                    path,
+                    Kind::Text {
+                        needed,
+                        fallback: None,
+                    },
+                );
             } else if !was_read && matches!(job.kind, Kind::Event { required: false }) {
                 self.absent.insert(job.path);
             } else {
@@ -384,11 +415,11 @@ impl Data {
         self.status = if catalog.rows.is_empty() {
             "No named Boss health bars found"
         } else if loading.failures != 0 {
-            "Ready; some event resources are unavailable"
+            "Ready; some game resources are unavailable"
         } else {
             "Ready"
         };
-        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable required resources, {} absent optional maps, {} unresolved event calls\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing));
+        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional maps, {} unresolved event calls\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing));
         self.publish(catalog)
     }
 }
@@ -451,7 +482,7 @@ fn build_catalog(
         .filter(|(_, v)| *v < 2)
         .map(|(id, v)| (id, v != 0))
         .collect();
-    let mut grouped: BTreeMap<(u32, u32), Vec<&BossDisplay>> = BTreeMap::new();
+    let mut grouped: BTreeMap<(u32, u32, u8, u32), Vec<&BossDisplay>> = BTreeMap::new();
     for display in displays {
         // An exact entity match resolves duplicate slot-switch helpers. It
         // never joins distinct entities merely because their IDs are close.
@@ -468,17 +499,24 @@ fn build_catalog(
             .completion_flag
             .or_else(|| (resolved.len() == 1).then(|| *resolved.first().unwrap()));
         grouped
-            .entry((
-                flag.unwrap_or(0),
-                if flag.is_some() { 0 } else { display.entity_id },
-            ))
+            .entry(if let Some(flag) = flag {
+                (flag, 0, 0, 0)
+            } else {
+                // Entity numbers may be reused in another map or ceremony.
+                (
+                    0,
+                    display.map_id,
+                    display.runtime_variant,
+                    display.entity_id,
+                )
+            })
             .or_default()
             .push(display);
     }
     let mut catalog = Catalog::default();
     let mut group_indices = BTreeMap::new();
     let mut group_order = BTreeMap::new();
-    for ((flag, _), evidence) in grouped {
+    for ((flag, ..), evidence) in grouped {
         let first = evidence[0];
         let area = areas
             .iter()
@@ -588,6 +626,287 @@ mod tests {
         // SAFETY: HostApi has only integers, raw pointers and nullable function
         // pointers; the production Host checks absent optional callbacks.
         Host(unsafe { std::mem::zeroed() })
+    }
+
+    fn empty_loading() -> Loading {
+        Loading {
+            areas: Vec::new(),
+            graces: Vec::new(),
+            points: Vec::new(),
+            subcategories: Vec::new(),
+            tabs: Vec::new(),
+            texts: TextCatalog::default(),
+            scripts: Vec::new(),
+            script_bytes: 0,
+            jobs: VecDeque::new(),
+            queued: BTreeSet::new(),
+            discover_at: 0,
+            displays: Vec::new(),
+            missing: 0,
+            failures: 0,
+            absent: BTreeSet::new(),
+            budget_exhausted: false,
+        }
+    }
+    fn display(map: u32, variant: u8, entity: u32, name: u32, flag: Option<u32>) -> BossDisplay {
+        BossDisplay {
+            map_id: map,
+            runtime_variant: variant,
+            entity_id: entity,
+            name_id: name,
+            slot: 0,
+            completion_flag: flag,
+            guard_flags: Vec::new(),
+            related_entities: Vec::new(),
+            proof: eroverlay_game::boss_events::EventProof {
+                source: "test.emevd".into(),
+                event_id: 0,
+                instruction: 0,
+                event_completion_flag: None,
+            },
+        }
+    }
+    #[test]
+    fn unknown_entities_merge_only_within_the_same_map_and_variant() {
+        let mut load = empty_loading();
+        load.displays = vec![
+            display(0x0a000000, 0, 7, 1, None),
+            display(0x0a000000, 0, 7, 2, None),
+            display(0x14000000, 0, 7, 3, None),
+            display(0x0a000000, 1, 7, 4, None),
+            display(0x0a000000, 1, 8, 5, None),
+        ];
+        let catalog = load.catalog(host());
+        assert_eq!(catalog.rows.len(), 4);
+        assert_eq!(catalog.unknown_count, 4);
+        assert!(catalog.rows.iter().all(|r| r.flag == 0));
+        assert!(
+            catalog
+                .rows
+                .iter()
+                .any(|r| r.name == "NpcName#1 / NpcName#2")
+        );
+    }
+    #[test]
+    fn known_flags_merge_across_entities_and_maps_without_leaking_to_another_variant() {
+        let mut load = empty_loading();
+        load.displays = vec![
+            display(0x0a000000, 0, 7, 1, Some(100)),
+            display(0x0a000000, 0, 8, 2, Some(100)),
+            display(0x14000000, 0, 7, 3, Some(100)),
+            display(0x0a000000, 0, 7, 4, None),
+            display(0x0a000000, 1, 7, 5, None),
+        ];
+        let catalog = load.catalog(host());
+        assert_eq!(catalog.rows.len(), 2);
+        assert_eq!(catalog.unknown_count, 1);
+        let known = catalog.rows.iter().find(|r| r.flag == 100).unwrap();
+        assert_eq!(known.name, "NpcName#1 / NpcName#2 / NpcName#3 / NpcName#4");
+        assert!(
+            catalog
+                .rows
+                .iter()
+                .any(|r| r.flag == 0 && r.name == "NpcName#5")
+        );
+    }
+
+    // Small valid BND4/FMG files drive the production parser and file-job state
+    // machine; a missing member is different from an empty FMG or empty string.
+    fn text_binder(entries: &[(&str, Option<&str>)]) -> Vec<u8> {
+        let mut b = vec![0; 64 + entries.len() * 36];
+        b[..4].copy_from_slice(b"BND4");
+        b[10] = 1;
+        b[12..16].copy_from_slice(&(entries.len() as u32).to_le_bytes());
+        b[16..24].copy_from_slice(&64u64.to_le_bytes());
+        b[32..40].copy_from_slice(&36u64.to_le_bytes());
+        for (i, (name, text)) in entries.iter().enumerate() {
+            let mut fmg = vec![0u8; if text.is_some() { 64 } else { 40 }];
+            fmg[..4].copy_from_slice(&[0, 0, 2, 0]);
+            fmg[8] = 1;
+            fmg[12..16].copy_from_slice(&u32::from(text.is_some()).to_le_bytes());
+            fmg[16..20].copy_from_slice(&u32::from(text.is_some()).to_le_bytes());
+            fmg[20] = 0xff;
+            let offsets = if text.is_some() { 56u64 } else { 40 };
+            fmg[24..32].copy_from_slice(&offsets.to_le_bytes());
+            if let Some(text) = text {
+                fmg[44..48].copy_from_slice(&100i32.to_le_bytes());
+                fmg[48..52].copy_from_slice(&100i32.to_le_bytes());
+                fmg[56..64].copy_from_slice(&64u64.to_le_bytes());
+                fmg.extend(text.encode_utf16().chain([0]).flat_map(u16::to_le_bytes));
+            }
+            let len = fmg.len() as u32;
+            fmg[4..8].copy_from_slice(&len.to_le_bytes());
+            let p = 64 + i * 36;
+            let name_offset = b.len() as u32;
+            b[p + 32..p + 36].copy_from_slice(&name_offset.to_le_bytes());
+            b.extend(name.encode_utf16().chain([0]).flat_map(u16::to_le_bytes));
+            let data_offset = b.len() as u32;
+            b[p + 24..p + 28].copy_from_slice(&data_offset.to_le_bytes());
+            for at in [p + 8, p + 16] {
+                b[at..at + 8].copy_from_slice(&(fmg.len() as u64).to_le_bytes());
+            }
+            b.extend(fmg);
+        }
+        b
+    }
+    #[test]
+    fn text_jobs_fallback_only_for_missing_target_namespaces() {
+        struct Files(Vec<Vec<u8>>);
+        unsafe extern "C" fn poll(user: *mut c_void, token: u64, out: *mut abi::FileView) -> i32 {
+            // SAFETY: the test retains Files and its buffers for the entire job.
+            let files = unsafe { &*user.cast::<Files>() };
+            let bytes = &files.0[token as usize - 1];
+            unsafe {
+                out.write(abi::FileView {
+                    status: abi::FILE_READY,
+                    bytes: abi::ByteSlice::new(bytes),
+                    ..Default::default()
+                });
+            }
+            abi::OK
+        }
+        let base = text_binder(&[
+            ("NpcName.fmg", Some("base NPC")),
+            ("PlaceName.fmg", Some("base place")),
+            ("GR_MenuText.fmg", Some("base menu")),
+        ]);
+        let cases = [
+            // A valid unrelated FMG and a valid wrong target namespace both
+            // require fallback; unrelated namespaces must not pollute the cache.
+            (
+                TextNamespaces::ITEM,
+                vec![],
+                Some(TextNamespaces::ITEM),
+                Some("base NPC"),
+                Some("base place"),
+                None,
+            ),
+            (
+                TextNamespaces::ITEM,
+                vec![("GoodsName.fmg", Some("goods"))],
+                Some(TextNamespaces::ITEM),
+                Some("base NPC"),
+                Some("base place"),
+                None,
+            ),
+            (
+                TextNamespaces::ITEM,
+                vec![("GR_MenuText.fmg", Some("wrong menu"))],
+                Some(TextNamespaces::ITEM),
+                Some("base NPC"),
+                Some("base place"),
+                None,
+            ),
+            (
+                TextNamespaces::MENU,
+                vec![("NpcName.fmg", Some("wrong NPC"))],
+                Some(TextNamespaces::MENU),
+                None,
+                None,
+                Some("base menu"),
+            ),
+            // Either half of an item binder can be absent. Fallback must not
+            // replace the already present base-layer Mod namespace.
+            (
+                TextNamespaces::ITEM,
+                vec![("NpcName.fmg", Some("mod NPC"))],
+                Some(TextNamespaces::PLACE),
+                Some("mod NPC"),
+                Some("base place"),
+                None,
+            ),
+            (
+                TextNamespaces::ITEM,
+                vec![("PlaceName.fmg", Some("mod place"))],
+                Some(TextNamespaces::NPC),
+                Some("base NPC"),
+                Some("mod place"),
+                None,
+            ),
+            // Empty FMGs and empty strings are intentional, valid namespaces.
+            (
+                TextNamespaces::ITEM,
+                vec![("NpcName.fmg", None), ("PlaceName.fmg", None)],
+                None,
+                None,
+                None,
+                None,
+            ),
+            (
+                TextNamespaces::ITEM,
+                vec![("NpcName.fmg", Some("")), ("PlaceName.fmg", Some(""))],
+                None,
+                Some(""),
+                Some(""),
+                None,
+            ),
+            (
+                TextNamespaces::MENU,
+                vec![("GR_MenuText.fmg", None)],
+                None,
+                None,
+                None,
+                None,
+            ),
+        ];
+        for (needed, entries, fallback, npc, place, menu) in cases {
+            let files = Files(vec![text_binder(&entries), base.clone()]);
+            let mut host = host();
+            host.0.user = (&files as *const Files).cast_mut().cast();
+            host.0.poll_file = Some(poll);
+            let mut load = empty_loading();
+            load.queue(
+                "primary".into(),
+                Kind::Text {
+                    needed,
+                    fallback: Some("base".into()),
+                },
+            );
+            load.jobs[0].token = 1;
+            assert_eq!(load.files(host), fallback.is_none(), "{entries:?}");
+            if let Some(expected) = fallback {
+                assert_eq!(load.jobs.len(), 1);
+                assert_eq!(load.jobs[0].path, "base");
+                assert!(
+                    matches!(load.jobs[0].kind, Kind::Text { needed, fallback: None } if needed == expected)
+                );
+                load.jobs[0].token = 2;
+                assert!(load.files(host));
+            }
+            assert_eq!(load.failures, 0, "{entries:?}");
+            assert_eq!(load.texts.npc(100), npc, "{entries:?}");
+            assert_eq!(load.texts.place(100), place, "{entries:?}");
+            assert_eq!(load.texts.menu(100), menu, "{entries:?}");
+        }
+
+        // A valid base binder still missing the requested namespace is a real
+        // unavailable-resource result, even if it contains another FMG.
+        let files = Files(vec![text_binder(&[("GR_MenuText.fmg", Some("menu"))])]);
+        let mut host = host();
+        host.0.user = (&files as *const Files).cast_mut().cast();
+        host.0.poll_file = Some(poll);
+        let mut load = empty_loading();
+        load.queue(
+            "base".into(),
+            Kind::Text {
+                needed: TextNamespaces::ITEM,
+                fallback: None,
+            },
+        );
+        load.jobs[0].token = 1;
+        assert!(load.files(host));
+        assert_eq!(load.failures, 1);
+        assert!(load.texts.is_empty());
+    }
+
+    #[test]
+    fn unknown_or_missing_language_is_an_unavailable_text_resource() {
+        for language in [None, Some("unsupported-language")] {
+            let mut load = empty_loading();
+            load.queue_text(language, host());
+            assert!(load.jobs.is_empty());
+            assert_eq!(load.failures, 1);
+        }
     }
 
     #[test]

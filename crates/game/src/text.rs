@@ -126,7 +126,7 @@ pub fn language_directory(language: &str) -> Option<&'static str> {
 }
 
 /// DLC02 binders contain base, DLC01 and DLC02 FMG members. Try the first pair;
-/// use its corresponding base binder only when that DLC binder is unavailable.
+/// use its corresponding base binder for any missing required namespace.
 pub fn binder_paths(language: &str) -> Option<[String; 4]> {
     let lang = language_directory(language)?;
     Some([
@@ -135,6 +135,30 @@ pub fn binder_paths(language: &str) -> Option<[String; 4]> {
         format!("msg:/{lang}/item.msgbnd"),
         format!("msg:/{lang}/menu.msgbnd"),
     ])
+}
+
+/// Presence of successfully parsed FMG members, independent of their text count.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TextNamespaces(u8);
+impl TextNamespaces {
+    pub const NPC: Self = Self(1);
+    pub const PLACE: Self = Self(2);
+    pub const MENU: Self = Self(4);
+    pub const ITEM: Self = Self(3);
+    pub const ALL: Self = Self(7);
+
+    pub fn missing_from(self, present: Self) -> Self {
+        Self(self.0 & !present.0)
+    }
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
+    }
+}
+
+#[derive(Debug)]
+pub struct TextMerge {
+    pub entries: usize,
+    pub namespaces: TextNamespaces,
 }
 
 #[derive(Default, Clone)]
@@ -147,6 +171,16 @@ impl TextCatalog {
     /// Accepts a decompressed BND4. Parsing completes before mutating the cache;
     /// malformed Mod text cannot leave a half-applied catalogue.
     pub fn merge_binder(&mut self, bytes: &[u8]) -> Result<usize> {
+        self.merge_binder_for(bytes, TextNamespaces::ALL)
+            .map(|merged| merged.entries)
+    }
+    /// Merges only requested namespaces and reports FMG member presence even
+    /// when those members contain no entries or only null/empty text.
+    pub fn merge_binder_for(
+        &mut self,
+        bytes: &[u8],
+        requested: TextNamespaces,
+    ) -> Result<TextMerge> {
         let mut parsed = Vec::new();
         for entry in assets::parse_binder(bytes)? {
             let filename = entry.name.rsplit(['/', '\\']).next().unwrap_or_default();
@@ -166,13 +200,18 @@ impl TextCatalog {
                 "GR_MenuText" => 2,
                 _ => continue,
             };
+            if requested.0 & (1 << kind) == 0 {
+                continue;
+            }
             if parsed.iter().any(|(k, l, _)| *k == kind && *l == layer) {
                 return Err(AssetError::Invalid);
             }
             parsed.push((kind, layer, parse_fmg(entry.bytes)?));
         }
         let mut count = 0;
+        let mut namespaces = TextNamespaces::default();
         for (kind, layer, entries) in parsed {
+            namespaces.0 |= 1 << kind;
             let target = match kind {
                 0 => &mut self.npc,
                 1 => &mut self.place,
@@ -186,7 +225,10 @@ impl TextCatalog {
                 }
             }
         }
-        Ok(count)
+        Ok(TextMerge {
+            entries: count,
+            namespaces,
+        })
     }
     pub fn npc(&self, id: i32) -> Option<&str> {
         self.npc.get(&id).map(|(_, s)| s.as_str())
@@ -206,19 +248,22 @@ impl TextCatalog {
 mod tests {
     use super::*;
     fn fmg(first: i32, strings: &[Option<&str>]) -> Vec<u8> {
-        let mut b = vec![0; 56 + strings.len() * 8];
+        let offsets = if strings.is_empty() { 40 } else { 56 };
+        let mut b = vec![0; offsets + strings.len() * 8];
         b[..4].copy_from_slice(&[0, 0, 2, 0]);
         b[8] = 1;
-        b[12..16].copy_from_slice(&1u32.to_le_bytes());
+        b[12..16].copy_from_slice(&u32::from(!strings.is_empty()).to_le_bytes());
         b[16..20].copy_from_slice(&(strings.len() as u32).to_le_bytes());
         b[20] = 0xff;
-        b[24..32].copy_from_slice(&56u64.to_le_bytes());
-        b[44..48].copy_from_slice(&first.to_le_bytes());
-        b[48..52].copy_from_slice(&(first + strings.len() as i32 - 1).to_le_bytes());
+        b[24..32].copy_from_slice(&(offsets as u64).to_le_bytes());
+        if !strings.is_empty() {
+            b[44..48].copy_from_slice(&first.to_le_bytes());
+            b[48..52].copy_from_slice(&(first + strings.len() as i32 - 1).to_le_bytes());
+        }
         for (i, text) in strings.iter().enumerate() {
             if let Some(text) = text {
                 let off = b.len() as u64;
-                b[56 + i * 8..64 + i * 8].copy_from_slice(&off.to_le_bytes());
+                b[offsets + i * 8..offsets + (i + 1) * 8].copy_from_slice(&off.to_le_bytes());
                 b.extend(text.encode_utf16().chain([0]).flat_map(u16::to_le_bytes));
             }
         }
@@ -299,6 +344,67 @@ mod tests {
         ]);
         assert!(catalog.merge_binder(&malformed).is_err());
         assert_eq!(catalog.npc(100), Some("new base"));
+    }
+    #[test]
+    fn namespace_presence_does_not_depend_on_text_count_or_another_namespace() {
+        let mut catalog = TextCatalog::default();
+        let unrelated = binder(&[("GoodsName.fmg", fmg(100, &[Some("item")]))]);
+        let merged = catalog
+            .merge_binder_for(&unrelated, TextNamespaces::ITEM)
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::default());
+        assert_eq!(merged.entries, 0);
+        let menu = binder(&[("GR_MenuText.fmg", fmg(100, &[Some("menu")]))]);
+        let merged = catalog
+            .merge_binder_for(&menu, TextNamespaces::ITEM)
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::default());
+        assert_eq!(catalog.menu(100), None);
+
+        let empty = binder(&[("NpcName.fmg", fmg(100, &[]))]);
+        let merged = catalog
+            .merge_binder_for(&empty, TextNamespaces::ITEM)
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::NPC);
+        assert_eq!(merged.entries, 0);
+        assert_eq!(
+            TextNamespaces::ITEM.missing_from(merged.namespaces),
+            TextNamespaces::PLACE
+        );
+        let null_text = binder(&[("NpcName.fmg", fmg(100, &[None]))]);
+        let merged = catalog
+            .merge_binder_for(&null_text, TextNamespaces::NPC)
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::NPC);
+        assert_eq!(merged.entries, 0);
+        let empty_text = binder(&[("PlaceName_dlc02.fmg", fmg(100, &[Some("")]))]);
+        let merged = catalog
+            .merge_binder_for(&empty_text, TextNamespaces::PLACE)
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::PLACE);
+        assert_eq!(catalog.place(100), Some(""));
+        catalog
+            .merge_binder(&binder(&[("PlaceName.fmg", fmg(100, &[Some("base")]))]))
+            .unwrap();
+        assert_eq!(catalog.place(100), Some(""));
+    }
+    #[test]
+    fn base_fallback_merges_only_the_missing_namespace() {
+        let mut catalog = TextCatalog::default();
+        let dlc = binder(&[("NpcName.fmg", fmg(100, &[Some("mod base-layer NPC")]))]);
+        let merged = catalog
+            .merge_binder_for(&dlc, TextNamespaces::ITEM)
+            .unwrap();
+        let base = binder(&[
+            ("NpcName.fmg", fmg(100, &[Some("unwanted base NPC")])),
+            ("PlaceName.fmg", fmg(100, &[Some("base place")])),
+        ]);
+        let merged = catalog
+            .merge_binder_for(&base, TextNamespaces::ITEM.missing_from(merged.namespaces))
+            .unwrap();
+        assert_eq!(merged.namespaces, TextNamespaces::PLACE);
+        assert_eq!(catalog.npc(100), Some("mod base-layer NPC"));
+        assert_eq!(catalog.place(100), Some("base place"));
     }
     #[test]
     #[ignore = "requires decompressed game item/menu BND paths in EROVERLAY_BOSS_TEXT_BINDERS, separated by semicolons"]

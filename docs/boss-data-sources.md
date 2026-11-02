@@ -66,7 +66,7 @@ Param 与事件的完成旗标也不保证完全一致。例如这份归档的 F
 
 ## 当前语言与 Mod 文本
 
-`text::language_directory` 将 Steam 的语言名或已有区域代码转换为原生目录，例如 `schinese → zhoCN`、`english → engUS`。未知语言返回不可用，由调用者保留数字标识或明确提示，不静默加载一套离线英文名单。
+`text::language_directory` 将 Steam 的语言名或已有区域代码转换为原生目录，例如 `schinese → zhoCN`、`english → engUS`。未知或缺少语言时保留数字标识，并计入游戏资源不可用状态，不静默加载一套离线英文名单。
 
 归档 1.17.2 EXE 中的 UTF-16 字符串直接给出以下原生请求路径：
 
@@ -75,7 +75,9 @@ msg:/%s/item_dlc02.msgbnd
 msg:/%s/menu_dlc02.msgbnd
 ```
 
-分别位于该归档 EXE 的文件偏移 `45999440` 和 `45999496`。这些是 VFS 挂载路径，不是磁盘上的 `msg/<语言>/*.msgbnd.dcx` 路径。原生文件服务负责找到 Mod 覆盖及 DCX 解压，Rust 解析解压后的 BND4。DLC02 binder 不可用时，调用者可请求对应的 `item.msgbnd` 或 `menu.msgbnd`。
+分别位于该归档 EXE 的文件偏移 `45999440` 和 `45999496`。这些是 VFS 挂载路径，不是磁盘上的 `msg/<语言>/*.msgbnd.dcx` 路径。原生文件服务负责找到 Mod 覆盖及 DCX 解压，Rust 解析解压后的 BND4。item 任务要求 `NpcName` 和 `PlaceName` 两个命名空间，menu 任务要求 `GR_MenuText`。DLC02 binder 不可用或缺少所需命名空间时，请求对应的 `item.msgbnd` 或 `menu.msgbnd`，只合并尚缺的命名空间，避免 base 回退覆盖已读取的同层 Mod 文本。
+
+合法 BND4 不一定包含目标 FMG，其他命名空间的内容不能使任务成功。读取器根据成功解析的目标 FMG 成员报告命名空间是否存在，不按字符串数量判断。存在但没有条目的 FMG、全部为空指针的 FMG 和合法空字符串都不等于命名空间缺失；空字符串仍保留为空文本。base 回退后仍缺少所需命名空间时计入游戏资源不可用状态，对缺少的具体 ID 使用数字标识。
 
 真实 `item_dlc02` binder 同时包含 `NpcName.fmg`、`NpcName_dlc01.fmg`、`NpcName_dlc02.fmg`，以及三层 `PlaceName`。`menu_dlc02` 同样包含三层 `GR_MenuText`。`TextCatalog` 按 FMG 成员层级覆盖，DLC02 高于 DLC01，高于 base；空指针条目保留较低层文本，空字符串仍是有效覆盖。合并不依赖 binder 的成员顺序，解析失败时不留下半套覆盖结果。
 
@@ -93,7 +95,7 @@ msg:/%s/menu_dlc02.msgbnd
 
 ## 可选验证与证据边界
 
-常规测试包含 Param 表型／版本／行边界检查、FMG 空条目和 UTF-16、损坏偏移拒绝、三层文本覆盖、失败合并回滚，以及生产存档读取／批量旗标／复活前置条件测试。外部资产检查需显式提供自行导出的数据：
+常规测试包含 Param 表型／版本／行边界检查、FMG 空条目和 UTF-16、损坏偏移拒绝、三层文本覆盖、失败合并回滚、按目标命名空间补缺、空 FMG／空字符串与缺失成员的区分，以及生产存档读取／批量旗标／复活前置条件测试。外部资产检查需显式提供自行导出的数据：
 
 ```powershell
 $env:EROVERLAY_BOSS_PARAM_DIR='E:/path/to/exported-params'

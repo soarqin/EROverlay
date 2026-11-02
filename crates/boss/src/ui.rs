@@ -109,8 +109,8 @@ impl Ui {
             "Loading game text and Boss events" => "正在读取游戏文本与 Boss 事件",
             "Discovering named Boss health bars" => "正在核对具名 Boss 生命条",
             "No named Boss health bars found" => "未发现具名 Boss 生命条，可尝试重新读取游戏数据",
-            "Ready; some event resources are unavailable" => {
-                "部分事件资源不可用，目录可能不完整，可重新读取游戏数据"
+            "Ready; some game resources are unavailable" => {
+                "部分游戏资源不可用，目录可能不完整，可重新读取游戏数据"
             }
             _ => status,
         }
@@ -281,7 +281,8 @@ impl Ui {
             }
             self.rows_dirty = true;
         }
-        if self.rows_dirty || self.revision != s.revision {
+        // Compact mode consumes prepared status text; list work stays pending until opened.
+        if full && (self.rows_dirty || self.revision != s.revision) {
             self.rebuild(s);
         }
         let ctx = self.context.clone();
@@ -406,5 +407,150 @@ impl Ui {
             self.settings_dirty = false;
         }
         self.meshes.submit(&i.host.0, &self.context, output)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        Update,
+        challenge::Challenge,
+        data::{Catalog, Data, Encounter, Group},
+        revival::Revival,
+    };
+    use std::sync::{Arc, Mutex, atomic::AtomicBool};
+
+    unsafe extern "C" fn visible(_: *mut std::ffi::c_void, out: *mut abi::DisplayState) -> i32 {
+        // SAFETY: Ui::render supplies one live DisplayState output slot.
+        unsafe {
+            out.write(abi::DisplayState {
+                valid: 1,
+                ..Default::default()
+            })
+        };
+        abi::OK
+    }
+
+    #[test]
+    fn compact_revisions_defer_95_group_211_boss_list_until_full_render() {
+        // No native hooks/GPU: call the actual Ui::render path with prepared
+        // snapshots. Missing texture admission cannot change list construction.
+        let mut api: abi::HostApi = unsafe { std::mem::zeroed() };
+        api.read_display_state = Some(visible);
+        let host = Host(api);
+        let settings = Arc::new(Settings::default());
+        let instance = Instance {
+            host,
+            update: Mutex::new(Update {
+                data: Data::new(host),
+                root: PathBuf::new(),
+                settings: settings.clone(),
+                keys: [0; 2],
+                catalog: None,
+                catalog_revision: 0,
+                challenge: Challenge::default(),
+                revival: Revival::default(),
+                next: None,
+                revision: 0,
+                result: None,
+            }),
+            ui: Mutex::new(Ui::new(host, &settings)),
+            snapshot: Mutex::new(None),
+            actions: Mutex::new(Vec::new()),
+            full: AtomicBool::new(false),
+            shown: AtomicBool::new(true),
+        };
+        let catalog = Arc::new(Catalog {
+            groups: (0..95)
+                .map(|group| Group {
+                    id: group as u32,
+                    name: format!("Group {group}"),
+                })
+                .collect(),
+            rows: (0..211)
+                .map(|row| Encounter {
+                    flag: row + 1,
+                    name: format!("Boss {row}"),
+                    place: format!("Place {}", row % 95),
+                    group: row as usize % 95,
+                    map_id: 0x0a00_0000 + ((row % 95) << 8),
+                    search: format!("boss {row}"),
+                })
+                .collect(),
+            unknown_count: 0,
+        });
+        let mut snapshot = Snapshot {
+            catalog: Some(catalog),
+            states: vec![1; 211].into(),
+            revivable: vec![0; 211].into(),
+            state: Some(abi::BossState {
+                size: size_of::<abi::BossState>() as u32,
+                valid: 1,
+                raw_map_id: 0x0a00_0000,
+                ..Default::default()
+            }),
+            settings,
+            kills: 211,
+            total: 211,
+            deaths: 0,
+            best: 0,
+            tries: 0,
+            compact: "211/211".into(),
+            status: "Ready",
+            revision: 0,
+            result: None,
+        };
+        let mut frame = abi::FrameInfo {
+            size: size_of::<abi::FrameInfo>() as u32,
+            layer: abi::LAYER_ABOVE_UI,
+            width: 1280.,
+            height: 900.,
+            pixels_per_point: 1.,
+            delta_seconds: 1. / 60.,
+            ..Default::default()
+        };
+        let mut ui = instance.ui.lock().unwrap();
+        for revision in 1..=4 {
+            snapshot.revision = revision;
+            frame.sequence += 1;
+            assert_eq!(ui.render(&instance, &snapshot, &frame), abi::OK);
+            assert!(ui.rows.is_empty());
+            assert_eq!(
+                ui.rows.capacity(),
+                0,
+                "compact render must not construct list rows"
+            );
+            assert_eq!(ui.revision, 0, "keep the list's pending snapshot revision");
+            assert!(ui.rows_dirty);
+        }
+        instance.full.store(true, Ordering::Relaxed);
+        frame.sequence += 1;
+        assert_eq!(ui.render(&instance, &snapshot, &frame), abi::OK);
+        assert_eq!(ui.rows.len(), 95 + 211);
+        assert_eq!(ui.revision, 4);
+        assert!(!ui.rows_dirty);
+        assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  3/3"));
+
+        instance.full.store(false, Ordering::Relaxed);
+        snapshot.states = vec![0; 211].into();
+        snapshot.kills = 0;
+        snapshot.compact = "0/211".into();
+        snapshot.state.as_mut().unwrap().raw_map_id = 0x0a00_0100;
+        for revision in 5..=8 {
+            snapshot.revision = revision;
+            frame.sequence += 1;
+            assert_eq!(ui.render(&instance, &snapshot, &frame), abi::OK);
+            assert_eq!(ui.revision, 4);
+            assert!(ui.rows_dirty, "map dirtiness must survive compact renders");
+            assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  3/3"));
+        }
+        instance.full.store(true, Ordering::Relaxed);
+        frame.sequence += 1;
+        assert_eq!(ui.render(&instance, &snapshot, &frame), abi::OK);
+        assert_eq!(ui.rows.len(), 95 + 211);
+        assert_eq!(ui.revision, 8);
+        assert!(!ui.rows_dirty);
+        assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  0/3"));
     }
 }

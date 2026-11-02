@@ -84,9 +84,21 @@ Rendering only reads the published catalogue and completion-state snapshot.
 Known progress entries merge by their proved completion flag, preserving
 multiple phase names without counting them twice. Unknown entries carry flag
 zero, display `?`, do not contribute to progress totals and cannot revive.
+Unknown bars merge only for the same map, runtime ceremony variant and exact
+entity. Reusing an entity number in another map or variant does not join those
+encounters. Duplicate bars for that same scoped entity can still retain their
+multiple names.
 Missing native text is shown as `NpcName#<id>`; no offline language catalogue is
 bundled. The archived production-input check currently has no unknown entries
 or missing Boss names.
+
+Item text jobs require both NpcName and PlaceName; menu jobs require GR_MenuText.
+A valid binder containing only other FMGs does not satisfy those requirements.
+Base-binder fallback merges only missing namespaces and preserves already
+loaded Mod namespaces, including layer-zero overrides. A parsed empty FMG is
+still a present namespace, and an empty string remains a valid override.
+Unavailable language or still-missing namespaces count as unavailable game
+resources rather than silently reporting a fully ready catalogue.
 
 ## Revival configuration
 
