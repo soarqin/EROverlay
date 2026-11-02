@@ -16,6 +16,50 @@ enum Row {
     Header { group: usize, text: String },
     Boss(usize),
 }
+
+fn status_width(ui: &egui::Ui) -> f32 {
+    let font = egui::TextStyle::Button.resolve(ui.style());
+    ["[+]", "[ ]", "[?]"]
+        .into_iter()
+        .map(|text| {
+            ui.painter()
+                .layout_no_wrap(text.into(), font.clone(), Color32::WHITE)
+                .size()
+                .x
+        })
+        .fold(0., f32::max)
+        + 2. * ui.spacing().button_padding.x
+}
+
+fn boss_widgets(
+    ui: &mut egui::Ui,
+    name: &str,
+    state: u8,
+    enabled: bool,
+    width: f32,
+) -> (egui::Response, egui::Response) {
+    ui.horizontal(|ui| {
+        let status = match state {
+            1 => "[+]",
+            0 => "[ ]",
+            _ => "[?]",
+        };
+        let button = ui
+            .add_enabled_ui(enabled, |ui| {
+                ui.add_sized([width, 0.], egui::Button::new(status).small())
+            })
+            .inner;
+        let color = if state == 1 {
+            ui.visuals().weak_text_color()
+        } else {
+            ui.visuals().text_color()
+        };
+        let label = ui.add(egui::Label::new(RichText::new(name).color(color)).truncate());
+        (button, label)
+    })
+    .inner
+}
+
 pub struct Ui {
     context: egui::Context,
     definitions: egui::FontDefinitions,
@@ -26,19 +70,22 @@ pub struct Ui {
     chinese: bool,
     query: String,
     remaining: bool,
-    selected: Option<usize>,
-    closed: BTreeSet<usize>,
+    selected: Option<u32>,
+    closed: BTreeSet<u32>,
     rows: Vec<Row>,
     rows_dirty: bool,
     revision: u64,
-    map: u32,
-    current: Option<usize>,
+    current: Option<u32>,
+    catalog_generation: Option<u64>,
+    fold_pending: bool,
     modal: Option<(u32, u64, String)>,
     last_sequence: Option<u64>,
     last_snapshot: Option<Arc<Snapshot>>,
     last_visible: bool,
     time: f64,
     style_size: f32,
+    #[cfg(feature = "continuity-fixture")]
+    probe: crate::probe::Layout,
 }
 impl Ui {
     pub fn new(host: Host, settings: &Settings) -> Self {
@@ -85,14 +132,17 @@ impl Ui {
             rows: Vec::new(),
             rows_dirty: true,
             revision: 0,
-            map: u32::MAX,
             current: None,
+            catalog_generation: None,
+            fold_pending: true,
             modal: None,
             last_sequence: None,
             last_snapshot: None,
             last_visible: false,
             time: 0.0,
             style_size: 0.0,
+            #[cfg(feature = "continuity-fixture")]
+            probe: crate::probe::Layout::default(),
         }
     }
     pub fn reset(&mut self, host: Host) {
@@ -111,6 +161,23 @@ impl Ui {
     fn label<'a>(&self, en: &'a str, zh: &'a str) -> &'a str {
         if self.chinese { zh } else { en }
     }
+    #[cfg(feature = "continuity-fixture")]
+    pub(crate) fn probe_state(&self) -> crate::probe::State<'_> {
+        crate::probe::State {
+            revision: self.revision,
+            raw_map: self
+                .last_snapshot
+                .as_ref()
+                .and_then(|s| s.state)
+                .map_or(0, |s| s.raw_map_id),
+            current: self.current,
+            selected: self.selected,
+            remaining: self.remaining,
+            closed: &self.closed,
+            logical_rows: self.rows.len(),
+            layout: &self.probe,
+        }
+    }
     fn status<'a>(&self, status: &'a str) -> &'a str {
         if status == "Ready" {
             return "";
@@ -120,6 +187,7 @@ impl Ui {
         }
         match status {
             "Waiting for game parameters" => "正在等待游戏参数",
+            "Waiting for game region parameters" => "正在等待游戏地区参数",
             "Waiting for game language" => "正在等待游戏语言",
             "Loading game text and Boss events" => "正在读取游戏文本与 Boss 事件",
             "Loading Boss data; some requests timed out" => {
@@ -147,12 +215,69 @@ impl Ui {
             false
         }
     }
+    fn sync_region(&mut self, s: &Snapshot) {
+        let Some(c) = s.catalog.as_ref() else {
+            self.catalog_generation = None;
+            return;
+        };
+        // Reload publishes an empty catalogue before the final groups. Do not
+        // consume that generation's initial fold state while it is still empty.
+        if c.groups.is_empty() {
+            if self.catalog_generation.take().is_some() {
+                self.rows_dirty = true;
+            }
+            return;
+        }
+        if self.catalog_generation != Some(s.catalog_generation) {
+            self.catalog_generation = Some(s.catalog_generation);
+            self.closed = c.groups.iter().map(|g| g.id).collect();
+            self.selected = self
+                .selected
+                .filter(|id| c.groups.iter().any(|g| g.id == *id));
+            self.current = None;
+            self.fold_pending = true;
+            self.rows_dirty = true;
+        }
+        let next = s
+            .state
+            .as_ref()
+            .filter(|state| state.valid != 0)
+            .and_then(|_| {
+                s.region
+                    .and_then(|region| c.group_for_region(region))
+                    .map(|index| c.groups[index].id)
+            });
+        if let Some(next) = next
+            && self.current != Some(next)
+        {
+            self.current = Some(next);
+            self.fold_pending = true;
+            self.rows_dirty = true;
+        }
+        // Preserve manual choices during a search/filter. Apply the latest valid
+        // region once the normal list returns; unavailable state never resets it.
+        if self.fold_pending
+            && self.query.is_empty()
+            && !self.remaining
+            && self.selected.is_none()
+            && let Some(current) = self.current
+        {
+            self.closed = c
+                .groups
+                .iter()
+                .filter(|g| g.id != current)
+                .map(|g| g.id)
+                .collect();
+            self.fold_pending = false;
+            self.rows_dirty = true;
+        }
+    }
     fn rebuild(&mut self, s: &Snapshot) {
         self.rows.clear();
         let Some(c) = s.catalog.as_ref() else { return };
         let query = self.query.to_lowercase();
         for (group, g) in c.groups.iter().enumerate() {
-            if self.selected.is_some_and(|v| v != group) {
+            if self.selected.is_some_and(|v| v != g.id) {
                 continue;
             }
             let matches =
@@ -182,7 +307,7 @@ impl Ui {
                 .iter()
                 .filter(|r| r.group == group && r.flag != 0)
                 .count();
-            let arrow = if self.closed.contains(&group) {
+            let arrow = if self.closed.contains(&g.id) {
                 ">"
             } else {
                 "v"
@@ -191,7 +316,7 @@ impl Ui {
                 group,
                 text: format!("{arrow} {}  {killed}/{total}", g.name),
             });
-            if !self.closed.contains(&group) {
+            if !self.closed.contains(&g.id) {
                 self.rows.extend(relevant.into_iter().map(Row::Boss));
             }
         }
@@ -323,21 +448,7 @@ impl Ui {
         if !interactive {
             self.input.clear();
         }
-        if let Some(state) = s.state
-            && state.raw_map_id != self.map
-        {
-            self.map = state.raw_map_id;
-            self.current = s.catalog.as_ref().and_then(|c| {
-                c.rows
-                    .iter()
-                    .find(|r| r.map_id >> 8 == state.raw_map_id >> 8)
-                    .map(|r| r.group)
-            });
-            if let Some(g) = self.current {
-                self.closed.remove(&g);
-            }
-            self.rows_dirty = true;
-        }
+        self.sync_region(s);
         // Compact mode consumes prepared status text; list work stays pending until opened.
         if full && (self.rows_dirty || self.revision != s.revision) {
             self.rebuild(s);
@@ -357,6 +468,8 @@ impl Ui {
             self.style_size = self.settings.font_size;
         }
         let mut full_open = full;
+        #[cfg(feature = "continuity-fixture")]
+        self.probe.begin(frame.sequence, full, interactive);
         let output=ctx.run(raw,|ctx|{
             if !full{
                 if s.catalog.is_some(){
@@ -389,41 +502,55 @@ impl Ui {
                         if ui.add_enabled(interactive&&s.state.is_some(),egui::Button::new(self.label("Start this attempt","开始本轮"))).clicked(){Self::queue(i,Action::BeginChallenge);}
                         if s.state.is_some_and(|state|state.graveyard_reached>1){ui.small(self.label("Challenge tracking is waiting for its start flag.","挑战记录正在等待有效起始旗标。"));}
                     }
-                    if ui.small_button(self.label("Reload game data","重新读取游戏数据")).clicked()&&interactive{Self::queue(i,Action::Reload);self.modal=None;}
+                    let reload=ui.small_button(self.label("Reload game data","重新读取游戏数据"));
+                    #[cfg(feature = "continuity-fixture")]
+                    {self.probe.reload_rect=crate::probe::rect(reload.rect);}
+                    if reload.clicked()&&interactive{Self::queue(i,Action::Reload);self.modal=None;}
                     ui.separator();
-                    let mut filter_changed=ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(if self.chinese{"搜索 Boss 或地点"}else{"Search boss or location"})).changed();
-                    filter_changed|=ui.checkbox(&mut self.remaining,if self.chinese{"只看未完成"}else{"Remaining only"}).changed();
+                    let search=ui.add(egui::TextEdit::singleline(&mut self.query).hint_text(if self.chinese{"搜索 Boss 或地点"}else{"Search boss or location"}));
+                    let remaining=ui.checkbox(&mut self.remaining,if self.chinese{"只看未完成"}else{"Remaining only"});
+                    let mut filter_changed=search.changed()||remaining.changed();
+                    #[cfg(feature = "continuity-fixture")]
+                    {self.probe.search_rect=crate::probe::rect(search.rect);self.probe.remaining_rect=crate::probe::rect(remaining.rect);}
                     if let Some(c)=s.catalog.as_ref(){
-                        egui::ComboBox::from_id_salt("boss-region").selected_text(self.selected.and_then(|g|c.groups.get(g)).map(|g|g.name.as_str()).unwrap_or(if self.chinese{"全部地区"}else{"All regions"})).show_ui(ui,|ui|{
+                        let region=egui::ComboBox::from_id_salt("boss-region").selected_text(self.selected.and_then(|id|c.groups.iter().find(|g|g.id==id)).map(|g|g.name.as_str()).unwrap_or(if self.chinese{"全部地区"}else{"All regions"})).show_ui(ui,|ui|{
                             filter_changed|=ui.selectable_value(&mut self.selected,None,if self.chinese{"全部地区"}else{"All regions"}).changed();
-                            for (g,group) in c.groups.iter().enumerate(){filter_changed|=ui.selectable_value(&mut self.selected,Some(g),&group.name).changed();}
+                            for group in &c.groups{filter_changed|=ui.selectable_value(&mut self.selected,Some(group.id),&group.name).changed();}
                         });
+                        #[cfg(feature = "continuity-fixture")]
+                        {self.probe.region_rect=crate::probe::rect(region.response.rect);}
+                        #[cfg(not(feature = "continuity-fixture"))]
+                        let _=region;
                         if c.unknown_count>0{ui.small(format!("{}: {}",self.label("Unresolved completion conditions","尚未确定的完成条件"),c.unknown_count));}
                     }
-                    if filter_changed{self.rows_dirty=true;self.rebuild(s);}
+                    if filter_changed{self.sync_region(s);self.rows_dirty=true;self.rebuild(s);}
                     let row_height=ui.text_style_height(&egui::TextStyle::Body)+ui.spacing().item_spacing.y;
+                    let status_width=status_width(ui);
                     egui::ScrollArea::vertical().auto_shrink([false,false]).show_rows(ui,row_height,self.rows.len(),|ui,range|{
                         let Some(c)=s.catalog.as_ref()else{return};
                         for index in range{match &self.rows[index]{
                             Row::Header{group,text}=>{
-                                let label=RichText::new(text).strong().color(if self.current==Some(*group){Color32::GOLD}else{ui.visuals().text_color()});
-                                if ui.selectable_label(false,label).clicked(){if !self.closed.remove(group){self.closed.insert(*group);}self.rows_dirty=true;}
+                                let id=c.groups[*group].id;
+                                let label=RichText::new(text).strong().color(if self.current==Some(id){Color32::GOLD}else{ui.visuals().text_color()});
+                                let header=ui.selectable_label(false,label);
+                                #[cfg(feature = "continuity-fixture")]
+                                self.probe.header(id,header.rect);
+                                if header.clicked(){if !self.closed.remove(&id){self.closed.insert(id);}self.rows_dirty=true;}
                             }
                             Row::Boss(row)=>{
                                 let row=*row;
                                 let boss=&c.rows[row];let state=s.states.get(row).copied().unwrap_or(2);
-                                let status=match state{1=>"[+]",0=>"[ ]",_=>"[?]"};
-                                ui.horizontal(|ui|{
-                                    let enabled=interactive&&self.settings.allow_revive&&state==1&&s.revivable.get(row)==Some(&1)&&s.state.is_some();
-                                    if ui.add_enabled(enabled,egui::Button::new(status).small()).on_hover_text(self.label("Revive this boss","复活此 Boss")).clicked(){
-                                        self.modal=Some((boss.flag,s.state.unwrap().context,boss.name.clone()));
-                                    }
-                                    let color=if state==1{ui.visuals().weak_text_color()}else{ui.visuals().text_color()};
-                                    ui.add(egui::Label::new(RichText::new(&boss.name).color(color)).truncate()).on_hover_ui(|ui|{
-                                        ui.label(&boss.name);
-                                        ui.label(format!("{}: {}",self.label("Location reference","参考地点"),boss.place));
-                                        ui.small(format!("Flag {}",boss.flag));
-                                    });
+                                let enabled=interactive&&self.settings.allow_revive&&state==1&&s.revivable.get(row)==Some(&1)&&s.state.is_some();
+                                let (status,name)=boss_widgets(ui,&boss.name,state,enabled,status_width);
+                                #[cfg(feature = "continuity-fixture")]
+                                self.probe.boss_row(boss,c.groups[boss.group].id,state,status.rect,name.rect);
+                                if status.on_hover_text(self.label("Revive this boss","复活此 Boss")).clicked(){
+                                    self.modal=Some((boss.flag,s.state.unwrap().context,boss.name.clone()));
+                                }
+                                name.on_hover_ui(|ui|{
+                                    ui.label(&boss.name);
+                                    ui.label(format!("{}: {}",self.label("Location reference","参考地点"),boss.place));
+                                    ui.small(format!("Flag {}",boss.flag));
                                 });
                             }
                         }}
@@ -641,7 +768,7 @@ mod tests {
             });
             let catalog = Arc::new(Catalog {
                 groups: vec![Group {
-                    id: 1,
+                    id: 10_000,
                     name: "Test group".into(),
                 }],
                 rows: vec![Encounter {
@@ -658,6 +785,8 @@ mod tests {
             });
             let snapshot = Arc::new(Snapshot {
                 catalog: Some(catalog.clone()),
+                catalog_generation: 1,
+                region: Some(1_000_000),
                 states: vec![1].into(),
                 revivable: vec![1].into(),
                 state: Some(abi::BossState {
@@ -736,6 +865,201 @@ mod tests {
             }
             assert!(self.callbacks.meshes.get() > 0);
         }
+    }
+
+    #[test]
+    fn actual_egui_status_column_aligns_all_states_and_long_names_at_each_font_size() {
+        let h = Harness::new();
+        let context = h.instance.ui.lock().unwrap().context.clone();
+        for size in [12., 20., 40.] {
+            context.set_style(egui::Style {
+                text_styles: [egui::TextStyle::Body, egui::TextStyle::Button]
+                    .map(|kind| (kind, egui::FontId::proportional(size)))
+                    .into(),
+                ..Default::default()
+            });
+            let mut positions = Vec::new();
+            let raw = egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(280., 500.),
+                )),
+                ..Default::default()
+            };
+            let _ = context.run(raw, |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let width = status_width(ui);
+                    for state in [0, 1, 2] {
+                        let (status, name) = boss_widgets(
+                            ui,
+                            "A very long Boss name that must keep its hover text",
+                            state,
+                            state == 1,
+                            width,
+                        );
+                        positions.push((status.rect, name.rect));
+                    }
+                });
+            });
+            assert_eq!(positions.len(), 3);
+            for (status, name) in &positions {
+                assert_eq!(status.width(), positions[0].0.width());
+                assert_eq!(name.left(), positions[0].1.left());
+                assert!(name.left() > status.right());
+                assert!(
+                    name.width() > 0. && name.width() < 280.,
+                    "name={name:?}, status={status:?}, size={size}"
+                );
+            }
+        }
+    }
+
+    fn regional_snapshot(h: &Harness) -> Snapshot {
+        let snapshot = h.instance.snapshot.lock().unwrap().take().unwrap();
+        let mut s = Arc::try_unwrap(snapshot).ok().unwrap();
+        let groups = [61_000, 10_000, 62_000]
+            .map(|id| Group {
+                id,
+                name: format!("Region {id}"),
+            })
+            .into();
+        let rows = (0..3)
+            .map(|group| Encounter {
+                flag: group as u32 + 10,
+                completion: vec![group as u32 + 10],
+                name: format!("Boss {group}"),
+                place: String::new(),
+                group,
+                map_id: 0x3c00_0000,
+                search: format!("boss {group}"),
+            })
+            .collect();
+        s.catalog = Some(Arc::new(Catalog {
+            groups,
+            rows,
+            ..Default::default()
+        }));
+        s.region = Some(6_100_000);
+        s.states = vec![0; 3].into();
+        s
+    }
+
+    #[test]
+    fn region_changes_close_other_groups_once_and_unknown_preserves_manual_choices() {
+        let h = Harness::new();
+        let mut s = regional_snapshot(&h);
+        let mut ui = h.instance.ui.lock().unwrap();
+        ui.sync_region(&s);
+        assert_eq!(ui.current, Some(61_000));
+        assert_eq!(ui.closed, BTreeSet::from([10_000, 62_000]));
+        ui.closed.remove(&10_000);
+        ui.closed.insert(61_000);
+        let manual = ui.closed.clone();
+        for raw_map in [0x3c2a_2400, 0x3c2b_2400, 0x3c2b_2401] {
+            s.state.as_mut().unwrap().raw_map_id = raw_map;
+            ui.sync_region(&s);
+            assert_eq!(ui.closed, manual, "same region, different tiles/variants");
+        }
+        let state = s.state.take();
+        s.region = None;
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, manual);
+        s.state = state;
+        s.region = Some(u32::MAX);
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, manual, "unrecognized region is not a transition");
+        s.region = Some(6_100_000);
+        ui.sync_region(&s);
+        assert_eq!(
+            ui.closed, manual,
+            "recovering the same region preserves manual choices"
+        );
+        s.region = Some(6_200_000);
+        ui.sync_region(&s);
+        assert_eq!(ui.current, Some(62_000));
+        assert_eq!(ui.closed, BTreeSet::from([10_000, 61_000]));
+    }
+
+    #[test]
+    fn first_catalog_reload_and_filters_apply_only_the_latest_valid_region() {
+        let h = Harness::new();
+        let mut s = regional_snapshot(&h);
+        let catalog = s.catalog.take();
+        let mut ui = h.instance.ui.lock().unwrap();
+        ui.sync_region(&s);
+        assert_eq!(ui.current, None);
+        s.catalog = catalog;
+        ui.sync_region(&s);
+        assert_eq!(ui.current, Some(61_000));
+        ui.closed.clear();
+        ui.query = "boss".into();
+        s.region = Some(1_000_000);
+        ui.sync_region(&s);
+        s.region = Some(6_200_000);
+        ui.sync_region(&s);
+        assert!(ui.closed.is_empty(), "search must not collapse its results");
+        ui.query.clear();
+        ui.remaining = true;
+        ui.sync_region(&s);
+        assert!(ui.closed.is_empty());
+        ui.remaining = false;
+        ui.selected = Some(61_000);
+        ui.sync_region(&s);
+        assert!(ui.closed.is_empty());
+        ui.selected = None;
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, BTreeSet::from([10_000, 61_000]));
+        ui.closed.clear();
+        s.revision += 1;
+        ui.sync_region(&s);
+        assert!(
+            ui.closed.is_empty(),
+            "progress/text updates preserve manual folds"
+        );
+        s.catalog_generation += 1;
+        ui.sync_region(&s);
+        assert_eq!(
+            ui.closed,
+            BTreeSet::from([10_000, 61_000]),
+            "reload in the same region reinitializes once"
+        );
+        ui.closed.clear();
+        ui.sync_region(&s);
+        assert!(ui.closed.is_empty());
+        s.catalog_generation += 1;
+        s.region = None;
+        ui.sync_region(&s);
+        assert_eq!(ui.current, None);
+        assert_eq!(ui.closed.len(), 3);
+        s.region = Some(1_000_000);
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, BTreeSet::from([61_000, 62_000]));
+    }
+
+    #[test]
+    fn an_empty_reload_publication_does_not_consume_initial_folds_before_ready_without_a_save() {
+        let h = Harness::new();
+        let mut s = regional_snapshot(&h);
+        let mut ui = h.instance.ui.lock().unwrap();
+        ui.sync_region(&s);
+        ui.closed.clear();
+        let catalog = s.catalog.replace(Arc::new(Catalog::default()));
+        s.catalog_generation += 1;
+        s.state = None;
+        s.region = None;
+        ui.sync_region(&s);
+        assert_eq!(ui.catalog_generation, None);
+        s.catalog = catalog;
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, BTreeSet::from([61_000, 10_000, 62_000]));
+        assert_eq!(ui.current, None);
+        s.state = Some(abi::BossState {
+            valid: 1,
+            ..Default::default()
+        });
+        s.region = Some(6_100_000);
+        ui.sync_region(&s);
+        assert_eq!(ui.closed, BTreeSet::from([10_000, 62_000]));
     }
 
     #[test]
@@ -1025,6 +1349,8 @@ mod tests {
         });
         let mut snapshot = Snapshot {
             catalog: Some(catalog),
+            catalog_generation: 1,
+            region: None,
             states: vec![1; 211].into(),
             revivable: vec![0; 211].into(),
             state: Some(abi::BossState {
@@ -1054,6 +1380,10 @@ mod tests {
             ..Default::default()
         };
         let mut ui = instance.ui.lock().unwrap();
+        // This stress catalogue has synthetic groups, already manually opened.
+        // Region lifecycle is covered separately with real major-region keys.
+        ui.catalog_generation = Some(1);
+        ui.fold_pending = false;
         for revision in 1..=4 {
             snapshot.revision = revision;
             frame.sequence += 1;
@@ -1085,7 +1415,10 @@ mod tests {
             frame.sequence += 1;
             assert_eq!(ui.render(&instance, &snapshot, &frame), abi::OK);
             assert_eq!(ui.revision, 4);
-            assert!(ui.rows_dirty, "map dirtiness must survive compact renders");
+            assert!(
+                ui.revision != snapshot.revision,
+                "pending changes must survive compact renders"
+            );
             assert!(matches!(&ui.rows[0],Row::Header {text,..} if text=="v Group 0  3/3"));
         }
         instance.full.store(true, Ordering::Relaxed);

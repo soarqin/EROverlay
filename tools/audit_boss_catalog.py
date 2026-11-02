@@ -47,7 +47,8 @@ def main():
     fingerprint("cpp", args.reference, "reference.json")
     fingerprint("cpp", args.reference, "src/boss/data/engUS/bosses.json")
     for name in ("GameAreaParam", "BonfireWarpParam", "WorldMapPointParam",
-                 "BonfireWarpSubCategoryParam", "BonfireWarpTabParam", "MapDefaultInfoParam"):
+                 "BonfireWarpSubCategoryParam", "BonfireWarpTabParam", "MapDefaultInfoParam",
+                 "PlayRegionParam"):
         fingerprint("param", args.params, name + ".param")
     for name in ("item_dlc02.bnd", "menu_dlc02.bnd"):
         fingerprint("text", args.params, name)
@@ -61,7 +62,7 @@ def main():
         fingerprint("scene", args.scenes, name)
     for name in ("crates/game/src/boss_events.rs", "crates/game/src/boss_params.rs",
                  "crates/game/src/boss_scene.rs", "crates/boss/src/encounters.rs",
-                 "crates/game/src/text.rs", "crates/boss/src/data.rs",
+                 "crates/game/src/text.rs", "crates/boss/src/data.rs", "crates/boss/src/regions.rs",
                  "crates/boss/src/data_audit.rs", "tools/audit_boss_catalog.py"):
         fingerprint("producer", root, name)
     manifest = {"schema": 1, "cpp_commit": artifact["cpp_commit"], "inputs": inputs}

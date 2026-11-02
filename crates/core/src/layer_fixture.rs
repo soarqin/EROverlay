@@ -71,6 +71,18 @@ forward!(
 forward!(ui_input_clear() -> i32, OK);
 forward!(ui_input_capture(mask: u32) -> i32, OK);
 forward!(read_boss_state(out: *mut BossState) -> i32, ERR_UNAVAILABLE);
+unsafe extern "C" fn read_boss_region(_user: *mut c_void, context: u64, out: *mut u32) -> i32 {
+    if out.is_null() || !out.is_aligned() {
+        return ERR_INVALID;
+    }
+    // SAFETY: the fixture follows the same one-u32 output contract as the core.
+    unsafe { *out = 0 };
+    let Some(Forward(api)) = table() else {
+        return ERR_UNAVAILABLE;
+    };
+    api.read_boss_region
+        .map_or(ERR_UNAVAILABLE, |f| unsafe { f(api.user, context, out) })
+}
 forward!(
     read_event_flags(ids: *const u32, out: *mut u8, len: usize) -> i32,
     ERR_UNAVAILABLE
@@ -117,6 +129,7 @@ pub(super) fn configure_api(mut api: Box<HostApi>) -> Box<HostApi> {
         api.read_boss_state = Some(read_boss_state);
         api.read_event_flags = Some(read_event_flags);
         api.revive_boss = Some(revive_boss);
+        api.read_boss_region = Some(read_boss_region);
     }
     api
 }

@@ -7,6 +7,7 @@ use crate::{
 
 // SoloParamRepository groups, not the unrelated PARAMDEF editor indices.
 pub const GAME_AREA_GROUP: u32 = 29;
+pub const PLAY_REGION_GROUP: u32 = 38;
 pub const BONFIRE_GROUP: u32 = 43;
 pub const BONFIRE_TAB_GROUP: u32 = 44;
 pub const BONFIRE_SUBCATEGORY_GROUP: u32 = 45;
@@ -21,6 +22,13 @@ pub struct GameAreaRecord {
     pub pos: [f32; 3],
     /// Co-op objective text, not an NpcName ID.
     pub found_text: i32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PlayRegionRecord {
+    pub row: u32,
+    pub boss_area: u32,
+    pub bosses: [u32; 16],
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -135,6 +143,28 @@ pub fn game_areas(table: usize) -> Option<Vec<GameAreaRecord>> {
                 pos: position(row, 0x48)?,
                 map: map(row, 0x54)?,
                 found_text: row.field(0x38)?,
+            })
+        })
+        .collect()
+}
+
+/// PLAY_REGION_PARAM_ST v9: game-authored play-region/Boss relationships.
+/// These IDs locate already-discovered encounters; they do not prove a health bar.
+pub fn play_regions(table: usize) -> Option<Vec<PlayRegionRecord>> {
+    typed_rows(table, "PLAY_REGION_PARAM_ST", 9)?
+        .iter()
+        .map(|row| {
+            if row.size < 272 {
+                return None;
+            }
+            let mut bosses = [0; 16];
+            for (i, boss) in bosses.iter_mut().enumerate() {
+                *boss = row.field(172 + i * 4)?;
+            }
+            Some(PlayRegionRecord {
+                row: row.id,
+                boss_area: row.field(20)?,
+                bosses,
             })
         })
         .collect()
@@ -272,6 +302,42 @@ mod tests {
     }
 
     #[test]
+    fn play_region_repository_group_uses_the_existing_bounded_native_chain() {
+        let mut fixture = crate::runtime_perf::NativeMemory::new();
+        fixture.ptr(0x9000 + 0x88 + PLAY_REGION_GROUP as usize * 72, 0x8000);
+        fixture.ptr(0x8080, 0x8200);
+        fixture.ptr(0x8280, fixture.table);
+        assert_eq!(
+            fixture.service().find_param_table(PLAY_REGION_GROUP),
+            fixture.bytes.as_ptr() as usize + fixture.table
+        );
+        fixture.bindings.layout.repository_groups = PLAY_REGION_GROUP;
+        assert_eq!(fixture.service().find_param_table(PLAY_REGION_GROUP), 0);
+    }
+
+    #[test]
+    fn play_region_fields_require_the_typed_v9_complete_row() {
+        let mut data = vec![0; 272];
+        data[20..24].copy_from_slice(&6100u32.to_le_bytes());
+        data[172..176].copy_from_slice(&10000850u32.to_le_bytes());
+        data[232..236].copy_from_slice(&1034500800u32.to_le_bytes());
+        let bytes = table("PLAY_REGION_PARAM_ST", 9, &data);
+        let rows = play_regions(bytes.as_ptr() as usize + 16).unwrap();
+        assert_eq!((rows[0].row, rows[0].boss_area), (10000850, 6100));
+        assert_eq!(rows[0].bosses[0], 10000850);
+        assert_eq!(rows[0].bosses[15], 1034500800);
+        assert!(rows[0].bosses[1..15].iter().all(|id| *id == 0));
+        for (kind, version, body) in [
+            ("GAME_AREA_PARAM_ST", 9, &data[..]),
+            ("PLAY_REGION_PARAM_ST", 8, &data[..]),
+            ("PLAY_REGION_PARAM_ST", 9, &data[..271]),
+        ] {
+            let invalid = table(kind, version, body);
+            assert!(play_regions(invalid.as_ptr() as usize + 16).is_none());
+        }
+    }
+
+    #[test]
     #[ignore = "requires explicitly exported original PARAM assets in EROVERLAY_BOSS_PARAM_DIR"]
     fn archived_param_assets_use_production_readers() {
         let root = std::path::PathBuf::from(std::env::var_os("EROVERLAY_BOSS_PARAM_DIR").unwrap());
@@ -304,6 +370,10 @@ mod tests {
         let tab = tabs(t.as_ptr() as usize + 16).unwrap();
         let m = read("MapDefaultInfoParam");
         let maps = event_maps(m.as_ptr() as usize + 16).unwrap();
+        let r = read("PlayRegionParam");
+        let regions = play_regions(r.as_ptr() as usize + 16).unwrap();
+        assert_eq!(regions.len(), 593);
+        assert!(regions.iter().any(|r| r.bosses.contains(&10000850)));
         assert!(maps.contains(&[61, 48, 38, 0]));
         assert!(
             graces
@@ -315,14 +385,15 @@ mod tests {
                 .any(|s| tab.iter().any(|t| t.row == s.tab as u32))
         );
         println!(
-            "areas={} nonzero_flags={} bonfires={} points={} subcategories={} tabs={} event_maps={}",
+            "areas={} nonzero_flags={} bonfires={} points={} subcategories={} tabs={} event_maps={} play_regions={}",
             areas.len(),
             flags.len(),
             graces.len(),
             points.len(),
             sub.len(),
             tab.len(),
-            maps.len()
+            maps.len(),
+            regions.len()
         );
     }
 }

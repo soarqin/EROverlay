@@ -243,6 +243,74 @@ unsafe extern "C" fn boss_state(user: *mut c_void, out: *mut BossState) -> i32 {
         OK
     })
 }
+unsafe extern "C" fn boss_region(user: *mut c_void, context: u64, out: *mut u32) -> i32 {
+    guarded(|| {
+        if out.is_null() || !out.is_aligned() {
+            return ERR_INVALID;
+        }
+        // SAFETY: the ABI caller provides one aligned writable u32.
+        unsafe { *out = 0 };
+        let Some(h) = (unsafe { host(user) }) else {
+            return ERR_INVALID;
+        };
+        let Ok(game) = h.game.try_lock() else {
+            return ERR_BUSY;
+        };
+        let Some(region) = game.boss_region(context) else {
+            return ERR_UNAVAILABLE;
+        };
+        unsafe { *out = region };
+        OK
+    })
+}
+
+#[cfg(test)]
+mod boss_region_tests {
+    use super::*;
+
+    #[test]
+    fn region_callback_clears_failed_results_and_never_waits_for_game_lock() {
+        let config = config::Config::default();
+        let game = GameServices::offline();
+        let mut owner = Host {
+            log: logging::Log::new(&config),
+            config,
+            display: game.display_reader(),
+            game: Mutex::new(game),
+            textures: texture::Textures::new(),
+            input: Mutex::new(Input {
+                epoch: 0,
+                keys: Default::default(),
+            }),
+            unload_chord: 0,
+        };
+        let user = (&mut owner as *mut Host).cast();
+        let mut out = 123;
+        assert_eq!(unsafe { boss_region(user, 1, &mut out) }, ERR_UNAVAILABLE);
+        assert_eq!(out, 0);
+        let held = owner.game.lock().unwrap();
+        out = 123;
+        assert_eq!(unsafe { boss_region(user, 1, &mut out) }, ERR_BUSY);
+        assert_eq!(out, 0);
+        drop(held);
+        out = 123;
+        assert_eq!(
+            unsafe { boss_region(std::ptr::null_mut(), 1, &mut out) },
+            ERR_INVALID
+        );
+        assert_eq!(out, 0);
+        assert_eq!(
+            unsafe { boss_region(user, 1, std::ptr::null_mut()) },
+            ERR_INVALID
+        );
+        let mut unaligned = [0u32; 2];
+        let ptr = unaligned.as_mut_ptr().cast::<u8>();
+        assert_eq!(
+            unsafe { boss_region(user, 1, ptr.add(1).cast()) },
+            ERR_INVALID
+        );
+    }
+}
 unsafe extern "C" fn event_flags(
     user: *mut c_void,
     ids: *const u32,
@@ -482,7 +550,8 @@ impl Runtime {
                 | CAP_INPUT
                 | CAP_CONCURRENT
                 | CAP_UI_INPUT
-                | CAP_BOSS_STATE,
+                | CAP_BOSS_STATE
+                | CAP_BOSS_REGION,
             user: (&mut *host as *mut Host).cast(),
             log: log_enabled.then_some(log),
             config_get: Some(config_get),
@@ -508,6 +577,7 @@ impl Runtime {
             read_boss_state: Some(boss_state),
             read_event_flags: Some(event_flags),
             revive_boss: Some(revive_boss),
+            read_boss_region: Some(boss_region),
         });
         #[cfg(feature = "layer-order-fixture")]
         let api = layer_fixture::configure_api(api);

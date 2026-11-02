@@ -595,6 +595,7 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
         "BonfireWarpSubCategoryParam",
         "BonfireWarpTabParam",
         "MapDefaultInfoParam",
+        "PlayRegionParam",
     ];
     let native: Vec<_> = names
         .iter()
@@ -1071,7 +1072,8 @@ fn archived_old_207_to_rust_member_audit() -> Result<()> {
             "Reachable enabled EMEVD bar instructions do not by themselves prove that an entity exists in MSB or that a live-game bar was observed; selected scope additionally uses only the explicitly available scene inputs.",
             "Place conditional flags are unknown in this offline audit; locality is not checked against the manually authored old places."],
         "old_to_rust":rows,"rust_battles":battles,"catalogue":catalog.rows.iter().enumerate().map(|(i,r)|json!({"row":i,
-            "flag":r.flag,"completion_flags":r.completion,"name":r.name,"place":r.place,"group":catalog.groups[r.group].name,"map":map_label(r.map_id)})).collect::<Vec<_>>(),
+            "flag":r.flag,"completion_flags":r.completion,"name":r.name,"place":r.place,"group":catalog.groups[r.group].name,
+            "group_id":catalog.groups[r.group].id,"map":map_label(r.map_id)})).collect::<Vec<_>>(),
         "defeat_events":used_defeats.iter().map(|&i|{
             let mut value=defeat(&defeats[i]); value["defeat"]=json!(format!("D{:05}",i+1)); value
         }).collect::<Vec<_>>(),"different_flag_correlations":correlations(&groups,&defeats),

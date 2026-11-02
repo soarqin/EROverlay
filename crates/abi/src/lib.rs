@@ -15,6 +15,7 @@ pub const CAP_INPUT: u64 = 16;
 pub const CAP_CONCURRENT: u64 = 32;
 pub const CAP_UI_INPUT: u64 = 64;
 pub const CAP_BOSS_STATE: u64 = 128;
+pub const CAP_BOSS_REGION: u64 = 256;
 pub const UI_CAPTURE_MOUSE: u32 = 1;
 pub const UI_CAPTURE_KEYBOARD: u32 = 2;
 pub const UI_INPUT_POINTER: u32 = 1;
@@ -310,13 +311,21 @@ pub struct HostApi {
     /// flags. The primary defeat flag must currently be set.
     pub revive_boss:
         Option<unsafe extern "C" fn(*mut c_void, u64, u32, *const FlagWrite, usize) -> i32>,
+    /// Optional update-only service. Returns FieldArea's current play-region ID
+    /// only for the supplied fresh BossState context. Failure always writes 0.
+    pub read_boss_region: Option<unsafe extern "C" fn(*mut c_void, u64, *mut u32) -> i32>,
 }
 
 /// V1's original prefix remains accepted independently of optional appendices.
 pub const HOST_V1_BASE_SIZE: usize = core::mem::offset_of!(HostApi, ui_input_poll);
 pub const UI_INPUT_HOST_SIZE: usize = core::mem::offset_of!(HostApi, ui_input_capture)
     + core::mem::size_of::<Option<unsafe extern "C" fn(*mut c_void, u32) -> i32>>();
-pub const BOSS_STATE_HOST_SIZE: usize = core::mem::size_of::<HostApi>();
+pub const BOSS_STATE_HOST_SIZE: usize = core::mem::offset_of!(HostApi, revive_boss)
+    + core::mem::size_of::<
+        Option<unsafe extern "C" fn(*mut c_void, u64, u32, *const FlagWrite, usize) -> i32>,
+    >();
+pub const BOSS_REGION_HOST_SIZE: usize = core::mem::offset_of!(HostApi, read_boss_region)
+    + core::mem::size_of::<Option<unsafe extern "C" fn(*mut c_void, u64, *mut u32) -> i32>>();
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -389,6 +398,26 @@ mod tests {
         assert_eq!(HOST_V1_BASE_SIZE, 176);
         assert_eq!(UI_INPUT_HOST_SIZE, 200);
         assert_eq!(BOSS_STATE_HOST_SIZE, 224);
+        assert_eq!(BOSS_REGION_HOST_SIZE, 232);
+        assert_eq!(offset_of!(HostApi, read_boss_region), BOSS_STATE_HOST_SIZE);
+        assert!(valid_header(
+            ABI_MAGIC,
+            224,
+            ABI_VERSION,
+            BOSS_STATE_HOST_SIZE
+        ));
+        assert!(!valid_header(
+            ABI_MAGIC,
+            224,
+            ABI_VERSION,
+            BOSS_REGION_HOST_SIZE
+        ));
+        assert!(valid_header(
+            ABI_MAGIC,
+            232,
+            ABI_VERSION,
+            BOSS_REGION_HOST_SIZE
+        ));
         assert_eq!(offset_of!(HostApi, set_render_options), 168);
         assert!(!valid_header(
             ABI_MAGIC,

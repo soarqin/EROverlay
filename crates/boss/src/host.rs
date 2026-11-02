@@ -64,6 +64,18 @@ impl Host {
             .is_some_and(|f| unsafe { f(self.0.user, &mut v) } == abi::OK)
             .then_some(v)
     }
+    pub fn region(self, context: u64) -> Option<u32> {
+        if self.0.capabilities & abi::CAP_BOSS_REGION == 0
+            || (self.0.size as usize) < abi::BOSS_REGION_HOST_SIZE
+        {
+            return None;
+        }
+        let mut region = 0;
+        self.0.read_boss_region.and_then(|f| {
+            (unsafe { f(self.0.user, context, &mut region) } == abi::OK && region != 0)
+                .then_some(region)
+        })
+    }
     pub fn flags(self, ids: &[u32], out: &mut [u8]) -> bool {
         out.fill(2);
         ids.len() == out.len()

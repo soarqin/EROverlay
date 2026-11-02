@@ -5,8 +5,8 @@ use crate::host::Host;
 use eroverlay_game::{
     boss_events::{BossDisplay, EventScript, discover_boss_displays, parse_emevd},
     boss_params::{
-        self as params, BonfireRecord, GameAreaRecord, MapPointRecord, SubcategoryRecord,
-        TabRecord, TextChoice,
+        self as params, BonfireRecord, GameAreaRecord, MapPointRecord, PlayRegionRecord,
+        SubcategoryRecord, TabRecord, TextChoice,
     },
     boss_scene::{SceneIndex, parse_msb},
     text::{self, TextCatalog, TextNamespaces},
@@ -17,13 +17,14 @@ use std::{
     time::{Duration, Instant},
 };
 
-const PARAM_GROUPS: [u32; 6] = [
+const PARAM_GROUPS: [u32; 7] = [
     params::GAME_AREA_GROUP,
     params::BONFIRE_GROUP,
     params::WORLD_MAP_POINT_GROUP,
     params::BONFIRE_SUBCATEGORY_GROUP,
     params::BONFIRE_TAB_GROUP,
     params::MAP_DEFAULT_INFO_GROUP,
+    params::PLAY_REGION_GROUP,
 ];
 const MAX_FILES: usize = 4096;
 const MAX_SCRIPT_BYTES: usize = 32 * 1024 * 1024;
@@ -65,6 +66,10 @@ pub struct Catalog {
     pub flag_ids: Vec<u32>,
 }
 impl Catalog {
+    pub fn group_for_region(&self, play_region_id: u32) -> Option<usize> {
+        let id = crate::regions::for_play_region(play_region_id)?.id;
+        self.groups.iter().position(|group| group.id == id)
+    }
     pub fn states(&self, values: &[u8]) -> Vec<u8> {
         self.rows
             .iter()
@@ -120,6 +125,7 @@ struct Loading {
     points: Vec<MapPointRecord>,
     subcategories: Vec<SubcategoryRecord>,
     tabs: Vec<TabRecord>,
+    play_regions: Vec<PlayRegionRecord>,
     texts: TextCatalog,
     scripts: Vec<EventScript>,
     script_bytes: usize,
@@ -207,16 +213,17 @@ impl Loading {
         }
     }
     #[cfg(test)]
-    fn new(host: Host, tables: [usize; 6]) -> Option<Self> {
+    fn new(host: Host, tables: [usize; 7]) -> Option<Self> {
         Self::with_language(host, tables, current_language(host).as_deref())
     }
-    fn with_language(host: Host, tables: [usize; 6], language: Option<&str>) -> Option<Self> {
+    fn with_language(host: Host, tables: [usize; 7], language: Option<&str>) -> Option<Self> {
         let mut load = Self {
             areas: params::game_areas(tables[0])?,
             graces: params::bonfires(tables[1])?,
             points: params::map_points(tables[2])?,
             subcategories: params::subcategories(tables[3])?,
             tabs: params::tabs(tables[4])?,
+            play_regions: params::play_regions(tables[6])?,
             texts: TextCatalog::default(),
             scripts: Vec::new(),
             script_bytes: 0,
@@ -593,6 +600,7 @@ impl Loading {
             &self.points,
             &self.subcategories,
             &self.tabs,
+            &self.play_regions,
             &self.texts,
             host,
             relations,
@@ -602,11 +610,12 @@ impl Loading {
 
 pub struct Data {
     host: Host,
-    tables: [usize; 6],
+    tables: [usize; 7],
     check: Instant,
     loading: Option<Loading>,
     catalog: Arc<Catalog>,
     revision: u64,
+    directory_generation: u64,
     status: &'static str,
     finished: bool,
     publish_empty: bool,
@@ -626,11 +635,12 @@ impl Data {
         let relation_error = relations.is_err();
         Self {
             host,
-            tables: [0; 6],
+            tables: [0; 7],
             check: Instant::now(),
             loading: None,
             catalog: Arc::new(Catalog::default()),
             revision: 0,
+            directory_generation: 0,
             status: "Waiting for game parameters",
             finished: false,
             publish_empty: false,
@@ -645,6 +655,9 @@ impl Data {
     pub fn revision(&self) -> u64 {
         self.revision
     }
+    pub fn directory_generation(&self) -> u64 {
+        self.directory_generation
+    }
     fn set_status(&mut self, status: &'static str) {
         if self.status != status {
             self.status = status;
@@ -654,10 +667,11 @@ impl Data {
     /// Explicit Mod/resource refresh; transient loading/menu states do not
     /// discard the catalogue or cancel in-flight native file generations.
     pub fn reload(&mut self) {
+        self.directory_generation = self.directory_generation.wrapping_add(1);
         if let Some(mut load) = self.loading.take() {
             load.cancel(self.host);
         }
-        self.tables = [0; 6];
+        self.tables = [0; 7];
         self.check = Instant::now();
         self.finished = false;
         self.labels = Labels::default();
@@ -684,7 +698,11 @@ impl Data {
         if now >= self.check {
             self.check = now + Duration::from_millis(500);
             let tables = PARAM_GROUPS.map(|group| self.host.param(group));
+            if tables[..6].iter().all(|t| *t != 0) && tables[6] == 0 {
+                self.set_status("Waiting for game region parameters");
+            }
             if tables.iter().all(|t| *t != 0) && tables != self.tables {
+                self.directory_generation = self.directory_generation.wrapping_add(1);
                 if let Some(mut loading) = self.loading.take() {
                     loading.cancel(self.host);
                 }
@@ -912,6 +930,164 @@ fn encounter_groups<'a>(
         .collect()
 }
 
+struct PlayGroups {
+    exact: BTreeMap<u32, BTreeSet<u32>>,
+    nearby: BTreeMap<u32, BTreeSet<u32>>,
+}
+
+struct RegionAnchor {
+    map: [u8; 3],
+    pos: [f32; 3],
+    region: u32,
+}
+struct RegionAnchors(Vec<RegionAnchor>);
+impl RegionAnchors {
+    fn new(graces: &[BonfireRecord], areas: &[GameAreaRecord], play: &PlayGroups) -> Self {
+        let mut anchors = Vec::new();
+        for g in graces {
+            if [60, 61].contains(&g.map[0])
+                && let Some(r) = crate::regions::for_subcategory(g.subcategory as u32)
+            {
+                anchors.push(RegionAnchor {
+                    map: g.map,
+                    pos: g.pos,
+                    region: r.id,
+                });
+            }
+        }
+        for a in areas {
+            if a.flag != 0
+                && [60, 61].contains(&a.map[0])
+                && let Some(r) = play.find(&[a.row, a.flag])
+            {
+                anchors.push(RegionAnchor {
+                    map: a.map,
+                    pos: a.pos,
+                    region: r.id,
+                });
+            }
+        }
+        Self(anchors)
+    }
+    fn find(&self, map: [u8; 3], pos: Option<[f32; 3]>) -> Option<&'static crate::regions::Region> {
+        if ![60, 61].contains(&map[0]) {
+            return None;
+        }
+        // Existing Minimap conversion uses 256 game units per m60/m61 tile.
+        // This is only an initialization fallback, never an exact boundary or
+        // current-player region lookup. With no PARAM position use tile centre
+        // and omit unknown altitude, rather than inventing zero elevation.
+        let origin = pos.unwrap_or([0.; 3]);
+        let mut nearest = None;
+        for a in &self.0 {
+            if a.map[0] != map[0] || a.map[1].abs_diff(map[1]) > 2 || a.map[2].abs_diff(map[2]) > 2
+            {
+                continue;
+            }
+            let dx = a.pos[0] - origin[0] + (f32::from(a.map[1]) - f32::from(map[1])) * 256.;
+            let dz = a.pos[2] - origin[2] + (f32::from(a.map[2]) - f32::from(map[2])) * 256.;
+            let dy = if pos.is_some() {
+                a.pos[1] - origin[1]
+            } else {
+                0.
+            };
+            let distance = dx * dx + dy * dy + dz * dz;
+            if !distance.is_finite() || distance > 512. * 512. {
+                continue;
+            }
+            let key = (distance, a.region, a.map);
+            if nearest.is_none_or(|prior: (f32, u32, [u8; 3])| {
+                key.0
+                    .total_cmp(&prior.0)
+                    .then_with(|| key.1.cmp(&prior.1))
+                    .then_with(|| key.2.cmp(&prior.2))
+                    .is_lt()
+            }) {
+                nearest = Some(key);
+            }
+        }
+        crate::regions::by_id(nearest?.1)
+    }
+}
+
+fn regional_place(
+    map: [u8; 3],
+    pos: Option<[f32; 3]>,
+    points: &[MapPointRecord],
+) -> Option<&MapPointRecord> {
+    let pos = pos?;
+    points
+        .iter()
+        .filter(|point| {
+            point
+                .texts
+                .iter()
+                .any(|text| text.kind == 0 && crate::regions::for_place(text.id).is_some())
+        })
+        .filter_map(|point| {
+            let mut location = point.pos;
+            if point.map != map {
+                if ![60, 61].contains(&map[0])
+                    || point.map[0] != map[0]
+                    || point.map[1].abs_diff(map[1]) > 1
+                    || point.map[2].abs_diff(map[2]) > 1
+                {
+                    return None;
+                }
+                location[0] += (f32::from(point.map[1]) - f32::from(map[1])) * 256.;
+                location[2] += (f32::from(point.map[2]) - f32::from(map[2])) * 256.;
+            }
+            let d = distance(location, pos);
+            (d.is_finite() && d <= 64. * 64.).then_some((point, d))
+        })
+        .min_by(|(a, da), (b, db)| da.total_cmp(db).then_with(|| a.row.cmp(&b.row)))
+        .map(|(point, _)| point)
+}
+impl PlayGroups {
+    fn new(rows: &[PlayRegionRecord]) -> Self {
+        let mut result = Self {
+            exact: BTreeMap::new(),
+            nearby: BTreeMap::new(),
+        };
+        for row in rows {
+            let Some(region) = crate::regions::for_play_region(row.row)
+                .or_else(|| crate::regions::for_play_region(row.boss_area))
+            else {
+                continue;
+            };
+            if row.boss_area != 0 {
+                result
+                    .exact
+                    .entry(row.boss_area)
+                    .or_default()
+                    .insert(region.id);
+            }
+            for id in row.bosses.iter().copied().filter(|id| *id != 0) {
+                result.nearby.entry(id).or_default().insert(region.id);
+            }
+        }
+        result
+    }
+    fn find(&self, ids: &[u32]) -> Option<&'static crate::regions::Region> {
+        for table in [&self.exact, &self.nearby] {
+            let groups: BTreeSet<_> = ids
+                .iter()
+                .copied()
+                .filter(|id| *id != 0)
+                .filter_map(|id| table.get(&id))
+                .flat_map(|ids| ids.iter().copied())
+                .collect();
+            if groups.len() == 1 {
+                return crate::regions::by_id(*groups.first()?);
+            }
+            if groups.len() > 1 {
+                return None;
+            }
+        }
+        None
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn build_catalog(
     displays: &[BossDisplay],
@@ -920,6 +1096,7 @@ fn build_catalog(
     points: &[MapPointRecord],
     subcategories: &[SubcategoryRecord],
     tabs: &[TabRecord],
+    play_regions: &[PlayRegionRecord],
     texts: &TextCatalog,
     _host: Host,
     relations: &Relations,
@@ -929,17 +1106,46 @@ fn build_catalog(
     let mut labels = Labels::default();
     let mut group_indices = BTreeMap::new();
     let mut group_order = BTreeMap::new();
+    let play_groups = PlayGroups::new(play_regions);
+    let anchors = RegionAnchors::new(graces, areas, &play_groups);
     for EncounterGroup {
         flag,
         members: evidence,
     } in encounter_groups(displays, relations)
     {
-        let first = evidence[0];
+        let first = evidence
+            .iter()
+            .copied()
+            .min_by_key(|d| {
+                (
+                    d.completion_flag != Some(flag),
+                    d.map_id,
+                    d.runtime_variant,
+                    d.entity_id,
+                    d.name_id,
+                )
+            })
+            .unwrap();
+        let event_map = map3(first.map_id);
         let area = areas
             .iter()
-            .find(|a| a.flag == flag && a.map == map3(first.map_id))
-            .or_else(|| areas.iter().find(|a| flag != 0 && a.flag == flag));
-        let map = area.map_or(map3(first.map_id), |a| a.map);
+            .find(|a| flag != 0 && a.flag == flag && a.map == event_map)
+            .or_else(|| {
+                areas.iter().find(|a| {
+                    flag != 0
+                        && a.flag == flag
+                        && evidence.iter().any(|d| map3(d.map_id)[0] == a.map[0])
+                })
+            })
+            .or_else(|| {
+                areas.iter().find(|a| {
+                    a.map[0] == event_map[0]
+                        && evidence.iter().any(|d| {
+                            d.entity_id != 0 && (d.entity_id == a.row || d.entity_id == a.flag)
+                        })
+                })
+            });
+        let map = area.map_or(event_map, |a| a.map);
         let grace = graces.iter().filter(|g| g.map == map).min_by(|a, b| {
             let origin = area.map_or([0.; 3], |a| a.pos);
             distance(a.pos, origin)
@@ -949,23 +1155,51 @@ fn build_catalog(
         let sub = grace.and_then(|g| subcategories.iter().find(|s| s.row == g.subcategory as u32));
         let tab = sub.and_then(|s| tabs.iter().find(|t| t.row == u32::from(s.tab)));
         let packed = u32::from_be_bytes([map[0], map[1], map[2], 0]);
-        let group_id = sub.map_or(packed | 0x8000_0000, |s| s.row);
+        let regional_place = regional_place(map, area.map(|a| a.pos), points);
+        let mut region_ids = vec![flag];
+        if let Some(area) = area {
+            region_ids.extend([area.row, area.flag]);
+        }
+        region_ids.extend(evidence.iter().map(|d| d.entity_id));
+        let region = crate::regions::for_map(map)
+            .or_else(|| {
+                regional_place.and_then(|point| {
+                    point
+                        .texts
+                        .iter()
+                        .filter(|text| text.kind == 0)
+                        .find_map(|text| crate::regions::for_place(text.id))
+                })
+            })
+            .or_else(|| play_groups.find(&region_ids))
+            .or_else(|| sub.and_then(|s| crate::regions::for_subcategory(s.row)))
+            .or_else(|| anchors.find(map, area.map(|a| a.pos)));
+        let group_id = region.map_or_else(|| sub.map_or(packed | 0x8000_0000, |s| s.row), |r| r.id);
+        let broad_order =
+            region.and_then(|r| crate::regions::REGIONS.iter().position(|v| v.id == r.id));
         group_order.insert(
             group_id,
             (
-                tab.map_or(i32::MAX, |t| t.sort),
+                broad_order.map_or_else(|| tab.map_or(i32::MAX, |t| 1000 + t.sort), |i| i as i32),
                 sub.map_or(u16::MAX, |s| s.sort),
                 group_id,
             ),
         );
         let group = *group_indices.entry(group_id).or_insert_with(|| {
-            let region = sub.and_then(|s| texts.menu(s.text_id));
+            let section = sub.and_then(|s| texts.menu(s.text_id));
             let heading = tab.and_then(|t| texts.menu(t.text_id));
-            let name = match (heading, region) {
-                (Some(a), Some(b)) if a != b => format!("{a} / {b}"),
-                (_, Some(b)) => b.into(),
-                (Some(a), _) => a.into(),
-                _ => map_label(packed),
+            let name = if let Some(region) = region {
+                texts
+                    .place(region.id as i32)
+                    .map(str::to_owned)
+                    .unwrap_or_else(|| format!("PlaceName#{}", region.id))
+            } else {
+                match (heading, section) {
+                    (Some(a), Some(b)) if a != b => format!("{a} / {b}"),
+                    (_, Some(b)) => b.into(),
+                    (Some(a), _) => a.into(),
+                    _ => map_label(packed),
+                }
             };
             let index = catalog.groups.len();
             catalog.groups.push(Group { id: group_id, name });
@@ -995,6 +1229,9 @@ fn build_catalog(
         for point in points.iter().filter(|p| {
             flag != 0 && (p.cleared_flag == flag || p.texts.iter().any(|t| t.disable_flag == flag))
         }) {
+            label.add(&point.texts, texts);
+        }
+        if let Some(point) = regional_place {
             label.add(&point.texts, texts);
         }
         if let Some(grace) = grace {
@@ -1098,6 +1335,7 @@ mod tests {
             points: Vec::new(),
             subcategories: Vec::new(),
             tabs: Vec::new(),
+            play_regions: Vec::new(),
             texts: TextCatalog::default(),
             scripts: Vec::new(),
             script_bytes: 0,
@@ -1158,7 +1396,7 @@ mod tests {
         next: u64,
         param: usize,
         state: Option<abi::BossState>,
-        tables: Option<[usize; 6]>,
+        tables: Option<[usize; 7]>,
         language: Option<String>,
         default_missing: bool,
         peak_tokens: usize,
@@ -1583,7 +1821,7 @@ mod tests {
         );
         assert!(!run_files(&mut load, host, Instant::now()));
         data.loading = Some(load);
-        data.tables = [1; 6];
+        data.tables = [1; 7];
         transport.param = 1;
         transport.state = Some(abi::BossState {
             size: size_of::<abi::BossState>() as u32,
@@ -1607,7 +1845,7 @@ mod tests {
         transport.state = None;
         data.check = Instant::now();
         data.update();
-        assert_eq!(data.tables, [2; 6]);
+        assert_eq!(data.tables, [2; 7]);
         assert!(data.loading.is_none());
         assert_eq!(transport.released, [1]);
         assert!(transport.active.is_empty());
@@ -1985,6 +2223,251 @@ mod tests {
     }
 
     #[test]
+    fn region_param_relations_are_unambiguous_and_resolve_declared_parent_areas() {
+        let row = |row, area, boss| {
+            let mut bosses = [0; 16];
+            bosses[0] = boss;
+            PlayRegionRecord {
+                row,
+                boss_area: area,
+                bosses,
+            }
+        };
+        let index = PlayGroups::new(&[
+            row(6100001, 50, 7),
+            row(6200001, 0, 7),
+            row(6941001, 6940000, 9),
+        ]);
+        assert!(
+            index.find(&[7]).is_none(),
+            "shared nearby-boss lists are not a unique region"
+        );
+        assert_eq!(index.find(&[50, 7]).unwrap().id, 61000);
+        assert_eq!(index.find(&[9]).unwrap().id, 69400);
+        assert!(index.find(&[0, 123]).is_none());
+    }
+
+    #[test]
+    fn regional_place_relations_require_the_same_map_and_a_finite_64_unit_radius() {
+        let mut point = MapPointRecord {
+            row: 1,
+            map: [60, 33, 42],
+            pos: [0.; 3],
+            icon: 0,
+            cleared_flag: 0,
+            texts: [TextChoice::default(); 8],
+        };
+        point.texts[0].id = 6210900;
+        let points = [point.clone()];
+        assert!(regional_place(point.map, Some([64., 0., 0.]), &points).is_some());
+        assert!(regional_place(point.map, Some([64.1, 0., 0.]), &points).is_none());
+        assert!(regional_place(point.map, Some([0., 64.1, 0.]), &points).is_none());
+        assert!(regional_place([61, 33, 42], Some([0.; 3]), &points).is_none());
+        assert!(regional_place([60, 34, 42], Some([0.; 3]), &points).is_none());
+        assert!(regional_place(point.map, None, &points).is_none());
+        assert!(regional_place(point.map, Some([f32::NAN, 0., 0.]), &points).is_none());
+        point.pos[1] = f32::INFINITY;
+        assert!(regional_place(point.map, Some([0.; 3]), &[point.clone()]).is_none());
+        point.pos = [0.; 3];
+        point.map = [60, 34, 42];
+        point.pos = [-250., 0., 0.];
+        assert!(regional_place([60, 33, 42], Some([6., 0., 0.]), &[point.clone()]).is_some());
+        point.map = [60, 35, 42];
+        point.pos = [-506., 0., 0.];
+        assert!(regional_place([60, 33, 42], Some([6., 0., 0.]), &[point.clone()]).is_none());
+        point.map = [60, 33, 42];
+        point.pos = [0.; 3];
+        point.texts[0].kind = 1;
+        assert!(regional_place(point.map, Some([0.; 3]), &[point]).is_none());
+    }
+
+    #[test]
+    fn region_anchor_fallback_is_limited_to_its_world_neighbourhood_and_known_altitude() {
+        let anchors = RegionAnchors(vec![
+            RegionAnchor {
+                map: [60, 40, 40],
+                pos: [0., 400., 0.],
+                region: 62002,
+            },
+            RegionAnchor {
+                map: [60, 40, 40],
+                pos: [0.; 3],
+                region: 62000,
+            },
+        ]);
+        assert_eq!(
+            anchors.find([60, 40, 40], Some([0., 390., 0.])).unwrap().id,
+            62002
+        );
+        assert_eq!(anchors.find([60, 40, 40], None).unwrap().id, 62000);
+        assert_eq!(anchors.find([60, 42, 40], Some([0.; 3])).unwrap().id, 62000);
+        assert!(anchors.find([60, 42, 40], Some([0.1, 0., 0.])).is_none());
+        assert!(anchors.find([61, 40, 40], Some([0.; 3])).is_none());
+        assert!(anchors.find([12, 40, 40], Some([0.; 3])).is_none());
+        assert!(
+            anchors
+                .find([60, 40, 40], Some([f32::NAN, 0., 0.]))
+                .is_none()
+        );
+        let far = RegionAnchors(vec![RegionAnchor {
+            map: [60, 43, 40],
+            pos: [-768., 0., 0.],
+            region: 62000,
+        }]);
+        assert!(far.find([60, 40, 40], Some([0.; 3])).is_none());
+    }
+
+    #[test]
+    fn event_map_scope_prevents_a_copied_param_location_from_reclassifying_an_encounter() {
+        let flag = 7;
+        let map = u32::from_be_bytes([21, 0, 0, 0]);
+        let displays = [display(map, 0, flag, 100, Some(flag))];
+        let areas = [GameAreaRecord {
+            row: flag,
+            flag,
+            map: [15, 0, 0],
+            pos: [0.; 3],
+            found_text: -1,
+        }];
+        let mut bosses = [0; 16];
+        bosses[0] = flag;
+        let play = [PlayRegionRecord {
+            row: 6900000,
+            boss_area: 6900000,
+            bosses,
+        }];
+        let (catalog, _) = build_catalog(
+            &displays,
+            &areas,
+            &[],
+            &[],
+            &[],
+            &[],
+            &play,
+            &TextCatalog::default(),
+            host(),
+            &Relations::default(),
+        );
+        assert_eq!(catalog.rows[0].map_id, map);
+        assert_eq!(catalog.groups[catalog.rows[0].group].id, 69000);
+        assert_eq!(catalog.group_for_region(6900001), Some(0));
+        assert_eq!(catalog.group_for_region(1500000), None);
+    }
+
+    #[test]
+    fn canonical_journey_location_does_not_depend_on_resource_completion_order() {
+        let relations =
+            crate::encounters::load(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../.."))
+                .unwrap();
+        let mut load = empty_loading();
+        load.displays = vec![
+            display(0x3c223200, 0, 1034500800, 1, Some(1034500800)),
+            display(0x3c222a00, 0, 1034420800, 1, Some(1034420800)),
+            display(0x3c253300, 0, 1037510800, 2, Some(1037510800)),
+            display(0x3c293400, 0, 1041520800, 2, Some(1041520800)),
+        ];
+        let first = load.catalog(host(), &relations);
+        load.displays.reverse();
+        let second = load.catalog(host(), &relations);
+        assert_eq!(first, second);
+        for (flag, map) in [(1034420800, 0x3c222a00), (1041520800, 0x3c293400)] {
+            assert_eq!(
+                first.rows.iter().find(|r| r.flag == flag).unwrap().map_id,
+                map
+            );
+        }
+    }
+
+    #[test]
+    fn exact_param_location_can_be_on_a_neighbouring_tile_in_the_same_map_family() {
+        let mut load = empty_loading();
+        load.displays.push(display(0x3d302600, 0, 7, 1, Some(7)));
+        load.areas.push(GameAreaRecord {
+            row: 7,
+            flag: 7,
+            map: [61, 48, 39],
+            pos: [0.; 3],
+            found_text: -1,
+        });
+        assert_eq!(
+            load.catalog(host(), &Relations::default()).rows[0].map_id,
+            0x3d302700
+        );
+    }
+
+    #[test]
+    fn unknown_completions_do_not_join_zero_flag_param_placeholders() {
+        let mut load = empty_loading();
+        let map = [60, 33, 42];
+        load.displays = vec![
+            display(0x3c212a00, 0, 7, 1, None),
+            display(0x3c212a00, 0, 8, 2, None),
+        ];
+        load.areas = vec![
+            GameAreaRecord {
+                row: 0,
+                flag: 0,
+                map,
+                pos: [0., 500., 0.],
+                found_text: -1,
+            },
+            GameAreaRecord {
+                row: 8,
+                flag: 0,
+                map,
+                pos: [0., 500., 0.],
+                found_text: -1,
+            },
+        ];
+        for (i, subcategory, pos) in [(0, 62000, [0.; 3]), (1, 62002, [0., 500., 0.])] {
+            load.graces.push(BonfireRecord {
+                row: i,
+                map,
+                pos,
+                subcategory,
+                cleared_flag: 0,
+                unlock_flag: 0,
+                texts: [TextChoice::default(); 8],
+            });
+            load.subcategories.push(SubcategoryRecord {
+                row: subcategory as u32,
+                text_id: -1,
+                tab: 0,
+                sort: 0,
+            });
+        }
+        let catalog = load.catalog(host(), &Relations::default());
+        assert_eq!(catalog.unknown_count, 2);
+        let region =
+            |name| catalog.groups[catalog.rows.iter().find(|r| r.name == name).unwrap().group].id;
+        assert_eq!(region("NpcName#1"), 62000);
+        assert_eq!(
+            region("NpcName#2"),
+            62002,
+            "real entity-to-row links remain useful without completion flags"
+        );
+    }
+
+    #[test]
+    fn missing_optional_host_region_param_waits_without_file_requests_or_generation_churn() {
+        let mut transport = Transport {
+            tables: Some([1, 1, 1, 1, 1, 1, 0]),
+            ..Default::default()
+        };
+        let mut data = Data::new(transport.host());
+        let start = Instant::now();
+        for i in 0..4 {
+            assert!(data.update_at(start + Duration::from_secs(i)).is_none());
+            assert!(data.loading.is_none());
+            assert_eq!(data.status(), "Waiting for game region parameters");
+        }
+        assert_eq!(data.directory_generation(), 0);
+        assert!(transport.requests.is_empty());
+        data.reload();
+        assert_eq!(data.directory_generation(), 1);
+    }
+
+    #[test]
     fn transient_context_and_param_unavailability_keep_catalog_and_pending() {
         unsafe extern "C" fn busy(_: *mut c_void, _: u64, _: *mut abi::FileView) -> i32 {
             abi::ERR_BUSY
@@ -2010,11 +2493,11 @@ mod tests {
             flag_ids: vec![7],
         });
         data.catalog = old.clone();
-        data.tables = [1; 6];
+        data.tables = [1; 7];
         data.finished = true;
         assert!(data.update().is_none());
         assert!(Arc::ptr_eq(&old, &data.catalog));
-        assert_eq!(data.tables, [1; 6]);
+        assert_eq!(data.tables, [1; 7]);
         assert!(data.finished);
         data.reload();
         assert!(data.update().unwrap().rows.is_empty());
@@ -2085,8 +2568,10 @@ mod tests {
             assert_eq!(c.rows[0].place, "Conditional place");
             assert!(c.rows[0].search.contains("conditional place"));
             let revision = data.revision();
+            let generation = data.directory_generation();
             assert!(data.refresh_places(&valid).is_none());
             assert_eq!(data.revision(), revision);
+            assert_eq!(data.directory_generation(), generation);
             transport.flag_values.insert(12, 1);
             assert_eq!(
                 data.refresh_places(&valid).unwrap().rows[0].place,
@@ -2105,21 +2590,27 @@ mod tests {
             ("BONFIRE_WARP_SUB_CATEGORY_PARAM_ST", 1),
             ("BONFIRE_WARP_TAB_PARAM_ST", 2),
             ("MAP_DEFAULT_INFO_PARAM_ST", 6),
+            ("PLAY_REGION_PARAM_ST", 9),
         ]
         .iter()
         .map(|(kind, version)| {
-            let mut n = vec![0; 16 + 0x180 + kind.len() + 1];
+            let end = if *kind == "PLAY_REGION_PARAM_ST" {
+                0x200
+            } else {
+                0x180
+            };
+            let mut n = vec![0; 16 + end + kind.len() + 1];
             let len = n.len() - 16;
             n[..4].copy_from_slice(&(len as u32).to_le_bytes());
             let b = &mut n[16..];
-            b[..4].copy_from_slice(&0x180u32.to_le_bytes());
+            b[..4].copy_from_slice(&(end as u32).to_le_bytes());
             b[8..10].copy_from_slice(&(*version as u16).to_le_bytes());
             b[10..12].copy_from_slice(&1u16.to_le_bytes());
-            b[16..24].copy_from_slice(&0x180u64.to_le_bytes());
+            b[16..24].copy_from_slice(&(end as u64).to_le_bytes());
             b[45] = 0x85;
             b[46] = 2;
             b[0x48..0x50].copy_from_slice(&0x80u64.to_le_bytes());
-            b[0x180..0x180 + kind.len()].copy_from_slice(kind.as_bytes());
+            b[end..end + kind.len()].copy_from_slice(kind.as_bytes());
             n
         })
         .collect();
@@ -2250,6 +2741,7 @@ mod tests {
             "BonfireWarpSubCategoryParam",
             "BonfireWarpTabParam",
             "MapDefaultInfoParam",
+            "PlayRegionParam",
         ];
         let native: Vec<_> = names
             .iter()
@@ -2352,6 +2844,7 @@ mod tests {
             "BonfireWarpSubCategoryParam",
             "BonfireWarpTabParam",
             "MapDefaultInfoParam",
+            "PlayRegionParam",
         ]
         .iter()
         .map(|name| {

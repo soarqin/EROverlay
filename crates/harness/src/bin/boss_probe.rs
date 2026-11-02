@@ -26,6 +26,11 @@ struct Geometry {
     indices: Vec<u32>,
     clip: [f32; 4],
 }
+#[derive(Clone, Copy, Debug)]
+struct Glyph {
+    bounds: [f32; 4],
+    uv: [u32; 4],
+}
 struct Upload {
     id: u64,
     width: u32,
@@ -36,6 +41,90 @@ struct FileToken {
     name: Option<String>,
     ready_epoch: u64,
     busy_once: bool,
+}
+// Test-only observation export. The production plugin has no such symbol; all
+// input, rendering, file and texture callbacks remain the same real paths.
+#[repr(C)]
+#[derive(Clone, Copy, Default, Debug)]
+struct UiProbe {
+    size: u32,
+    schema: u32,
+    sequence: u64,
+    revision: u64,
+    raw_map: u32,
+    current_group: u32,
+    selected_group: u32,
+    flags: u32,
+    group_count: u32,
+    drawn_count: u32,
+    catalog_count: u32,
+    logical_rows: u32,
+    play_region: u32,
+    reserved: u32,
+    search_rect: [f32; 4],
+    remaining_rect: [f32; 4],
+    region_rect: [f32; 4],
+    reload_rect: [f32; 4],
+}
+#[repr(C)]
+#[derive(Clone, Copy, Default, Debug)]
+struct UiGroup {
+    id: u32,
+    flags: u32,
+    logical_bosses: u32,
+    reserved: u32,
+    header_rect: [f32; 4],
+}
+#[repr(C)]
+#[derive(Clone, Copy, Default, Debug)]
+struct UiRow {
+    flag: u32,
+    map: u32,
+    group: u32,
+    state: u32,
+    status_rect: [f32; 4],
+    name_rect: [f32; 4],
+}
+#[repr(C)]
+#[derive(Clone, Copy, Default, Debug)]
+struct CatalogRow {
+    flag: u32,
+    map: u32,
+    group: u32,
+    completion_count: u32,
+    completion: [u32; 4],
+}
+impl CatalogRow {
+    fn signature(&self) -> Result<String, String> {
+        let completion = self
+            .completion
+            .get(..self.completion_count as usize)
+            .ok_or("invalid completion capacity")?
+            .iter()
+            .map(u32::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+        Ok(format!(
+            "{}\t{:08x}\t{}\t{}",
+            self.flag, self.map, completion, self.group
+        ))
+    }
+}
+type ReadUi = unsafe extern "C" fn(
+    *mut c_void,
+    *mut UiProbe,
+    *mut UiGroup,
+    usize,
+    *mut UiRow,
+    usize,
+    *mut CatalogRow,
+    usize,
+) -> i32;
+struct Observation {
+    ui: UiProbe,
+    groups: Vec<UiGroup>,
+    rows: Vec<UiRow>,
+    catalog: Vec<CatalogRow>,
 }
 struct Fixture {
     root: String,
@@ -61,6 +150,8 @@ struct Fixture {
     flags: BTreeMap<u32, u8>,
     display: abi::DisplayState,
     state: abi::BossState,
+    region: Option<u32>,
+    region_calls: u64,
     writes: Vec<(u32, Vec<abi::FlagWrite>)>,
     options: abi::RenderOptions,
     meshes: Vec<Geometry>,
@@ -138,6 +229,25 @@ unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
     } else {
         abi::OK
     }
+}
+unsafe extern "C" fn region(user: *mut c_void, context: u64, out: *mut u32) -> i32 {
+    if out.is_null() || !out.is_aligned() {
+        return abi::ERR_INVALID;
+    }
+    let f = unsafe { fixture(user) };
+    f.region_calls += 1;
+    if context != f.state.context || f.state_mode != 0 || f.state.valid == 0 {
+        return abi::ERR_UNAVAILABLE;
+    }
+    let Some(region) = f.region else {
+        return abi::ERR_UNAVAILABLE;
+    };
+    unsafe { out.write(region) };
+    abi::OK
+}
+unsafe extern "C" fn forbidden_region(user: *mut c_void, _: u64, _: *mut u32) -> i32 {
+    unsafe { fixture(user) }.region_calls += 1;
+    abi::ERR_INVALID
 }
 unsafe extern "C" fn flags(user: *mut c_void, ids: *const u32, out: *mut u8, len: usize) -> i32 {
     if len > 4096 || (len != 0 && (ids.is_null() || out.is_null() || !ids.is_aligned())) {
@@ -460,6 +570,9 @@ struct GuardedHost {
 }
 impl GuardedHost {
     fn new(host: &abi::HostApi) -> Result<Self, String> {
+        Self::with_size(host, abi::HOST_V1_BASE_SIZE)
+    }
+    fn with_size(host: &abi::HostApi, readable: usize) -> Result<Self, String> {
         // SYSTEM_INFO is <=64 bytes on supported Windows x64; dwPageSize is at 4.
         let mut information = [0usize; 8];
         unsafe { GetSystemInfo(information.as_mut_ptr().cast()) };
@@ -471,7 +584,11 @@ impl GuardedHost {
                 .cast::<u32>()
                 .read()
         } as usize;
-        if page < abi::HOST_V1_BASE_SIZE || !page.is_power_of_two() {
+        if readable < abi::HOST_V1_BASE_SIZE
+            || readable > size_of::<abi::HostApi>()
+            || page < readable
+            || !page.is_power_of_two()
+        {
             return Err("unexpected system page size".into());
         }
         let allocation = unsafe { VirtualAlloc(std::ptr::null_mut(), page * 2, 0x3000, 4) };
@@ -485,12 +602,12 @@ impl GuardedHost {
             unsafe { VirtualFree(allocation, 0, 0x8000) };
             return Err("VirtualProtect guard fixture failed".into());
         }
-        let table = unsafe { allocation.cast::<u8>().add(page - abi::HOST_V1_BASE_SIZE) };
+        let table = unsafe { allocation.cast::<u8>().add(page - readable) };
         unsafe {
             std::ptr::copy_nonoverlapping(
                 (host as *const abi::HostApi).cast::<u8>(),
                 table,
-                abi::HOST_V1_BASE_SIZE,
+                readable,
             )
         };
         Ok(Self {
@@ -525,7 +642,7 @@ fn short_minimap(path: &Path, host: &abi::HostApi) -> Result<(), String> {
         let api = unsafe { *get(abi::ABI_VERSION) };
         let mut old = *host;
         old.size = abi::HOST_V1_BASE_SIZE as u32;
-        old.capabilities &= !(abi::CAP_UI_INPUT | abi::CAP_BOSS_STATE);
+        old.capabilities &= !(abi::CAP_UI_INPUT | abi::CAP_BOSS_STATE | abi::CAP_BOSS_REGION);
         let guarded = GuardedHost::new(&old)?;
         let mut instance = std::ptr::null_mut();
         let code = unsafe { api.init.unwrap()(guarded.table, &mut instance) };
@@ -567,6 +684,533 @@ struct Probe {
     cpu: Duration,
 }
 impl Probe {
+    fn glyphs_where(&self, include: impl Fn(&Geometry) -> bool) -> Vec<Glyph> {
+        let mut glyphs = Vec::new();
+        for mesh in &self.fixture.meshes {
+            if !include(mesh) {
+                continue;
+            }
+            for triangles in mesh.indices.as_chunks::<6>().0 {
+                let ids: BTreeSet<_> = triangles.iter().copied().collect();
+                if ids.len() != 4 {
+                    continue;
+                }
+                let vertices: Vec<_> = ids
+                    .iter()
+                    .filter_map(|&i| mesh.vertices.get(i as usize))
+                    .collect();
+                if vertices.len() != 4 {
+                    continue;
+                }
+                let mut bounds = [
+                    f32::INFINITY,
+                    f32::INFINITY,
+                    f32::NEG_INFINITY,
+                    f32::NEG_INFINITY,
+                ];
+                let mut uv = [
+                    f32::INFINITY,
+                    f32::INFINITY,
+                    f32::NEG_INFINITY,
+                    f32::NEG_INFINITY,
+                ];
+                for v in &vertices {
+                    bounds[0] = bounds[0].min(v.pos[0]);
+                    bounds[1] = bounds[1].min(v.pos[1]);
+                    bounds[2] = bounds[2].max(v.pos[0]);
+                    bounds[3] = bounds[3].max(v.pos[1]);
+                    uv[0] = uv[0].min(v.uv[0]);
+                    uv[1] = uv[1].min(v.uv[1]);
+                    uv[2] = uv[2].max(v.uv[0]);
+                    uv[3] = uv[3].max(v.uv[1]);
+                }
+                if uv[2] <= uv[0]
+                    || uv[3] <= uv[1]
+                    || bounds[1] < mesh.clip[1] - 2.
+                    || bounds[1] >= mesh.clip[3]
+                    || vertices.iter().any(|v| {
+                        ![bounds[0], bounds[2]].contains(&v.pos[0])
+                            || ![bounds[1], bounds[3]].contains(&v.pos[1])
+                    })
+                {
+                    continue;
+                }
+                glyphs.push(Glyph {
+                    bounds,
+                    uv: uv.map(f32::to_bits),
+                });
+            }
+        }
+        glyphs
+    }
+    fn list_glyphs(&self) -> Vec<Glyph> {
+        // The real ScrollArea has its own content clip below the selector.
+        self.glyphs_where(|m| m.clip[0] >= 700. && (300. ..=700.).contains(&m.clip[1]))
+    }
+    fn select_region(&mut self, first_group: bool) -> Result<(), String> {
+        let bounds = self.observed()?.ui.region_rect;
+        let previous: BTreeSet<_> = self
+            .glyphs_where(|_| true)
+            .iter()
+            .map(|g| (g.bounds.map(f32::to_bits), g.uv))
+            .collect();
+        self.click_rect(bounds)?;
+        let added: Vec<_> = self
+            .glyphs_where(|_| true)
+            .into_iter()
+            .filter(|g| {
+                !previous.contains(&(g.bounds.map(f32::to_bits), g.uv))
+                    && g.bounds[0] >= bounds[0]
+                    && g.bounds[2] < bounds[0] + 350.
+                    && g.bounds[1] > bounds[3]
+                    && g.bounds[3] < bounds[3] + 90.
+            })
+            .collect();
+        let mut lines: Vec<f32> = Vec::new();
+        let mut sorted = added.clone();
+        sorted.sort_by(|a, b| a.bounds[1].total_cmp(&b.bounds[1]));
+        for glyph in &sorted {
+            let center = (glyph.bounds[1] + glyph.bounds[3]) / 2.;
+            if lines.iter().all(|y| (y - center).abs() > 12.) {
+                lines.push(center);
+            }
+        }
+        let y = *lines
+            .get(usize::from(first_group))
+            .ok_or_else(|| format!("real region popup glyph rows unavailable: {lines:?}"))?;
+        let x = added
+            .iter()
+            .filter(|g| ((g.bounds[1] + g.bounds[3]) / 2. - y).abs() < 10.)
+            .map(|g| g.bounds[0])
+            .fold(f32::INFINITY, f32::min)
+            + 20.;
+        self.click(x, y)?;
+        for _ in 0..4 {
+            self.frame()?;
+        }
+        let selected = self.observed()?.ui.selected_group;
+        let expected = if first_group { 61000 } else { u32::MAX };
+        if selected != expected {
+            return Err(format!(
+                "real region selection mismatch: expected{expected}, got{selected}; popup lines={lines:?}"
+            ));
+        }
+        Ok(())
+    }
+    fn expand_searched_header(&mut self) -> Result<(), String> {
+        let glyphs = self.list_glyphs();
+        let top = glyphs
+            .iter()
+            .map(|g| (g.bounds[1] + g.bounds[3]) / 2.)
+            .fold(f32::INFINITY, f32::min);
+        let bottom = glyphs
+            .iter()
+            .map(|g| (g.bounds[1] + g.bounds[3]) / 2.)
+            .fold(f32::NEG_INFINITY, f32::max);
+        if !top.is_finite() {
+            return Err("searched ScrollArea has no actual font glyphs".into());
+        }
+        if bottom - top < 15. {
+            let first = glyphs.first().ok_or("searched group header has no glyph")?;
+            self.click(first.bounds[0] + 40., top + 2.)?;
+            for _ in 0..4 {
+                self.frame()?;
+            }
+        }
+        Ok(())
+    }
+    fn normal_status_columns(&mut self) -> Result<(), String> {
+        const NAME: &str = "Ancient Dragon Lansseax";
+        self.click(1000., 255.)?;
+        self.query(NAME)?;
+        self.expand_searched_header()?;
+        // Warm all three status glyphs before comparing UVs so atlas growth
+        // cannot look like a name change. This works on uninstrumented old DLLs.
+        for state in [1, 0, 2] {
+            self.refresh_flags(&[(1041520800, state), (1037510800, state)])?;
+        }
+        let count = NAME.chars().filter(|c| !c.is_whitespace()).count();
+        let mut samples = Vec::new();
+        for state in [1, 0, 2] {
+            self.refresh_flags(&[(1041520800, state), (1037510800, state)])?;
+            let glyphs = self.list_glyphs();
+            let name = glyphs
+                .get(glyphs.len().saturating_sub(count)..)
+                .ok_or("Boss name glyph range missing")?;
+            if name.len() != count
+                || name.windows(2).any(|g| g[1].bounds[0] <= g[0].bounds[0])
+                || name.iter().any(|g| {
+                    g.bounds[1] < name[0].bounds[1] - 8. || g.bounds[1] > name[0].bounds[1] + 8.
+                })
+            {
+                return Err(format!(
+                    "actual searched name is not a single complete glyph run: {name:?}"
+                ));
+            }
+            let sample = (
+                name[0].bounds[0],
+                name.iter().map(|g| g.uv).collect::<Vec<_>>(),
+            );
+            println!(
+                "Normal-DLL glyph observation: state={state}, first Boss name glyph x={}, glyph count={}",
+                sample.0,
+                name.len()
+            );
+            samples.push(sample);
+            self.screenshot(&format!("boss-normal-status-{state}"))?;
+        }
+        if samples.windows(2).any(|v| v[0].1 != v[1].1) {
+            return Err("status comparison did not retain the same name glyph UV sequence".into());
+        }
+        if samples.windows(2).any(|v| v[0].0 != v[1].0) {
+            return Err(format!(
+                "actual normal-DLL [+]/[ ]/[?] shifts Boss name x: {:?}",
+                samples.iter().map(|s| s.0).collect::<Vec<_>>()
+            ));
+        }
+        println!(
+            "PASS: uninstrumented real-DLL name glyph UV sequence stays identical and first glyph x is fixed for all three status states."
+        );
+        self.refresh_flags(&[])?;
+        self.click(1000., 255.)?;
+        self.query("")?;
+        Ok(())
+    }
+    fn observe(&self) -> Result<Option<Observation>, String> {
+        let Some(symbol) =
+            (unsafe { GetProcAddress(self.plugin.module, s!("eroverlay_test_boss_ui")) })
+        else {
+            return Ok(None);
+        };
+        let read: ReadUi = unsafe { std::mem::transmute(symbol) };
+        let mut ui = UiProbe {
+            size: size_of::<UiProbe>() as u32,
+            ..Default::default()
+        };
+        let mut groups = vec![UiGroup::default(); 64];
+        let mut rows = vec![UiRow::default(); 64];
+        let mut catalog = vec![CatalogRow::default(); 256];
+        let code = unsafe {
+            read(
+                self.plugin.instance,
+                &mut ui,
+                groups.as_mut_ptr(),
+                groups.len(),
+                rows.as_mut_ptr(),
+                rows.len(),
+                catalog.as_mut_ptr(),
+                catalog.len(),
+            )
+        };
+        if code != abi::OK || ui.schema != 1 || ui.size as usize != size_of::<UiProbe>() {
+            return Err(format!(
+                "layout observation failed: code={code}, header={ui:?}"
+            ));
+        }
+        if ui.group_count as usize > groups.len()
+            || ui.drawn_count as usize > rows.len()
+            || ui.catalog_count as usize > catalog.len()
+        {
+            return Err("layout observation returned out-of-capacity counts".into());
+        }
+        groups.truncate(ui.group_count as usize);
+        rows.truncate(ui.drawn_count as usize);
+        catalog.truncate(ui.catalog_count as usize);
+        Ok(Some(Observation {
+            ui,
+            groups,
+            rows,
+            catalog,
+        }))
+    }
+    fn observed(&self) -> Result<Observation, String> {
+        self.observe()?
+            .ok_or("layout fixture export unavailable".into())
+    }
+    fn click_rect(&mut self, rect: [f32; 4]) -> Result<(), String> {
+        if !rect.iter().all(|v| v.is_finite()) || rect[2] <= rect[0] || rect[3] <= rect[1] {
+            return Err(format!("actual widget rectangle unavailable: {rect:?}"));
+        }
+        self.click((rect[0] + rect[2]) / 2., (rect[1] + rect[3]) / 2.)?;
+        for _ in 0..3 {
+            self.frame()?;
+        }
+        Ok(())
+    }
+    fn observed_search(&mut self, query: &str) -> Result<Observation, String> {
+        self.click_rect(self.observed()?.ui.search_rect)?;
+        self.query(query)?;
+        self.frame()?;
+        self.observed()
+    }
+    fn observed_open(&mut self, group: u32) -> Result<Observation, String> {
+        let current = self.observed()?;
+        let header = current
+            .groups
+            .iter()
+            .find(|g| g.id == group)
+            .ok_or_else(|| format!("missing stable group {group}"))?;
+        if header.flags & 1 == 0 {
+            self.click_rect(header.header_rect)?;
+        }
+        self.observed()
+    }
+    fn region_update(&mut self, value: Option<u32>) -> Result<Observation, String> {
+        self.fixture.region = value;
+        std::thread::sleep(Duration::from_millis(510));
+        self.update()?;
+        for _ in 0..4 {
+            self.frame()?;
+        }
+        self.observed()
+    }
+    fn expect_open(
+        observed: &Observation,
+        current: u32,
+        opened: &[u32],
+        label: &str,
+    ) -> Result<(), String> {
+        let actual: BTreeSet<_> = observed
+            .groups
+            .iter()
+            .filter(|g| g.flags & 1 != 0)
+            .map(|g| g.id)
+            .collect();
+        if observed.ui.current_group != current || actual != opened.iter().copied().collect() {
+            return Err(format!(
+                "{label}: current={} open={actual:?}, expected current={current} open={opened:?}",
+                observed.ui.current_group
+            ));
+        }
+        println!(
+            "PASS: {label}: current={current}, open={actual:?}, logical rows={}",
+            observed.ui.logical_rows
+        );
+        Ok(())
+    }
+    fn layout_contract(&mut self) -> Result<(), String> {
+        if self.observe()?.is_none() {
+            println!(
+                "Production DLL has no layout observation export; exact widget/fold metadata is checked separately with the feature DLL."
+            );
+            return Ok(());
+        }
+        self.hotkey(abi::parse_chord("="))?;
+        for _ in 0..12 {
+            self.frame()?;
+        }
+        let initial = self.observed()?;
+        if initial.groups.len() != 32
+            || initial.catalog.len() != 207
+            || initial
+                .groups
+                .iter()
+                .map(|g| g.logical_bosses as usize)
+                .sum::<usize>()
+                != 207
+        {
+            return Err(format!(
+                "expected 32 broad groups /207 catalogue rows: {} /{}",
+                initial.groups.len(),
+                initial.catalog.len()
+            ));
+        }
+        Self::expect_open(&initial, 10000, &[10000], "initial native Stormveil region")?;
+        let mut baseline = String::from("flag\tmap\tcompletion\tgroup\n");
+        let mut actual = BTreeSet::new();
+        for row in &initial.catalog {
+            let line = row.signature()?;
+            baseline.push_str(&format!("{line}\n"));
+            actual.insert(line);
+        }
+        std::fs::write(
+            Path::new(&self.fixture.root).join("boss-layout-catalog.tsv"),
+            baseline,
+        )
+        .map_err(|e| e.to_string())?;
+        if let Some(path) = std::env::var_os("EROVERLAY_BOSS_CATALOG_BASELINE") {
+            let expected = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
+            let expected: BTreeSet<_> = expected.lines().skip(1).map(str::to_owned).collect();
+            if actual != expected || actual.len() != 207 {
+                return Err(format!(
+                    "actual DLL catalogue differs from pinned 207 metadata: removed={:?}, added={:?}",
+                    expected.difference(&actual).collect::<Vec<_>>(),
+                    actual.difference(&expected).collect::<Vec<_>>()
+                ));
+            }
+            println!(
+                "PASS: all207 actual-DLL primary/map/completion/group sets match the selected archive audit; old-scope member semantics require its separate production member audit."
+            );
+        }
+        self.observed_open(61000)?;
+        Self::expect_open(
+            &self.region_update(Some(1000000))?,
+            10000,
+            &[61000, 10000],
+            "manual second group survives same-region snapshot",
+        )?;
+        Self::expect_open(
+            &self.region_update(Some(1000000))?,
+            10000,
+            &[61000, 10000],
+            "repeated same-region update preserves manual expansion",
+        )?;
+        Self::expect_open(
+            &self.region_update(None)?,
+            10000,
+            &[61000, 10000],
+            "unknown native region preserves last valid fold state",
+        )?;
+        Self::expect_open(
+            &self.region_update(Some(u32::MAX))?,
+            10000,
+            &[61000, 10000],
+            "unmapped native region preserves last valid fold state",
+        )?;
+        Self::expect_open(
+            &self.region_update(Some(6200000))?,
+            62000,
+            &[62000],
+            "valid region transition folds all other groups",
+        )?;
+        let searched = self.observed_search("Ancient Dragon Lansseax")?;
+        let group = searched
+            .catalog
+            .iter()
+            .find(|r| r.flag == 1041520800)
+            .ok_or("Lansseax missing")?
+            .group;
+        let searched = self.observed_open(group)?;
+        if searched.rows.len() != 1 || searched.rows[0].flag != 1041520800 {
+            return Err("actual search did not isolate the canonical Lansseax row".into());
+        }
+        let before: Vec<_> = searched
+            .groups
+            .iter()
+            .filter(|g| g.flags & 1 != 0)
+            .map(|g| g.id)
+            .collect();
+        Self::expect_open(
+            &self.region_update(Some(6100000))?,
+            61000,
+            &before,
+            "search defers region-driven collapse",
+        )?;
+        let mut status_positions = Vec::new();
+        for state in [1, 0, 2] {
+            self.refresh_flags(&[(1041520800, state), (1037510800, state)])?;
+            let observed = self.observed()?;
+            let row = observed
+                .rows
+                .iter()
+                .find(|r| r.flag == 1041520800)
+                .ok_or("searched row disappeared after state change")?;
+            if row.state != state.into() || row.name_rect[0] <= row.status_rect[2] {
+                return Err(format!("invalid actual status/name responses: {row:?}"));
+            }
+            status_positions.push((row.status_rect[0], row.status_rect[2], row.name_rect[0]));
+            self.screenshot(&format!("boss-layout-status-{state}"))?;
+        }
+        if status_positions.windows(2).any(|p| p[0] != p[1]) {
+            return Err(format!(
+                "status [+]/[ ]/[?] shifted actual Boss name x: {status_positions:?}"
+            ));
+        }
+        println!(
+            "PASS: real egui status/name Response rectangles keep name x fixed for done/remaining/unknown: {status_positions:?}"
+        );
+        self.refresh_flags(&[])?;
+        let cleared = self.observed_search("")?;
+        Self::expect_open(
+            &cleared,
+            61000,
+            &[61000],
+            "clearing search applies latest pending region once",
+        )?;
+        self.click_rect(cleared.ui.remaining_rect)?;
+        let filtered = self.observed()?;
+        if filtered.ui.flags & 4 == 0 || filtered.ui.logical_rows != 0 {
+            return Err("remaining filter did not hide all completed rows".into());
+        }
+        Self::expect_open(
+            &self.region_update(Some(1000000))?,
+            10000,
+            &[61000],
+            "remaining filter defers region collapse",
+        )?;
+        self.click_rect(self.observed()?.ui.remaining_rect)?;
+        Self::expect_open(
+            &self.observed()?,
+            10000,
+            &[10000],
+            "clearing remaining filter applies pending region",
+        )?;
+        self.select_region(true)?;
+        let selected = self.observed_open(61000)?;
+        if selected.rows.iter().any(|r| r.group != 61000) {
+            return Err("selected region rendered a Boss from another group".into());
+        }
+        Self::expect_open(
+            &self.region_update(Some(6200000))?,
+            62000,
+            &[61000, 10000],
+            "explicit region filter defers automatic collapse",
+        )?;
+        self.select_region(false)?;
+        Self::expect_open(
+            &self.observed()?,
+            62000,
+            &[62000],
+            "All regions selection applies latest pending region",
+        )?;
+        self.region_update(Some(1000000))?;
+        self.observed_open(61000)?;
+        let requested = self.fixture.request_count;
+        self.click_rect(self.observed()?.ui.reload_rect)?;
+        self.fixture.state_mode = 1;
+        self.fixture.directory_count = 0;
+        self.update()?;
+        self.wait_catalog()?;
+        for _ in 0..12 {
+            self.frame()?;
+        }
+        Self::expect_open(
+            &self.observed()?,
+            u32::MAX,
+            &[],
+            "real reload reaches Ready without a save and initializes every group closed",
+        )?;
+        let reloaded = self
+            .observed()?
+            .catalog
+            .iter()
+            .map(CatalogRow::signature)
+            .collect::<Result<BTreeSet<_>, _>>()?;
+        if actual != reloaded {
+            return Err(format!(
+                "asynchronous reload changed catalogue identity/map/group: removed={:?}, added={:?}",
+                actual.difference(&reloaded).collect::<Vec<_>>(),
+                reloaded.difference(&actual).collect::<Vec<_>>()
+            ));
+        }
+        println!(
+            "PASS: initial and asynchronous reload produce identical207 primary/map/completion/group records."
+        );
+        if self.fixture.request_count <= requested {
+            return Err("reload did not request archived resources".into());
+        }
+        self.screenshot("boss-layout-reloaded")?;
+        self.fixture.state_mode = 0;
+        Self::expect_open(
+            &self.region_update(Some(1000000))?,
+            10000,
+            &[10000],
+            "first valid save after reload opens only its current region",
+        )?;
+        self.hotkey(abi::parse_chord("="))?;
+        self.frame()?;
+        Ok(())
+    }
     fn frame(&mut self) -> Result<usize, String> {
         self.sequence += 1;
         self.render_sequence(self.sequence)
@@ -770,7 +1414,7 @@ impl Probe {
                 return Err("one update exceeded the 32-request submission budget".into());
             }
             if self.fixture.state_mode != 0
-                && self.fixture.update_epoch > self.fixture.files_ready_epoch + 40
+                && self.fixture.update_epoch > epoch.max(self.fixture.files_ready_epoch) + 40
                 && self.fixture.request_count == requests
             {
                 return Err(
@@ -911,14 +1555,41 @@ impl Probe {
         self.click(1000., 255.)?;
         let no_match = self.query("zzzzzznonexistent")?;
         let matched = self.query("Ancient Dragon Lansseax")?;
-        if matched <= no_match + 100 {
+        self.expand_searched_header()?;
+        let expanded = self.frame()?;
+        if expanded <= no_match + 100 {
             return Err("real canonical Lansseax search did not produce a row".into());
         }
+        println!(
+            "Canonical search real glyph expansion: no-match={no_match}, initially matched={matched}, expanded={expanded}"
+        );
         Ok(())
     }
     fn open_confirmation(&mut self) -> Result<(), String> {
         let before = self.frame()?;
-        self.click(850., 377.)?;
+        if let Some(observed) = self.observe()? {
+            let row = observed
+                .rows
+                .iter()
+                .find(|r| r.flag == 1041520800)
+                .ok_or("canonical row is not drawn")?;
+            self.click_rect(row.status_rect)?;
+        } else {
+            let glyphs = self.list_glyphs();
+            let bottom = glyphs
+                .iter()
+                .map(|g| (g.bounds[1] + g.bounds[3]) / 2.)
+                .fold(f32::NEG_INFINITY, f32::max);
+            let left = glyphs
+                .iter()
+                .filter(|g| (g.bounds[1] + g.bounds[3]) / 2. > bottom - 10.)
+                .map(|g| g.bounds[0])
+                .fold(f32::INFINITY, f32::min);
+            if !left.is_finite() || !bottom.is_finite() {
+                return Err("canonical row status glyphs missing".into());
+            }
+            self.click(left + 5., bottom - 2.)?;
+        }
         let mut after = 0;
         for _ in 0..6 {
             after = self.frame()?;
@@ -1191,6 +1862,7 @@ fn run() -> Result<(), String> {
     let mut params = BTreeMap::new();
     for (group, name) in [
         (29, "GameAreaParam"),
+        (38, "PlayRegionParam"),
         (43, "BonfireWarpParam"),
         (44, "BonfireWarpTabParam"),
         (45, "BonfireWarpSubCategoryParam"),
@@ -1252,6 +1924,8 @@ fn run() -> Result<(), String> {
             in_game_time_ms: 3600017,
             graveyard_reached: 1,
         },
+        region: Some(1000000),
+        region_calls: 0,
         writes: Vec::new(),
         options: abi::RenderOptions::default(),
         meshes: Vec::new(),
@@ -1280,6 +1954,7 @@ fn run() -> Result<(), String> {
         | abi::CAP_INPUT
         | abi::CAP_UI_INPUT
         | abi::CAP_BOSS_STATE
+        | abi::CAP_BOSS_REGION
         | abi::CAP_CONCURRENT;
     host.user = (&mut *fixture as *mut Fixture).cast();
     host.log = Some(log);
@@ -1287,6 +1962,7 @@ fn run() -> Result<(), String> {
     host.key_pressed = Some(key);
     host.read_display_state = Some(display);
     host.read_boss_state = Some(state);
+    host.read_boss_region = Some(region);
     host.read_event_flags = Some(flags);
     host.read_event_flag = Some(event_flag);
     host.revive_boss = Some(revive);
@@ -1333,6 +2009,34 @@ fn run() -> Result<(), String> {
         return Err("Boss accepted missing input capability".into());
     }
     host.capabilities |= abi::CAP_UI_INPUT;
+    for (size, optional_capability) in [(224, false), (228, false), (228, true)] {
+        let mut old = host;
+        old.size = size;
+        old.capabilities &= !abi::CAP_BOSS_REGION;
+        if optional_capability {
+            old.capabilities |= abi::CAP_BOSS_REGION;
+        }
+        old.read_boss_region = Some(forbidden_region);
+        let calls = fixture.region_calls;
+        let guarded = GuardedHost::with_size(&old, size as usize)?;
+        let code = unsafe { api.init.unwrap()(guarded.table, &mut instance) };
+        if code != abi::OK || instance.is_null() {
+            return Err(format!(
+                "Boss rejected optional-region prefix size{size}: {code}"
+            ));
+        }
+        let updated = unsafe { api.update.unwrap()(instance) };
+        unsafe { api.destroy.unwrap()(instance) };
+        instance = std::ptr::null_mut();
+        if updated != abi::OK || fixture.region_calls != calls {
+            return Err(format!(
+                "short/partial optional region callback was used: size{size}, cap={optional_capability}"
+            ));
+        }
+        println!(
+            "PASS: actual Boss init/update/destroy accepts only {size} readable bytes before PAGE_NOACCESS, optional region cap={optional_capability}, forbidden tail callback was never called."
+        );
+    }
     let code = unsafe { api.init.unwrap()(&host, &mut instance) };
     if code != abi::OK || instance.is_null() {
         return Err(format!("Boss init failed {code}"));
@@ -1351,6 +2055,10 @@ fn run() -> Result<(), String> {
     };
     probe.preload_before_save()?;
     println!(
+        "Full232-byte host optional context-checked region callback calls={}",
+        probe.fixture.region_calls
+    );
+    println!(
         "Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue={} rows, unique completion flags={}, file requests={}, real scenes={:?}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.",
         probe.fixture.directory_count,
         probe.fixture.last_flag_ids.len(),
@@ -1359,12 +2067,20 @@ fn run() -> Result<(), String> {
     );
     probe.measure("compact")?;
     probe.completion_counts()?;
+    probe.layout_contract()?;
     probe.hotkey(abi::parse_chord("="))?;
     for _ in 0..5 {
         probe.frame()?;
     }
     if probe.fixture.capture != 3 {
         return Err("full list did not capture input".into());
+    }
+    probe.normal_status_columns()?;
+    if std::env::var_os("EROVERLAY_BOSS_LAYOUT_ONLY").is_some() {
+        println!(
+            "PASS: requested layout-only actual-DLL/WARP probe complete; normal full resource/input/revival regression remains a separate run."
+        );
+        return Ok(());
     }
     probe.measure("full real catalogue")?;
     let mut update_samples = Vec::new();
@@ -1432,10 +2148,10 @@ fn run() -> Result<(), String> {
     for _ in 0..12 {
         probe.frame()?;
     }
-    probe.click(850., 377.)?;
-    for _ in 0..6 {
-        probe.frame()?;
-    }
+    probe.click(1000., 255.)?;
+    probe.query("Ancient Dragon Lansseax")?;
+    probe.expand_searched_header()?;
+    probe.open_confirmation()?;
     probe.screenshot("boss-revival-confirm")?;
     if !probe.fixture.writes.is_empty() {
         return Err("revival mutated before confirmation".into());
@@ -1450,6 +2166,7 @@ fn run() -> Result<(), String> {
     }
     probe.click(1000., 255.)?;
     probe.query("Ancient Dragon Lansseax")?;
+    probe.expand_searched_header()?;
     probe.refresh_flags(&[(1041520800, 0), (1037510800, 1)])?;
     for _ in 0..4 {
         probe.frame()?;

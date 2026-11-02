@@ -4,6 +4,9 @@ mod challenge;
 mod data;
 mod encounters;
 mod host;
+#[cfg(feature = "continuity-fixture")]
+mod probe;
+mod regions;
 mod revival;
 mod settings;
 mod ui;
@@ -23,6 +26,8 @@ use std::{
 
 pub(crate) struct Snapshot {
     pub catalog: Option<Arc<data::Catalog>>,
+    pub catalog_generation: u64,
+    pub region: Option<u32>,
     pub states: Arc<[u8]>,
     pub revivable: Arc<[u8]>,
     pub state: Option<abi::BossState>,
@@ -97,7 +102,21 @@ unsafe extern "C" fn init(api: *const abi::HostApi, out: *mut *mut c_void) -> i3
         if !abi::valid_header(magic, size, version, abi::BOSS_STATE_HOST_SIZE) {
             return abi::ERR_ABI;
         }
-        let host = Host(unsafe { api.read_unaligned() });
+        let mut owned: abi::HostApi = unsafe { std::mem::zeroed() };
+        // The optional region appendix must never be read from an older short
+        // host, or copied partially into a function pointer.
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                api.cast::<u8>(),
+                (&mut owned as *mut abi::HostApi).cast::<u8>(),
+                abi::BOSS_STATE_HOST_SIZE,
+            );
+            if size as usize >= abi::BOSS_REGION_HOST_SIZE {
+                owned.read_boss_region =
+                    std::ptr::addr_of!((*api).read_boss_region).read_unaligned();
+            }
+        }
+        let host = Host(owned);
         let required = abi::CAP_GAME
             | abi::CAP_FILES
             | abi::CAP_TEXTURES
@@ -342,6 +361,8 @@ unsafe extern "C" fn update(instance: *mut c_void) -> i32 {
         u.revision = u.revision.wrapping_add(1);
         let snapshot = Arc::new(Snapshot {
             catalog,
+            catalog_generation: u.data.directory_generation(),
+            region: state.and_then(|s| instance.host.region(s.context)),
             states: states.into(),
             revivable,
             state,

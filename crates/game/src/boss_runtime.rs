@@ -6,6 +6,13 @@ use crate::{
 use eroverlay_abi::{BossState, FlagWrite};
 use std::sync::atomic::{AtomicU8, Ordering};
 
+pub(super) fn context_identity(c: &map::MapContext, manager: usize, generation: u64) -> u64 {
+    (c.game_data as u64).rotate_left(11)
+        ^ (c.player as u64).rotate_left(27)
+        ^ (manager as u64).rotate_left(43)
+        ^ generation
+}
+
 impl GameServices {
     pub fn boss_state(&mut self) -> Option<BossState> {
         let b = self.bindings?;
@@ -29,10 +36,7 @@ impl GameServices {
             return None;
         }
         // This token is a context identity, not an address exposed for dereferencing.
-        let context = (c.game_data as u64).rotate_left(11)
-            ^ (c.player as u64).rotate_left(27)
-            ^ (manager as u64).rotate_left(43)
-            ^ self.generation;
+        let context = context_identity(&c, manager, self.generation);
         Some(BossState {
             size: size_of::<BossState>() as u32,
             valid: 1,

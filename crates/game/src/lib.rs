@@ -3,6 +3,7 @@
 pub mod assets;
 pub mod boss_events;
 pub mod boss_params;
+mod boss_region;
 pub mod boss_runtime;
 pub mod boss_scene;
 mod files;
@@ -61,6 +62,7 @@ pub struct GameServices {
     mask_valid: bool,
     mask_failure: SnapshotReason,
     diagnostic: GameDiagnostics,
+    boss_region_layout: Option<boss_region::RegionLayout>,
 }
 /// Stable diagnostic stages, copied under the existing update-thread lock.
 /// Keys contain no game-owned strings and logging need not run every update.
@@ -151,7 +153,9 @@ impl GameServices {
         let base = memory::main_module();
         let image = memory::image_snapshot(base)?;
         let bindings = scan_image(&image, base)?;
-        Ok(Self::with_bindings(base, Some(bindings)))
+        let mut service = Self::with_bindings(base, Some(bindings));
+        service.boss_region_layout = boss_region::scan_layout(&image, base);
+        Ok(service)
     }
     pub fn offline() -> Self {
         Self::with_bindings(0, None)
@@ -179,6 +183,7 @@ impl GameServices {
             mask_valid: false,
             mask_failure: SnapshotReason::ParamUnavailable,
             diagnostic: GameDiagnostics::default(),
+            boss_region_layout: None,
         }
     }
     pub fn compatible(&self) -> bool {
@@ -245,7 +250,7 @@ impl GameServices {
         let Some(b) = self.bindings else {
             return 0;
         };
-        if ![29, 43, 44, 45, 87, 88, 133, 141].contains(&group)
+        if ![29, 38, 43, 44, 45, 87, 88, 133, 141].contains(&group)
             || group >= b.layout.repository_groups
         {
             return 0;
