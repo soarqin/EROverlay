@@ -1,0 +1,950 @@
+{
+  "schema": 2,
+  "purpose": "Read-only native VFS contract audit for Boss loading failure; no live-game validation",
+  "source_commit": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+  "input": {
+    "sha256": "f9118fea2cfd8fa3901e8060bfadb1552cb2471771ded8a5b662c4e298ffb328",
+    "image_base": "0x140000000",
+    "analysis": "Offline PE bytes, Capstone 64-bit decode; no game execution, process access, or database mutation",
+    "name": "eldenring.exe",
+    "reported_version": "1.17.2"
+  },
+  "finding": {
+    "id": "boss-high-level-path-sent-to-raw-submit",
+    "confirmed_contract": "Resource-cap wrapper appends literal UTF16 .dcx before setting native request flag 0x40. Raw submit/request initialization preserves supplied filename. At audited failure commit ca8dd4e, Boss Host.request set 0x40 but passed unsuffixed high-level filenames.",
+    "minimal_fix": "Append .dcx once at Boss raw request boundary, keep 0x40. Preserve logical event filenames for parser/proof/link matching.",
+    "scope": "All event, text binder, and scene requests; Minimap already supplies explicit suffix for compressed files."
+  },
+  "request_examples": [
+    {
+      "kind": "event-map",
+      "logical": "event:/m61_49_44_00.emevd",
+      "raw_request": "event:/m61_49_44_00.emevd.dcx",
+      "flags": "0x40"
+    },
+    {
+      "kind": "event-common",
+      "logical": "event:/common_func.emevd",
+      "raw_request": "event:/common_func.emevd.dcx",
+      "flags": "0x40"
+    },
+    {
+      "kind": "item-text",
+      "logical": "msg:/engUS/item_dlc02.msgbnd",
+      "raw_request": "msg:/engUS/item_dlc02.msgbnd.dcx",
+      "flags": "0x40"
+    },
+    {
+      "kind": "menu-text",
+      "logical": "msg:/engUS/menu_dlc02.msgbnd",
+      "raw_request": "msg:/engUS/menu_dlc02.msgbnd.dcx",
+      "flags": "0x40"
+    },
+    {
+      "kind": "scene-base",
+      "logical": "mapstudio:/m60_38_54_00.msb",
+      "raw_request": "mapstudio:/m60_38_54_00.msb.dcx",
+      "flags": "0x40"
+    },
+    {
+      "kind": "scene-dlc",
+      "logical": "mapstudio_dlc2:/m61_49_44_00.msb",
+      "raw_request": "mapstudio_dlc2:/m61_49_44_00.msb.dcx",
+      "flags": "0x40"
+    }
+  ],
+  "instructions": {
+    "raw_submit": [
+      {
+        "va": "0x1426f0290",
+        "asm": "mov r11, rsp"
+      },
+      {
+        "va": "0x1426f0293",
+        "asm": "sub rsp, 0x78"
+      },
+      {
+        "va": "0x1426f0297",
+        "asm": "mov r10, qword ptr [r8 + 8]"
+      },
+      {
+        "va": "0x1426f029b",
+        "asm": "test r10, r10"
+      },
+      {
+        "va": "0x1426f029e",
+        "asm": "je 0x1426f0324"
+      },
+      {
+        "va": "0x1426f02a4",
+        "asm": "mov r9, qword ptr [r8 + 0x18]"
+      },
+      {
+        "va": "0x1426f02a8",
+        "asm": "test r9, r9"
+      },
+      {
+        "va": "0x1426f02ab",
+        "asm": "je 0x1426f0324"
+      },
+      {
+        "va": "0x1426f02ad",
+        "asm": "mov rax, qword ptr [r8]"
+      },
+      {
+        "va": "0x1426f02b0",
+        "asm": "test rax, rax"
+      },
+      {
+        "va": "0x1426f02b3",
+        "asm": "je 0x1426f0324"
+      },
+      {
+        "va": "0x1426f02b5",
+        "asm": "mov qword ptr [r11 - 0x58], rax"
+      },
+      {
+        "va": "0x1426f02b9",
+        "asm": "mov rax, qword ptr [r8 + 0x10]"
+      },
+      {
+        "va": "0x1426f02bd",
+        "asm": "mov qword ptr [r11 - 0x48], rax"
+      },
+      {
+        "va": "0x1426f02c1",
+        "asm": "mov rax, qword ptr [r8 + 0x20]"
+      },
+      {
+        "va": "0x1426f02c5",
+        "asm": "mov qword ptr [r11 - 0x38], rax"
+      },
+      {
+        "va": "0x1426f02c9",
+        "asm": "mov rax, qword ptr [r8 + 0x28]"
+      },
+      {
+        "va": "0x1426f02cd",
+        "asm": "mov qword ptr [r11 - 0x30], rax"
+      },
+      {
+        "va": "0x1426f02d1",
+        "asm": "mov eax, dword ptr [r8 + 0x30]"
+      },
+      {
+        "va": "0x1426f02d5",
+        "asm": "mov qword ptr [r11 - 0x50], r10"
+      },
+      {
+        "va": "0x1426f02d9",
+        "asm": "mov qword ptr [r11 - 0x40], r9"
+      },
+      {
+        "va": "0x1426f02dd",
+        "asm": "mov dword ptr [rsp + 0x50], eax"
+      },
+      {
+        "va": "0x1426f02e1",
+        "asm": "mov eax, dword ptr [r8 + 0x38]"
+      },
+      {
+        "va": "0x1426f02e5",
+        "asm": "mov dword ptr [rsp + 0x54], eax"
+      },
+      {
+        "va": "0x1426f02e9",
+        "asm": "movzx eax, word ptr [r8 + 0x34]"
+      },
+      {
+        "va": "0x1426f02ee",
+        "asm": "mov word ptr [rsp + 0x58], ax"
+      },
+      {
+        "va": "0x1426f02f3",
+        "asm": "movzx eax, byte ptr [rcx + 0xe38]"
+      },
+      {
+        "va": "0x1426f02fa",
+        "asm": "mov qword ptr [r11 - 0x18], 0"
+      },
+      {
+        "va": "0x1426f0302",
+        "asm": "mov byte ptr [rsp + 0x68], 0"
+      },
+      {
+        "va": "0x1426f0307",
+        "asm": "test al, al"
+      },
+      {
+        "va": "0x1426f0309",
+        "asm": "je 0x1426f0315"
+      },
+      {
+        "va": "0x1426f030b",
+        "asm": "mov eax, 0xffffff04"
+      },
+      {
+        "va": "0x1426f0310",
+        "asm": "add rsp, 0x78"
+      },
+      {
+        "va": "0x1426f0314",
+        "asm": "ret "
+      },
+      {
+        "va": "0x1426f0315",
+        "asm": "lea r8, [rsp + 0x20]"
+      },
+      {
+        "va": "0x1426f031a",
+        "asm": "call 0x1401a2720"
+      },
+      {
+        "va": "0x1426f031f",
+        "asm": "add rsp, 0x78"
+      },
+      {
+        "va": "0x1426f0323",
+        "asm": "ret "
+      },
+      {
+        "va": "0x1426f0324",
+        "asm": "mov eax, 0xffffff05"
+      },
+      {
+        "va": "0x1426f0329",
+        "asm": "add rsp, 0x78"
+      },
+      {
+        "va": "0x1426f032d",
+        "asm": "ret "
+      }
+    ],
+    "raw_path_copy": [
+      {
+        "va": "0x1426f8c00",
+        "asm": "mov qword ptr [rsp + 8], rbx"
+      },
+      {
+        "va": "0x1426f8c05",
+        "asm": "mov qword ptr [rsp + 0x10], rsi"
+      },
+      {
+        "va": "0x1426f8c0a",
+        "asm": "push rdi"
+      },
+      {
+        "va": "0x1426f8c0b",
+        "asm": "sub rsp, 0x20"
+      },
+      {
+        "va": "0x1426f8c0f",
+        "asm": "mov rbx, rdx"
+      },
+      {
+        "va": "0x1426f8c12",
+        "asm": "or rax, 0xffffffffffffffff"
+      },
+      {
+        "va": "0x1426f8c16",
+        "asm": "nop word ptr [rax + rax]"
+      },
+      {
+        "va": "0x1426f8c20",
+        "asm": "cmp word ptr [rdx + rax*2 + 2], 0"
+      },
+      {
+        "va": "0x1426f8c26",
+        "asm": "lea rax, [rax + 1]"
+      },
+      {
+        "va": "0x1426f8c2a",
+        "asm": "jne 0x1426f8c20"
+      },
+      {
+        "va": "0x1426f8c2c",
+        "asm": "lea rsi, [rax*2 + 2]"
+      },
+      {
+        "va": "0x1426f8c34",
+        "asm": "mov rax, qword ptr [rcx]"
+      },
+      {
+        "va": "0x1426f8c37",
+        "asm": "mov rdx, rsi"
+      },
+      {
+        "va": "0x1426f8c3a",
+        "asm": "call qword ptr [rax + 0x48]"
+      },
+      {
+        "va": "0x1426f8c3d",
+        "asm": "mov rdi, rax"
+      },
+      {
+        "va": "0x1426f8c40",
+        "asm": "test rax, rax"
+      },
+      {
+        "va": "0x1426f8c43",
+        "asm": "jne 0x1426f8c55"
+      },
+      {
+        "va": "0x1426f8c45",
+        "asm": "mov rbx, qword ptr [rsp + 0x30]"
+      },
+      {
+        "va": "0x1426f8c4a",
+        "asm": "mov rsi, qword ptr [rsp + 0x38]"
+      },
+      {
+        "va": "0x1426f8c4f",
+        "asm": "add rsp, 0x20"
+      },
+      {
+        "va": "0x1426f8c53",
+        "asm": "pop rdi"
+      },
+      {
+        "va": "0x1426f8c54",
+        "asm": "ret "
+      },
+      {
+        "va": "0x1426f8c55",
+        "asm": "mov r8, rsi"
+      },
+      {
+        "va": "0x1426f8c58",
+        "asm": "mov rdx, rbx"
+      },
+      {
+        "va": "0x1426f8c5b",
+        "asm": "mov rcx, rdi"
+      },
+      {
+        "va": "0x1426f8c5e",
+        "asm": "call 0x14251fe40"
+      },
+      {
+        "va": "0x1426f8c63",
+        "asm": "mov rbx, qword ptr [rsp + 0x30]"
+      },
+      {
+        "va": "0x1426f8c68",
+        "asm": "mov rax, rdi"
+      },
+      {
+        "va": "0x1426f8c6b",
+        "asm": "mov rsi, qword ptr [rsp + 0x38]"
+      },
+      {
+        "va": "0x1426f8c70",
+        "asm": "add rsp, 0x20"
+      },
+      {
+        "va": "0x1426f8c74",
+        "asm": "pop rdi"
+      },
+      {
+        "va": "0x1426f8c75",
+        "asm": "ret "
+      }
+    ],
+    "compressed_flag_init": [
+      {
+        "va": "0x1426fb02b",
+        "asm": "test byte ptr [rdi + 0x30], 0x40"
+      },
+      {
+        "va": "0x1426fb02f",
+        "asm": "je 0x1426fb05a"
+      },
+      {
+        "va": "0x1426fb031",
+        "asm": "mov rax, qword ptr [rsi]"
+      },
+      {
+        "va": "0x1426fb034",
+        "asm": "lea edx, [r14 + 0x4c]"
+      },
+      {
+        "va": "0x1426fb038",
+        "asm": "mov rcx, rsi"
+      },
+      {
+        "va": "0x1426fb03b",
+        "asm": "call qword ptr [rax + 0x48]"
+      },
+      {
+        "va": "0x1426fb03e",
+        "asm": "mov qword ptr [rbx + 0x70], rax"
+      },
+      {
+        "va": "0x1426fb042",
+        "asm": "test rax, rax"
+      },
+      {
+        "va": "0x1426fb045",
+        "asm": "jne 0x1426fb05e"
+      },
+      {
+        "va": "0x1426fb047",
+        "asm": "mov rax, qword ptr [rsi]"
+      },
+      {
+        "va": "0x1426fb04a",
+        "asm": "mov rdx, rbp"
+      },
+      {
+        "va": "0x1426fb04d",
+        "asm": "mov rcx, rsi"
+      },
+      {
+        "va": "0x1426fb050",
+        "asm": "call qword ptr [rax + 0x68]"
+      },
+      {
+        "va": "0x1426fb053",
+        "asm": "xor al, al"
+      },
+      {
+        "va": "0x1426fb055",
+        "asm": "jmp 0x1426fb0e4"
+      },
+      {
+        "va": "0x1426fb05a",
+        "asm": "mov qword ptr [rbx + 0x70], r14"
+      }
+    ],
+    "resource_cap_path_and_flag": [
+      {
+        "va": "0x14265caf8",
+        "asm": "test byte ptr [rbx + 0x89], 0x20"
+      },
+      {
+        "va": "0x14265caff",
+        "asm": "jne 0x14265cb0a"
+      },
+      {
+        "va": "0x14265cb01",
+        "asm": "test byte ptr [rbx + 0x8c], 1"
+      },
+      {
+        "va": "0x14265cb08",
+        "asm": "je 0x14265cb2d"
+      },
+      {
+        "va": "0x14265cb0a",
+        "asm": "mov r8d, 4"
+      },
+      {
+        "va": "0x14265cb10",
+        "asm": "lea rdx, [rip + 0xc23251]"
+      },
+      {
+        "va": "0x14265cb17",
+        "asm": "lea rcx, [rsp + 0x48]"
+      },
+      {
+        "va": "0x14265cb1c",
+        "asm": "call 0x14011e080"
+      },
+      {
+        "va": "0x14265cb21",
+        "asm": "test byte ptr [rbx + 0x89], 0x20"
+      },
+      {
+        "va": "0x14265cb28",
+        "asm": "je 0x14265cb2d"
+      },
+      {
+        "va": "0x14265cb2a",
+        "asm": "or esi, 0x40"
+      }
+    ],
+    "map_event_load": [
+      {
+        "va": "0x140cde8b9",
+        "asm": "lea r8, [rbp + 0xf]"
+      },
+      {
+        "va": "0x140cde8bd",
+        "asm": "cmp qword ptr [rbp + 0x27], 8"
+      },
+      {
+        "va": "0x140cde8c2",
+        "asm": "cmovae r8, qword ptr [rbp + 0xf]"
+      },
+      {
+        "va": "0x140cde8c7",
+        "asm": "lea rdx, [rip + 0x1db4922]"
+      },
+      {
+        "va": "0x140cde8ce",
+        "asm": "lea rcx, [rbp - 0x29]"
+      },
+      {
+        "va": "0x140cde8d2",
+        "asm": "call 0x14011d9b0"
+      },
+      {
+        "va": "0x140cde8d7",
+        "asm": "lea rdi, [rbp - 0x21]"
+      },
+      {
+        "va": "0x140cde8db",
+        "asm": "cmp qword ptr [rbp - 9], 8"
+      },
+      {
+        "va": "0x140cde8e0",
+        "asm": "cmovae rdi, qword ptr [rbp - 0x21]"
+      },
+      {
+        "va": "0x140cde8e5",
+        "asm": "mov rcx, qword ptr [rip + 0x308388c]"
+      },
+      {
+        "va": "0x140cde8ec",
+        "asm": "test rcx, rcx"
+      },
+      {
+        "va": "0x140cde8ef",
+        "asm": "jne 0x140cde917"
+      },
+      {
+        "va": "0x140cde8f1",
+        "asm": "lea r9, [rip + 0x1cf5810]"
+      },
+      {
+        "va": "0x140cde8f8",
+        "asm": "lea r8, [rip + 0x25b97b9]"
+      },
+      {
+        "va": "0x140cde8ff",
+        "asm": "mov edx, 0xaa"
+      },
+      {
+        "va": "0x140cde904",
+        "asm": "lea rcx, [rip + 0x1cf58f5]"
+      },
+      {
+        "va": "0x140cde90b",
+        "asm": "call 0x141ebcd00"
+      },
+      {
+        "va": "0x140cde910",
+        "asm": "mov rcx, qword ptr [rip + 0x3083861]"
+      },
+      {
+        "va": "0x140cde917",
+        "asm": "xor r8d, r8d"
+      },
+      {
+        "va": "0x140cde91a",
+        "asm": "mov rdx, rdi"
+      },
+      {
+        "va": "0x140cde91d",
+        "asm": "call 0x1401f1640"
+      }
+    ],
+    "common_event_load": [
+      {
+        "va": "0x140cdf6e0",
+        "asm": "xor r8d, r8d"
+      },
+      {
+        "va": "0x140cdf6e3",
+        "asm": "lea rdx, [rip + 0x1ec8536]"
+      },
+      {
+        "va": "0x140cdf6ea",
+        "asm": "call 0x1401f1640"
+      }
+    ],
+    "event_marks_compressed": [
+      {
+        "va": "0x1401f16ad",
+        "asm": "or byte ptr [rbx + 0x89], 0x20"
+      }
+    ],
+    "dcx_header_validation": [
+      {
+        "va": "0x1426f9fa0",
+        "asm": "sub rsp, 0x38"
+      },
+      {
+        "va": "0x1426f9fa4",
+        "asm": "mov r10, qword ptr [rcx + 8]"
+      },
+      {
+        "va": "0x1426f9fa8",
+        "asm": "mov r11, rcx"
+      },
+      {
+        "va": "0x1426f9fab",
+        "asm": "mov dword ptr [r10 + 0x88], edx"
+      },
+      {
+        "va": "0x1426f9fb2",
+        "asm": "cmp edx, 1"
+      },
+      {
+        "va": "0x1426f9fb5",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9fbb",
+        "asm": "mov rdx, qword ptr [r10 + 0x70]"
+      },
+      {
+        "va": "0x1426f9fbf",
+        "asm": "cmp byte ptr [rdx], 0x44"
+      },
+      {
+        "va": "0x1426f9fc2",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9fc8",
+        "asm": "cmp byte ptr [rdx + 1], 0x43"
+      },
+      {
+        "va": "0x1426f9fcc",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9fd2",
+        "asm": "cmp byte ptr [rdx + 2], 0x58"
+      },
+      {
+        "va": "0x1426f9fd6",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9fdc",
+        "asm": "cmp byte ptr [rdx + 3], 0"
+      },
+      {
+        "va": "0x1426f9fe0",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9fe6",
+        "asm": "mov eax, dword ptr [rdx + 4]"
+      },
+      {
+        "va": "0x1426f9fe9",
+        "asm": "bswap eax"
+      },
+      {
+        "va": "0x1426f9feb",
+        "asm": "cmp eax, 0x11000"
+      },
+      {
+        "va": "0x1426f9ff0",
+        "asm": "ja 0x1426fa140"
+      },
+      {
+        "va": "0x1426f9ff6",
+        "asm": "cmp byte ptr [rdx + 0x18], 0x44"
+      },
+      {
+        "va": "0x1426f9ffa",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426fa000",
+        "asm": "cmp byte ptr [rdx + 0x19], 0x43"
+      },
+      {
+        "va": "0x1426fa004",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426fa00a",
+        "asm": "cmp byte ptr [rdx + 0x1a], 0x53"
+      },
+      {
+        "va": "0x1426fa00e",
+        "asm": "jne 0x1426fa140"
+      },
+      {
+        "va": "0x1426fa014",
+        "asm": "cmp byte ptr [rdx + 0x1b], 0"
+      },
+      {
+        "va": "0x1426fa018",
+        "asm": "jne 0x1426fa140"
+      }
+    ],
+    "raw_open_uses_copied_path": [
+      {
+        "va": "0x1426fa99c",
+        "asm": "mov r8, qword ptr [rbx + 0x38]"
+      },
+      {
+        "va": "0x1426fa9a0",
+        "asm": "lea rax, [rsp + 0x40]"
+      },
+      {
+        "va": "0x1426fa9a5",
+        "asm": "mov rcx, qword ptr [rip + 0x21693f4]"
+      },
+      {
+        "va": "0x1426fa9ac",
+        "asm": "mov rdx, rbx"
+      },
+      {
+        "va": "0x1426fa9af",
+        "asm": "mov qword ptr [rsp + 0x20], rax"
+      },
+      {
+        "va": "0x1426fa9b4",
+        "asm": "mov qword ptr [rsp + 0x40], 0"
+      },
+      {
+        "va": "0x1426fa9bd",
+        "asm": "call 0x1426f6b70"
+      }
+    ]
+  },
+  "aliases": {
+    "event": "event:/ is used by current native map/common/common_func EMEVD consumers and base/DLC02 eventflag alloclists; no alternate event_dlc2 or event_dlc02 string found in examined current PE",
+    "msg": "msg:/%s/item_dlc02.msgbnd and msg:/%s/menu_dlc02.msgbnd are direct native formatter literals",
+    "scene": "mapstudio:/%s.msb or mapstudio_dlc2:/%s.msb as selected by previously audited native config+area bitset; append suffix after alias selection",
+    "native_literals": {
+      "0x142a737c0": "event:/eventflag/LegacyMap.eventflagalloclist",
+      "0x142a73820": "event:/eventflag/OpenMap.eventflagalloclist",
+      "0x142a73880": "event:/eventflag/LegacyMap_DLC02.eventflagalloclist",
+      "0x142a738f0": "event:/eventflag/OpenMap_DLC02.eventflagalloclist",
+      "0x142a931f0": "event:/%s.emevd",
+      "0x142ba7ba8": "event:/common_func.emevd",
+      "0x142ba7c20": "event:/common.emevd",
+      "0x142bdcb10": "mapstudio_dlc2:/%s.msb",
+      "0x142bdcb40": "mapstudio:/%s.msb",
+      "0x142bdfb50": "msg:/%s/item_dlc02.msgbnd",
+      "0x142bdfb88": "msg:/%s/menu_dlc02.msgbnd",
+      "0x142bdfbc0": "msg:/%s/ngword.msgbnd",
+      "0x142bdfbf0": "msg:/%s/sellregion.msgbnd"
+    }
+  },
+  "native_language_table": {
+    "table": "0x143b47140",
+    "entries": [
+      {
+        "index": 0,
+        "va": "0x142bdfcd8",
+        "text": "jpnJP"
+      },
+      {
+        "index": 1,
+        "va": "0x142bdfce8",
+        "text": "engUS"
+      },
+      {
+        "index": 2,
+        "va": "0x142bdfcf8",
+        "text": "fraFR"
+      },
+      {
+        "index": 3,
+        "va": "0x142bdfd08",
+        "text": "spaES"
+      },
+      {
+        "index": 4,
+        "va": "0x142bdfd18",
+        "text": "itaIT"
+      },
+      {
+        "index": 5,
+        "va": "0x142bdfd28",
+        "text": "deuDE"
+      },
+      {
+        "index": 6,
+        "va": "0x142bdfd38",
+        "text": "korKR"
+      },
+      {
+        "index": 7,
+        "va": "0x142bdfd48",
+        "text": "zhoTW"
+      },
+      {
+        "index": 8,
+        "va": "0x142bdfd58",
+        "text": "zhoCN"
+      },
+      {
+        "index": 9,
+        "va": "0x142bdfd68",
+        "text": "polPL"
+      },
+      {
+        "index": 10,
+        "va": "0x142bdfd78",
+        "text": "rusRU"
+      },
+      {
+        "index": 11,
+        "va": "0x142bdfd88",
+        "text": "porBR"
+      },
+      {
+        "index": 12,
+        "va": "0x142bdfd98",
+        "text": "spaAR"
+      },
+      {
+        "index": 13,
+        "va": "0x142bdfda8",
+        "text": "thaTH"
+      },
+      {
+        "index": 14,
+        "va": "0x142bdfdb8",
+        "text": "araAE"
+      }
+    ]
+  },
+  "compression_contract": {
+    "flag": "0x40",
+    "effect": "DCX-specific read/decompression, not a filename-expansion switch. Init allocates 0x4c header; header callback requires DCX\\0 and DCS\\0 and version<=0x11000.",
+    "plain_bytes_with_compressed_flag": "Rejected by native header callback; no proved automatic fallback to uncompressed data.",
+    "loose_mod_boundary": "Native compressed resource lookup uses same explicit .dcx name; keep native VFS so mounted/loose Mod override participates. This audit does not claim uncompressed bytes renamed .dcx or unsuffixed loose paths work."
+  },
+  "raw_contract_comparison": {
+    "cpp_reference": "afab7e1:src/gamefiles.cpp",
+    "matching": [
+      "64-byte public request layout",
+      "128-byte alignment",
+      "submit result 0 success",
+      "completion status 1 success",
+      "allocator vtable slot 13 frees callback buffer",
+      "manager+0xe38 readiness",
+      "cancel queued on manager+0x20",
+      "generation-based retirement before callback state free"
+    ],
+    "thread_difference": "C++ invokes submit/flush outside request mutex on dedicated worker; Rust pump invokes under Host.game mutex on update worker. Examined flush only detaches queue under native lock and enqueues worker task; no direct disk read or wait-for-completion was seen. Native internal mutex acquisition can wait. No confirmed new deadlock from these static reads.",
+    "status_limitation": "Boss poll collapses all failures to Err(()); root is adding low-frequency native diagnostics. Terminal/deadline policies are a separate initialization concern."
+  },
+  "evidence_limits": [
+    "No game launched or injected.",
+    "No live native callback completion measured.",
+    "Archive parser and mock host success do not validate raw VFS path expansion.",
+    "Native config/current mount priority not read; existing conservative scene alias routing remains required.",
+    "Steam language names map to the same 15 native directories, but external Mod language overrides may need explicit common.language."
+  ],
+  "source_refs": [
+    {
+      "revision": "afab7e14db2b62ae0bede980d5d0c96634321350",
+      "path": "src/gamefiles.cpp",
+      "lines": [
+        35,
+        48
+      ],
+      "fact": "64-byte ReadRequest ABI"
+    },
+    {
+      "revision": "afab7e14db2b62ae0bede980d5d0c96634321350",
+      "path": "src/gamefiles.cpp",
+      "lines": [
+        110,
+        145
+      ],
+      "fact": "callback status 1, buffer release via allocator vtable slot 13, callback/generation ownership"
+    },
+    {
+      "revision": "afab7e14db2b62ae0bede980d5d0c96634321350",
+      "path": "src/gamefiles.cpp",
+      "lines": [
+        183,
+        233
+      ],
+      "fact": "collect under queue mutex, native submit/flush/cancel outside mutex; request gets exact stored path, alignment 128, supplied flags"
+    },
+    {
+      "revision": "afab7e14db2b62ae0bede980d5d0c96634321350",
+      "path": "src/gamefiles.cpp",
+      "lines": [
+        268,
+        297
+      ],
+      "fact": "request validates 0x40; canonicalizes case/slashes but does not add .dcx; 128 retained items"
+    },
+    {
+      "revision": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+      "path": "crates/minimap/src/host.rs",
+      "lines": [
+        109,
+        116
+      ],
+      "fact": "0x40 only for explicit .dcx suffix"
+    },
+    {
+      "revision": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+      "path": "crates/minimap/src/resources.rs",
+      "lines": [
+        18,
+        24
+      ],
+      "fact": "compressed metadata/atlas requests include .dcx; uncompressed GFX/BHD do not"
+    },
+    {
+      "revision": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+      "path": "crates/minimap/src/resources.rs",
+      "lines": [
+        501,
+        501
+      ],
+      "fact": "named map-tile TPF path explicitly ends .tpf.dcx"
+    },
+    {
+      "revision": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+      "path": "crates/boss/src/host.rs",
+      "lines": [
+        67,
+        75
+      ],
+      "fact": "failure baseline uses unexpanded logical path with 0x40"
+    }
+  ],
+  "publication_review": {
+    "scope": "Only this evidence JSON and the Markdown report are intended for source control. Detailed intermediate files remain ignored research outputs.",
+    "private_data": "Local absolute input paths removed; no user/account identifiers, credentials, URLs with tokens, or machine-specific directory names retained.",
+    "binary_data": "No executable image, compressed resource, archive payload, memory dump, or base64 data included. Evidence contains SHA-256, virtual paths, native addresses, selected textual instruction listings, and language directory names.",
+    "product_files_edited": false
+  },
+  "loading_fix_source_state": {
+    "kind": "uncommitted working tree on audited failure commit; hashes identify this review snapshot, not a release manifest",
+    "sha256": {
+      "crates/boss/src/data.rs": "4bfa9b405dfbcaa737f477de60fcda6de131e390d514d5001d8cfbc073d96906",
+      "crates/boss/src/host.rs": "4f391e5694529571c2b00dea26f63f108963fa5a1a9260baaebf44b950539104",
+      "crates/game/src/files.rs": "2355a761e17bff487a21720024c3c20b12bddb07a55a6af96f99d828bf006ebe",
+      "crates/abi/src/lib.rs": "4adcd4d2cb6190484a73485bc12cdbd3f814b157bf7b85bf27c09e415e9cbd7d"
+    }
+  },
+  "loading_bounds": {
+    "planned_unique_paths": 4096,
+    "active_boss_tokens": 4,
+    "per_update_completed_or_expired_jobs": 32,
+    "per_update_submission_calls": 32,
+    "shared_file_and_discovery_soft_cpu_ms": 2,
+    "first_attempt_deadline_seconds": 10,
+    "generation_resource_wait_deadline_seconds": 60,
+    "first_attempt_detail": "Per-job 10 seconds starts on the first request call, including request returning token 0. The 1-second transport retry preserves that start. Queue waiting before the first request is limited by the generation resource deadline. A later optional-to-required promotion can create one fresh required job, still under the original generation 60-second resource deadline.",
+    "expiration_detail": "After the 60-second resource deadline, files_at starts no new reads and expires queued/pending jobs in bounded batches; fallback is disabled during this drain. Up to 4096 jobs may remain. A full 32-job batch would drain that number in 128 update calls; the 2-ms soft budget can make more calls necessary. Discovery/filter/catalog preparation follows and is not preempted at 60 seconds.",
+    "not_hard_wall_clock_guarantee": "The deadlines bound waits only when update callbacks keep running and Host/native calls return. They do not interrupt native calls, a single parse/expansion/finalization unit, or OS scheduling. 2 ms is checked between units, not a hard per-update limit. Manual reload or actual nonzero PARAM-pointer replacement starts a new generation; temporary zero/context changes do not.",
+    "native_retirement_detail": "Four is the number of Boss-held active tokens, not the number of all outstanding native callback contexts. Timed-out tokens are released and cancelled, but callback storage remains until callback completion and native generation retirement. The shared core retains at most 128 request items/tokens; capacity exhaustion returns token 0 and is bounded by the same job/resource deadlines.",
+    "memory_limits": {
+      "boss_per_file_admitted_copy_bytes": 67108864,
+      "shared_core_copied_file_bytes": 268435456,
+      "note": "The shared 256-MiB budget includes Minimap and late retiring callbacks. Event/scene source totals count accepted files, not rejected transport payloads. These limits do not bound native allocations made before completion or Rust parser expansion/container overhead.",
+      "accepted_event_source_bytes": 33554432,
+      "accepted_scene_source_bytes": 33554432
+    },
+    "no_progress_outcome": "Expired/failed zero-row catalogue becomes Boss data unavailable, not Ready. Successful but truly empty catalogue has a distinct No named Boss health bars found state. Both finish the generation and require explicit reload or actual PARAM replacement to restart."
+  }
+}

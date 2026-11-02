@@ -1,0 +1,8 @@
+PASS: controlled revival host rejects false/unknown primary, unknown targets, stale context, invalid IDs/values and conflicts before any write; this fixture is not the native game writer.
+minimap-font C:\WINDOWS\Fonts\msyh.ttc
+Minimap Rust/egui initialized; native UI_SCENE below game UI
+PASS: actual new Minimap DLL init/destroy with only 176 host bytes readable; next page PAGE_NOACCESS, no appended capabilities.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+Boss 离线验证失败：production raw resource request violates physical .dcx / 0x40 contract: first=Some("path=msg:/engUS/item_dlc02.msgbnd, flags=0x40"), invalid requests=1075, update epoch=1
+expected_negative_exit_code=1

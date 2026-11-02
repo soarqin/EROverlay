@@ -1,0 +1,34 @@
+{
+  "baseline": "ca8dd4ee24d80169084821dbf25a13ce77e16f56",
+  "note": "Hashes of tested working-tree inputs; final delivery commit is in package/source.json. GameFiles changes are test-only. No config data changed.",
+  "files": [
+    {
+      "path": "crates/boss/src/host.rs",
+      "sha256": "4f391e5694529571c2b00dea26f63f108963fa5a1a9260baaebf44b950539104"
+    },
+    {
+      "path": "crates/boss/src/data.rs",
+      "sha256": "4bfa9b405dfbcaa737f477de60fcda6de131e390d514d5001d8cfbc073d96906"
+    },
+    {
+      "path": "crates/boss/src/ui.rs",
+      "sha256": "6ab2257be3a6a38c7d12f4ea8bb2bf0bb806393466c18473a82f838e688805c7"
+    },
+    {
+      "path": "crates/game/src/files.rs",
+      "sha256": "2355a761e17bff487a21720024c3c20b12bddb07a55a6af96f99d828bf006ebe"
+    },
+    {
+      "path": "crates/harness/src/bin/boss_probe.rs",
+      "sha256": "eb5085c9ca99ef4c3f9951e5d8eea9a77175ea3608465d30881496f7b76b2d39"
+    },
+    {
+      "path": "configs/boss-revival.json",
+      "sha256": "2a1eef11397caae9c2e6af452006932bf97c840288285a22711d54aa44e1da2e"
+    },
+    {
+      "path": "configs/boss-encounters.json",
+      "sha256": "d5999e0874a518909ac32ac6143b699f402e66c2264d8b1214c7922d71ea009f"
+    }
+  ]
+}

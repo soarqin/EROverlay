@@ -1,0 +1,7 @@
+{
+  "OriginalEntriesChecked": 92,
+  "ChangedOriginalEntries": [
+    "overlays/Boss.dll"
+  ],
+  "Purpose": "Controlled compatibility verification only; original source/manifest remain unchanged; not a deliverable package"
+}

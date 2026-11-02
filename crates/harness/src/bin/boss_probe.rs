@@ -32,6 +32,11 @@ struct Upload {
     height: u32,
     bytes: Vec<u8>,
 }
+struct FileToken {
+    name: Option<String>,
+    ready_epoch: u64,
+    busy_once: bool,
+}
 struct Fixture {
     root: String,
     params: BTreeMap<u32, Vec<u8>>,
@@ -39,7 +44,13 @@ struct Fixture {
     scenes: Option<PathBuf>,
     scene_reads: BTreeSet<String>,
     invalid_scene_aliases: BTreeSet<String>,
-    requests: BTreeMap<u64, Option<String>>,
+    invalid_resource_requests: BTreeSet<String>,
+    first_invalid_resource_request: Option<String>,
+    requests: BTreeMap<u64, FileToken>,
+    update_epoch: u64,
+    pending_polls: u64,
+    busy_polls: u64,
+    max_pending_requests: usize,
     keys: BTreeSet<u32>,
     input: VecDeque<abi::UiInput>,
     capture: u32,
@@ -206,7 +217,18 @@ unsafe extern "C" fn param(user: *mut c_void, id: u32) -> usize {
 unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest) -> u64 {
     let f = unsafe { fixture(user) };
     let request = unsafe { &*request };
-    let path = unsafe { text(request.path) };
+    let physical_path = unsafe { text(request.path) };
+    f.request_count += 1;
+    let Some(path) = physical_path
+        .strip_suffix(".dcx")
+        .filter(|_| request.flags == 0x40)
+    else {
+        let invalid = format!("path={physical_path}, flags={:#x}", request.flags);
+        f.first_invalid_resource_request
+            .get_or_insert_with(|| invalid.clone());
+        f.invalid_resource_requests.insert(invalid);
+        return 0;
+    };
     let scene = path
         .strip_prefix("mapstudio:/")
         .or_else(|| path.strip_prefix("mapstudio_dlc2:/"));
@@ -215,7 +237,7 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
     let invalid_scene_alias = path.starts_with("mapstudio_dlc2:/")
         && matches!(scene, Some("m31_00_00_00.msb" | "m60_38_54_00.msb"));
     if invalid_scene_alias {
-        f.invalid_scene_aliases.insert(path.to_owned());
+        f.invalid_scene_aliases.insert(physical_path.to_owned());
     }
     if let Some(name) = scene
         && !invalid_scene_alias
@@ -225,7 +247,8 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
         && !f.files.contains_key(path)
         && let Some(root) = &f.scenes
     {
-        // The explicit flat archive directory contains decompressed game bytes.
+        // Strip the checked physical .dcx suffix only at the provider boundary:
+        // these archives contain bytes after native VFS decompression.
         // For area 61, it models the same archived scene under both native
         // aliases without claiming to reproduce the live switch/Mod priority.
         if let Ok(bytes) = std::fs::read(root.join(name)) {
@@ -246,16 +269,38 @@ unsafe extern "C" fn request(user: *mut c_void, request: *const abi::FileRequest
     };
     let name = (!invalid_scene_alias && f.files.contains_key(name)).then(|| name.to_owned());
     f.next += 1;
-    f.request_count += 1;
-    f.requests.insert(f.next, name);
+    f.requests.insert(
+        f.next,
+        FileToken {
+            name,
+            ready_epoch: f.update_epoch + 1,
+            busy_once: f.next.is_multiple_of(17),
+        },
+    );
+    f.max_pending_requests = f.max_pending_requests.max(f.requests.len());
     f.next
 }
 unsafe extern "C" fn file(user: *mut c_void, id: u64, out: *mut abi::FileView) -> i32 {
     let f = unsafe { fixture(user) };
-    let Some(request) = f.requests.get(&id) else {
+    let Some(request) = f.requests.get_mut(&id) else {
         return abi::ERR_INVALID;
     };
-    let view = if let Some(name) = request {
+    if f.update_epoch < request.ready_epoch {
+        f.pending_polls += 1;
+        unsafe {
+            out.write(abi::FileView {
+                status: abi::FILE_PENDING,
+                ..Default::default()
+            })
+        };
+        return abi::OK;
+    }
+    if request.busy_once {
+        request.busy_once = false;
+        f.busy_polls += 1;
+        return abi::ERR_BUSY;
+    }
+    let view = if let Some(name) = &request.name {
         abi::FileView {
             status: abi::FILE_READY,
             reserved: 0,
@@ -558,6 +603,9 @@ impl Probe {
         Ok(fixture.meshes.iter().map(|m| m.vertices.len()).sum())
     }
     fn update(&mut self) -> Result<Duration, String> {
+        // Match the core order: native file pump before this tick's plugin
+        // update. A request submitted this tick cannot already be FILE_READY.
+        self.fixture.update_epoch += 1;
         let start = Instant::now();
         let code = unsafe { self.plugin.api.update.unwrap()(self.plugin.instance) };
         if code != abi::OK {
@@ -690,13 +738,51 @@ impl Probe {
         Ok(())
     }
     fn wait_catalog(&mut self) -> Result<(), String> {
-        let deadline = Instant::now() + Duration::from_secs(35);
+        let start = Instant::now();
+        let deadline = start + Duration::from_secs(35);
+        let epoch = self.fixture.update_epoch;
+        let requests = self.fixture.request_count;
+        let pending = self.fixture.pending_polls;
+        let busy = self.fixture.busy_polls;
+        self.fixture.max_pending_requests = self.fixture.requests.len();
+        let interval = Duration::from_nanos(1_000_000_000 / 60);
+        let mut max_update = Duration::ZERO;
         while self.fixture.directory_count == 0 {
-            self.update()?;
+            let elapsed = self.update()?;
+            max_update = max_update.max(elapsed);
+            if !self.fixture.invalid_resource_requests.is_empty() {
+                return Err(format!(
+                    "production raw resource request violates physical .dcx / 0x40 contract: first={:?}, invalid requests={}, update epoch={}",
+                    self.fixture.first_invalid_resource_request,
+                    self.fixture.invalid_resource_requests.len(),
+                    self.fixture.update_epoch
+                ));
+            }
+            if !self.fixture.invalid_scene_aliases.is_empty() {
+                return Err(format!(
+                    "production requested a DLC2 alias for a base-only scene: {:?}",
+                    self.fixture.invalid_scene_aliases
+                ));
+            }
             if Instant::now() >= deadline {
                 return Err("real archive catalogue did not finish in 35 seconds".into());
             }
-            std::thread::sleep(Duration::from_millis(2));
+            std::thread::sleep(interval.saturating_sub(elapsed));
+        }
+        println!(
+            "Catalogue initialization at 60Hz: elapsed={}ms updates={} requests={} peak active tokens={} pending polls={} busy polls={} max single update={}us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+            start.elapsed().as_millis(),
+            self.fixture.update_epoch - epoch,
+            self.fixture.request_count - requests,
+            self.fixture.max_pending_requests,
+            self.fixture.pending_polls - pending,
+            self.fixture.busy_polls - busy,
+            max_update.as_micros()
+        );
+        if self.fixture.pending_polls == pending || self.fixture.busy_polls == busy {
+            return Err(
+                "catalogue did not exercise next-tick pending and transient busy polls".into(),
+            );
         }
         std::thread::sleep(Duration::from_millis(510));
         self.update()?;
@@ -1060,7 +1146,13 @@ fn run() -> Result<(), String> {
         scenes,
         scene_reads: BTreeSet::new(),
         invalid_scene_aliases: BTreeSet::new(),
+        invalid_resource_requests: BTreeSet::new(),
+        first_invalid_resource_request: None,
         requests: BTreeMap::new(),
+        update_epoch: 0,
+        pending_polls: 0,
+        busy_polls: 0,
+        max_pending_requests: 0,
         keys: BTreeSet::new(),
         input: VecDeque::new(),
         capture: 0,

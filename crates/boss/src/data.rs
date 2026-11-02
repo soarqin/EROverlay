@@ -27,8 +27,12 @@ const PARAM_GROUPS: [u32; 6] = [
 ];
 const MAX_FILES: usize = 4096;
 const MAX_SCRIPT_BYTES: usize = 32 * 1024 * 1024;
-const MAX_PENDING: usize = 2;
+const MAX_PENDING: usize = 4;
 const MAX_SCENE_BYTES: usize = 32 * 1024 * 1024;
+const UPDATE_BUDGET: Duration = Duration::from_millis(2);
+const MAX_BATCH: usize = 32;
+const JOB_TIMEOUT: Duration = Duration::from_secs(10);
+const LOADING_TIMEOUT: Duration = Duration::from_secs(60);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Encounter {
@@ -99,6 +103,7 @@ struct Job {
     attempts: u8,
     retry: Instant,
     token: u64,
+    started: Option<Instant>,
 }
 
 struct Loading {
@@ -123,6 +128,9 @@ struct Loading {
     scenes: BTreeMap<u32, Vec<SceneIndex>>,
     scene_untrusted: BTreeSet<u32>,
     excluded: Vec<BossDisplay>,
+    started: Instant,
+    timeouts: usize,
+    first_failure: Option<String>,
 }
 impl Loading {
     fn queue(&mut self, path: String, kind: Kind) {
@@ -138,7 +146,10 @@ impl Loading {
         }
         if matches!(kind, Kind::Event { required: true }) {
             if self.absent.remove(&path) {
-                self.failures += 1;
+                // A later explicit link upgrades an earlier optional miss.
+                // Permit its required attempt/retry once; final required
+                // failures never return to absent, preventing a retry loop.
+                self.queued.remove(&path);
             }
             if let Some(job) = self.jobs.iter_mut().find(|job| job.path == path) {
                 job.kind = kind;
@@ -152,6 +163,7 @@ impl Loading {
                 attempts: 0,
                 retry: Instant::now(),
                 token: 0,
+                started: None,
             });
         }
     }
@@ -202,6 +214,9 @@ impl Loading {
             scenes: BTreeMap::new(),
             scene_untrusted: BTreeSet::new(),
             excluded: Vec::new(),
+            started: Instant::now(),
+            timeouts: 0,
+            first_failure: None,
         };
         let language = host
             .config("common.language")
@@ -210,6 +225,25 @@ impl Loading {
         load.queue_text(language.as_deref(), host);
         load.event("common_func.emevd", true);
         load.event("common.emevd", false);
+        // Get the existing Boss-position maps ahead of broad resource probes.
+        // The full authoritative map directory is still queued below.
+        let priority: BTreeSet<_> = load
+            .areas
+            .iter()
+            .filter(|a| a.flag != 0 && a.map[0] != 0)
+            .map(|a| a.map)
+            .collect();
+        for [area, block, sub] in priority {
+            load.event(&format!("m{area:02}_{block:02}_{sub:02}_00.emevd"), false);
+            if matches!(area, 60 | 61) {
+                for version in [10, 20] {
+                    load.event(
+                        &format!("m{area:02}_{block:02}_{sub:02}_{version:02}.emevd"),
+                        false,
+                    );
+                }
+            }
+        }
         for [area, block, sub, version] in params::event_maps(tables[5])? {
             load.event(
                 &format!("m{area:02}_{block:02}_{sub:02}_{version:02}.emevd"),
@@ -228,20 +262,6 @@ impl Loading {
         for [area, block, sub] in maps {
             load.event(&format!("m{area:02}_{block:02}_{sub:02}_00.emevd"), false);
         }
-        let field_maps: BTreeSet<_> = load
-            .areas
-            .iter()
-            .filter(|a| a.flag != 0 && matches!(a.map[0], 60 | 61))
-            .map(|a| a.map)
-            .collect();
-        for [area, block, sub] in field_maps {
-            for version in [10, 20] {
-                load.event(
-                    &format!("m{area:02}_{block:02}_{sub:02}_{version:02}.emevd"),
-                    false,
-                );
-            }
-        }
         Some(load)
     }
     fn cancel(&mut self, host: Host) {
@@ -250,81 +270,25 @@ impl Loading {
             job.token = 0;
         }
     }
-    /// Completes at most one resource parse per update and retains busy tokens.
-    fn files(&mut self, host: Host) -> bool {
-        let now = Instant::now();
-        let mut pending = self.jobs.iter().filter(|j| j.token != 0).count();
-        for job in &mut self.jobs {
-            if pending >= MAX_PENDING {
-                break;
-            }
-            if job.token == 0 && now >= job.retry {
-                job.token = host.request(&job.path);
-                if job.token == 0 {
-                    job.retry = now + Duration::from_millis(250);
-                } else {
-                    pending += 1;
-                }
-            }
+    fn failure(&mut self, path: &str, reason: &str) {
+        self.failures += 1;
+        self.first_failure
+            .get_or_insert_with(|| format!("{path}: {reason}"));
+    }
+    fn unavailable(&mut self, job: Job, timeout: Option<&str>, fallback: bool) {
+        if let Some(reason) = timeout {
+            self.timeouts += 1;
+            self.failure(&job.path, reason);
         }
-        let ready = self.jobs.iter().enumerate().find_map(|(index, job)| {
-            (job.token != 0)
-                .then(|| host.poll(job.token))
-                .flatten()
-                .map(|result| (index, result))
-        });
-        let Some((index, result)) = ready else {
-            return self.jobs.is_empty();
-        };
-        let mut job = self.jobs.remove(index).unwrap();
-        host.release(job.token);
-        job.token = 0;
-        let was_read = result.is_ok();
-        let mut retryable = true;
-        let parsed = match result {
-            Ok(bytes) => match &mut job.kind {
-                Kind::Text { needed, .. } => {
-                    match self.texts.merge_binder_for(&bytes, *needed) {
-                        Ok(merged) => {
-                            *needed = needed.missing_from(merged.namespaces);
-                            // A valid binder cannot gain a missing member on retry.
-                            retryable = false;
-                            needed.is_empty()
-                        }
-                        Err(_) => false,
-                    }
-                }
-                Kind::Event { .. } => {
-                    if self.script_bytes + bytes.len() > MAX_SCRIPT_BYTES {
-                        false
-                    } else if let Ok(script) = parse_emevd(&job.path, &bytes) {
-                        self.script_bytes += bytes.len();
-                        for link in &script.linked {
-                            self.event(link, true);
-                        }
-                        self.scripts.push(script);
-                        true
-                    } else {
-                        false
-                    }
-                }
-                Kind::Scene { map } => {
-                    retryable = false;
-                    self.accept_scene(*map, &bytes)
-                }
-            },
-            Err(()) => false,
-        };
-        if !parsed {
-            job.attempts += 1;
-            if retryable && job.attempts < 2 {
-                job.retry = now + Duration::from_secs(1);
-                self.jobs.push_back(job);
-            } else if let Kind::Text {
-                needed,
-                fallback: Some(path),
-            } = job.kind
-            {
+        if let Kind::Scene { map } = job.kind {
+            // A transport failure is unknown, never negative scene evidence.
+            self.scene_untrusted.insert(map);
+        } else if let Kind::Text {
+            needed,
+            fallback: Some(path),
+        } = job.kind
+        {
+            if fallback {
                 self.queue(
                     path,
                     Kind::Text {
@@ -332,20 +296,128 @@ impl Loading {
                         fallback: None,
                     },
                 );
-            } else if let Kind::Scene { map } = job.kind {
-                // The host does not distinguish not-found from unsupported,
-                // copy-budget or native read failures. None prove absence.
-                self.scene_untrusted.insert(map);
-            } else if !was_read && matches!(job.kind, Kind::Event { required: false }) {
+            } else if timeout.is_none() {
+                self.failure(&job.path, "text resource unavailable");
+            }
+        } else if timeout.is_none() {
+            self.failure(&job.path, "resource unavailable or invalid");
+        }
+    }
+    /// One update shares a soft CPU budget with discovery. Poll a pending token
+    /// at most once, retain busy work, and bound both rejected and accepted jobs.
+    fn files_at(&mut self, host: Host, now: Instant, until: Instant) -> bool {
+        let mut polled = BTreeSet::new();
+        let mut submissions = 0;
+        let mut completed = 0;
+        let loading_expired = now.saturating_duration_since(self.started) >= LOADING_TIMEOUT;
+        while completed < MAX_BATCH && Instant::now() < until {
+            if let Some(index) = self.jobs.iter().position(|job| {
+                loading_expired
+                    || job
+                        .started
+                        .is_some_and(|start| now.saturating_duration_since(start) >= JOB_TIMEOUT)
+            }) {
+                let job = self.jobs.remove(index).unwrap();
+                host.release(job.token);
+                self.unavailable(
+                    job,
+                    Some(if loading_expired {
+                        "initialization deadline exceeded"
+                    } else {
+                        "request deadline exceeded"
+                    }),
+                    !loading_expired,
+                );
+                completed += 1;
+                continue;
+            }
+            let mut pending = self.jobs.iter().filter(|job| job.token != 0).count();
+            for job in &mut self.jobs {
+                if pending >= MAX_PENDING || submissions >= MAX_BATCH || Instant::now() >= until {
+                    break;
+                }
+                if job.token == 0 && now >= job.retry {
+                    job.started.get_or_insert(now);
+                    job.token = host.request(&job.path);
+                    submissions += 1;
+                    if job.token == 0 {
+                        job.retry = now + Duration::from_millis(250);
+                    } else {
+                        pending += 1;
+                    }
+                }
+            }
+            let ready = self.jobs.iter_mut().enumerate().find_map(|(index, job)| {
+                if job.token == 0 || !polled.insert(job.token) {
+                    return None;
+                }
+                job.started.get_or_insert(now);
+                host.poll(job.token).map(|result| (index, result))
+            });
+            let Some((index, result)) = ready else {
+                break;
+            };
+            let mut job = self.jobs.remove(index).unwrap();
+            host.release(job.token);
+            job.token = 0;
+            completed += 1;
+            let was_read = result.is_ok();
+            let parsed = match result {
+                Ok(bytes) => match &mut job.kind {
+                    Kind::Text { needed, .. } => self
+                        .texts
+                        .merge_binder_for(&bytes, *needed)
+                        .map(|merged| {
+                            *needed = needed.missing_from(merged.namespaces);
+                            needed.is_empty()
+                        })
+                        .unwrap_or(false),
+                    Kind::Event { .. } => {
+                        if self.script_bytes + bytes.len() > MAX_SCRIPT_BYTES {
+                            false
+                        } else if let Ok(script) = parse_emevd(&job.path, &bytes) {
+                            self.script_bytes += bytes.len();
+                            for link in &script.linked {
+                                self.event(link, true);
+                            }
+                            self.scripts.push(script);
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    Kind::Scene { map } => self.accept_scene(*map, &bytes),
+                },
+                Err(()) => false,
+            };
+            if parsed {
+                continue;
+            }
+            job.attempts += 1;
+            let optional = matches!(job.kind, Kind::Event { required: false });
+            // Obtained bytes cannot improve by reading them again. Optional
+            // misses are probes, not a reason to double the whole map IO plan.
+            if !was_read && !optional && job.attempts < 2 {
+                job.retry = now + Duration::from_secs(1);
+                self.jobs.push_back(job);
+            } else if !was_read && optional {
                 self.absent.insert(job.path);
             } else {
-                self.failures += 1;
+                self.unavailable(job, None, true);
             }
         }
         self.jobs.is_empty()
     }
-    fn discover(&mut self) -> bool {
+    #[cfg(test)]
+    fn files(&mut self, host: Host) -> bool {
+        self.files_at(host, Instant::now(), Instant::now() + UPDATE_BUDGET)
+    }
+    fn discover_until(&mut self, until: Instant) -> bool {
+        let mut maps = 0;
         while let Some(script) = self.scripts.get(self.discover_at) {
+            if maps >= MAX_BATCH || Instant::now() >= until {
+                return false;
+            }
             self.discover_at += 1;
             if script.map_id.is_none() {
                 continue;
@@ -357,9 +429,13 @@ impl Loading {
                 }
                 Err(_) => self.failures += 1,
             }
-            return false;
+            maps += 1;
         }
         true
+    }
+    #[cfg(test)]
+    fn discover(&mut self) -> bool {
+        self.discover_until(Instant::now() + UPDATE_BUDGET)
     }
     fn param_locates(&self, display: &BossDisplay) -> bool {
         self.areas.iter().any(|area| {
@@ -546,6 +622,12 @@ impl Data {
     pub fn revision(&self) -> u64 {
         self.revision
     }
+    fn set_status(&mut self, status: &'static str) {
+        if self.status != status {
+            self.status = status;
+            self.host.log(&format!("boss-loading: {status}\n"));
+        }
+    }
     /// Explicit Mod/resource refresh; transient loading/menu states do not
     /// discard the catalogue or cancel in-flight native file generations.
     pub fn reload(&mut self) {
@@ -572,6 +654,7 @@ impl Data {
             return Some(self.catalog.clone());
         }
         let now = Instant::now();
+        let until = now + UPDATE_BUDGET;
         if now >= self.check {
             self.check = now + Duration::from_millis(500);
             let tables = PARAM_GROUPS.map(|group| self.host.param(group));
@@ -598,29 +681,48 @@ impl Data {
             }
         }
         let loading = self.loading.as_mut()?;
-        if !loading.files(self.host) {
+        if !loading.files_at(self.host, now, until) {
+            let status = if loading.timeouts != 0 {
+                "Loading Boss data; some requests timed out"
+            } else if loading.scene_started {
+                "Checking Boss scene entities"
+            } else {
+                "Loading game text and Boss events"
+            };
+            self.set_status(status);
             return None;
         }
-        self.status = "Discovering named Boss health bars";
-        if !loading.discover() {
+        self.set_status("Discovering named Boss health bars");
+        let loading = self.loading.as_mut().unwrap();
+        if !loading.discover_until(until) {
             return None;
         }
         if loading.prepare_scenes() {
-            self.status = "Checking Boss scene entities";
+            self.set_status("Checking Boss scene entities");
+            return None;
+        }
+        // A parser/expander may exhaust the soft budget. Final preparation is a
+        // distinct bounded unit, so defer it instead of appending it that tick.
+        if Instant::now() >= until {
             return None;
         }
         loading.filter_scenes();
         let loading = self.loading.take().unwrap();
         self.finished = true;
         let catalog = loading.catalog(self.host, &self.relations);
-        self.status = if catalog.rows.is_empty() {
-            "No named Boss health bars found"
+        let status = if catalog.rows.is_empty() {
+            if loading.failures != 0 || loading.timeouts != 0 {
+                "Boss data unavailable; reload game data"
+            } else {
+                "No named Boss health bars found"
+            }
         } else if loading.failures != 0 || self.relation_error {
             "Ready; some game resources are unavailable"
         } else {
             "Ready"
         };
-        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional resources, {} unresolved event calls, {} absent scene bars excluded\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing,loading.excluded.len()));
+        self.set_status(status);
+        self.host.log(&format!("boss-catalog: {} encounters, {} unknown, {} scripts, {} unavailable game resources, {} absent optional resources, {} unresolved event calls, {} absent scene bars excluded, {} request timeouts, first_failure={:?}\n",catalog.rows.len(),catalog.unknown_count,loading.scripts.len(),loading.failures,loading.absent.len(),loading.missing,loading.excluded.len(),loading.timeouts,loading.first_failure));
         self.publish(catalog)
     }
 }
@@ -910,6 +1012,9 @@ mod tests {
             scenes: BTreeMap::new(),
             scene_untrusted: BTreeSet::new(),
             excluded: Vec::new(),
+            started: Instant::now(),
+            timeouts: 0,
+            first_failure: None,
         }
     }
     fn display(map: u32, variant: u8, entity: u32, name: u32, flag: Option<u32>) -> BossDisplay {
@@ -929,6 +1034,392 @@ mod tests {
                 event_completion_flag: None,
             },
         }
+    }
+    #[derive(Clone)]
+    enum Reply {
+        Ready(Vec<u8>),
+        Missing,
+        Busy,
+        Pending,
+        Zero,
+        Delayed(Vec<u8>),
+    }
+    #[derive(Default)]
+    struct Transport {
+        replies: BTreeMap<String, Reply>,
+        requests: Vec<String>,
+        active: BTreeMap<u64, String>,
+        polls: BTreeMap<u64, usize>,
+        released: Vec<u64>,
+        next: u64,
+        param: usize,
+        state: Option<abi::BossState>,
+    }
+    impl Transport {
+        fn host(&mut self) -> Host {
+            unsafe extern "C" fn request(user: *mut c_void, r: *const abi::FileRequest) -> u64 {
+                // SAFETY: this fixture is retained and callbacks run serially.
+                let transport = unsafe { &mut *user.cast::<Transport>() };
+                let request = unsafe { &*r };
+                let bytes =
+                    unsafe { std::slice::from_raw_parts(request.path.data, request.path.len) };
+                let path = std::str::from_utf8(bytes).unwrap();
+                let path = path.strip_suffix(".dcx").unwrap_or(path).to_owned();
+                transport.requests.push(path.clone());
+                if matches!(transport.replies.get(&path), None | Some(Reply::Zero)) {
+                    return 0;
+                }
+                transport.next += 1;
+                let token = transport.next;
+                transport.active.insert(token, path);
+                token
+            }
+            unsafe extern "C" fn poll(
+                user: *mut c_void,
+                token: u64,
+                out: *mut abi::FileView,
+            ) -> i32 {
+                // SAFETY: the callback receives a valid fixture/output buffer.
+                let transport = unsafe { &mut *user.cast::<Transport>() };
+                let count = transport.polls.entry(token).or_default();
+                *count += 1;
+                let path = &transport.active[&token];
+                let reply = &transport.replies[path];
+                if matches!(reply, Reply::Busy) || matches!(reply, Reply::Delayed(_)) && *count == 1
+                {
+                    return abi::ERR_BUSY;
+                }
+                let view = match reply {
+                    Reply::Ready(bytes) | Reply::Delayed(bytes)
+                        if !matches!(reply, Reply::Delayed(_)) || *count > 2 =>
+                    {
+                        abi::FileView {
+                            status: abi::FILE_READY,
+                            bytes: abi::ByteSlice::new(bytes),
+                            ..Default::default()
+                        }
+                    }
+                    Reply::Pending | Reply::Delayed(_) => abi::FileView {
+                        status: abi::FILE_PENDING,
+                        ..Default::default()
+                    },
+                    _ => abi::FileView {
+                        status: abi::FILE_FAILED,
+                        ..Default::default()
+                    },
+                };
+                unsafe {
+                    out.write(view);
+                }
+                abi::OK
+            }
+            unsafe extern "C" fn release(user: *mut c_void, token: u64) {
+                // SAFETY: no callback or borrowed bytes remain after Host::poll.
+                let transport = unsafe { &mut *user.cast::<Transport>() };
+                assert!(transport.active.remove(&token).is_some());
+                transport.released.push(token);
+            }
+            unsafe extern "C" fn param(user: *mut c_void, _: u32) -> usize {
+                unsafe { (*user.cast::<Transport>()).param }
+            }
+            unsafe extern "C" fn state(user: *mut c_void, out: *mut abi::BossState) -> i32 {
+                // SAFETY: the Host supplies a complete writable BossState.
+                if let Some(state) = unsafe { (*user.cast::<Transport>()).state } {
+                    unsafe {
+                        out.write(state);
+                    }
+                    abi::OK
+                } else {
+                    abi::ERR_UNAVAILABLE
+                }
+            }
+            let mut host = host();
+            host.0.user = (self as *mut Self).cast();
+            host.0.request_file = Some(request);
+            host.0.poll_file = Some(poll);
+            host.0.release_file = Some(release);
+            host.0.find_param_table = Some(param);
+            host.0.read_boss_state = Some(state);
+            host
+        }
+    }
+    fn empty_emevd() -> Vec<u8> {
+        let mut bytes = vec![0; 144];
+        bytes[..12].copy_from_slice(b"EVD\0\0\xff\x01\xff\xcd\0\0\0");
+        bytes[12..16].copy_from_slice(&144u32.to_le_bytes());
+        bytes
+    }
+    fn run_files(load: &mut Loading, host: Host, now: Instant) -> bool {
+        // Queue creation uses the real clock; align only never-attempted jobs
+        // with this fixture's explicit time. Retry deadlines remain untouched.
+        for job in &mut load.jobs {
+            if job.started.is_none() {
+                job.retry = now;
+            }
+        }
+        load.files_at(host, now, Instant::now() + Duration::from_secs(1))
+    }
+    #[test]
+    fn file_batches_bound_work_poll_busy_once_and_do_not_retry_optional_misses() {
+        let mut transport = Transport::default();
+        let mut load = empty_loading();
+        let now = Instant::now();
+        let busy = "event:/m11_00_00_00.emevd";
+        transport.replies.insert(busy.into(), Reply::Busy);
+        load.queue(busy.into(), Kind::Event { required: false });
+        for i in 0..70 {
+            let path = format!("event:/m10_00_{i:02}_00.emevd");
+            transport.replies.insert(
+                path.clone(),
+                if i == 0 {
+                    Reply::Missing
+                } else {
+                    Reply::Ready(empty_emevd())
+                },
+            );
+            load.queue(path, Kind::Event { required: false });
+        }
+        let host = transport.host();
+        assert!(!run_files(&mut load, host, now));
+        assert!(
+            load.scripts.len() > 1,
+            "ready files must not wait one tick each"
+        );
+        assert!(transport.released.len() <= MAX_BATCH);
+        assert_eq!(
+            transport.released.len() + transport.active.len(),
+            transport.requests.len()
+        );
+        assert_eq!(
+            transport.polls[&1], 1,
+            "pending token must not be polled per completed file"
+        );
+        while load.jobs.len() > 1 {
+            run_files(&mut load, host, now);
+        }
+        assert_eq!(load.scripts.len(), 69);
+        assert_eq!(load.absent.len(), 1);
+        assert_eq!(
+            transport
+                .requests
+                .iter()
+                .filter(|path| path.as_str() == "event:/m10_00_00_00.emevd")
+                .count(),
+            1
+        );
+        assert_eq!(transport.requests.len(), 71);
+        assert!(run_files(&mut load, host, now + JOB_TIMEOUT));
+        assert_eq!(load.timeouts, 1);
+        assert_eq!(transport.released.len(), 71);
+        assert!(transport.active.is_empty());
+        assert!(run_files(&mut load, host, now + JOB_TIMEOUT));
+        assert_eq!(transport.requests.len(), 71);
+    }
+    #[test]
+    fn rejected_busy_and_pending_jobs_expire_without_sleep_and_a_fresh_load_recovers() {
+        for reply in [Reply::Zero, Reply::Busy, Reply::Pending] {
+            let mut transport = Transport::default();
+            let path = "event:/m10_00_00_00.emevd";
+            transport.replies.insert(path.into(), reply.clone());
+            let host = transport.host();
+            let now = Instant::now();
+            let mut load = empty_loading();
+            load.queue(path.into(), Kind::Event { required: false });
+            assert!(!run_files(&mut load, host, now));
+            assert!(!run_files(&mut load, host, now + Duration::from_millis(1)));
+            assert_eq!(transport.requests.len(), 1);
+            assert!(run_files(&mut load, host, now + JOB_TIMEOUT));
+            assert_eq!((load.timeouts, load.failures), (1, 1));
+            assert!(load.first_failure.as_ref().unwrap().contains(path));
+            assert_eq!(
+                transport.released.len(),
+                usize::from(!matches!(reply, Reply::Zero))
+            );
+            transport
+                .replies
+                .insert(path.into(), Reply::Ready(empty_emevd()));
+            let mut recovered = empty_loading();
+            recovered.queue(path.into(), Kind::Event { required: false });
+            assert!(run_files(&mut recovered, host, now + JOB_TIMEOUT));
+            assert_eq!(
+                (
+                    recovered.scripts.len(),
+                    recovered.timeouts,
+                    recovered.failures
+                ),
+                (1, 0, 0)
+            );
+        }
+    }
+    #[test]
+    fn delayed_completion_and_required_retry_are_bounded_and_invalid_bytes_are_not_reloaded() {
+        let path = "event:/m10_00_00_00.emevd";
+        let now = Instant::now();
+        let mut transport = Transport::default();
+        transport
+            .replies
+            .insert(path.into(), Reply::Delayed(empty_emevd()));
+        let host = transport.host();
+        let mut load = empty_loading();
+        load.queue(path.into(), Kind::Event { required: true });
+        assert!(!run_files(&mut load, host, now));
+        assert!(!run_files(&mut load, host, now));
+        assert!(run_files(&mut load, host, now));
+        assert_eq!(
+            (
+                transport.requests.len(),
+                transport.released.len(),
+                load.scripts.len()
+            ),
+            (1, 1, 1)
+        );
+        transport.replies.insert(path.into(), Reply::Missing);
+        let mut load = empty_loading();
+        load.queue(path.into(), Kind::Event { required: true });
+        assert!(!run_files(&mut load, host, now));
+        let requests = transport.requests.len();
+        assert!(!run_files(
+            &mut load,
+            host,
+            now + Duration::from_millis(999)
+        ));
+        assert_eq!(transport.requests.len(), requests);
+        assert!(run_files(&mut load, host, now + Duration::from_secs(1)));
+        assert_eq!((load.failures, transport.requests.len()), (1, requests + 1));
+        transport
+            .replies
+            .insert(path.into(), Reply::Ready(vec![0; 4 * 1024 * 1024]));
+        let mut load = empty_loading();
+        load.queue(path.into(), Kind::Event { required: true });
+        assert!(run_files(&mut load, host, now));
+        let requests = transport.requests.len();
+        assert!(run_files(&mut load, host, now + Duration::from_secs(1)));
+        assert_eq!(
+            transport.requests.len(),
+            requests,
+            "an invalid completed resource must not be read twice"
+        );
+        assert_eq!(load.failures, 1);
+    }
+    #[test]
+    fn later_explicit_link_upgrades_an_optional_miss_once_but_not_a_known_parse_failure() {
+        let path = "event:/m10_00_00_00.emevd";
+        for recover in [false, true] {
+            let mut transport = Transport::default();
+            transport.replies.insert(path.into(), Reply::Missing);
+            let host = transport.host();
+            let mut load = empty_loading();
+            let now = Instant::now();
+            load.queue(path.into(), Kind::Event { required: false });
+            assert!(run_files(&mut load, host, now));
+            assert!(load.absent.contains(path));
+            load.event("m10_00_00_00.emevd", true);
+            assert!(!load.absent.contains(path));
+            assert!(!run_files(&mut load, host, now));
+            if recover {
+                transport
+                    .replies
+                    .insert(path.into(), Reply::Ready(empty_emevd()));
+            }
+            assert!(run_files(&mut load, host, now + Duration::from_secs(1)));
+            assert_eq!(transport.requests.len(), 3);
+            assert_eq!(load.failures, usize::from(!recover));
+            load.event("m10_00_00_00.emevd", true);
+            assert!(load.jobs.is_empty());
+        }
+        let mut transport = Transport::default();
+        transport
+            .replies
+            .insert(path.into(), Reply::Ready(vec![0; 1024]));
+        let host = transport.host();
+        let mut load = empty_loading();
+        load.queue(path.into(), Kind::Event { required: false });
+        assert!(run_files(&mut load, host, Instant::now()));
+        load.event("m10_00_00_00.emevd", true);
+        assert!(load.jobs.is_empty());
+        assert_eq!(transport.requests.len(), 1);
+        assert_eq!(load.failures, 1);
+    }
+    #[test]
+    fn initialization_deadline_does_not_publish_zero_success_as_ready_and_reload_cancels_old_generations()
+     {
+        let mut transport = Transport::default();
+        transport
+            .replies
+            .insert("event:/m10_00_00_00.emevd".into(), Reply::Pending);
+        let host = transport.host();
+        let mut load = empty_loading();
+        let now = Instant::now();
+        load.started = now - LOADING_TIMEOUT;
+        for i in 0..20 {
+            load.queue(
+                format!("event:/m10_00_{i:02}_00.emevd"),
+                Kind::Event { required: false },
+            );
+        }
+        assert!(run_files(&mut load, host, now));
+        assert_eq!(
+            (load.timeouts, load.failures, transport.requests.len()),
+            (20, 20, 0)
+        );
+        let mut data = Data::new(host);
+        data.loading = Some(load);
+        assert!(data.update().is_none());
+        assert!(data.status().contains("unavailable"));
+        assert!(data.finished);
+        data.reload();
+        assert!(!data.finished);
+        assert!(data.loading.is_none());
+        let mut load = empty_loading();
+        load.queue(
+            "event:/m10_00_00_00.emevd".into(),
+            Kind::Event { required: false },
+        );
+        assert!(!run_files(&mut load, host, Instant::now()));
+        data.loading = Some(load);
+        data.tables = [1; 6];
+        transport.param = 1;
+        transport.state = Some(abi::BossState {
+            size: size_of::<abi::BossState>() as u32,
+            valid: 1,
+            context: 1,
+            raw_map_id: 0x0a00_0000,
+            ..Default::default()
+        });
+        assert!(data.update().is_none());
+        transport.state.as_mut().unwrap().context = 2;
+        transport.state.as_mut().unwrap().raw_map_id = 0x0b00_0000;
+        transport.param = 0;
+        data.check = Instant::now();
+        assert!(
+            data.update().is_none(),
+            "temporary unreadable PARAM/context must retain pending work"
+        );
+        assert!(transport.released.is_empty());
+        assert!(data.loading.is_some());
+        transport.param = 2;
+        transport.state = None;
+        data.check = Instant::now();
+        data.update();
+        assert_eq!(data.tables, [2; 6]);
+        assert!(data.loading.is_none());
+        assert_eq!(transport.released, [1]);
+        assert!(transport.active.is_empty());
+    }
+    #[test]
+    fn discovery_batches_maps_and_respects_an_expired_cpu_budget() {
+        let mut load = empty_loading();
+        for i in 0..70 {
+            load.scripts
+                .push(parse_emevd(&format!("m10_00_{i:02}_00.emevd"), &empty_emevd()).unwrap());
+        }
+        assert!(!load.discover_until(Instant::now()));
+        assert_eq!(load.discover_at, 0);
+        assert!(!load.discover_until(Instant::now() + Duration::from_secs(1)));
+        assert_eq!(load.discover_at, MAX_BATCH);
+        while !load.discover() {}
+        assert_eq!(load.discover_at, 70);
+        assert!(load.displays.is_empty());
     }
     #[test]
     fn failed_or_budget_dropped_scene_alias_is_unknown_not_absent() {

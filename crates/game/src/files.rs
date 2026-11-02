@@ -813,4 +813,222 @@ mod tests {
         assert_eq!(files.diagnostics().owned_bytes, 0);
         assert!(files.stop());
     }
+
+    // Separate globals keep this native-contract driver independent of the
+    // original asynchronous test when cargo runs tests concurrently.
+    static CONTRACT_MANAGER: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_ALLOCATOR: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_OWNER: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_FREED: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_CANCELLED: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_FLUSHED: AtomicUsize = AtomicUsize::new(0);
+    static CONTRACT_RESULT: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+    static CONTRACT_REQUESTS: Mutex<Vec<ContractRequest>> = Mutex::new(Vec::new());
+
+    #[derive(Clone)]
+    struct ContractRequest {
+        path: String,
+        flags: u32,
+        id: u64,
+        complete: unsafe extern "C" fn(u32, *mut c_void, *mut c_void, u64),
+        context: usize,
+    }
+    unsafe extern "C" fn contract_submit(
+        _: usize,
+        id: *mut u64,
+        request: *const NativeRequest,
+    ) -> i32 {
+        let request = unsafe { &*request };
+        let mut path = Vec::new();
+        for offset in 0..=1024 {
+            let unit = unsafe { request.path.add(offset).read() };
+            if unit == 0 {
+                break;
+            }
+            path.push(unit);
+        }
+        assert_eq!(request.alignment, 128);
+        assert_eq!(
+            request.allocator,
+            CONTRACT_ALLOCATOR.load(Ordering::Relaxed)
+        );
+        assert_eq!(
+            (
+                request.stage,
+                request.parameter,
+                request.priority,
+                request.tail
+            ),
+            (0, 0, 0, 0)
+        );
+        let mut requests = CONTRACT_REQUESTS.lock().unwrap();
+        let native_id = 0x1234_0000 | (requests.len() as u64 + 1);
+        unsafe { id.write(native_id) };
+        requests.push(ContractRequest {
+            path: String::from_utf16(&path).unwrap(),
+            flags: request.flags,
+            id: native_id,
+            complete: request.complete,
+            context: request.context as usize,
+        });
+        CONTRACT_RESULT.load(Ordering::Relaxed)
+    }
+    unsafe extern "C" fn contract_flush(_: usize) {
+        CONTRACT_FLUSHED.fetch_add(1, Ordering::Relaxed);
+    }
+    unsafe extern "C" fn contract_cancel(_: usize, _: usize, _: u64) {
+        CONTRACT_CANCELLED.fetch_add(1, Ordering::Relaxed);
+    }
+    unsafe extern "C" fn contract_free(_: usize, allocation: *mut c_void) {
+        unsafe { HeapFree(GetProcessHeap(), 0, allocation) };
+        CONTRACT_FREED.fetch_add(1, Ordering::Relaxed);
+    }
+    fn contract_complete(request: &ContractRequest, status: u32, bytes: usize) {
+        let allocation = if bytes == 0 {
+            std::ptr::null_mut()
+        } else {
+            // HEAP_ZERO_MEMORY: real initialized native allocation transferred
+            // into the production callback, not a HostApi raw-buffer provider.
+            let allocation = unsafe { HeapAlloc(GetProcessHeap(), 8, bytes) };
+            assert!(!allocation.is_null());
+            allocation
+        };
+        unsafe {
+            (request.complete)(
+                status,
+                request.context as *mut c_void,
+                allocation,
+                bytes as u64,
+            )
+        };
+    }
+
+    #[test]
+    fn boss_native_requests_cover_busy_missing_large_and_late_retirement() {
+        let base = crate::memory::main_module();
+        // All fake functions and pointer slots live in this test executable;
+        // use its real base + checked RVAs, never invented game addresses.
+        let rva = |address: usize| u32::try_from(address.checked_sub(base).unwrap()).unwrap();
+        let mut manager = vec![0u8; 0xe40];
+        let mut vtable = [0usize; 14];
+        vtable[13] = contract_free as *const () as usize;
+        let allocator = [vtable.as_ptr() as usize];
+        let mut pool = [0usize; 12];
+        let mut generations = [0x1234u16; 32];
+        pool[0x50 / 8] = generations.as_ptr() as usize;
+        let owner = [pool.as_ptr() as usize];
+        CONTRACT_MANAGER.store(manager.as_mut_ptr() as usize, Ordering::Relaxed);
+        CONTRACT_ALLOCATOR.store(allocator.as_ptr() as usize, Ordering::Relaxed);
+        CONTRACT_OWNER.store(owner.as_ptr() as usize, Ordering::Relaxed);
+        CONTRACT_FREED.store(0, Ordering::Relaxed);
+        CONTRACT_CANCELLED.store(0, Ordering::Relaxed);
+        CONTRACT_FLUSHED.store(0, Ordering::Relaxed);
+        CONTRACT_RESULT.store(0, Ordering::Relaxed);
+        CONTRACT_REQUESTS.lock().unwrap().clear();
+        let bindings = Bindings {
+            manager: rva(&CONTRACT_MANAGER as *const _ as usize),
+            allocator: rva(&CONTRACT_ALLOCATOR as *const _ as usize),
+            retire_pool_owner: rva(&CONTRACT_OWNER as *const _ as usize),
+            submit: rva(contract_submit as *const () as usize),
+            flush: rva(contract_flush as *const () as usize),
+            enqueue: rva(contract_cancel as *const () as usize),
+            ..Default::default()
+        };
+        let mut files = GameFiles::new(base, Some(bindings));
+        const BOSS_LIMIT: usize = 64 * 1024 * 1024;
+        manager[0xe38] = 1;
+        std::hint::black_box(&manager);
+        let token = files.request("EVENT:/m60_37_51_00.emevd.dcx", None, 0x40, BOSS_LIMIT);
+        files.pump();
+        assert_eq!(files.poll(token).status, FILE_PENDING);
+        assert_eq!(files.diagnostics().queued, 1);
+        assert!(CONTRACT_REQUESTS.lock().unwrap().is_empty());
+        manager[0xe38] = 0;
+        std::hint::black_box(&manager);
+        files.pump();
+        let request = CONTRACT_REQUESTS.lock().unwrap()[0].clone();
+        assert_eq!(request.path, "event:/m60_37_51_00.emevd.dcx");
+        assert_eq!(request.flags, 0x40);
+        for _ in 0..100 {
+            files.pump();
+        }
+        assert_eq!(
+            files.poll(token).status,
+            FILE_PENDING,
+            "accepted native requests do not time out themselves; Loading must bound its own wait"
+        );
+        // Simulate the consumer's timeout/reload release while native still
+        // owns the callback. Cancel exactly once, never free its context early.
+        files.release(token);
+        files.pump();
+        files.pump();
+        assert_eq!(CONTRACT_CANCELLED.load(Ordering::Relaxed), 1);
+        assert_eq!(files.items.len(), 1);
+        assert_eq!(files.diagnostics().tokens, 0);
+        contract_complete(&request, 1, 4096);
+        assert_eq!(CONTRACT_FREED.load(Ordering::Relaxed), 1);
+        files.pump();
+        assert_eq!(
+            files.items.len(),
+            1,
+            "even a returned callback needs native generation retirement"
+        );
+        assert_eq!(files.diagnostics().owned_bytes, 4096);
+        generations[request.id as u16 as usize] += 1;
+        std::hint::black_box(&generations);
+        files.pump();
+        assert!(files.items.is_empty());
+        assert_eq!(files.diagnostics().owned_bytes, 0);
+
+        for (path, status, size, expected) in [
+            ("msg:/engUS/menu_dlc02.msgbnd.dcx", 1, 4096, FILE_READY),
+            ("event:/missing.emevd.dcx", 0, 0, FILE_FAILED),
+            (
+                "msg:/engUS/item_dlc02.msgbnd.dcx",
+                1,
+                BOSS_LIMIT + 1,
+                FILE_FAILED,
+            ),
+            ("mapstudio:/m60_38_54_00.msb.dcx", 1, 4096, FILE_READY),
+        ] {
+            let token = files.request(path, None, 0x40, BOSS_LIMIT);
+            assert_ne!(token, 0);
+            files.pump();
+            let request = CONTRACT_REQUESTS.lock().unwrap().last().unwrap().clone();
+            assert_eq!(request.path, path.to_ascii_lowercase());
+            assert_eq!(
+                request.flags, 0x40,
+                "Boss delegates decompression to the native VFS"
+            );
+            contract_complete(&request, status, size);
+            let result = files.poll(token);
+            assert_eq!(result.status, expected, "{path}");
+            assert_eq!(result.native_status, status as i32);
+            assert_eq!(
+                result.bytes.len(),
+                if expected == FILE_READY { size } else { 0 }
+            );
+            files.release(token);
+            files.pump();
+            assert_eq!(files.items.len(), 1);
+            generations[request.id as u16 as usize] += 1;
+            std::hint::black_box(&generations);
+            files.pump();
+            assert!(files.items.is_empty());
+            assert_eq!(files.diagnostics().owned_bytes, 0);
+        }
+        // A synchronous submit rejection is terminal, not an everlasting token;
+        // no native callback or generation ownership was acquired in this case.
+        CONTRACT_RESULT.store(-11, Ordering::Relaxed);
+        let token = files.request("event:/rejected.emevd.dcx", None, 0x40, BOSS_LIMIT);
+        files.pump();
+        assert_eq!(files.poll(token).status, FILE_FAILED);
+        assert_eq!(files.poll(token).native_status, -11);
+        files.release(token);
+        files.pump();
+        assert!(files.items.is_empty());
+        assert_eq!(CONTRACT_FREED.load(Ordering::Relaxed), 4);
+        assert_eq!(CONTRACT_FLUSHED.load(Ordering::Relaxed), 5);
+        assert!(files.stop());
+    }
 }

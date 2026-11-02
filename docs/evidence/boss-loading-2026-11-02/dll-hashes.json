@@ -1,0 +1,17 @@
+[
+  {
+    "Path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\package\\EROverlay.dll",
+    "Bytes": 693760,
+    "SHA256": "A1B9528A038C77996E57B16139E636235AB7995C988B92E10B85BE5FEAF6AD61"
+  },
+  {
+    "Path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\package\\overlays\\Minimap.dll",
+    "Bytes": 1766400,
+    "SHA256": "231C5596CB36CDDAA923DE687158527CB691B60B424F1F3BC066D948E1DECAB8"
+  },
+  {
+    "Path": "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\package\\overlays\\Boss.dll",
+    "Bytes": 2685952,
+    "SHA256": "C14B2FB42E7F996124AD6C705AA0B1A9179A4CA91A2756239B837B14B67059DF"
+  }
+]

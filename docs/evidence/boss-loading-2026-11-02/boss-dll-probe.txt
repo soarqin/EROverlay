@@ -1,0 +1,61 @@
+PASS: controlled revival host rejects false/unknown primary, unknown targets, stale context, invalid IDs/values and conflicts before any write; this fixture is not the native game writer.
+minimap-font C:\WINDOWS\Fonts\msyh.ttc
+Minimap Rust/egui initialized; native UI_SCENE below game UI
+PASS: actual new Minimap DLL init/destroy with only 176 host bytes readable; next page PAGE_NOACCESS, no appended capabilities.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=6691ms updates=393 requests=1082 peak active tokens=4 pending polls=1080 busy polls=64 max single update=7691us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue=207 rows, unique completion flags=208, file requests=1082, real scenes={"m31_00_00_00.msb", "m60_38_54_00.msb", "m61_49_44_00.msb"}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.
+compact: render CPU median=31us p95=49us; mean vertices=244 meshes=1; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+PASS: real DLL compact geometry: Lansseax early kill OR late
+PASS: real DLL compact geometry: Lansseax retreat is not a kill
+PASS: real DLL compact geometry: Adula early is not late completion
+PASS: real DLL compact geometry: Patches late is not initial completion
+PASS: real DLL compact geometry: Hinterland first remains independent
+PASS: real DLL compact geometry: Hinterland second remains independent
+PASS: real DLL compact geometry: Hinterland both unfinished
+full real catalogue: render CPU median=160us p95=209us; mean vertices=3196 meshes=8; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+Full 500ms update with controlled batch flag reader: median=73us max=133us, ids=208, file requests=0
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-full.bmp: 1280x900, nonblack RGB pixels=389962
+Search input verified at (1000,255): all=3268 vertices, no-match=1268; real pointer press/release, Ctrl+A, Backspace and Unicode text events.
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-search.bmp: 1280x900, nonblack RGB pixels=389962
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-settings.bmp: 1280x900, nonblack RGB pixels=389962
+Settings pointer interaction persisted configs/boss-ui.json on update, outside render.
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-revival-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-revival-reopened.bmp: 1280x900, nonblack RGB pixels=480832
+PASS: Cancel preserved flags; actual Lansseax search + early-only completion allowed one explicit update-side revival with a true early witness and the exact original five cleared targets: primary=1037510800, auxiliary writes=4
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-revived.bmp: 1280x900, nonblack RGB pixels=390065
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=6683ms updates=392 requests=1082 peak active tokens=4 pending polls=1076 busy polls=63 max single update=7848us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-unknown-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+boss-revival: context or flags unavailable; no revival performed
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-unknown-rejected.bmp: 1280x900, nonblack RGB pixels=390065
+PASS: actual DLL confirmation rejected unknown completion flags without controlled writes
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=6722ms updates=394 requests=1082 peak active tokens=4 pending polls=1080 busy polls=63 max single update=9361us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-context-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+boss-revival: context or flags unavailable; no revival performed
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-context-rejected.bmp: 1280x900, nonblack RGB pixels=390065
+PASS: actual DLL confirmation rejected changed save context without controlled writes
+Wheel delivered through production input adapter; capture=3
+hidden loading: render CPU median=0us p95=1us; mean vertices=0 meshes=0; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final\boss-hidden.bmp: 1280x900, nonblack RGB pixels=0
+PASS: actual Boss DLL + real archived PARAM/EMEVD/FMG/MSB parsers + WARP pixels/mesh/font rendering; 207 rows/208 unique completion flags, OR/count boundaries, strict controlled revival, search/settings persistence/cancel/explicit early-witness confirmation/unknown/context rejection/wheel/full-map/loading/hide/reset/repeated-sequence contracts. Save/flags/writes are controlled fixtures; no live game/FPS or mount-priority claim. Scratch \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-probe-loading-final
+probe_exit_code=0

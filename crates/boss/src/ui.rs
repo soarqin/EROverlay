@@ -107,6 +107,12 @@ impl Ui {
         match status {
             "Waiting for game parameters" => "正在等待游戏参数",
             "Loading game text and Boss events" => "正在读取游戏文本与 Boss 事件",
+            "Loading Boss data; some requests timed out" => {
+                "部分 Boss 资源请求超时，正在整理已读取的数据"
+            }
+            "Boss data unavailable; reload game data" => {
+                "Boss 数据读取失败，请点击“重新读取游戏数据”重试"
+            }
             "Discovering named Boss health bars" => "正在核对具名 Boss 生命条",
             "Checking Boss scene entities" => "正在核对 Boss 场景实体",
             "No named Boss health bars found" => "未发现具名 Boss 生命条，可尝试重新读取游戏数据",

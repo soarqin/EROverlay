@@ -1,0 +1,8 @@
+   Compiling eroverlay-game v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\game)
+   Compiling eroverlay-renderer v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\renderer)
+   Compiling eroverlay-minimap v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\minimap)
+   Compiling eroverlay-core v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\core)
+   Compiling eroverlay-boss v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\boss)
+   Compiling eroverlay-harness v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\harness)
+    Finished `release` profile [optimized + debuginfo] target(s) in 17.62s
+Independent Rust package: E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\package

@@ -8,6 +8,8 @@ Boss 从游戏 Param、具名大生命条事件和当前语言文本生成目录
 
 DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)：Minimap 移除未使用的等宽和 emoji 字库，保留比例字体后备、自定义字体及系统语言字体。
 
+Boss 首次现场测试的 `0/0` 持续读取问题已修正原生 `.dcx` 文件名契约、逐资源跨帧等待和无截止时间的请求；证据与最小复测见 [Boss 首次读取修复](docs/boss-loading-fix-2026-11-02.md)。该修复仍待游戏内复测，不能沿用核心／Minimap 的既有现场验收结论。
+
 针对 1.17.2 实测卡顿及读档后持续等待，已修正首次资源与标记快照的错误依赖、无插件层的 renderer 重建和旗标读取契约，并恢复 PARAM 批读。用户已确认后续功能与加载提示修复正常。累计审查进一步修正资源背压、请求成员退休、尺寸变化与配置／ABI 边界，见 [审查和修复记录](docs/review-2026-11-02.md)。此前确定反例及 C++ 源码差分见 [读档与性能修复](docs/runtime-read-review.md)。
 
 ## 构建独立安装目录
@@ -46,7 +48,7 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。本次 Boss 包需要同时更新 `EROverlay.dll`、`overlays/Minimap.dll`、`overlays/Boss.dll`，并加入 `configs/boss-encounters.json`。首次安装 Boss 还需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。
+升级前须完全退出游戏。从 `ca8dd4e` 的 Boss 207 项包升级本次读取修复，只需替换 `overlays/Boss.dll`。从 Boss 移植前版本升级需要同时更新 `EROverlay.dll`、`overlays/Minimap.dll`、`overlays/Boss.dll`，并加入 `configs/boss-encounters.json`。首次安装 Boss 还需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。
 
 ## 加载与退出
 
