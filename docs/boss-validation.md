@@ -62,6 +62,18 @@ python crates/abi-fixture/check_native_retention.py target/native-retention/rele
 
 专用 fixture DLL 不可用于安装。原生生产模式仍在首次启用 hook 前 PIN 核心，停止返回 `STOPPED_RESIDENT = 1`，再次启动需重启游戏；离线模式才验证完整解除映射。
 
+## 干净源码复核
+
+实现提交 `1e28973bf33c8f872fe78c702600ff409922af10` 完成后，使用以下命令创建无旧 C++ 工作目录、无 `target/`、无安装包的独立克隆，并清除可选 C++／Boss 资产环境变量。在克隆根目录重新执行上述 fmt、check、clippy、测试及 `build.ps1`，全部通过；135 项常规测试通过、8 项默认跳过，Release 从零构建约 44 秒。`source.json` 记录该提交、当前隔离分支和 `dirty=false`。表中的大小也已与这个克隆产生的 DLL 核对。
+
+```powershell
+git clone --no-local --no-tags --single-branch --branch cindy/gentle-darwin . target/clean-boss-checkout
+```
+
+独立包随后又通过三轮组合 DLL／WARP 检查。再显式提供归档资产，运行包内真实 Boss／Minimap DLL 的完整探针，保护页、搜索、设置、复活请求、隐藏、reset 和像素检查通过。该轮渲染 CPU 中位数／p95 为紧凑 `32/61 µs`、完整列表 `162/203 µs`；更新 `28 µs` 中位数使用受控旗标服务，不能与生产 OS 读取对照混用。稳定字体上传和文件请求均为 0。普通源码构建没有访问这些可选游戏资产。
+
+`master` 和 `rust-rewrite` 仍分别指向原 C++ 基线及 `765fdcd`，既有 `rust-core-minimap-accepted-765fdcd` 标签保留。独立复核之后只追加本节验证文档，不改变已经检查的实现。
+
 ## 升级与游戏内复测
 
 退出游戏后同时更新 `EROverlay.dll`、`overlays/Minimap.dll`，新增 `overlays/Boss.dll`、`configs/boss.ini` 和 `configs/boss-revival.json`。保留其他既有配置和 `Challenge.txt`。旧 Boss 的 JSON 名单和旧 INI 不能覆盖新模板。默认 `=` 打开完整列表，`=`、`Esc` 或关闭按钮返回紧凑状态。
