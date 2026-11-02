@@ -1,0 +1,122 @@
+{
+  "source_commit": "0819f40da74f8fcaf916a1ba62d9b70f60e4e913",
+  "source_branch": "cindy/gentle-darwin",
+  "clone_command": "git clone --no-local --depth 1 --single-branch --branch cindy/gentle-darwin <worktree> target/boss-continuity-clean-source",
+  "shallow_clone": true,
+  "source_clean_before": true,
+  "target_existed_before_checks": false,
+  "build_features": "default features only; no fixture or original C++ reader features",
+  "removed_inherited_environment_variable_names": [],
+  "old_cpp_reference_env_set": false,
+  "external_game_asset_environment_supplied": false,
+  "cargo_target_dir_env_set": false,
+  "cargo_version": "cargo 1.99.1 (5f94df478 2026-08-27)",
+  "rustc_version": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "started_at": "2026-11-02T14:31:42.470780+00:00",
+  "steps": [
+    {
+      "id": "fmt",
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0,
+      "seconds": 0.594,
+      "log": "clean-fmt.log"
+    },
+    {
+      "id": "check",
+      "command": "cargo check --workspace --locked",
+      "exit_code": 0,
+      "seconds": 8.25,
+      "log": "clean-check.log"
+    },
+    {
+      "id": "clippy",
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exit_code": 0,
+      "seconds": 3.547,
+      "log": "clean-clippy.log"
+    },
+    {
+      "id": "test",
+      "command": "cargo test --workspace --locked",
+      "exit_code": 0,
+      "seconds": 15.453,
+      "log": "clean-test.log"
+    },
+    {
+      "id": "build-package",
+      "command": "pwsh -NoProfile -File ./build.ps1",
+      "exit_code": 0,
+      "seconds": 34.672,
+      "log": "clean-build-package.log"
+    },
+    {
+      "id": "default-dll-harness-three-cycles",
+      "command": "<worktree>\\target\\boss-continuity-clean-source\\target\\release\\eroverlay-harness.exe <worktree>\\target\\boss-continuity-clean-source\\package 3",
+      "exit_code": 0,
+      "seconds": 0.812,
+      "log": "clean-default-dll-harness-three-cycles.log"
+    }
+  ],
+  "test_totals": {
+    "passed": 183,
+    "failed": 0,
+    "ignored": 11,
+    "result_lines": 19
+  },
+  "manifest_check": {
+    "entries": 133,
+    "all_sizes_match": true,
+    "all_sha256_match": true,
+    "package_file_set_exact_before_harness": true,
+    "all_original_items_unchanged_after_harness": true
+  },
+  "package_source": {
+    "commit": "0819f40da74f8fcaf916a1ba62d9b70f60e4e913",
+    "branch": "cindy/gentle-darwin",
+    "dirty": false
+  },
+  "dlls": [
+    {
+      "path": "EROverlay.dll",
+      "bytes": 738816,
+      "sha256": "22dd6a80a646c59592228b90cd7defe572d7759bb366493499624bae506f4209",
+      "exports": [
+        "DllMain",
+        "eroverlay_render",
+        "eroverlay_start",
+        "eroverlay_stats",
+        "eroverlay_stop"
+      ],
+      "test_or_fixture_export_present": false
+    },
+    {
+      "path": "overlays/Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "64806a9cad0d383e08db12b28e514c123970394b91991a7b61dc9a310d2dae11",
+      "exports": [
+        "getEROverlayPluginV1"
+      ],
+      "test_or_fixture_export_present": false
+    },
+    {
+      "path": "overlays/Boss.dll",
+      "bytes": 2692608,
+      "sha256": "4ff770faf557cc6285da64e408f8325186d1a394540f079679c7d98eb60f023c",
+      "exports": [
+        "getEROverlayPluginV1"
+      ],
+      "test_or_fixture_export_present": false
+    }
+  ],
+  "harness": {
+    "cycles": 3,
+    "fixture_dlls_added": false,
+    "game_assets_supplied": false,
+    "scope": "Default production EROverlay + Minimap + Boss DLL loader/lifecycle/borrowed WARP render path. Offline game state stays unavailable, so this does not replace visible overlap or live-game acceptance."
+  },
+  "source_clean_after": true,
+  "harness_created_extra_package_files": [],
+  "finished_at": "2026-11-02T14:32:45.938876+00:00",
+  "success": true,
+  "limits": "Independent clean-source rebuild; its paths/tool outputs may change DLL bytes. These hashes do not replace parent-task final packaged DLL identity. No game installation, injection, external assets, fixture features, visible continuity matrix or microbenchmark were run."
+}

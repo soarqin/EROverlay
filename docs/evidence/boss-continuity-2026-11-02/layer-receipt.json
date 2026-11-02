@@ -1,0 +1,122 @@
+{
+  "fixture_core_only": true,
+  "normal_core_not_used_in_this_probe": true,
+  "controlled_game_resources_no_catalog": true,
+  "normal_steady_frames_per_run": 120,
+  "overlap_roi_pixels": 26940,
+  "hashes": [
+    {
+      "path": "target/layer-order-fixture/release/EROverlay.dll",
+      "size": 768512,
+      "sha256": "F947879A12380E0DC9BAD656F7DD53B076B7ED3C66A061429860C316B5AC87E6"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-production-input/overlays/Boss.dll",
+      "size": 2692608,
+      "sha256": "B31CA8FDFDE4DA5197DD174E5649E07F326D8C829F55F0D2EBC1A9C5DA1F339A"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-fixture-input/overlays/Boss.dll",
+      "size": 2693632,
+      "sha256": "6C0D6909D048939567C0444C1ACC20F7BC3D216844BAD1B5B70075391E16E84A"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-production-input/overlays/Minimap.dll",
+      "size": 1766400,
+      "sha256": "C73DEFE5CDC439E0D9A443D0ED793FEEE3D6AF259FE3D7C4186144EEDF149A7D"
+    },
+    {
+      "path": "target/input-agent/release/layer_order_probe.exe",
+      "size": 324608,
+      "sha256": "A2224BC8122DCA0693EC42650FBD41677686719263E3C8DB1C266FA507E7183A"
+    },
+    {
+      "path": "crates/harness/src/bin/layer_order_probe.rs",
+      "size": 56526,
+      "sha256": "8A1E8F7B2977AE09CE081553B847C42E2F372C24C32AD45DE7A599E2267461AB"
+    },
+    {
+      "path": "crates/harness/src/layer_order_gpu.rs",
+      "size": 24972,
+      "sha256": "55DF1B0CDCC7C335E8E0E5C144C568BEC777A99DCB4BBF437D56F7DEA8549999"
+    }
+  ],
+  "runs": [
+    {
+      "name": "final-production-12-duplicates",
+      "exit": 0,
+      "captured_matrix_frames": 326,
+      "log": "target/boss-continuity-review/final-production-12-duplicates/log",
+      "pixel_trace": "target/boss-continuity-review/final-production-12-duplicates/presented-frames.log",
+      "images": [
+        "01-minimap-reference.bmp",
+        "02-normal-overlap.bmp",
+        "03-three-slots-held.bmp"
+      ],
+      "fresh_empty": [
+        "sequence=544 case=fresh-empty-presentation-mutex-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=545 case=fresh-empty-then-painting-mutex-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=546 case=fresh-empty-reshow expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ],
+      "duplicate_upload": [
+        "sequence=310 case=atlas-upload-during-duplicate-only expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ],
+      "reopen": [
+        "sequence=549 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=204.396",
+        "sequence=550 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=129.987",
+        "sequence=551 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=83.111",
+        "sequence=552 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26400 mean_red=51.392",
+        "sequence=553 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=0 mean_red=34.644",
+        "sequence=554 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=27.751",
+        "sequence=555 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=556 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=557 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=558 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ]
+    },
+    {
+      "name": "final-fixture-13",
+      "exit": 0,
+      "captured_matrix_frames": 336,
+      "log": "target/boss-continuity-review/final-fixture-13/log",
+      "pixel_trace": "target/boss-continuity-review/final-fixture-13/presented-frames.log",
+      "images": [
+        "01-minimap-reference.bmp",
+        "02-normal-overlap.bmp",
+        "03-three-slots-held.bmp"
+      ],
+      "fresh_empty": [
+        "sequence=554 case=fresh-empty-presentation-mutex-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=555 case=fresh-empty-then-painting-mutex-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=556 case=fresh-empty-reshow expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ],
+      "duplicate_upload": [
+        "sequence=310 case=atlas-upload-during-duplicate-only expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ],
+      "reopen": [
+        "sequence=559 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=204.396",
+        "sequence=560 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=129.987",
+        "sequence=561 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26940 mean_red=83.111",
+        "sequence=562 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=26400 mean_red=51.392",
+        "sequence=563 case=closed-panel-reopen-intentional-fade expected=Closing bad_pixels=0/26940 opaque_bad=0 mean_red=34.644",
+        "sequence=564 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=27.751",
+        "sequence=565 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=566 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=567 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=568 case=closed-panel-reopen-intentional-fade expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ]
+    }
+  ],
+  "negative_runs": [
+    "negative-duplicate",
+    "negative-atlas",
+    "negative-snapshot",
+    "negative-atlas-admission-old-ui",
+    "negative-duplicate-upload-maintenance"
+  ],
+  "build_core": "cargo build -p eroverlay-core --release --features layer-order-fixture --locked --target-dir target/layer-order-fixture",
+  "build_probe": "cargo build -p eroverlay-harness --bin layer_order_probe --release --locked --target-dir target/input-agent",
+  "production_command": "target/input-agent/release/layer_order_probe.exe target/layer-order-fixture/release/EROverlay.dll target/boss-continuity-review/admission-production-input target/boss-continuity-review/final-production-12-duplicates all",
+  "fixture_command": "target/input-agent/release/layer_order_probe.exe target/layer-order-fixture/release/EROverlay.dll target/boss-continuity-review/admission-fixture-input target/boss-continuity-review/final-fixture-13 all",
+  "limits": "Controlled save/display/resources, real plugin UI, core texture/mesh ownership and GPU queue/WARP pixels. Explicit reopen first opaque ROI frame 5 within fixed 11 presentations. Artificial GPU-held 24-frame pool overload loses 6 frames and recovers next frame; excluded from normal continuity. Not live-game FPS or injected-game visual acceptance."
+}

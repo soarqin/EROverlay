@@ -1,0 +1,96 @@
+{
+  "source_commit": "411bc6384c06aef80cba888d4443fb01b2291903",
+  "source": "git archive of pinned objects; no refs changed",
+  "exported_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "crates/abi",
+    "crates/game",
+    "crates/ui",
+    "crates/boss"
+  ],
+  "changed_crate_files": [
+    "crates/boss/Cargo.toml",
+    "crates/boss/src/lib.rs"
+  ],
+  "hook_removal_recovers_original_source": true,
+  "constraint": "All ABI/game/UI/Boss sources are pinned old source. Only cfg(feature=continuity-fixture) lock fault controls were backported. The old snapshot.try_lock().ok()->None->OK-empty render remains unchanged. Root workspace members trimmed for an isolated build; Cargo.lock is resolved offline then built --locked. No game assets are included.",
+  "commands": [
+    "python target/continuity-old411/export-recipe.py",
+    "cd target/continuity-old411",
+    "cargo build -p eroverlay-boss --release --features continuity-fixture --offline --target-dir build-target",
+    "cargo build -p eroverlay-boss --release --features continuity-fixture --locked --target-dir build-target"
+  ],
+  "original_sha256": {
+    "Cargo.lock": "ac1c86537bfa2bd736bcae265f5661bffd1ce8c0d0b13db48e9c753434b0cbd5",
+    "Cargo.toml": "d6b42b7331c67f7ca34fa0e02db6269a3706937cbf62dc1d0544965532c400ae",
+    "crates/abi/Cargo.toml": "63443c892eb35921348af88442fdc87802c33e2d02871f7b7bacf3953f9781f0",
+    "crates/abi/src/input.rs": "87dff0307185f2c2a2b0b8a24c18cad4ab51a94fe84ab90aeb5fb37837d566f7",
+    "crates/abi/src/lib.rs": "2d94a682f55cb22c926a9a9c64d9cb33b4a35c277c421b654ca28572fef7c245",
+    "crates/boss/Cargo.toml": "3c342cf9c4e597a698d7a140d0d49b5308faa093ebbda59f1f36742b28dabafc",
+    "crates/boss/README.md": "c86d27ae9799c1a893c470cdcf506bca0c21d5ae9d05391b4d99536c753bf92c",
+    "crates/boss/src/challenge.rs": "b4bed696f459833530af70e7e7cd91d9776ced627d5b2fc7635538804b936193",
+    "crates/boss/src/data.rs": "5202687d2a0bec78a23a1dd7456f40d10ce1383c90854cdca3c8fecb1529ffe9",
+    "crates/boss/src/data_audit.rs": "a429cb9c5429ca460c3554cd0385a3bc783d7c27eb6ec126c8425e3229c58b4f",
+    "crates/boss/src/encounters.rs": "64ced5f1bb3de74bf4f60940b1a76a224689cde414312ad3fe16e7057b8b4ccc",
+    "crates/boss/src/host.rs": "0ed380f239bc7d64163c08f0a3d1f584d49042ca0473416152283fe616eb4f6e",
+    "crates/boss/src/lib.rs": "7153aed0da1398675099267c75dae06bec5c4ba50fb10f0bcebfdbc3eb22edb8",
+    "crates/boss/src/revival.rs": "c2d2fe2f26eb695abeae8925ccdb4b66424d751f5aa8b7b84964f6f993fb045f",
+    "crates/boss/src/settings.rs": "b422d6e11888e9a6438bb9c83a84f6ee81d2070fcde649f1e95268d7b3f28d20",
+    "crates/boss/src/ui.rs": "0842f3042ca0b74fcce7d6481bdd084a9c218c645883e2349b509db153379d59",
+    "crates/game/Cargo.toml": "97f2b8c3c91a6a575ad75c364a96db79cb7615d07f2f5e824222b5d857e0e778",
+    "crates/game/README.md": "312e1b518d9859a46e821829ccf32a6c92f3db36908ab3ae04f6f5b0905b32ce",
+    "crates/game/build.rs": "ed5f15a8aaccfd1c5ecab8acee42be26444a23099e5649bbe659934602ae2f7d",
+    "crates/game/native/read_checks.cpp": "a32ebc659203ce5bbd232f7f52bfe0aa9f326bb19af095b0350a8d4fd2c0fc5f",
+    "crates/game/scan-evidence-rust.csv": "fbcfdd23e34e59893a975925dd688ea14c597973429ee1accaa3671337bba0af",
+    "crates/game/scan-evidence.csv": "c734add6413699c809ea7388798f17895ee90737905b549af23dc2b5f1cd6fce",
+    "crates/game/src/assets.rs": "cef05225a448cac0df4d2b5392ae048c5fa793083c29948dacd788514201322d",
+    "crates/game/src/bin/game_probe.rs": "d98ee2057b03f11b9ff43824e8daa2800e348a69965dbe7faa76e58e7bc018e9",
+    "crates/game/src/boss_events.rs": "123c9c1e68ffe232626dc024f4a3ff6167ab32f87f918013ec73e33096365282",
+    "crates/game/src/boss_params.rs": "2e7a2636ec2c2db68689cc2ff25d12be4422a1edfc4a3ec6550bed36b5d8f5e6",
+    "crates/game/src/boss_runtime.rs": "75427f8938032a5f8a362a4185c4300c417adbddbd15b9d7d05b4c1473a19e5f",
+    "crates/game/src/boss_scene.rs": "c5018c72fdeb5e4c0a27897a9d24771a67b5ce13a65d9062bac84b34fef554ce",
+    "crates/game/src/files.rs": "a8ee3afbf5b6d42715d61734f9ec444a420fd1edb13f84c067b987842bd171b2",
+    "crates/game/src/flags.rs": "d81b0a4ce7c7d767c9219b6b0cd6dd71e9edc1d491f66b86b5aee98385ad55d4",
+    "crates/game/src/language.rs": "af7b76fcb176be5b3b8e6b160ecaa95be1c6e249dced217ac64463742e901db0",
+    "crates/game/src/lib.rs": "a36f3d249e8a52a4ae3ef2999b27a92b9882417d46e53f0dd9194e018b7636ff",
+    "crates/game/src/map.rs": "a48531afb9ad93b83ff568a75295f36466996760cc5c0196e4d3bdc0a4a80602",
+    "crates/game/src/memory.rs": "ede957eeccb9a0234c84d57cbf4602d483fb8d420754062c125e7fa7247a81e7",
+    "crates/game/src/params.rs": "761b6fb5f48f62309764a144c5ddc888e54305f5428830732a3f35c7ee793322",
+    "crates/game/src/runtime_boss_perf.rs": "f8a3e28a2968f29a5afde5193b5937f6c4f610e07c6cf9e710e60cd24c49fa6a",
+    "crates/game/src/runtime_cpp_perf.rs": "611740c58a30f6634aa3bd08e5251b8b9650ba560ecac268632285f2ce50ea9d",
+    "crates/game/src/runtime_perf.rs": "dd2dbfaa9519bbd50c2ecee8361a20ff34b2241589e7f45bbfac46d012bb198d",
+    "crates/game/src/scan.rs": "52fa79e908bf6966c7e5eac1e27fd187a4c467e0334fd608b68c91d173983666",
+    "crates/game/src/scan/game.rs": "438038d8645dbc77d1af2076edf1556cced1086a5b203a8b2679b13fdf13eaa6",
+    "crates/game/src/scan/rules.rs": "8f08dc2c29e81c0d09da20b74e8451e4ad556cd151ce7a0516eb335bf96c2875",
+    "crates/game/src/text.rs": "4f182ccc8474ffd6c4b48f349ce7ecae92da0e90ba5bdaf457c9ec456cb9e3d2",
+    "crates/ui/Cargo.toml": "4af6d9159858d3e437fc45953164f8fa33e58b20e2f840eb80c9b115df03dbee",
+    "crates/ui/README.md": "f218cc246117a483c09bbb3f2b574332d4a72d69159254657a4c3eea79408f7c",
+    "crates/ui/src/fonts.rs": "b0d2b5c41c72a2e38e41f7a1a115b1ac155e107673275317c34d92fb042b64ad",
+    "crates/ui/src/input.rs": "bfcdf8f9563b94002ebb7c2590695a0cfa863e3d5b6815a1254425297d5fabaa",
+    "crates/ui/src/lib.rs": "5843721ae0e6e775f441fde93dadd0b697161ccc40889ff637407dee2895b247",
+    "crates/ui/src/meshes.rs": "30c02cadb4d74d0264d59c25907f1aacd7f29b9b7731582c474c4d3c27b7c2fc"
+  },
+  "fixture_sha256": {
+    "crates/boss/Cargo.toml": "76c6d5f5babfbc9ff8901c689adbffed56393f0b9549ea117ec947dc4e493f55",
+    "crates/boss/src/lib.rs": "f2e9c2fa8fc3ef3a358b388a6442229ec9ca85064162c5d668436283cd499d99"
+  },
+  "setup_notes": [
+    "The first preservation assertion rejected git-archive CRLF text; the saved recipe preserves original line endings and verifies removal of only injected hooks recovers the original normalized source.",
+    "The initial metadata --no-deps did not prune the workspace lock. Full offline metadata asked for an unused zerocopy-derive crate; production Windows cargo build --offline resolved only required dependencies. Successful commands above do not use the metadata step."
+  ],
+  "resolved_lock_sha256": "1124fd719e61d587f92769130fb2e49bcefd75ead7d3b828005e9570c7c9fa78",
+  "resolved_packages": 49,
+  "all_resolved_package_versions_and_checksums_match_411_lock": true,
+  "fixture_patch_sha256": "e545cc69ae0657097abef8930e29fac9608c71a028be6f59129d2602bd51c517",
+  "recipe_sha256": "582146fd90c8d83ec03a8ae80c6d5ee51d1d8da23f3a7ccfd7c8699ad74e4b5f",
+  "old_fixture_dll": {
+    "path": "<worktree>\\target\\continuity-old411\\build-target\\release\\Boss.dll",
+    "bytes": 2690560,
+    "sha256": "a7536a7b3663d8bc3d773d677e9939671b161f9df7ebc25e8d390418b3b0a933",
+    "exports": [
+      "eroverlay_test_boss_fault",
+      "getEROverlayPluginV1"
+    ]
+  }
+}

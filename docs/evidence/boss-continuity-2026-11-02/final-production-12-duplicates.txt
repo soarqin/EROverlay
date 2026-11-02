@@ -1,0 +1,45 @@
+plugin: boss-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Boss Rust/egui initialized; native UI_SCENE above game UI
+plugin: minimap-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Minimap Rust/egui initialized; native UI_SCENE below game UI
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=ready
+real DLL overlap established: 26940 interior red-border pixels hidden by Boss; capture=3
+120 sequential actual double-layer frames: overlap readback stable; max test step including GPU drain=6.149ms
+real atlas held pending: counters before=[4, 0, 0, 2, 0], held=[5, 1, 0, 2, 262144]
+continuity PASS: fresh glyphs and actual pending→ready atlas transition never expose Minimap
+real atlas rejected twice then admitted after 0.533s: [5, 0, 0, 2, 0]→[6, 1, 0, 2, 262144]
+duplicate-only upload maintenance reached real GPU ready without UI advance: [6, 0, 0, 2, 0]
+continuity PASS: actual atlas admission rejection→backoff→retry→prepared→GPU ready preserves complete Boss pixels and rejects incompatible fresh geometry
+continuity PASS: every cleared duplicate/interleaved presented frame remains opaque; duplicate input polls unchanged
+internal Boss locks not injected: production Boss has no fixture export; run separately with continuity-fixture Boss
+continuity PASS: six async presented frames, including all-four geometry slots busy, each checked independently
+plugin: minimap-data phase=display-hidden
+plugin: minimap-wait phase=initial-live-map
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=display-hidden
+plugin: minimap-wait phase=initial-live-map
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+continuity PASS: Display unknown, invalid/unavailable save state, and real update-mutex hold do not erase an already-visible Boss
+plugin: minimap-data phase=display-hidden
+plugin: minimap-wait phase=initial-live-map
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+explicit reopen: first opaque frame=Some(5), fixed transition bound=11 presentations; real texture counters Some([8, 0, 0, 2, 0])→Some([8, 0, 0, 2, 0])
+continuity PASS: real hides/close clear retained paint immediately, beat busy fallback, release input, and reopen
+continuity PASS: viewport changes checked on each presented frame
+artificial overload boundary: 24 queued presentations with GPU held; 6/24 differ from opaque Boss; after drain the next frame recovers. This interval is excluded from ordinary continuity PASS.
+three busy slots + native dual-layer frame: Boss remains above overlap; drops +1
+8 asynchronous queued frames: released gate and recovered full overlap
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+native driver scenarios 0–4: stale/missing/duplicate composite boundaries preserve the upper stage
+duplicate sequence emits no new meshes; same-device viewport resizes recover overlap
+core render try_lock and callback-gate contention skip and recover
+GPU-busy stop returned ERR_BUSY after 5.012s with 19267584 bytes retained
+PASS: actual core + Boss.dll + Minimap.dll; plugins=2, nonempty meshes=2933, drops=41 (normal baseline 1); RGB10A2/RGBA8 same-queue composite/readback; validation clean; drained stop OK
+Evidence limits: controlled game/save/resource inputs; real plugin UI, core ownership, native queue adapter and WARP pixels. This does not measure live-game FPS or prove injected-game visuals.

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "EROverlay.dll",
+    "required_exports": [
+      "eroverlay_start",
+      "eroverlay_stop",
+      "eroverlay_render",
+      "eroverlay_stats"
+    ],
+    "fixture_exports_present": false
+  },
+  {
+    "path": "Boss.dll",
+    "required_exports": [
+      "getEROverlayPluginV1"
+    ],
+    "fixture_exports_present": false
+  },
+  {
+    "path": "Minimap.dll",
+    "required_exports": [
+      "getEROverlayPluginV1"
+    ],
+    "fixture_exports_present": false
+  }
+]

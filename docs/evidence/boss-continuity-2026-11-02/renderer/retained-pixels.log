@@ -1,0 +1,14 @@
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\crates\renderer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_renderer-c04e73a89954dd6e.exe)
+
+running 2 tests
+D3D12 debug layer enabled for WARP pixel/lifecycle checks
+WARP retained: image and descriptor survive copy-only completion; retire after both main and presentation fences
+test gpu::tests::warp_retained_surfaces_retire_after_both_copy_and_replay_fences ... ok
+WARP retained: missing-atlas old=red/new=green; 17 cleared presents old=17 red, retained=16 green + 1 explicit pool-cap red; zero render wait events
+WARP retained: confirmed hide and viewport invalidation release completed images
+test gpu::tests::warp_retained_image_survives_missing_atlas_and_sixteen_busy_presentations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.05s
+

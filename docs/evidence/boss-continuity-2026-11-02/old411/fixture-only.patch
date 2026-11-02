@@ -1,0 +1,48 @@
+--- 411bc638/crates/boss/Cargo.toml
++++ test-fixture/crates/boss/Cargo.toml
+@@ -7,6 +7,9 @@
+ [lib]
+ name = "Boss"
+ crate-type = ["cdylib", "rlib"]
++
++[features]
++continuity-fixture = []
+ 
+ [dependencies]
+ eroverlay-abi.workspace = true
+--- 411bc638/crates/boss/src/lib.rs
++++ test-fixture/crates/boss/src/lib.rs
+@@ -65,6 +65,18 @@
+     actions: Mutex<Vec<Action>>,
+     full: AtomicBool,
+     shown: AtomicBool,
++}
++#[cfg(feature = "continuity-fixture")]
++static NEXT_RENDER_FAULT: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
++
++#[cfg(feature = "continuity-fixture")]
++#[unsafe(no_mangle)]
++pub extern "C" fn eroverlay_test_boss_fault(mask: u32) -> i32 {
++    if mask & !3 != 0 {
++        return abi::ERR_INVALID;
++    }
++    NEXT_RENDER_FAULT.store(mask, Ordering::Relaxed);
++    abi::OK
+ }
+ fn guard(f: impl FnOnce() -> i32) -> i32 {
+     catch_unwind(AssertUnwindSafe(f)).unwrap_or(abi::ERR_PANIC)
+@@ -402,6 +414,14 @@
+             return abi::ERR_INVALID;
+         }
+         let instance = unsafe { &*instance.cast::<Instance>() };
++        #[cfg(feature = "continuity-fixture")]
++        let fault = NEXT_RENDER_FAULT.swap(0, Ordering::Relaxed);
++        #[cfg(feature = "continuity-fixture")]
++        let _snapshot_fault = (fault & 1 != 0)
++            .then(|| instance.snapshot.lock().unwrap_or_else(|e| e.into_inner()));
++        #[cfg(feature = "continuity-fixture")]
++        let _ui_fault = (fault & 2 != 0)
++            .then(|| instance.ui.lock().unwrap_or_else(|e| e.into_inner()));
+         let snapshot = instance.snapshot.try_lock().ok().and_then(|s| s.clone());
+         let Some(snapshot) = snapshot else {
+             instance.host.capture(0);

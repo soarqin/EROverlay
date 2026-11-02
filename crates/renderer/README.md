@@ -42,6 +42,17 @@ fall back into an entry that might still be patched.
   three of the four slots. This restores the C++ upper-stage reservation: a
   lower group cannot consume the upper stage's last available slot. More upper
   groups remain best effort; the cap prevents permanent lower-stage starvation.
+- Above-UI groups additionally publish a complete owned RGBA8 image only when
+  every mesh texture is resident. Missing atlases or busy geometry slots replay
+  the last image through sixteen separate, bounded composite-only command lists.
+  Core can borrow this independent presentation handle during GPU-state lock or
+  callback-gate contention without advancing plugin UI/input again. Empty output,
+  confirmed hiding, viewport changes or device/queue changes invalidate images.
+  Images and descriptors retire only after both copy and presentation fences.
+  There are at most 64 groups, 128 descriptors and 128 MiB of retained surfaces;
+  no render call waits for the GPU or expands the command ring. Exhausting all
+  sixteen presentation slots is an explicit drop boundary. Tests clear and read
+  each present independently; see [the continuity record](../../docs/boss-continuity-fix-2026-11-02.md).
 - Each slot has a reusable RGBA8 offscreen target sized to the group's clipped
   region. It is resized only after that slot completes. The shader handles group
   opacity, circular/rounded clipping and an independently opaque inside border.

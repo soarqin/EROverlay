@@ -1,0 +1,209 @@
+{
+  "code_commit": "0819f40da74f8fcaf916a1ba62d9b70f60e4e913",
+  "current_branch": "cindy/gentle-darwin",
+  "normal_features": "default only; installation DLLs have no test exports",
+  "normal_tests": {
+    "passed": 183,
+    "failed": 0,
+    "ignored": 11
+  },
+  "production_dlls": [
+    {
+      "Path": "EROverlay.dll",
+      "Bytes": 738816,
+      "SHA256": "471f10df3c1d4043695a529dc88d84d5cdd33562016461ac93bd8da663cd3466"
+    },
+    {
+      "Path": "Boss.dll",
+      "Bytes": 2692608,
+      "SHA256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+    },
+    {
+      "Path": "Minimap.dll",
+      "Bytes": 1766400,
+      "SHA256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+    }
+  ],
+  "production_dll_harness_cycles": 3,
+  "production_dll_with_extra_upper_fixture_cycles": 3,
+  "native_input_lifecycle_fixture": "Real hidden HWND, DirectInput and MinHook; PASS and stopped resident=1; separate non-shipping core.",
+  "visible_layer_matrices": [
+    {
+      "name": "final-production-12-duplicates",
+      "steady_frames": 120,
+      "matrix_presentations": 326,
+      "coverage_categories": {
+        "Boss": 263,
+        "Hidden": 28,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "forced_overload_misses": 6,
+      "exit_code": 0
+    },
+    {
+      "name": "final-fixture-13",
+      "steady_frames": 120,
+      "matrix_presentations": 336,
+      "coverage_categories": {
+        "Boss": 273,
+        "Hidden": 28,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "forced_overload_misses": 6,
+      "exit_code": 0
+    }
+  ],
+  "matrix_dll_identity": [
+    {
+      "path": "target/layer-order-fixture/release/EROverlay.dll",
+      "size": 768512,
+      "sha256": "F947879A12380E0DC9BAD656F7DD53B076B7ED3C66A061429860C316B5AC87E6"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-production-input/overlays/Boss.dll",
+      "size": 2692608,
+      "sha256": "B31CA8FDFDE4DA5197DD174E5649E07F326D8C829F55F0D2EBC1A9C5DA1F339A"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-fixture-input/overlays/Boss.dll",
+      "size": 2693632,
+      "sha256": "6C0D6909D048939567C0444C1ACC20F7BC3D216844BAD1B5B70075391E16E84A"
+    },
+    {
+      "path": "target/boss-continuity-review/admission-production-input/overlays/Minimap.dll",
+      "size": 1766400,
+      "sha256": "C73DEFE5CDC439E0D9A443D0ED793FEEE3D6AF259FE3D7C4186144EEDF149A7D"
+    },
+    {
+      "path": "target/input-agent/release/layer_order_probe.exe",
+      "size": 324608,
+      "sha256": "A2224BC8122DCA0693EC42650FBD41677686719263E3C8DB1C266FA507E7183A"
+    },
+    {
+      "path": "crates/harness/src/bin/layer_order_probe.rs",
+      "size": 56526,
+      "sha256": "8A1E8F7B2977AE09CE081553B847C42E2F372C24C32AD45DE7A599E2267461AB"
+    },
+    {
+      "path": "crates/harness/src/layer_order_gpu.rs",
+      "size": 24972,
+      "sha256": "55DF1B0CDCC7C335E8E0E5C144C568BEC777A99DCB4BBF437D56F7DEA8549999"
+    }
+  ],
+  "old_failures": [
+    "negative-duplicate",
+    "negative-atlas",
+    "negative-snapshot",
+    "negative-atlas-admission-old-ui",
+    "negative-duplicate-upload-maintenance"
+  ],
+  "optional_asset_probe": "Final normal Boss + Minimap DLLs; 207 entries, 208 unique flags, real PARAM/EMEVD/FMG/MSB, controlled save/input/flags/writes; PASS. No native VFS/game acceptance claim.",
+  "pixel_artifacts_not_distributed": [
+    {
+      "path": "target/boss-continuity-review/final-production-12-duplicates/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/final-production-12-duplicates/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/final-production-12-duplicates/03-three-slots-held.bmp",
+      "bytes": 4608054,
+      "sha256": "05c6f82330070470f5f67e3fb7a4b1a685c81d8787e7177dbf4bc099211cc0b7"
+    },
+    {
+      "path": "target/boss-continuity-review/final-fixture-13/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/final-fixture-13/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/final-fixture-13/03-three-slots-held.bmp",
+      "bytes": 4608054,
+      "sha256": "05c6f82330070470f5f67e3fb7a4b1a685c81d8787e7177dbf4bc099211cc0b7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-duplicate/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-duplicate/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-duplicate/FAIL-cleared-duplicate-269.bmp",
+      "bytes": 4608054,
+      "sha256": "aebafde88c7118fef4f9e5e39aaeaa72a1066fc1314d3b1a1ece04ad695559bb"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-atlas/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-atlas/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-atlas/FAIL-atlas-new-glyph-pending-271.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-snapshot/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-snapshot/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-snapshot/FAIL-boss-lock-1-269.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-atlas-admission-old-ui/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-atlas-admission-old-ui/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-duplicate-upload-maintenance/01-minimap-reference.bmp",
+      "bytes": 4608054,
+      "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+    },
+    {
+      "path": "target/boss-continuity-review/negative-duplicate-upload-maintenance/02-normal-overlap.bmp",
+      "bytes": 4608054,
+      "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+    }
+  ],
+  "limits": [
+    "The 411bc63 user flicker report remains the latest field result; this new package is not yet confirmed in game.",
+    "Menu preload field acceptance and live-game FPS remain unconfirmed.",
+    "Controlled save/display/resources, real plugin UI, core texture/mesh ownership and GPU queue/WARP pixels. Explicit reopen first opaque ROI frame 5 within fixed 11 presentations. Artificial GPU-held 24-frame pool overload loses 6 frames and recovers next frame; excluded from normal continuity. Not live-game FPS or injected-game visual acceptance.",
+    "Presenter try_lock and the fixed presentation-ring limit do not promise unlimited continuity under simultaneous GPU submission or an indefinitely stalled GPU.",
+    "Independent clean rebuild hashes do not substitute for these actual tested installation DLLs."
+  ]
+}

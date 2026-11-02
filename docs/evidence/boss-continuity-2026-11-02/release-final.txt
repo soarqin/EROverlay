@@ -1,0 +1,3 @@
+   Compiling eroverlay-harness v0.1.0 (<worktree>\crates\harness)
+   Compiling eroverlay-core v0.1.0 (<worktree>\crates\core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 3.35s

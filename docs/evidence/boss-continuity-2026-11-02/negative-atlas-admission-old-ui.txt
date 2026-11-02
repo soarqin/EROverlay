@@ -1,0 +1,12 @@
+plugin: boss-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Boss Rust/egui initialized; native UI_SCENE above game UI
+plugin: minimap-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Minimap Rust/egui initialized; native UI_SCENE below game UI
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=ready
+real DLL overlap established: 26940 interior red-border pixels hidden by Boss; capture=3
+120 sequential actual double-layer frames: overlap readback stable; max test step including GPU drain=5.225ms
+real atlas held pending: counters before=[4, 0, 0, 2, 0], held=[5, 1, 0, 2, 262144]
+continuity PASS: fresh glyphs and actual pending→ready atlas transition never expose Minimap
+层级探针未通过：rejected dirty atlas emitted fresh geometry: 1127→1134

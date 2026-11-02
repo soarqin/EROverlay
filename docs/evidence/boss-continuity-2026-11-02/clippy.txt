@@ -1,0 +1,2 @@
+    Checking eroverlay-harness v0.1.0 (<worktree>\crates\harness)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.46s

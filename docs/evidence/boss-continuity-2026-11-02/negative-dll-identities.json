@@ -1,0 +1,46 @@
+[
+  {
+    "run": "negative-atlas-admission-old-ui",
+    "exit": 1,
+    "fixture_core_sha256": "D8298D7CBA40592DBB62408D44CFD896E65268F42A378CBA0C9D0C1105C4A1B5",
+    "fixture_core_saved_binary": "target/boss-continuity-review/final-production-10/EROverlay-layer-fixture.dll",
+    "fixture_core_bytes": 767488,
+    "fixture_core_invocation": "target/layer-order-fixture/release/EROverlay.dll",
+    "identity_basis": "Recorded invocation history; same D829 build preserved by final-production-10 and independently identical final-fixture-11 copies; plugin hashes read directly from this run controlled-package.",
+    "plugins": [
+      {
+        "path": "target/boss-continuity-review/negative-atlas-admission-old-ui/controlled-package/overlays/Boss.dll",
+        "size": 2691584,
+        "sha256": "297916B71E4C59E3CE71D9B463C60CA492193930F8CFE82370266BDD6483B55C"
+      },
+      {
+        "path": "target/boss-continuity-review/negative-atlas-admission-old-ui/controlled-package/overlays/Minimap.dll",
+        "size": 1766400,
+        "sha256": "7B300EBD8BD7BA1065E350C19AD0ECA9E488D5749C14FD11E916699660118FE1"
+      }
+    ],
+    "log": "target/boss-continuity-review/negative-atlas-admission-old-ui/log"
+  },
+  {
+    "run": "negative-duplicate-upload-maintenance",
+    "exit": 1,
+    "fixture_core_sha256": "D8298D7CBA40592DBB62408D44CFD896E65268F42A378CBA0C9D0C1105C4A1B5",
+    "fixture_core_saved_binary": "target/boss-continuity-review/final-production-10/EROverlay-layer-fixture.dll",
+    "fixture_core_bytes": 767488,
+    "fixture_core_invocation": "target/boss-continuity-review/final-production-10/EROverlay-layer-fixture.dll",
+    "identity_basis": "Recorded invocation history; same D829 build preserved by final-production-10 and independently identical final-fixture-11 copies; plugin hashes read directly from this run controlled-package.",
+    "plugins": [
+      {
+        "path": "target/boss-continuity-review/negative-duplicate-upload-maintenance/controlled-package/overlays/Boss.dll",
+        "size": 2692608,
+        "sha256": "B31CA8FDFDE4DA5197DD174E5649E07F326D8C829F55F0D2EBC1A9C5DA1F339A"
+      },
+      {
+        "path": "target/boss-continuity-review/negative-duplicate-upload-maintenance/controlled-package/overlays/Minimap.dll",
+        "size": 1766400,
+        "sha256": "C73DEFE5CDC439E0D9A443D0ED793FEEE3D6AF259FE3D7C4186144EEDF149A7D"
+      }
+    ],
+    "log": "target/boss-continuity-review/negative-duplicate-upload-maintenance/log"
+  }
+]

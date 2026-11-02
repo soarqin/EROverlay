@@ -1,0 +1,329 @@
+{
+  "kind": "renderer-retained-presentation-evidence",
+  "date": "2026-11-02",
+  "base_commit": "411bc6384c06aef80cba888d4443fb01b2291903",
+  "source_status": "Uncommitted renderer work integrated with parent changes; exact renderer input files below.",
+  "source_files": [
+    {
+      "path": "crates/renderer/src/gpu.rs",
+      "sha256": "663e214fd61e0ae784d6ccf0d6e9e7d2ce2873bfc0b094552998b4e83a69434e"
+    },
+    {
+      "path": "crates/renderer/src/gpu/presentation.rs",
+      "sha256": "ec205037e7a9fd48181b7d624957ba372b00e0640b07d0ee102ef3b28d9afcef"
+    },
+    {
+      "path": "crates/renderer/src/lib.rs",
+      "sha256": "b6ad6d853bf28718d2039a50e3711437f855f15d2839339c27679ebd9ca73216"
+    }
+  ],
+  "public_api": [
+    "Renderer::presentation_handle() -> PresentationHandle",
+    "Renderer::render_with_group(frame, meshes, options, key)",
+    "Presentation::{replay, matches_device, invalidate, invalidate_all, committed_bytes, wait_idle}"
+  ],
+  "bounds": {
+    "geometry_slots": 4,
+    "composite_only_slots": 16,
+    "active_group_images": 64,
+    "immutable_srv_descriptors_including_retired": 128,
+    "owned_image_bytes_including_retired": 134217728,
+    "render_cpu_gpu_waits": false,
+    "cached_game_target_pointers": false,
+    "reuse_inflight_command_lists": false
+  },
+  "ownership": {
+    "normal_render": "Complete AboveUI image copied to an owned RGBA8 resource within the normal command list. All visible mesh texture dependencies must be GPU-ready before replacing the retained image.",
+    "replay": "Each available composite-only allocator/list is reset only after its presentation fence completed. A current NativeFrame RTV is borrowed for each synchronous replay call.",
+    "retirement": "Resource and immutable SRV descriptor retained until both geometry copy fence and presentation replay fence complete.",
+    "same_queue_writes": "The retained resource may be reused only on the same DIRECT queue; queue order serializes earlier replay reads, the next image copy, and later replay reads.",
+    "shutdown": "wait_idle covers both fences using one total timeout. Drops use bounded 5000ms waits outside rendering; if work remains in flight, associated bounded resources are intentionally retained until process exit.",
+    "lock_contention": "All rendering paths use presenter try_lock and do not wait for the owner. A contended presenter can still drop that present; Core integration must keep contention brief.",
+    "geometry_busy": "No normal geometry allocator is reset while busy. Bounded texture upload work resumes when a geometry slot becomes available; retained presentation does not perform uploads."
+  },
+  "checks": [
+    {
+      "command": "cargo fmt -p eroverlay-renderer -- --check",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo check -p eroverlay-renderer --locked",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo check -p eroverlay-renderer --features native-scene-fixture --locked",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo clippy -p eroverlay-renderer --all-targets --locked -- -D warnings",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo clippy -p eroverlay-renderer --all-targets --features native-scene-fixture --locked -- -D warnings",
+      "exit_code": 0
+    }
+  ],
+  "tests": [
+    {
+      "log": "renderer-default-tests.log",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "log": "renderer-fixture-tests.log",
+      "passed": 14,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "log": "retained-pixels.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "warp_evidence": {
+    "command": "cargo test -p eroverlay-renderer --locked warp_retained -- --nocapture",
+    "log": "retained-pixels.log",
+    "actual_target": "RGB10A2 WARP render target; explicit fresh clear and independent asynchronous readback ticket for every present",
+    "missing_new_atlas": {
+      "baseline_pixel": "red",
+      "retained_pixel": "green"
+    },
+    "geometry_all_four_busy": {
+      "present_count": 17,
+      "baseline_red": 17,
+      "retained_green": 16,
+      "retained_red_at_explicit_pool_limit": 1,
+      "render_wait_events_created": 0
+    },
+    "hide_resize": "Successful empty paint invalidates the group; viewport mismatch rejects the old pixels. Completed image resources released.",
+    "double_fence": "After invalidate, resources remain allocated when only normal-copy fence is complete. Released only after presentation fence also completes.",
+    "device_identity": "matches_device returns false for a changed device/queue identity without submitting or poisoning the presenter.",
+    "debug": "No D3D12 ERROR or CORRUPTION messages in these tests.",
+    "limits": "The 17th drop is an intentional artificial blocked-GPU hard-cap observation, not a promise of unlimited continuity. These are renderer tests, not live game acceptance or dynamic plugin integration."
+  },
+  "normal_copy_microbenchmark": {
+    "reproduce_script": "run-copy-perf.ps1",
+    "derived_source_generator": "copy_perf.py",
+    "derived_source": "copy_perf.rs",
+    "base_example": "crates/renderer/examples/gpu_perf.rs",
+    "metadata": {
+      "kind": "metadata",
+      "adapter": "NVIDIA GeForce RTX 4080",
+      "warp": false,
+      "resolution": "1920x1080",
+      "target": "RGB10A2 AboveUI full-viewport",
+      "gpu_timing": true,
+      "samples": 300,
+      "frontend": "renderer only",
+      "scope": "CPU scope selected by frontend; GPU queue timestamps; excludes dynamic plugin dispatch, updater and game; explicit queue drain outside timed region; Rust allocator counts only"
+    },
+    "warmup_frames_per_invocation": 32,
+    "rounds": [
+      {
+        "round": 1,
+        "order": [
+          "baseline",
+          "retained"
+        ],
+        "baseline": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 19.5,
+          "cpu_p95_us": 33.2,
+          "cpu_p99_us": 54.9,
+          "gpu_p50_us": 21.504,
+          "gpu_p95_us": 21.504,
+          "gpu_p99_us": 21.504,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.023761,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 36569088,
+          "dropped": 0
+        },
+        "retained": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 22.5,
+          "cpu_p95_us": 34.2,
+          "cpu_p99_us": 56.9,
+          "gpu_p50_us": 34.816,
+          "gpu_p95_us": 34.816,
+          "gpu_p99_us": 35.84,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.028907,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 44957696,
+          "dropped": 0
+        }
+      },
+      {
+        "round": 2,
+        "order": [
+          "retained",
+          "baseline"
+        ],
+        "baseline": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 19.3,
+          "cpu_p95_us": 27.6,
+          "cpu_p99_us": 48.4,
+          "gpu_p50_us": 21.504,
+          "gpu_p95_us": 21.504,
+          "gpu_p99_us": 21.504,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.023335,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 36569088,
+          "dropped": 0
+        },
+        "retained": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 22.6,
+          "cpu_p95_us": 33.8,
+          "cpu_p99_us": 62.6,
+          "gpu_p50_us": 34.816,
+          "gpu_p95_us": 34.816,
+          "gpu_p99_us": 34.816,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.029132,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 44957696,
+          "dropped": 0
+        }
+      },
+      {
+        "round": 3,
+        "order": [
+          "baseline",
+          "retained"
+        ],
+        "baseline": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 19.4,
+          "cpu_p95_us": 36.0,
+          "cpu_p99_us": 55.7,
+          "gpu_p50_us": 21.504,
+          "gpu_p95_us": 21.504,
+          "gpu_p99_us": 21.504,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.023416,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 36569088,
+          "dropped": 0
+        },
+        "retained": {
+          "kind": "scenario",
+          "scenario": "stable_64_quads",
+          "cpu_p50_us": 22.8,
+          "cpu_p95_us": 50.0,
+          "cpu_p99_us": 61.1,
+          "gpu_p50_us": 34.816,
+          "gpu_p95_us": 34.816,
+          "gpu_p99_us": 35.84,
+          "gpu_samples": 300,
+          "rust_allocations": 0,
+          "rust_allocated_bytes": 0,
+          "draw_calls_per_frame": 2.0,
+          "sampled_wall_seconds": 0.030023,
+          "upload_bytes_total": 0,
+          "committed_resource_bytes_peak": 44957696,
+          "dropped": 0
+        }
+      }
+    ],
+    "copy_payload_bytes": 8294400,
+    "extra_owned_resource_bytes": 8388608,
+    "gpu_p50_added_us_by_round": [
+      13.312,
+      13.312,
+      13.312
+    ],
+    "gpu_p95_added_us_by_round": [
+      13.312,
+      13.312,
+      13.312
+    ],
+    "cpu_p50_baseline_median_us": 19.4,
+    "cpu_p50_retained_median_us": 22.6,
+    "limits": "Renderer-only Release benchmark on RTX 4080, fixed 1920x1080 full-viewport AboveUI, stable 64 quads. Queue drain outside timing; no fixed CPU affinity. Both modes already construct the presentation pool, so this compares normal-frame copy/cache bookkeeping rather than pool startup. Driver allocator/list/descriptor heap memory not available through committed resource accounting. No whole-game FPS or C++ parity claim."
+  },
+  "artifacts": [
+    {
+      "path": "copy-baseline-1.jsonl",
+      "sha256": "274f0376cecaa7aa68dc555c9fb8cd2176f2e71191c7b3fdcf9e64d3a4e6dd45"
+    },
+    {
+      "path": "copy-baseline-2.jsonl",
+      "sha256": "d989248f4fbbbeb03e43042e1f0a7e6316376b9f5c99679ca5c9369685d3c470"
+    },
+    {
+      "path": "copy-baseline-3.jsonl",
+      "sha256": "86438158186519097db5e21eba00053ab3189dfad1fe0937ecc70ae2b7216748"
+    },
+    {
+      "path": "copy-build.jsonl",
+      "sha256": "af6fd7ffa8161b21d4d18be01db5fbd6348e819cfa27335c0c9a45a8a3d0a8ce"
+    },
+    {
+      "path": "copy-build.stderr.log",
+      "sha256": "39572425e233d6457321d154ced04c4dee944d84136da558b0b6f0875eeba7d6"
+    },
+    {
+      "path": "copy-retained-1.jsonl",
+      "sha256": "e55c182920a584deca40512bc9b669486a3c4ae4c9f9482fd4985a1de5857ad5"
+    },
+    {
+      "path": "copy-retained-2.jsonl",
+      "sha256": "a5370267fbc3ac84ab6a1923b61c4984e73f97f5b6467bca44ef4bc693834cb3"
+    },
+    {
+      "path": "copy-retained-3.jsonl",
+      "sha256": "67039d2402b222d7fa331b0a62ed96bd279bb7a9d5c44603928c110cc84d898e"
+    },
+    {
+      "path": "copy_perf.py",
+      "sha256": "81ffc0331bbd6660ca9a9a33635b339a7115e87ac8144707e35ce102e9866031"
+    },
+    {
+      "path": "renderer-default-tests.log",
+      "sha256": "5dcf0fe4ece381cab3a99e077289308a523f6e8174160410a1b0f1b43ffe3e9d"
+    },
+    {
+      "path": "renderer-fixture-tests.log",
+      "sha256": "0c8afdf67658bdcc0b88af15d082ea55de994fb8cf66fe1c50d35bac24c452fd"
+    },
+    {
+      "path": "retained-pixels.log",
+      "sha256": "a4b4e35901cfc132ebacb2345af9f2d8067f0aeaf93d258a310669ef0372192d"
+    },
+    {
+      "path": "run-copy-perf.ps1",
+      "sha256": "f737e10c5d179d7ef33c53a181b440129069a020f953b3a88327c334a5325563"
+    },
+    {
+      "path": "strict-checks.log",
+      "sha256": "19157ed2d539f5dba2804383791511d12e0f982b12f98dffb744e5ad7ea28667"
+    }
+  ]
+}

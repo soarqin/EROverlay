@@ -1,0 +1,52 @@
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=6628
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=1948
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=1948
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=46488
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=46488
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=58904
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=58904
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=29284
+[EROverlay] UI_SCENE queue 1: below-ui before native UI composition; priority=00FFFFFF
+[EROverlay] UI_SCENE queue 1: consumed 2 callback(s) (below-ui=1 above-ui=1), returning to game
+[EROverlay] UI_SCENE queue 2: enqueue before sort/consume; thread=29284
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 2: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE queue 3: enqueue before sort/consume; thread=29284
+[EROverlay] UI_SCENE queue 3: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+PASS: real hidden-HWND Win32/DirectInput input, lifecycle and native PIN; stopped resident=1. No game or foreground interaction.
+PASS: two real MinHook detours drain lock-protected callbacks; restored local entries and fixture reinstall work without unmapping the module.
+CONFIRMED: 12 real-detour pre-acquire/post-release pauses outlive stop(); a drained bridge does not prove its module can be unmapped.
+PASS: three real MinHook disable-error branches retain an inert bridge/trampoline, skip user callbacks, and permit later successful cleanup.
+PASS: exact native UI command boundary survives later native work; stale/missing boundaries suppress only the lower stage.
+

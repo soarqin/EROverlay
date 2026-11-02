@@ -1,0 +1,3 @@
+cycle 1: real core and 3 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1507328; Boss=true, upper_fixture=true, GPU-retained shutdown=true; offline game overlays hidden)
+cycle 2: real core and 3 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1507328; Boss=true, upper_fixture=true, GPU-retained shutdown=true; offline game overlays hidden)
+cycle 3: real core and 3 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=48, committed=1507328; Boss=true, upper_fixture=true, GPU-retained shutdown=true; offline game overlays hidden)

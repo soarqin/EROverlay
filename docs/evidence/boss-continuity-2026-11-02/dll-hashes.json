@@ -1,0 +1,17 @@
+[
+  {
+    "Path": "EROverlay.dll",
+    "Bytes": 738816,
+    "SHA256": "471f10df3c1d4043695a529dc88d84d5cdd33562016461ac93bd8da663cd3466"
+  },
+  {
+    "Path": "Boss.dll",
+    "Bytes": 2692608,
+    "SHA256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+  },
+  {
+    "Path": "Minimap.dll",
+    "Bytes": 1766400,
+    "SHA256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+  }
+]

@@ -1,0 +1,10 @@
+plugin: boss-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Boss Rust/egui initialized; native UI_SCENE above game UI
+plugin: minimap-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Minimap Rust/egui initialized; native UI_SCENE below game UI
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=ready
+real DLL overlap established: 26940 interior red-border pixels hidden by Boss; capture=3
+120 sequential actual double-layer frames: overlap readback stable; max test step including GPU drain=4.314ms
+层级探针未通过：continuity boss-lock-1: presented sequence 269 lost Boss coverage (26940/26940 pixels), \\?\<worktree>\target\boss-continuity-review\negative-snapshot\FAIL-boss-lock-1-269.bmp

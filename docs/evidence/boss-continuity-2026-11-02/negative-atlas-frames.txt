@@ -1,0 +1,3 @@
+sequence=269 case=atlas-focus-down expected=Boss bad_pixels=0/26940
+sequence=270 case=atlas-focus-up expected=Boss bad_pixels=0/26940
+sequence=271 case=atlas-new-glyph-pending expected=Boss bad_pixels=26940/26940

@@ -1,0 +1,10 @@
+plugin: boss-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Boss Rust/egui initialized; native UI_SCENE above game UI
+plugin: minimap-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Minimap Rust/egui initialized; native UI_SCENE below game UI
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=ready
+real DLL overlap established: 26940 interior red-border pixels hidden by Boss; capture=3
+120 sequential actual double-layer frames: overlap readback stable; max test step including GPU drain=4.439ms
+层级探针未通过：continuity atlas-new-glyph-pending: presented sequence 271 lost Boss coverage (26940/26940 pixels), \\?\<worktree>\target\boss-continuity-review\negative-atlas\FAIL-atlas-new-glyph-pending-271.bmp

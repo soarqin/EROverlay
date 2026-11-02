@@ -48,7 +48,7 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。从 `a456002`、仅更新文档的 `09cd6e9` 或 `ca8dd4e` 升级本轮菜单预加载与层级修复，必须替换 `EROverlay.dll` 和 `overlays/Boss.dll`；本包也提供重新构建的 `overlays/Minimap.dll`。从 Boss 移植前版本升级需要同时更新三个 DLL，并加入 `configs/boss-encounters.json`。首次安装 Boss 还需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。
+升级前须完全退出游戏。从 `411bc63` 或更早 Rust Boss 包升级本轮连续显示修复，替换 `EROverlay.dll`、`overlays/Boss.dll` 和 `overlays/Minimap.dll`；两个插件都包含共享字体图集暂忙处理的修复。从 Boss 移植前版本升级还需加入 `configs/boss-encounters.json`。首次安装 Boss 另需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。修复、逐帧验证及现场复测边界见 [Boss 连续显示记录](docs/boss-continuity-fix-2026-11-02.md)。
 
 ## 加载与退出
 
@@ -101,7 +101,7 @@ cargo build --workspace --release --locked
 
 主要验收依据是相同硬件、分辨率、配置、地图、标记数量和样本时长下的 C++/Rust 对照。统计 Rust、egui、依赖、分配、FFI、CPU、GPU 和显存的全部开销，不扣除所谓 runtime 开销，不设置用户未认可的百分比门槛。固定毫秒预算仅作观察参考。
 
-渲染线程不读取磁盘、解压、解析配置、执行全局签名扫描或等待 update 锁。资源由更新线程和纹理准备线程处理，绘制使用快照与 `try_lock`，GPU 使用有界提交环和 fence 回收。普通绘制遇到忙槽会跳过，不能通过逐帧 GPU 等待腾出槽位。测量 harness 内为读取结果而执行的同步与产品绘制路径分开统计。
+渲染线程不读取磁盘、解压、解析配置、执行全局签名扫描或等待 update 锁。资源由更新线程和纹理准备线程处理，绘制使用快照与 `try_lock`，GPU 使用有界提交环和 fence 回收。上层绘制暂忙或新图集尚未就绪时，独立合成环重放最后完整成图；明确关闭、真实隐藏或不兼容的设备／viewport 变化使其失效。固定环全部在途时不逐帧等待或无限扩容。测量 harness 内为读取结果而执行的同步与产品绘制路径分开统计。
 
 运行场景至少覆盖隐藏、稳定显示、大尺寸、旋转、透明、切图、碎片变化、标记变化和大量标记。记录 CPU p50/p95/p99、分配次数和字节、draw call、上传量、驻留显存和缓存上限。离线 fixture、WARP 和真实游戏数据必须分别标注。
 

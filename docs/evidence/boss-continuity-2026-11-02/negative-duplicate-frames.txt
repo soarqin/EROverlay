@@ -1,0 +1,2 @@
+sequence=269 case=duplicate-prior-valid expected=Boss bad_pixels=0/26940
+sequence=269 case=cleared-duplicate expected=Boss bad_pixels=26460/26940

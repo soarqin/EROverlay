@@ -1,0 +1,69 @@
+$ pwsh -NoProfile -File ./build.ps1
+   Compiling windows-link v0.2.1
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling paste v1.0.15
+   Compiling memchr v2.8.3
+   Compiling eroverlay-abi v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\abi)
+   Compiling eroverlay-game v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\game)
+   Compiling zerocopy v0.8.63
+   Compiling cfg-if v1.0.5
+   Compiling version_check v0.9.5
+   Compiling parking_lot_core v0.9.12
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling scopeguard v1.2.0
+   Compiling ttf-parser v0.25.1
+   Compiling smallvec v1.16.4
+   Compiling once_cell v1.21.4
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling emath v0.33.3
+   Compiling serde_core v1.0.229
+   Compiling profiling v1.0.18
+   Compiling log v0.4.35
+   Compiling nohash-hasher v0.2.0
+   Compiling unicode-segmentation v1.13.3
+   Compiling bitflags v2.13.2
+   Compiling zmij v1.0.23
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling epaint_default_fonts v0.33.3
+   Compiling adler2 v2.0.1
+   Compiling itoa v1.0.18
+   Compiling windows-strings v0.5.1
+   Compiling windows-result v0.4.1
+   Compiling windows-threading v0.2.1
+   Compiling lock_api v0.4.14
+   Compiling miniz_oxide v0.8.9
+   Compiling ahash v0.8.12
+   Compiling ecolor v0.33.3
+   Compiling cc v1.2.67
+   Compiling quick-xml v0.38.3
+   Compiling eroverlay-abi-fixture v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\abi-fixture)
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\renderer)
+   Compiling owned_ttf_parser v0.25.1
+   Compiling parking_lot v0.12.5
+   Compiling ab_glyph v0.2.32
+   Compiling texture2ddecoder v0.1.2
+   Compiling syn v2.0.119
+   Compiling syn v3.0.9
+   Compiling serde_derive v1.0.229
+   Compiling windows-implement v0.60.2
+   Compiling windows-interface v0.59.3
+   Compiling windows-core v0.62.2
+   Compiling epaint v0.33.3
+   Compiling windows-collections v0.3.2
+   Compiling windows-numerics v0.3.1
+   Compiling windows-future v0.3.2
+   Compiling windows v0.62.2
+   Compiling egui v0.33.3
+   Compiling eroverlay-ui v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\ui)
+   Compiling eroverlay-harness v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\harness)
+   Compiling eroverlay-core v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\core)
+   Compiling eroverlay-boss v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\boss)
+   Compiling eroverlay-minimap v0.1.0 (<worktree>\target\boss-continuity-clean-source\crates\minimap)
+    Finished `release` profile [optimized + debuginfo] target(s) in 33.71s
+Independent Rust package: <worktree>\target\boss-continuity-clean-source\package
+
+exit_code=0

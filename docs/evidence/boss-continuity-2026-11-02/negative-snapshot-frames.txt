@@ -1,0 +1,1 @@
+sequence=269 case=boss-lock-1 expected=Boss bad_pixels=26940/26940
