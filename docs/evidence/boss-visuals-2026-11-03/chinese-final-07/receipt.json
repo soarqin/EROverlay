@@ -1,0 +1,362 @@
+{
+  "result": "PASS",
+  "exit_code": 0,
+  "command": "target\\boss-layout-check\\release\\boss_probe.exe target\\boss-layout-fixture\\release\\Boss.dll target/research E:/Projects/EROverlay/build/ida/boss/events target\\boss-visual-2026-11-03\\chinese-final-07 target/boss-contract/scene-fixtures",
+  "environment": {
+    "EROVERLAY_BOSS_LANGUAGE": "zhocn",
+    "EROVERLAY_BOSS_TEXT_DIR": "target\\boss-visual-2026-11-03\\text-zhocn",
+    "EROVERLAY_BOSS_VISUAL_MATRIX": "1"
+  },
+  "inputs": [
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\controlled-inputs\\Boss.dll",
+      "size": 2784256,
+      "sha256": "28d3ba798e4b369abf03d3619f55f798cd783bb239da456877509c750831546d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\controlled-inputs\\Minimap.dll",
+      "size": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\controlled-inputs\\boss_probe.exe",
+      "size": 681984,
+      "sha256": "cbfd9f098d347b8c03a54711aaca9077d0693e05bb5ffb0cacebc60c16537d2a"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "crates\\harness\\src\\bin\\boss_probe.rs",
+      "size": 99455,
+      "sha256": "91fd0473ab092a5b78b587e2d62d2ca1764eae75b6d3f77ce8581e2ce114746b"
+    },
+    {
+      "path": "crates\\harness\\src\\gpu.rs",
+      "size": 12092,
+      "sha256": "2e6730c2124ac0fd16899585e793e3c05448b7c7bf21d230cb3a68ac10782460"
+    },
+    {
+      "path": "crates\\abi\\src\\lib.rs",
+      "size": 15312,
+      "sha256": "874cd983d106616d36998cbadbb6ab82bd88e37653d09bb926bd96fee8b946d5"
+    },
+    {
+      "path": "Cargo.lock",
+      "size": 14972,
+      "sha256": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b"
+    },
+    {
+      "path": "crates\\boss\\src\\challenge.rs",
+      "size": 4488,
+      "sha256": "5248dcb6ae2839ec5337faf505bf3ed7eaa358f83fe298b63c7b6dc8b5180474"
+    },
+    {
+      "path": "crates\\boss\\src\\data.rs",
+      "size": 116580,
+      "sha256": "193588a7a1f6b865312f0d866681dd5ca3a44c4359c392a2ebd894f410732d7d"
+    },
+    {
+      "path": "crates\\boss\\src\\data_audit.rs",
+      "size": 58064,
+      "sha256": "25fcac175fd2e48698a87d9b4a63ac1e60e79c466dfc50fc1c0469a7fe21b9da"
+    },
+    {
+      "path": "crates\\boss\\src\\encounters.rs",
+      "size": 10876,
+      "sha256": "f21851122cba19cb364136ce71e17aa19807780caf882953d026ffd429a4f152"
+    },
+    {
+      "path": "crates\\boss\\src\\host.rs",
+      "size": 6840,
+      "sha256": "e53bb3ec171717277bac6d2ca2418d4ec0ebe2b615b12a2212836618fdc83eec"
+    },
+    {
+      "path": "crates\\boss\\src\\lib.rs",
+      "size": 20434,
+      "sha256": "fd71515aa7b2cfe765bc933e892d8698ff4115d8d89ee808633cf8731d67930e"
+    },
+    {
+      "path": "crates\\boss\\src\\probe.rs",
+      "size": 8203,
+      "sha256": "de2ef06f9f4843d4951131a1d766a6b18e152f0b8c42de7395525529a9da9da4"
+    },
+    {
+      "path": "crates\\boss\\src\\regions.rs",
+      "size": 5143,
+      "sha256": "136f3a82717c4c96ad15ea5f7881ad01f597868b6f5ff574c1a2479d6a200d13"
+    },
+    {
+      "path": "crates\\boss\\src\\revival.rs",
+      "size": 8358,
+      "sha256": "bc88dc42d64867714ad27df3aaeb130c69345474eafc177d766c5789fd56580e"
+    },
+    {
+      "path": "crates\\boss\\src\\settings.rs",
+      "size": 5004,
+      "sha256": "7c9f6b2bfb5c4f423e724865eaf55d79c4d592b3ae5a0c742dfcea60f1dfe68e"
+    },
+    {
+      "path": "crates\\boss\\src\\ui.rs",
+      "size": 69230,
+      "sha256": "038572974a1742e810626e52de6b9157e6a42f239bdf632730984a894edc9f2b"
+    }
+  ],
+  "baseline": {
+    "path": "target\\boss-layout-review\\selected-207-metadata.tsv",
+    "size": 7498,
+    "sha256": "1788b48e0c4523743476375b10cf33c4c7564e8cccba1899fe5fbd933f0702c0"
+  },
+  "read_only_schema": {
+    "version": 2,
+    "header_bytes": 128,
+    "group_bytes": 32,
+    "row_bytes": 56,
+    "catalog_row_bytes": 32
+  },
+  "load_observations": [
+    "Catalogue initialization at 60Hz: elapsed=2462ms updates=146 requests=1658 peak active tokens=16 pending polls=1080 busy polls=64 max single update=5386us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1788ms updates=106 requests=1082 peak active tokens=16 pending polls=1079 busy polls=64 max single update=8096us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1787ms updates=106 requests=1082 peak active tokens=16 pending polls=1080 busy polls=64 max single update=8187us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1789ms updates=106 requests=1082 peak active tokens=16 pending polls=1079 busy polls=64 max single update=9861us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1824ms updates=108 requests=1082 peak active tokens=16 pending polls=1079 busy polls=64 max single update=7787us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1813ms updates=107 requests=1082 peak active tokens=16 pending polls=1080 busy polls=64 max single update=7989us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update"
+  ],
+  "cpu_observations": [],
+  "glyph_observations": [],
+  "screenshots": [
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\all-collapsed-header-focused.bmp",
+      "size": 3456054,
+      "sha256": "14b03bb4cf6a4a53d680d05366db5c9311ab2081e4950b2d64e4ca5c449299af"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+      "size": 3456054,
+      "sha256": "35ef4d737796aececdba443fd752be83a0bfbaf8532349baa1d9fd6c3b22afe9"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-hover.bmp",
+      "size": 3456054,
+      "sha256": "b2733a48fb3dc1a4850c5a3319e8b98e06c26a5afc7612f1c03731be669c6f4e"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "35ef4d737796aececdba443fd752be83a0bfbaf8532349baa1d9fd6c3b22afe9"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\expanded-collapsed-current-three-states.bmp",
+      "size": 3456054,
+      "sha256": "5b0e6b617cfa59087e0297595cec623d4bf3d11e32c4fe5eb28d25d07f768ffd"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-hover-right-edge.bmp",
+      "size": 3456054,
+      "sha256": "c76c2c9324df0b42b654c053daf39654baceacf3f7a11b8dfb6c856e2fd4f278"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "8856103f864b436ddce2915ff21cf706ebe8fae4cb5c6db6669519cb7f3a037e"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\all-collapsed-header-focused.bmp",
+      "size": 3456054,
+      "sha256": "aeebf64937e9785002bdb04daa574a38dbc1a14e01c17502d6f5d758e158fac5"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+      "size": 3456054,
+      "sha256": "4a03b35d96305a187cb21ae5b899b7e56e2ad03e37b30ac5240d3d37c72ec3b6"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-hover.bmp",
+      "size": 3456054,
+      "sha256": "e24fac747b58615e929dc3c671687e708ff445f801466ce6006e994789374e21"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "4a03b35d96305a187cb21ae5b899b7e56e2ad03e37b30ac5240d3d37c72ec3b6"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\expanded-collapsed-current-three-states.bmp",
+      "size": 3456054,
+      "sha256": "7ceb37e3adec85cdc0b0f77159108690f7ed17b7bb2fb77e5ef5edeb5217f3ed"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-hover-right-edge.bmp",
+      "size": 3456054,
+      "sha256": "3b7c42ed832bc01ac7b5484c83a6fa8d2b81a5d31ac0e6aa595f732e2eb43a04"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "f7c4d67b1713cb28f3375f146755a9bc86694b3078e9b1284cc4c1b83705e952"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\all-collapsed-header-focused.bmp",
+      "size": 3456054,
+      "sha256": "53a822db073b4489ff7c63ca0bb0787fa478b1b4182c9351e4c884cd03410eda"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+      "size": 3456054,
+      "sha256": "62c6205e132908ede31eb63a5983cd8cc7b7ed3b59fc658b54c2ef921d978a19"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-hover.bmp",
+      "size": 3456054,
+      "sha256": "eda37d912822af23c75b67c3e48574da191f8d5a1960964c96edc8b2d475c682"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "62c6205e132908ede31eb63a5983cd8cc7b7ed3b59fc658b54c2ef921d978a19"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-0-after-real-wheel.bmp",
+      "size": 3456054,
+      "sha256": "23659974ef2f2c0586a9349a8bbefb8334a606416f72fe5152f258bcb2c99b75"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-1-after-real-wheel.bmp",
+      "size": 3456054,
+      "sha256": "da84b3e8217e294475368f540611c8f0ce440fbbb051c106c9d82b62b5e11b8d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-2-after-real-wheel.bmp",
+      "size": 3456054,
+      "sha256": "23659974ef2f2c0586a9349a8bbefb8334a606416f72fe5152f258bcb2c99b75"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\expanded-collapsed-current-three-states.bmp",
+      "size": 3456054,
+      "sha256": "da84b3e8217e294475368f540611c8f0ce440fbbb051c106c9d82b62b5e11b8d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-hover-right-edge.bmp",
+      "size": 3456054,
+      "sha256": "41432fc6f0f366c614b693d5893754f45f310582ca13ffc75a0e0a3e3ec8fb3e"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "0bef6506df788725d426b611a37501f8d16b62456528cb621204a0d827aed3da"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\all-collapsed-header-focused.bmp",
+      "size": 3456054,
+      "sha256": "cbe1d7f6f64907225d2f05c56f76596e091dfa007fba1d3b7f69bcec061b35f9"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\done-status-hover.bmp",
+      "size": 3456054,
+      "sha256": "1d920a02549bf76bbc5cf73aad204c77d51a6d091f05466f6455868c1c44f2df"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\expanded-collapsed-current-three-states.bmp",
+      "size": 3456054,
+      "sha256": "bb2ae86d19194b48d15abd15e9b55199ca89c9e0b655a65769902a4b6995d7e2"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-hover-right-edge.bmp",
+      "size": 3456054,
+      "sha256": "6d915fa2658a41c18c3808c95749cc25cc51c9ab002acd62d48d8d504bde769d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "8d242b9a125d28e2ff2abd629615652129d7a9e86653bac0631482baf467e086"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\revival-setting-disabled.bmp",
+      "size": 3456054,
+      "sha256": "1d920a02549bf76bbc5cf73aad204c77d51a6d091f05466f6455868c1c44f2df"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\all-collapsed-header-focused.bmp",
+      "size": 3456054,
+      "sha256": "cbe1d7f6f64907225d2f05c56f76596e091dfa007fba1d3b7f69bcec061b35f9"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+      "size": 3456054,
+      "sha256": "3d95cc03a26bebb5f6c77b702059008ed5f903265807729bbcb550058673e23c"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-hover.bmp",
+      "size": 3456054,
+      "sha256": "0c2a43aa97fc016e93632b778daebba378c4429b734a03fc26f9fd23b160829f"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "3d95cc03a26bebb5f6c77b702059008ed5f903265807729bbcb550058673e23c"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\expanded-collapsed-current-three-states.bmp",
+      "size": 3456054,
+      "sha256": "bb2ae86d19194b48d15abd15e9b55199ca89c9e0b655a65769902a4b6995d7e2"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-hover-right-edge.bmp",
+      "size": 3456054,
+      "sha256": "6d915fa2658a41c18c3808c95749cc25cc51c9ab002acd62d48d8d504bde769d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-keyboard-focus.bmp",
+      "size": 3456054,
+      "sha256": "8d242b9a125d28e2ff2abd629615652129d7a9e86653bac0631482baf467e086"
+    }
+  ],
+  "limits": [
+    "Actual Boss DLL, real renderer/WARP and archived PARAM/EMEVD/FMG/MSB; save, flags, region and input are controlled fixtures.",
+    "No core DLL is loaded by boss_probe. Minimap is only init/destroy-tested with a guarded176-byte Host prefix; combined core/plugin rendering is separately verified by the parent.",
+    "No live game, FPS, native Win32 event-routing or VFS mount-priority claim.",
+    "The feature DLL adds only fault hooks and read-only layout recording. Normal DLL has neither observation nor fault control exports.",
+    "Configured width280 may be enlarged by egui content/title minimums; original1280x900 readbacks preserve actual bounds.",
+    "At font40, viewport initially clips lower rows; actual wheel makes each entire status response lie within the real ScrollArea clip before checking it.",
+    "Header right-20 tests the visible progress side. The outer scrollbar/resize gutter remains owned by its native egui control.",
+    "Missing common_macro archive and9 unresolved calls remain explicit in load logs; this run does not invent those resources."
+  ],
+  "real_chinese_assets": [
+    {
+      "path": "target\\boss-visual-2026-11-03\\text-zhocn\\receipt.json",
+      "size": 1591,
+      "sha256": "15b9f2893bdeb86a561936b7aef80f1e7c4229be0dfa01ac58c700d1bd8491d5"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\text-zhocn\\production-reader-verification.txt",
+      "size": 511,
+      "sha256": "7adc295510590ccd2fdce3ec8f85b806f1bfa111e92c82d5fffd43e6fe819c57"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\text-zhocn\\item_dlc02.bnd",
+      "size": 1765444,
+      "sha256": "2f6a1f66b4d44281f1d3cb71863624f69456b77e30fcaf4c99dee015bb7e36d2"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\text-zhocn\\menu_dlc02.bnd",
+      "size": 3328900,
+      "sha256": "36a40453084e4cba5ff189137ec1ae0a2d49646bca36b3211a75d2b6767ce225"
+    }
+  ],
+  "visual_cases": [
+    "PASS: w440-f20-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w440-f20-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f12-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f12-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f20-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f20-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f40-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f40-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w440-f20-revivefalse: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w440-f20-revivefalse: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true"
+  ],
+  "png_conversion": {
+    "path": "target\\boss-visual-2026-11-03\\chinese-final-07\\png-conversion-receipt.json",
+    "size": 28393,
+    "sha256": "087b0faf8f7065f951e9d1621b45e276d816797d824de269e1e6799210ce65c5"
+  }
+}

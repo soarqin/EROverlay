@@ -1,0 +1,22 @@
+[
+  {
+    "name": "multi-dll",
+    "command": [
+      "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\release\\eroverlay-harness.exe",
+      "./package",
+      "3"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "two-plugin-basic",
+    "command": [
+      "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\release\\layer_order_probe.exe",
+      "target/boss-layout-core-fixture/release/EROverlay.dll",
+      "./package",
+      "target/boss-visual-review/two-plugin-basic",
+      "basic"
+    ],
+    "exit_code": 0
+  }
+]

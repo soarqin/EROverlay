@@ -1,0 +1,194 @@
+{
+  "code_commit": "3ca251b942b4c588e28ed3fefe796aa72f7c21b6",
+  "baseline": "daf35393236fc64d7512e99a85d601d3e77e6a7d",
+  "normal_tests": {
+    "passed": 205,
+    "failed": 0,
+    "ignored": 12
+  },
+  "production_dlls": [
+    {
+      "name": "EROverlay.dll",
+      "bytes": 765952,
+      "sha256": "e4c3995a4f6f347a5c8ccf219e32853a45eb1f1f4d478646c9feda2ada33dfdb"
+    },
+    {
+      "name": "Boss.dll",
+      "bytes": 2770944,
+      "sha256": "c3e4a5d7cd02cdc80dc7635d3664d73643ff0fa9f831d7adb77d6a063d327791"
+    },
+    {
+      "name": "Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    }
+  ],
+  "unchanged_source_scopes": [
+    "crates/core",
+    "crates/game",
+    "crates/renderer",
+    "crates/minimap",
+    "crates/abi",
+    "crates/ui",
+    "configs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "build.ps1",
+    "native"
+  ],
+  "new_dependencies_fonts_images_in_runtime": false,
+  "required_upgrade_from_daf3539": [
+    "overlays/Boss.dll"
+  ],
+  "normal_glyph_x": [
+    890,
+    890,
+    890
+  ],
+  "normal_glyphs": 21,
+  "catalogue": {
+    "groups": 32,
+    "encounters": 207,
+    "completion_flags": 208,
+    "baseline": "../boss-layout-2026-11-03/selected-207-metadata.tsv",
+    "primary_map_completion_group_match": true,
+    "discovery_and_revival_sources_changed": false
+  },
+  "visual_cases": [
+    "PASS: w440-f20-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w440-f20-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f12-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f12-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f20-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f20-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w280-f40-revivetrue: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w280-f40-revivetrue: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true",
+    "PASS: w440-f20-revivefalse: initial Weeping region: current=61002, open={61002}, logical rows=42",
+    "PASS: w440-f20-revivefalse: real current/expanded/collapsed/three states/whole-row mouse/keyboard/hover/revival permissions; capture=3, no writes=true"
+  ],
+  "multi_dll": [
+    {
+      "name": "multi-dll",
+      "command": [
+        "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\release\\eroverlay-harness.exe",
+        "./package",
+        "3"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "two-plugin-basic",
+      "command": [
+        "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\release\\layer_order_probe.exe",
+        "target/boss-layout-core-fixture/release/EROverlay.dll",
+        "./package",
+        "target/boss-visual-review/two-plugin-basic",
+        "basic"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "visible_basic": {
+    "frames": 120,
+    "opaque_overlap_pixels": 26940,
+    "drops_total": 8,
+    "drops_normal_baseline": 1,
+    "scope": "Controlled game/native inputs, actual core+two plugins/shared renderer/WARP; basic deliberate skip/recovery is not renewed flicker acceptance."
+  },
+  "images": [
+    {
+      "image": "images/list.png",
+      "sha256": "4baf52e4a5d26e9e972cedb4eea7391716831f6c360be2f9cab397b0c8275228",
+      "full_png": "images/list.full.png",
+      "full_png_sha256": "ff1ba57118feb5e11e9278fd44e9a1b1dab527c6ab5a414ffc68d83e6fede1a7",
+      "source_bmp": "target/boss-visual-2026-11-03/chinese-final-07/w440-f20-revivetrue/expanded-collapsed-current-three-states.bmp",
+      "source_bmp_sha256": "bb2ae86d19194b48d15abd15e9b55199ca89c9e0b655a65769902a4b6995d7e2",
+      "crop": [
+        820,
+        0,
+        1280,
+        900
+      ],
+      "source_case": "w440-f20-revivetrue",
+      "source_frame": "expanded-collapsed-current-three-states",
+      "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+    },
+    {
+      "image": "images/hover.png",
+      "sha256": "1078ccb8c26570219683d4d8b3d44ef0e6259ec482643452f55db2b11d497a73",
+      "full_png": "images/hover.full.png",
+      "full_png_sha256": "81616c72025ce22c794e0907df3fc6e2a67a5048ce5c68bf49a091b5e910653c",
+      "source_bmp": "target/boss-visual-2026-11-03/chinese-final-07/w440-f20-revivetrue/done-status-hover.bmp",
+      "source_bmp_sha256": "0c2a43aa97fc016e93632b778daebba378c4429b734a03fc26f9fd23b160829f",
+      "crop": [
+        820,
+        0,
+        1280,
+        900
+      ],
+      "source_case": "w440-f20-revivetrue",
+      "source_frame": "done-status-hover",
+      "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+    },
+    {
+      "image": "images/collapsed.png",
+      "sha256": "e7707ffa6b659fbfc1f5d96090f89ba4a06219d5631896668b8c1f37ec9b0ca1",
+      "full_png": "images/collapsed.full.png",
+      "full_png_sha256": "0fe1b4ad2f35fb0dcd924d35ed07a07f2b5f5e3b64ce63bd372e289bfe381fb7",
+      "source_bmp": "target/boss-visual-2026-11-03/chinese-final-07/w440-f20-revivetrue/all-collapsed-header-focused.bmp",
+      "source_bmp_sha256": "cbe1d7f6f64907225d2f05c56f76596e091dfa007fba1d3b7f69bcec061b35f9",
+      "crop": [
+        820,
+        0,
+        1280,
+        900
+      ],
+      "source_case": "w440-f20-revivetrue",
+      "source_frame": "all-collapsed-header-focused",
+      "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+    },
+    {
+      "image": "images/keyboard-focus.png",
+      "sha256": "9b1102f12faaa2d84240089bd4c7a6a77c9f5d8557de40a646f858b8d6e16858",
+      "full_png": "images/keyboard-focus.full.png",
+      "full_png_sha256": "31e6654fc9e18aa96d726b24f59084d3477723d41888b952425fd3185d399f8c",
+      "source_bmp": "target/boss-visual-2026-11-03/chinese-final-07/w440-f20-revivetrue/done-status-keyboard-focus.bmp",
+      "source_bmp_sha256": "3d95cc03a26bebb5f6c77b702059008ed5f903265807729bbcb550058673e23c",
+      "crop": [
+        820,
+        0,
+        1280,
+        900
+      ],
+      "source_case": "w440-f20-revivetrue",
+      "source_frame": "done-status-keyboard-focus",
+      "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+    },
+    {
+      "image": "images/narrow-large.png",
+      "sha256": "53050f3ca7a0e8f98462db69f3ef73ccb30a6b0f16a082df637ee129243a18f6",
+      "full_png": "images/narrow-large.full.png",
+      "full_png_sha256": "0d72115fcdf72465bb384b24e4da7f4c6e96a3d53f0cf0093394ac289ec0d452",
+      "source_bmp": "target/boss-visual-2026-11-03/chinese-final-07/w280-f40-revivetrue/entire-visible-state-2-after-real-wheel.bmp",
+      "source_bmp_sha256": "23659974ef2f2c0586a9349a8bbefb8334a606416f72fe5152f258bcb2c99b75",
+      "crop": [
+        952,
+        0,
+        1280,
+        900
+      ],
+      "source_case": "w280-f40-revivetrue",
+      "source_frame": "entire-visible-state-2-after-real-wheel",
+      "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+    }
+  ],
+  "limits": [
+    "No live game was launched, injected or modified.",
+    "Prior flicker and menu-preload acceptance remain pending user confirmation.",
+    "Chinese pictures use a read-only observation DLL; installed normal DLL has no test exports.",
+    "Actual Chinese game FMG, archived PARAM/events/scenes; save, region, flags, writes and native VFS latency are controlled.",
+    "At 40 text size in the narrow panel, wheel scroll is needed to bring each row fully into the viewport.",
+    "CPU samples exclude WARP submission/drain and are not live-game FPS or a same-scene C++ comparison.",
+    "Archive common_macro is missing; resource errors remain visible with full hover detail."
+  ]
+}

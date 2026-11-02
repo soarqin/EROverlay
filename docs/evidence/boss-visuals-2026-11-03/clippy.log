@@ -1,0 +1,5 @@
+$ cargo clippy --workspace --all-targets --locked -- -D warnings
+    Checking eroverlay-harness v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\harness)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.62s
+
+exit_code=0

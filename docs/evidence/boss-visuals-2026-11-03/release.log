@@ -1,0 +1,5 @@
+$ cargo build --workspace --release --locked
+   Compiling eroverlay-harness v0.1.0 (E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\crates\harness)
+    Finished `release` profile [optimized + debuginfo] target(s) in 8.05s
+
+exit_code=0

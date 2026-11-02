@@ -1,0 +1,120 @@
+{
+  "baseline": "daf35393236fc64d7512e99a85d601d3e77e6a7d",
+  "default_features_only": true,
+  "external_game_inputs": false,
+  "steps": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "log": "fmt.log",
+      "exit_code": 0,
+      "seconds": 0.703
+    },
+    {
+      "name": "check",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "check.log",
+      "exit_code": 0,
+      "seconds": 0.547
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "log": "clippy.log",
+      "exit_code": 0,
+      "seconds": 0.812
+    },
+    {
+      "name": "feature-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "eroverlay-boss",
+        "--features",
+        "continuity-fixture",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "log": "feature-clippy.log",
+      "exit_code": 0,
+      "seconds": 0.266
+    },
+    {
+      "name": "test",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "test.log",
+      "exit_code": 0,
+      "seconds": 7.797
+    },
+    {
+      "name": "release",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "log": "release.log",
+      "exit_code": 0,
+      "seconds": 8.187
+    }
+  ],
+  "test_totals": {
+    "passed": 205,
+    "failed": 0,
+    "ignored": 12
+  },
+  "tested_source_sha256": {
+    "crates/boss/README.md": "c51ce567f70283545858139533211710da49ab1966739bdfd50a3bf65fccb686",
+    "crates/boss/src/probe.rs": "de2ef06f9f4843d4951131a1d766a6b18e152f0b8c42de7395525529a9da9da4",
+    "crates/boss/src/ui.rs": "038572974a1742e810626e52de6b9157e6a42f239bdf632730984a894edc9f2b",
+    "crates/harness/src/bin/boss_probe.rs": "91fd0473ab092a5b78b587e2d62d2ca1764eae75b6d3f77ce8581e2ce114746b"
+  },
+  "dlls": [
+    {
+      "name": "EROverlay.dll",
+      "bytes": 765952,
+      "sha256": "e4c3995a4f6f347a5c8ccf219e32853a45eb1f1f4d478646c9feda2ada33dfdb"
+    },
+    {
+      "name": "Boss.dll",
+      "bytes": 2770944,
+      "sha256": "c3e4a5d7cd02cdc80dc7635d3664d73643ff0fa9f831d7adb77d6a063d327791"
+    },
+    {
+      "name": "Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "result": "PASS",
+  "exit_code": 0,
+  "command": "target\\boss-layout-check\\release\\boss_probe.exe target\\boss-layout-fixture\\release\\Boss.dll target/research E:/Projects/EROverlay/build/ida/boss/events target\\boss-visual-2026-11-03\\feature-final-08 target/boss-contract/scene-fixtures",
+  "environment": {
+    "EROVERLAY_BOSS_CATALOG_BASELINE": "target/boss-layout-review/selected-207-metadata.tsv"
+  },
+  "inputs": [
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\controlled-inputs\\Boss.dll",
+      "size": 2784256,
+      "sha256": "28d3ba798e4b369abf03d3619f55f798cd783bb239da456877509c750831546d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\controlled-inputs\\Minimap.dll",
+      "size": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\controlled-inputs\\boss_probe.exe",
+      "size": 681984,
+      "sha256": "cbfd9f098d347b8c03a54711aaca9077d0693e05bb5ffb0cacebc60c16537d2a"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "crates\\harness\\src\\bin\\boss_probe.rs",
+      "size": 99455,
+      "sha256": "91fd0473ab092a5b78b587e2d62d2ca1764eae75b6d3f77ce8581e2ce114746b"
+    },
+    {
+      "path": "crates\\harness\\src\\gpu.rs",
+      "size": 12092,
+      "sha256": "2e6730c2124ac0fd16899585e793e3c05448b7c7bf21d230cb3a68ac10782460"
+    },
+    {
+      "path": "crates\\abi\\src\\lib.rs",
+      "size": 15312,
+      "sha256": "874cd983d106616d36998cbadbb6ab82bd88e37653d09bb926bd96fee8b946d5"
+    },
+    {
+      "path": "Cargo.lock",
+      "size": 14972,
+      "sha256": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b"
+    },
+    {
+      "path": "crates\\boss\\src\\challenge.rs",
+      "size": 4488,
+      "sha256": "5248dcb6ae2839ec5337faf505bf3ed7eaa358f83fe298b63c7b6dc8b5180474"
+    },
+    {
+      "path": "crates\\boss\\src\\data.rs",
+      "size": 116580,
+      "sha256": "193588a7a1f6b865312f0d866681dd5ca3a44c4359c392a2ebd894f410732d7d"
+    },
+    {
+      "path": "crates\\boss\\src\\data_audit.rs",
+      "size": 58064,
+      "sha256": "25fcac175fd2e48698a87d9b4a63ac1e60e79c466dfc50fc1c0469a7fe21b9da"
+    },
+    {
+      "path": "crates\\boss\\src\\encounters.rs",
+      "size": 10876,
+      "sha256": "f21851122cba19cb364136ce71e17aa19807780caf882953d026ffd429a4f152"
+    },
+    {
+      "path": "crates\\boss\\src\\host.rs",
+      "size": 6840,
+      "sha256": "e53bb3ec171717277bac6d2ca2418d4ec0ebe2b615b12a2212836618fdc83eec"
+    },
+    {
+      "path": "crates\\boss\\src\\lib.rs",
+      "size": 20434,
+      "sha256": "fd71515aa7b2cfe765bc933e892d8698ff4115d8d89ee808633cf8731d67930e"
+    },
+    {
+      "path": "crates\\boss\\src\\probe.rs",
+      "size": 8203,
+      "sha256": "de2ef06f9f4843d4951131a1d766a6b18e152f0b8c42de7395525529a9da9da4"
+    },
+    {
+      "path": "crates\\boss\\src\\regions.rs",
+      "size": 5143,
+      "sha256": "136f3a82717c4c96ad15ea5f7881ad01f597868b6f5ff574c1a2479d6a200d13"
+    },
+    {
+      "path": "crates\\boss\\src\\revival.rs",
+      "size": 8358,
+      "sha256": "bc88dc42d64867714ad27df3aaeb130c69345474eafc177d766c5789fd56580e"
+    },
+    {
+      "path": "crates\\boss\\src\\settings.rs",
+      "size": 5004,
+      "sha256": "7c9f6b2bfb5c4f423e724865eaf55d79c4d592b3ae5a0c742dfcea60f1dfe68e"
+    },
+    {
+      "path": "crates\\boss\\src\\ui.rs",
+      "size": 69230,
+      "sha256": "038572974a1742e810626e52de6b9157e6a42f239bdf632730984a894edc9f2b"
+    }
+  ],
+  "baseline": {
+    "path": "target\\boss-layout-review\\selected-207-metadata.tsv",
+    "size": 7498,
+    "sha256": "1788b48e0c4523743476375b10cf33c4c7564e8cccba1899fe5fbd933f0702c0"
+  },
+  "read_only_schema": {
+    "version": 2,
+    "header_bytes": 128,
+    "group_bytes": 32,
+    "row_bytes": 56,
+    "catalog_row_bytes": 32
+  },
+  "load_observations": [
+    "Catalogue initialization at 60Hz: elapsed=2494ms updates=148 requests=1658 peak active tokens=16 pending polls=1078 busy polls=64 max single update=4491us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1728ms updates=102 requests=1082 peak active tokens=16 pending polls=1079 busy polls=63 max single update=8416us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1689ms updates=100 requests=1082 peak active tokens=16 pending polls=1078 busy polls=63 max single update=6566us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1709ms updates=101 requests=1082 peak active tokens=16 pending polls=1074 busy polls=63 max single update=6207us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update"
+  ],
+  "cpu_observations": [
+    "compact: render CPU median=49us p95=78us; mean vertices=244 meshes=1; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples",
+    "full real catalogue: render CPU median=197us p95=280us; mean vertices=2788 meshes=35; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples",
+    "hidden loading: render CPU median=0us p95=0us; mean vertices=0 meshes=0; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples"
+  ],
+  "glyph_observations": [
+    "Normal-DLL glyph observation: state=1, first Boss name glyph x=890, glyph count=21",
+    "Normal-DLL glyph observation: state=0, first Boss name glyph x=890, glyph count=21",
+    "Normal-DLL glyph observation: state=2, first Boss name glyph x=890, glyph count=21"
+  ],
+  "screenshots": [
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-context-confirm.bmp",
+      "size": 3456054,
+      "sha256": "07ac6358f961f07efd337f9bc3e9e6de0347b5e0eecfff301fa607cef933eccc"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-context-rejected.bmp",
+      "size": 3456054,
+      "sha256": "e467dcb0699dbb1a4f5c6d03a359edfc5a13057fd85957cb30bea3e83aa4cb9a"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-full.bmp",
+      "size": 3456054,
+      "sha256": "c5f2dd43a20dec0b61bf1251268e076e23af76eab8e78ae3f5665e7915dc4df8"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-hidden.bmp",
+      "size": 3456054,
+      "sha256": "a5b7222e900c7fb10ada52c51b634569b11d43f4b9d71825a2d4d834576c6964"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-layout-reloaded.bmp",
+      "size": 3456054,
+      "sha256": "2e25947b0cec79e9f9c426442e5e8af0c800757d9fb8ad5df020e00a23599ba3"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-layout-status-0.bmp",
+      "size": 3456054,
+      "sha256": "a6b35ae3b4d8e7b3b77721930d601a53d2ae775b631a686d1fde07f49c45425d"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-layout-status-1.bmp",
+      "size": 3456054,
+      "sha256": "4de8f75245902fba40b56009b12690d6a8567dac5d15c6955278351aa220da70"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-layout-status-2.bmp",
+      "size": 3456054,
+      "sha256": "05f0f9489e1e776b42db707d097c4ea449600f4b7a36304e56abdd87eb07f904"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-normal-status-0.bmp",
+      "size": 3456054,
+      "sha256": "b993f39c3b15a1d60adc189765cfb889452c0a31412838ed23bb1e3325e3aa63"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-normal-status-1.bmp",
+      "size": 3456054,
+      "sha256": "068741f5caacd9802be50c260638e87833b29520390f97d0c4fbc68ba1ae9583"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-normal-status-2.bmp",
+      "size": 3456054,
+      "sha256": "b7d1dfc57ed2377ec0b46aa03c51dc96fbec9dbae941ca0ac713359e68d95831"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-revival-confirm.bmp",
+      "size": 3456054,
+      "sha256": "07ac6358f961f07efd337f9bc3e9e6de0347b5e0eecfff301fa607cef933eccc"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-revival-reopened.bmp",
+      "size": 3456054,
+      "sha256": "07ac6358f961f07efd337f9bc3e9e6de0347b5e0eecfff301fa607cef933eccc"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-revived.bmp",
+      "size": 3456054,
+      "sha256": "7a7f0f78740b53ec1e63a6a4e8469c86c01b22ceb759810c614b549e36149383"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-search.bmp",
+      "size": 3456054,
+      "sha256": "47af0b04ad1f3e91f475267c1f42ab579f3c8c8c76a2f3f074551d367020c331"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-settings.bmp",
+      "size": 3456054,
+      "sha256": "d9a0f43a6485bf12f6cf51e8d1fbf82bbf969a14039256008b9659a6f6166cde"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-unknown-confirm.bmp",
+      "size": 3456054,
+      "sha256": "07ac6358f961f07efd337f9bc3e9e6de0347b5e0eecfff301fa607cef933eccc"
+    },
+    {
+      "path": "target\\boss-visual-2026-11-03\\feature-final-08\\boss-unknown-rejected.bmp",
+      "size": 3456054,
+      "sha256": "b01a05899e3a2ca6fedda3823bbeb87e2de19a2deb04c0dd53da63fef9a00db6"
+    }
+  ],
+  "limits": [
+    "Actual Boss DLL, real renderer/WARP and archived PARAM/EMEVD/FMG/MSB; save, flags, region and input are controlled fixtures.",
+    "No core DLL is loaded by boss_probe. Minimap is only init/destroy-tested with a guarded176-byte Host prefix; combined core/plugin rendering is separately verified by the parent.",
+    "No live game, FPS, native Win32 event-routing or VFS mount-priority claim.",
+    "The feature DLL adds only fault hooks and read-only layout recording. Normal DLL has neither observation nor fault control exports.",
+    "Configured width280 may be enlarged by egui content/title minimums; original1280x900 readbacks preserve actual bounds.",
+    "At font40, viewport initially clips lower rows; actual wheel makes each entire status response lie within the real ScrollArea clip before checking it.",
+    "Header right-20 tests the visible progress side. The outer scrollbar/resize gutter remains owned by its native egui control.",
+    "Missing common_macro archive and9 unresolved calls remain explicit in load logs; this run does not invent those resources."
+  ]
+}

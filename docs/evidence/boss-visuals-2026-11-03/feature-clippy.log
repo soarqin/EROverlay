@@ -1,0 +1,4 @@
+$ cargo clippy -p eroverlay-boss --features continuity-fixture --all-targets --locked -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+
+exit_code=0

@@ -1,0 +1,631 @@
+[
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\all-collapsed-header-focused.bmp",
+    "original_sha256": "14b03bb4cf6a4a53d680d05366db5c9311ab2081e4950b2d64e4ca5c449299af",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\all-collapsed-header-focused.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\all-collapsed-header-focused-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+    "original_sha256": "35ef4d737796aececdba443fd752be83a0bfbaf8532349baa1d9fd6c3b22afe9",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\allowed-revival-keyboard-confirmation.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\allowed-revival-keyboard-confirmation-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-hover.bmp",
+    "original_sha256": "b2733a48fb3dc1a4850c5a3319e8b98e06c26a5afc7612f1c03731be669c6f4e",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-hover.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-hover-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-keyboard-focus.bmp",
+    "original_sha256": "35ef4d737796aececdba443fd752be83a0bfbaf8532349baa1d9fd6c3b22afe9",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\done-status-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\expanded-collapsed-current-three-states.bmp",
+    "original_sha256": "5b0e6b617cfa59087e0297595cec623d4bf3d11e32c4fe5eb28d25d07f768ffd",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\expanded-collapsed-current-three-states.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\expanded-collapsed-current-three-states-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-hover-right-edge.bmp",
+    "original_sha256": "c76c2c9324df0b42b654c053daf39654baceacf3f7a11b8dfb6c856e2fd4f278",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-hover-right-edge.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-hover-right-edge-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-keyboard-focus.bmp",
+    "original_sha256": "8856103f864b436ddce2915ff21cf706ebe8fae4cb5c6db6669519cb7f3a037e",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f12-revivetrue\\header-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\all-collapsed-header-focused.bmp",
+    "original_sha256": "aeebf64937e9785002bdb04daa574a38dbc1a14e01c17502d6f5d758e158fac5",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\all-collapsed-header-focused.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\all-collapsed-header-focused-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+    "original_sha256": "4a03b35d96305a187cb21ae5b899b7e56e2ad03e37b30ac5240d3d37c72ec3b6",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\allowed-revival-keyboard-confirmation.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\allowed-revival-keyboard-confirmation-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-hover.bmp",
+    "original_sha256": "e24fac747b58615e929dc3c671687e708ff445f801466ce6006e994789374e21",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-hover.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-hover-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-keyboard-focus.bmp",
+    "original_sha256": "4a03b35d96305a187cb21ae5b899b7e56e2ad03e37b30ac5240d3d37c72ec3b6",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\done-status-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\expanded-collapsed-current-three-states.bmp",
+    "original_sha256": "7ceb37e3adec85cdc0b0f77159108690f7ed17b7bb2fb77e5ef5edeb5217f3ed",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\expanded-collapsed-current-three-states.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\expanded-collapsed-current-three-states-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-hover-right-edge.bmp",
+    "original_sha256": "3b7c42ed832bc01ac7b5484c83a6fa8d2b81a5d31ac0e6aa595f732e2eb43a04",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-hover-right-edge.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-hover-right-edge-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-keyboard-focus.bmp",
+    "original_sha256": "f7c4d67b1713cb28f3375f146755a9bc86694b3078e9b1284cc4c1b83705e952",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f20-revivetrue\\header-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      980,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\all-collapsed-header-focused.bmp",
+    "original_sha256": "53a822db073b4489ff7c63ca0bb0787fa478b1b4182c9351e4c884cd03410eda",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\all-collapsed-header-focused.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\all-collapsed-header-focused-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+    "original_sha256": "62c6205e132908ede31eb63a5983cd8cc7b7ed3b59fc658b54c2ef921d978a19",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\allowed-revival-keyboard-confirmation.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\allowed-revival-keyboard-confirmation-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-hover.bmp",
+    "original_sha256": "eda37d912822af23c75b67c3e48574da191f8d5a1960964c96edc8b2d475c682",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-hover.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-hover-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-keyboard-focus.bmp",
+    "original_sha256": "62c6205e132908ede31eb63a5983cd8cc7b7ed3b59fc658b54c2ef921d978a19",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\done-status-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-0-after-real-wheel.bmp",
+    "original_sha256": "23659974ef2f2c0586a9349a8bbefb8334a606416f72fe5152f258bcb2c99b75",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-0-after-real-wheel.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-0-after-real-wheel-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-1-after-real-wheel.bmp",
+    "original_sha256": "da84b3e8217e294475368f540611c8f0ce440fbbb051c106c9d82b62b5e11b8d",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-1-after-real-wheel.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-1-after-real-wheel-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-2-after-real-wheel.bmp",
+    "original_sha256": "23659974ef2f2c0586a9349a8bbefb8334a606416f72fe5152f258bcb2c99b75",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-2-after-real-wheel.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\entire-visible-state-2-after-real-wheel-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\expanded-collapsed-current-three-states.bmp",
+    "original_sha256": "da84b3e8217e294475368f540611c8f0ce440fbbb051c106c9d82b62b5e11b8d",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\expanded-collapsed-current-three-states.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\expanded-collapsed-current-three-states-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-hover-right-edge.bmp",
+    "original_sha256": "41432fc6f0f366c614b693d5893754f45f310582ca13ffc75a0e0a3e3ec8fb3e",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-hover-right-edge.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-hover-right-edge-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-keyboard-focus.bmp",
+    "original_sha256": "0bef6506df788725d426b611a37501f8d16b62456528cb621204a0d827aed3da",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w280-f40-revivetrue\\header-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      952,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\all-collapsed-header-focused.bmp",
+    "original_sha256": "cbe1d7f6f64907225d2f05c56f76596e091dfa007fba1d3b7f69bcec061b35f9",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\all-collapsed-header-focused.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\all-collapsed-header-focused-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\done-status-hover.bmp",
+    "original_sha256": "1d920a02549bf76bbc5cf73aad204c77d51a6d091f05466f6455868c1c44f2df",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\done-status-hover.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\done-status-hover-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\expanded-collapsed-current-three-states.bmp",
+    "original_sha256": "bb2ae86d19194b48d15abd15e9b55199ca89c9e0b655a65769902a4b6995d7e2",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\expanded-collapsed-current-three-states.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\expanded-collapsed-current-three-states-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-hover-right-edge.bmp",
+    "original_sha256": "6d915fa2658a41c18c3808c95749cc25cc51c9ab002acd62d48d8d504bde769d",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-hover-right-edge.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-hover-right-edge-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-keyboard-focus.bmp",
+    "original_sha256": "8d242b9a125d28e2ff2abd629615652129d7a9e86653bac0631482baf467e086",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\header-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\revival-setting-disabled.bmp",
+    "original_sha256": "1d920a02549bf76bbc5cf73aad204c77d51a6d091f05466f6455868c1c44f2df",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\revival-setting-disabled.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivefalse\\revival-setting-disabled-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\all-collapsed-header-focused.bmp",
+    "original_sha256": "cbe1d7f6f64907225d2f05c56f76596e091dfa007fba1d3b7f69bcec061b35f9",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\all-collapsed-header-focused.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\all-collapsed-header-focused-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\allowed-revival-keyboard-confirmation.bmp",
+    "original_sha256": "3d95cc03a26bebb5f6c77b702059008ed5f903265807729bbcb550058673e23c",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\allowed-revival-keyboard-confirmation.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\allowed-revival-keyboard-confirmation-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-hover.bmp",
+    "original_sha256": "0c2a43aa97fc016e93632b778daebba378c4429b734a03fc26f9fd23b160829f",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-hover.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-hover-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-keyboard-focus.bmp",
+    "original_sha256": "3d95cc03a26bebb5f6c77b702059008ed5f903265807729bbcb550058673e23c",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\done-status-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\expanded-collapsed-current-three-states.bmp",
+    "original_sha256": "bb2ae86d19194b48d15abd15e9b55199ca89c9e0b655a65769902a4b6995d7e2",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\expanded-collapsed-current-three-states.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\expanded-collapsed-current-three-states-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-hover-right-edge.bmp",
+    "original_sha256": "6d915fa2658a41c18c3808c95749cc25cc51c9ab002acd62d48d8d504bde769d",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-hover-right-edge.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-hover-right-edge-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  },
+  {
+    "original_bmp": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-keyboard-focus.bmp",
+    "original_sha256": "8d242b9a125d28e2ff2abd629615652129d7a9e86653bac0631482baf467e086",
+    "full_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-keyboard-focus.png",
+    "full_size": [
+      1280,
+      900
+    ],
+    "cropped_png": "target\\boss-visual-2026-11-03\\chinese-final-07\\w440-f20-revivetrue\\header-keyboard-focus-crop.png",
+    "crop_box_left_top_right_bottom_exclusive": [
+      820,
+      0,
+      1280,
+      900
+    ],
+    "operation": "lossless BMP-to-PNG, then RGB nonblack bounds plus6px margin; no paint, scaling, font or layout change"
+  }
+]

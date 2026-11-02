@@ -1,0 +1,39 @@
+{
+  "command": "python target/boss-visual-2026-11-03/text-zhocn/extract.py",
+  "source_game": "D:\\Steam\\steamapps\\common\\ELDEN RING\\Game",
+  "reader_source": "E:\\Projects\\EROverlay\\.cindy-worktrees\\gentle-darwin\\target\\cpp-reference\\tools\\boss_event_extract.py",
+  "reader_sha256": "7cd55e7f437ab91ed35d638e993de28e9c2b38e57bdbdd0d2a465d588a3b6039",
+  "language": "zhoCN",
+  "files": [
+    {
+      "path": "/msg/zhocn/item_dlc02.msgbnd.dcx",
+      "path_hash": "0xa75a766d042fc80f",
+      "archive_offset": 5435960842,
+      "size": 244448,
+      "sha256": "f1e4a3ec1c410f5095eb44ec422f47325074b069f60b10eb7fff469ba3dce9bc",
+      "file": "item_dlc02.bnd",
+      "bnd_size": 1765444,
+      "bnd_sha256": "2f6a1f66b4d44281f1d3cb71863624f69456b77e30fcaf4c99dee015bb7e36d2"
+    },
+    {
+      "path": "/msg/zhocn/menu_dlc02.msgbnd.dcx",
+      "path_hash": "0x951cb0ece5a2389",
+      "archive_offset": 5437151002,
+      "size": 489744,
+      "sha256": "09b5a66889b47fae304c98af02694dd3145db72a69c11df7495d49f009d3aff9",
+      "file": "menu_dlc02.bnd",
+      "bnd_size": 3328900,
+      "bnd_sha256": "36a40453084e4cba5ff189137ec1ae0a2d49646bca36b3211a75d2b6767ce225"
+    }
+  ],
+  "missing": [],
+  "archive": {
+    "archive": "Data0",
+    "bhd_sha256": "0686d2b966774a63772347d49ee84ce63c98a528865f6fca783023bb1d6059d7",
+    "public_key_file": "archive-key-1429d26c0.pem",
+    "public_key_sha256": "8ad5913a44670b5bde1eea474b25bab8e7465638cfdd61a0bdd8a34cb53cfcb7",
+    "files": 5878,
+    "buckets": 839,
+    "bucket_fields_64_bit": false
+  }
+}
