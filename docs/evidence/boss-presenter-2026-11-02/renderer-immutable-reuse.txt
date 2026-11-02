@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_renderer-58cc532a923a61ba.exe)
+
+running 1 test
+test gpu::tests::warp_retained_copy_reuses_two_immutable_allocations ... D3D12 debug layer enabled for WARP pixel/lifecycle checks
+WARP immutable retained: 32 updates, 2 resource/Arc allocations, 131072 resource bytes, hide frees both
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.08s
+

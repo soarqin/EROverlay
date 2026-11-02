@@ -1,0 +1,483 @@
+{
+  "source_commit": "9d623d0f4cc9063524b2538938f7505afdd1569f",
+  "fixture_core_only": true,
+  "probe": {
+    "path": "target/presenter-cpu-final/layer_order_probe-final.exe",
+    "bytes": 332800,
+    "sha256": "bdc42d5526f57742977d6faa0533a056544a22bccb748ffefacdcb6239c3888e"
+  },
+  "source_hashes": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 14972,
+      "sha256": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b"
+    },
+    {
+      "path": "crates/core/src/lib.rs",
+      "bytes": 41616,
+      "sha256": "311e5cc1ee7d29f20fe2bfcb775a878c6da36f2beccdaa046c8d2a747b6b4f2c"
+    },
+    {
+      "path": "crates/core/src/rendering.rs",
+      "bytes": 13287,
+      "sha256": "2c315e5d4a49261da70912202be1925f25e1bc919b9fc3942db7825a139fae7e"
+    },
+    {
+      "path": "crates/core/src/layer_fixture.rs",
+      "bytes": 15175,
+      "sha256": "d8aead8124f85e6c0f47147eb341fb561a4cb49f4a64f03a732ea90b629211eb"
+    },
+    {
+      "path": "crates/renderer/Cargo.toml",
+      "bytes": 639,
+      "sha256": "85900acfb893c50a5ca16ca265dcce6893c2a5353f5fcd27fbe136eebc5c4f11"
+    },
+    {
+      "path": "crates/renderer/src/gpu.rs",
+      "bytes": 131305,
+      "sha256": "ae490ccca7a15711ab8ea8c5dcb3fcbd1e662f393a2037d88acb940c92cd0eaf"
+    },
+    {
+      "path": "crates/renderer/src/gpu/presentation.rs",
+      "bytes": 26792,
+      "sha256": "bfc51834b31c8f295e683ceb454d213a26a83f55442429fea23c15b3f47f7dfd"
+    },
+    {
+      "path": "crates/harness/src/bin/layer_order_probe.rs",
+      "bytes": 61433,
+      "sha256": "f1e1a2ee16fc8efeb4d3fb15a07f63282caa0963eb80337808cf25ab6c459805"
+    },
+    {
+      "path": "crates/harness/src/layer_order_gpu.rs",
+      "bytes": 24972,
+      "sha256": "55df1b0cdcc7c335e8e0e5c144c568bec777a99dcb4bbf437d56f7dea8549999"
+    }
+  ],
+  "runs": [
+    {
+      "name": "final-production-03",
+      "exit": 0,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 362,
+      "matrix_classification": {
+        "Boss": 283,
+        "Hidden": 44,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-final/final-production-03/EROverlay-layer-fixture.dll",
+          "bytes": 830464,
+          "sha256": "64b860bda49e49fd8513f45aa5ddef5c711ed802fc12efd2bba7a58c35c4fccf"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-production-03/controlled-package/overlays/Boss.dll",
+          "bytes": 2692608,
+          "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-production-03/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-final/final-production-03/log",
+      "trace": "target/presenter-cpu-final/final-production-03/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=269 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=270 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=271 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=272 case=presenter-atlas-focus expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=273 case=presenter-atlas-focus-release expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=274 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=275 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=276 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=276 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=277 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=277 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=278 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=278 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=279 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=280 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=281 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=282 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=283 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=284 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=285 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=286 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=287 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=288 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=290 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=291 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=292 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=366 case=display-unknown-1-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=367 case=display-unknown-1-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=373 case=display-unknown-2-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=374 case=display-unknown-2-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=380 case=display-unknown-3-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=381 case=display-unknown-3-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=527 case=explicit-game-hide-publisher-4-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=528 case=explicit-game-hide-publisher-4-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=533 case=known-hide-4-then-unknown-1-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=534 case=known-hide-4-then-unknown-1-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=539 case=known-hide-4-then-unknown-2-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=540 case=known-hide-4-then-unknown-2-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=545 case=known-hide-4-then-unknown-3-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=546 case=known-hide-4-then-unknown-3-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=550 case=explicit-game-hide-publisher-5-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=551 case=explicit-game-hide-publisher-5-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=556 case=known-hide-5-then-unknown-1-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=557 case=known-hide-5-then-unknown-1-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=562 case=known-hide-5-then-unknown-2-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=563 case=known-hide-5-then-unknown-2-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=568 case=known-hide-5-then-unknown-3-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=569 case=known-hide-5-then-unknown-3-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=571 case=user-hide-other-cpu-publisher-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=572 case=user-hide-beats-publisher-and-render-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-final/final-production-03/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-production-03/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-production-03/03-three-slots-held.bmp",
+          "bytes": 4608054,
+          "sha256": "f7ff51ba3ae67a421a8878b0c9189e4dbd31cd222d15a2a23658122802e3d209"
+        }
+      ]
+    },
+    {
+      "name": "final-fixture-04",
+      "exit": 0,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 376,
+      "matrix_classification": {
+        "Boss": 297,
+        "Hidden": 44,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/EROverlay-layer-fixture.dll",
+          "bytes": 830464,
+          "sha256": "64b860bda49e49fd8513f45aa5ddef5c711ed802fc12efd2bba7a58c35c4fccf"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/controlled-package/overlays/Boss.dll",
+          "bytes": 2693632,
+          "sha256": "6c0d6909d048939567c0444c1acc20f7bc3d216844bad1b5b70075391e16e84a"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-final/final-fixture-04/log",
+      "trace": "target/presenter-cpu-final/final-fixture-04/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=269 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=270 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=271 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=272 case=presenter-atlas-focus expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=273 case=presenter-atlas-focus-release expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=274 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=275 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=276 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=276 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=277 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=277 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=278 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=278 case=presenter-pending-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=279 case=presenter-pending-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=280 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=281 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=282 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=283 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=284 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=285 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=286 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=287 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=288 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-atlas-ready-transition expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=289 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=290 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=291 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=292 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=376 case=display-unknown-1-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=377 case=display-unknown-1-core-7-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=378 case=display-unknown-1-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=379 case=display-unknown-1-core-8-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=389 case=display-unknown-2-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=390 case=display-unknown-2-core-7-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=391 case=display-unknown-2-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=392 case=display-unknown-2-core-8-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=402 case=display-unknown-3-core-7 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=403 case=display-unknown-3-core-7-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=404 case=display-unknown-3-core-8 expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=405 case=display-unknown-3-core-8-ui-busy expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=541 case=explicit-game-hide-publisher-4-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=542 case=explicit-game-hide-publisher-4-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=547 case=known-hide-4-then-unknown-1-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=548 case=known-hide-4-then-unknown-1-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=553 case=known-hide-4-then-unknown-2-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=554 case=known-hide-4-then-unknown-2-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=559 case=known-hide-4-then-unknown-3-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=560 case=known-hide-4-then-unknown-3-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=564 case=explicit-game-hide-publisher-5-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=565 case=explicit-game-hide-publisher-5-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=570 case=known-hide-5-then-unknown-1-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=571 case=known-hide-5-then-unknown-1-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=576 case=known-hide-5-then-unknown-2-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=577 case=known-hide-5-then-unknown-2-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=582 case=known-hide-5-then-unknown-3-busy-7 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=583 case=known-hide-5-then-unknown-3-busy-8 expected=Hidden bad_pixels=0/26940 opaque_bad=26460 mean_red=6.000",
+        "sequence=585 case=user-hide-other-cpu-publisher-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000",
+        "sequence=586 case=user-hide-beats-publisher-and-render-busy expected=Lower bad_pixels=0/26940 opaque_bad=26940 mean_red=255.000"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        },
+        {
+          "path": "target/presenter-cpu-final/final-fixture-04/03-three-slots-held.bmp",
+          "bytes": 4608054,
+          "sha256": "f7ff51ba3ae67a421a8878b0c9189e4dbd31cd222d15a2a23658122802e3d209"
+        }
+      ]
+    }
+  ],
+  "baseline_core": {
+    "path": "target/presenter-cpu-old5ee/build-target/release/EROverlay.dll",
+    "bytes": 806400,
+    "sha256": "1a4b7f8c009ca8bff4a1361256cf9fb6b9cf65427451a9be5e04777bfe9e275e"
+  },
+  "baseline_pin": "5ee822c78921cd29e7c7252ed3810e563663bd54",
+  "baseline_source_receipt": "target/presenter-cpu-old5ee/source-receipt.json",
+  "baseline_patch": "target/presenter-cpu-old5ee/fixture-only.patch",
+  "baseline_patch_proof": "target/presenter-cpu-old5ee/normalized-patch-receipt.json",
+  "baseline_runs": [
+    {
+      "name": "negative-visible",
+      "exit": 0,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 3,
+      "matrix_classification": {
+        "Boss": 3
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-visible/controlled-package/overlays/Boss.dll",
+          "bytes": 2692608,
+          "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-visible/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-old5ee/negative-visible/log",
+      "trace": "target/presenter-cpu-old5ee/negative-visible/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=269 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=270 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=271 case=presenter-other-cpu-publish-lock expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-visible/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-visible/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        }
+      ],
+      "control_only": true
+    },
+    {
+      "name": "negative-atlas-with-state",
+      "exit": 1,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 3,
+      "matrix_classification": {
+        "Boss": 3
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-atlas-with-state/controlled-package/overlays/Boss.dll",
+          "bytes": 2692608,
+          "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-atlas-with-state/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-old5ee/negative-atlas-with-state/log",
+      "trace": "target/presenter-cpu-old5ee/negative-atlas-with-state/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=269 case=presenter-atlas-focus expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=270 case=presenter-atlas-focus-release expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771",
+        "sequence=271 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=26940/26940 opaque_bad=26940 mean_red=255.000"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-atlas-with-state/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-atlas-with-state/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-atlas-with-state/FAIL-presenter-other-cpu-and-new-atlas-pending-271.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        }
+      ]
+    },
+    {
+      "name": "negative-presenter-duplicate",
+      "exit": 1,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 1,
+      "matrix_classification": {
+        "Boss": 1
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-duplicate/controlled-package/overlays/Boss.dll",
+          "bytes": 2692608,
+          "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-duplicate/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-old5ee/negative-presenter-duplicate/log",
+      "trace": "target/presenter-cpu-old5ee/negative-presenter-duplicate/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=268 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=26460/26940 opaque_bad=26460 mean_red=6.000"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-duplicate/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-duplicate/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-duplicate/FAIL-presenter-other-cpu-cleared-duplicate-268.bmp",
+          "bytes": 4608054,
+          "sha256": "aebafde88c7118fef4f9e5e39aaeaa72a1066fc1314d3b1a1ece04ad695559bb"
+        }
+      ]
+    },
+    {
+      "name": "negative-presenter-render",
+      "exit": 1,
+      "normal_steady_frames": 120,
+      "independent_matrix_captures": 1,
+      "matrix_classification": {
+        "Boss": 1
+      },
+      "binaries": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-render/controlled-package/overlays/Boss.dll",
+          "bytes": 2692608,
+          "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-render/controlled-package/overlays/Minimap.dll",
+          "bytes": 1766400,
+          "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+        }
+      ],
+      "log": "target/presenter-cpu-old5ee/negative-presenter-render/log",
+      "trace": "target/presenter-cpu-old5ee/negative-presenter-render/presented-frames.log",
+      "cpu_contention_trace": [
+        "sequence=269 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=26940/26940 opaque_bad=26940 mean_red=255.000"
+      ],
+      "images": [
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-render/01-minimap-reference.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-render/02-normal-overlap.bmp",
+          "bytes": 4608054,
+          "sha256": "671034ffb058108b593389ba50af5d949dda6a42d1015bc57bb2abcbf074f140"
+        },
+        {
+          "path": "target/presenter-cpu-old5ee/negative-presenter-render/FAIL-presenter-other-cpu-render-lock-fallback-269.bmp",
+          "bytes": 4608054,
+          "sha256": "ec3eca295346461c26130a9f2820945680040ef4bd3e279c1b1009d391cdb5f7"
+        }
+      ]
+    }
+  ],
+  "fixture_modes": {
+    "6": "same-thread real maintenance lock, legacy explicit hide test",
+    "7": "acknowledged distinct thread owns real maintenance lock throughout H",
+    "8": "same distinct-thread maintenance hold plus actual H render Mutex fallback"
+  },
+  "build_commands": [
+    "cargo build -p eroverlay-core --release --features layer-order-fixture --locked --target-dir target/layer-order-fixture",
+    "cargo build -p eroverlay-harness --bin layer_order_probe --release --locked --target-dir target/input-agent"
+  ],
+  "run_commands": [
+    "target/input-agent/release/layer_order_probe.exe target/layer-order-fixture/release/EROverlay.dll target/presenter-cpu-final/production-input target/presenter-cpu-final/final-production-03 all",
+    "target/input-agent/release/layer_order_probe.exe target/layer-order-fixture/release/EROverlay.dll target/presenter-cpu-final/fixture-input target/presenter-cpu-final/final-fixture-04 all"
+  ],
+  "limits": [
+    "Controlled display/save/resources with empty catalog; real two-plugin UI, core ownership, native queue driver and WARP readbacks. No injected game or live FPS validation.",
+    "Distinct acknowledged CPU thread/context; no physical-core affinity claimed. The scoped thread is joined before each fixture call returns.",
+    "Explicit reopen first reaches stable opaque ROI at frame 5 within fixed 11 presentations; strict coverage applies thereafter.",
+    "Artificial GPU-held 24-frame overload exceeds bounded pools: 6 frames lose opaque coverage, excluded from ordinary continuity. Next frame recovers after drain.",
+    "Initial baseline probe executables were not retained separately; exact pinned old core/source/fixture patch and actual plugins are preserved. Final probe identities apply to the two final positive runs."
+  ],
+  "checks": [
+    "strict harness-bin Clippy passed",
+    "core-fixture feature Clippy passed",
+    "owned-file diff check passed",
+    "both final matrices passed with clean D3D12 validation and GPU-busy stop then drain/stop OK"
+  ]
+}

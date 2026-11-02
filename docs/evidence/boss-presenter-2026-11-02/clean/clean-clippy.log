@@ -1,0 +1,13 @@
+$ cargo clippy --workspace --all-targets --locked -- -D warnings
+    Checking eroverlay-abi v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\abi)
+   Compiling eroverlay-game v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\game)
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\renderer)
+    Checking eroverlay-ui v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\ui)
+    Checking eroverlay-abi-fixture v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\abi-fixture)
+    Checking eroverlay-boss v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\boss)
+    Checking eroverlay-minimap v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\minimap)
+    Checking eroverlay-harness v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\harness)
+    Checking eroverlay-core v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.36s
+
+exit_code=0

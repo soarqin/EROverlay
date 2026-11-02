@@ -45,6 +45,12 @@ fall back into an entry that might still be patched.
 - Above-UI groups additionally publish a complete owned RGBA8 image only when
   every mesh texture is resident. Missing atlases or busy geometry slots replay
   the last image through sixteen separate, bounded composite-only command lists.
+  Published images are immutable and read independently of the copy/maintenance
+  mutex. Each replay slot has its own fence and CPU recording lease; a busy
+  publisher cannot consume all replay slots. Normal updates reuse two images
+  rather than modifying the currently published image. Final epoch/admission
+  checks cancel a recorded replay after hiding or close; stop closes admission
+  before draining every slot, including recordings that have not signaled yet.
   Core can borrow this independent presentation handle during GPU-state lock or
   callback-gate contention without advancing plugin UI/input again. Empty output,
   confirmed hiding, viewport changes or device/queue changes invalidate images.
@@ -52,7 +58,8 @@ fall back into an entry that might still be patched.
   There are at most 64 groups, 128 descriptors and 128 MiB of retained surfaces;
   no render call waits for the GPU or expands the command ring. Exhausting all
   sixteen presentation slots is an explicit drop boundary. Tests clear and read
-  each present independently; see [the continuity record](../../docs/boss-continuity-fix-2026-11-02.md).
+  each present independently, including an acknowledged second CPU context
+  holding the production publisher lock; see [the contention record](../../docs/boss-presenter-contention-fix-2026-11-02.md).
 - Each slot has a reusable RGBA8 offscreen target sized to the group's clipped
   region. It is resized only after that slot completes. The shader handles group
   opacity, circular/rounded clipping and an independently opaque inside border.

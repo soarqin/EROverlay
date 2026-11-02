@@ -1,0 +1,106 @@
+{
+  "baseline": "5ee822c78921cd29e7c7252ed3810e563663bd54",
+  "default_features_only": true,
+  "external_game_inputs": false,
+  "steps": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "log": "fmt.log",
+      "exit_code": 0,
+      "seconds": 0.578
+    },
+    {
+      "name": "check",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "check.log",
+      "exit_code": 0,
+      "seconds": 0.688
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "log": "clippy.log",
+      "exit_code": 0,
+      "seconds": 1.266
+    },
+    {
+      "name": "test",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "test.log",
+      "exit_code": 0,
+      "seconds": 6.593
+    },
+    {
+      "name": "release",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "log": "release.log",
+      "exit_code": 0,
+      "seconds": 5.407
+    }
+  ],
+  "test_totals": {
+    "passed": 186,
+    "failed": 0,
+    "ignored": 11
+  },
+  "tested_source_sha256": {
+    "Cargo.lock": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b",
+    "build.ps1": "d778752bf12e94a73c983e0cfa77cbb65a6535c4fcd58d7903146173fa8ab8d4",
+    "crates/core/src/layer_fixture.rs": "d8aead8124f85e6c0f47147eb341fb561a4cb49f4a64f03a732ea90b629211eb",
+    "crates/core/src/lib.rs": "311e5cc1ee7d29f20fe2bfcb775a878c6da36f2beccdaa046c8d2a747b6b4f2c",
+    "crates/core/src/rendering.rs": "2c315e5d4a49261da70912202be1925f25e1bc919b9fc3942db7825a139fae7e",
+    "crates/harness/src/bin/layer_order_probe.rs": "f1e1a2ee16fc8efeb4d3fb15a07f63282caa0963eb80337808cf25ab6c459805",
+    "crates/renderer/Cargo.toml": "85900acfb893c50a5ca16ca265dcce6893c2a5353f5fcd27fbe136eebc5c4f11",
+    "crates/renderer/src/gpu.rs": "ae490ccca7a15711ab8ea8c5dcb3fcbd1e662f393a2037d88acb940c92cd0eaf",
+    "crates/renderer/src/gpu/presentation.rs": "bfc51834b31c8f295e683ceb454d213a26a83f55442429fea23c15b3f47f7dfd"
+  },
+  "dlls": [
+    {
+      "name": "EROverlay.dll",
+      "bytes": 761856,
+      "sha256": "a576c8e81f36660c9d143862be831ce32b12ede39ccae4244a128cbb9caaa7f4"
+    },
+    {
+      "name": "Boss.dll",
+      "bytes": 2692608,
+      "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+    },
+    {
+      "name": "Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+    }
+  ]
+}

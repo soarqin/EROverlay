@@ -1,0 +1,7 @@
+$ cargo check --workspace --locked
+    Checking eroverlay-renderer v0.1.0 (<worktree>\crates\renderer)
+    Checking eroverlay-harness v0.1.0 (<worktree>\crates\harness)
+    Checking eroverlay-core v0.1.0 (<worktree>\crates\core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.59s
+
+exit_code=0

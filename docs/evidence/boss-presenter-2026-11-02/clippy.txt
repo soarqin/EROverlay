@@ -1,0 +1,7 @@
+$ cargo clippy --workspace --all-targets --locked -- -D warnings
+    Checking eroverlay-renderer v0.1.0 (<worktree>\crates\renderer)
+    Checking eroverlay-harness v0.1.0 (<worktree>\crates\harness)
+    Checking eroverlay-core v0.1.0 (<worktree>\crates\core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.09s
+
+exit_code=0

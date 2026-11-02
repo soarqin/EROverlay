@@ -48,7 +48,7 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。从 `411bc63` 或更早 Rust Boss 包升级本轮连续显示修复，替换 `EROverlay.dll`、`overlays/Boss.dll` 和 `overlays/Minimap.dll`；两个插件都包含共享字体图集暂忙处理的修复。从 Boss 移植前版本升级还需加入 `configs/boss-encounters.json`。首次安装 Boss 另需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。修复、逐帧验证及现场复测边界见 [Boss 连续显示记录](docs/boss-continuity-fix-2026-11-02.md)。
+升级前须完全退出游戏。从 `411bc63` 或更早 Rust Boss 包升级本轮连续显示修复，替换 `EROverlay.dll`、`overlays/Boss.dll` 和 `overlays/Minimap.dll`；两个插件都包含共享字体图集暂忙处理的修复。相对暂缓交付的 `5ee822c` 包，本轮仅核心 DLL 变化。从 Boss 移植前版本升级还需加入 `configs/boss-encounters.json`。首次安装 Boss 另需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。当前修复、故障当帧验证及现场边界见 [成图锁竞争记录](docs/boss-presenter-contention-fix-2026-11-02.md)。
 
 ## 加载与退出
 

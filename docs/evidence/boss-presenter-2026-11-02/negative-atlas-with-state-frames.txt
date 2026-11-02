@@ -1,0 +1,3 @@
+sequence=269 case=presenter-atlas-focus expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771
+sequence=270 case=presenter-atlas-focus-release expected=Boss bad_pixels=0/26940 opaque_bad=0 mean_red=26.771
+sequence=271 case=presenter-other-cpu-and-new-atlas-pending expected=Boss bad_pixels=26940/26940 opaque_bad=26940 mean_red=255.000

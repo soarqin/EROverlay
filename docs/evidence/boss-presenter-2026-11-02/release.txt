@@ -1,0 +1,9 @@
+$ cargo build --workspace --release --locked
+   Compiling rustversion v1.0.23
+   Compiling arc-swap v1.9.3
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\crates\renderer)
+   Compiling eroverlay-harness v0.1.0 (<worktree>\crates\harness)
+   Compiling eroverlay-core v0.1.0 (<worktree>\crates\core)
+    Finished `release` profile [optimized + debuginfo] target(s) in 5.30s
+
+exit_code=0

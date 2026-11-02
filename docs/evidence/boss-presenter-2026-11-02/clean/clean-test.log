@@ -1,0 +1,417 @@
+$ cargo test --workspace --locked
+   Compiling windows-link v0.2.1
+   Compiling eroverlay-abi v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\abi)
+   Compiling memchr v2.8.3
+   Compiling cfg-if v1.0.5
+   Compiling ttf-parser v0.25.1
+   Compiling scopeguard v1.2.0
+   Compiling smallvec v1.16.4
+   Compiling once_cell v1.21.4
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling emath v0.33.3
+   Compiling profiling v1.0.18
+   Compiling log v0.4.35
+   Compiling nohash-hasher v0.2.0
+   Compiling bitflags v2.13.2
+   Compiling unicode-segmentation v1.13.3
+   Compiling epaint_default_fonts v0.33.3
+   Compiling adler2 v2.0.1
+   Compiling itoa v1.0.18
+   Compiling zerocopy v0.8.63
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling texture2ddecoder v0.1.2
+   Compiling arc-swap v1.9.3
+   Compiling windows-result v0.4.1
+   Compiling windows-strings v0.5.1
+   Compiling windows-threading v0.2.1
+   Compiling lock_api v0.4.14
+   Compiling miniz_oxide v0.8.9
+   Compiling parking_lot_core v0.9.12
+   Compiling ecolor v0.33.3
+   Compiling windows-core v0.62.2
+   Compiling quick-xml v0.38.3
+   Compiling eroverlay-abi-fixture v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\abi-fixture)
+   Compiling parking_lot v0.12.5
+   Compiling windows-numerics v0.3.1
+   Compiling windows-future v0.3.2
+   Compiling windows-collections v0.3.2
+   Compiling eroverlay-game v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\game)
+   Compiling windows v0.62.2
+   Compiling owned_ttf_parser v0.25.1
+   Compiling ab_glyph v0.2.32
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling ahash v0.8.12
+   Compiling epaint v0.33.3
+   Compiling egui v0.33.3
+   Compiling eroverlay-ui v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\ui)
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\renderer)
+   Compiling eroverlay-core v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\core)
+   Compiling eroverlay-harness v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\harness)
+   Compiling eroverlay-boss v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\boss)
+   Compiling eroverlay-minimap v0.1.0 (<worktree>\target\boss-presenter-clean-source\crates\minimap)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.62s
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_abi-e379ed49e1cf3543.exe)
+
+running 5 tests
+test input::tests::disabled_and_malformed_inputs_cannot_become_unintended_shortcuts ... ok
+test input::tests::all_alphanumeric_function_and_numpad_keys ... ok
+test tests::c_layout_and_version_gates ... ok
+test input::tests::punctuation_aliases_and_extended_names ... ok
+test input::tests::modifiers_are_exact_and_side_keys_stand_alone ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\BadPlugin-ce2879296847fbf5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\Boss-2e85351690c08457.exe)
+
+running 35 tests
+test data::audit::archived_old_207_to_rust_member_audit ... ignored, explicit C++/PARAM/EMEVD/FMG exports; writes a complete optional evidence audit
+test data::tests::archived_catalog_uses_param_map_plan_and_current_game_text ... ignored, requires original PARAM/EMEVD/FMG exports; see docs/boss-events.md
+test data::tests::archived_loading_scheduler_profile ... ignored, explicit archived PARAM/EMEVD/FMG/MSB inputs; profiles production initialization
+test challenge::tests::challenge_counts_crossing_once_and_new_save_does_not_underflow ... ok
+test contract_tests::abi_rejects_old_host_and_short_frame_before_reading_past_headers ... ok
+test contract_tests::status_preserves_templates_and_formats_igt_without_frame_reads ... ok
+test data::tests::discovery_batches_maps_and_respects_an_expired_cpu_budget ... ok
+test encounters::tests::malformed_duplicate_conflicting_chained_and_cyclic_definitions_fail_atomically ... ok
+test data::tests::new_required_dependencies_precede_broad_probes_without_reordering_an_existing_upgrade ... ok
+test revival::tests::alternative_completion_uses_the_same_reviewed_writes_and_a_true_witness ... ok
+test data::tests::text_jobs_fallback_only_for_missing_target_namespaces ... ok
+test data::tests::unknown_entities_merge_only_within_the_same_map_and_variant ... ok
+test data::tests::selected_journeys_count_alternative_kills_once_and_ignore_retreat_or_rematch_flags ... ok
+test data::tests::transient_context_and_param_unavailability_keep_catalog_and_pending ... ok
+test data::tests::unknown_or_missing_language_is_an_unavailable_text_resource ... ok
+test data::tests::known_flags_merge_across_entities_and_maps_without_leaking_to_another_variant ... ok
+test encounters::tests::shipped_relationships_preserve_authorized_progress_and_revival_identity ... ok
+test data::tests::initialization_deadline_does_not_publish_zero_success_as_ready_and_reload_cancels_old_generations ... ok
+test host::tests::raw_native_requests_use_explicit_dcx_names_and_decompression_flag ... ok
+test data::tests::later_explicit_link_upgrades_an_optional_miss_once_but_not_a_known_parse_failure ... ok
+test revival::tests::configured_recipe_distinguishes_empty_from_unknown_and_rejects_conflicts ... ok
+test data::tests::shared_bars_and_phases_merge_but_independent_same_name_victories_do_not ... ok
+test data::tests::file_batches_bound_work_poll_busy_once_and_do_not_retry_optional_misses ... ok
+test data::tests::failed_or_budget_dropped_scene_alias_is_unknown_not_absent ... ok
+test data::tests::rejected_busy_and_pending_jobs_expire_without_sleep_and_a_fresh_load_recovers ... ok
+test data::tests::delayed_completion_and_required_retry_are_bounded_and_invalid_bytes_are_not_reloaded ... ok
+test data::tests::menu_catalogue_does_not_read_save_state_or_flags_and_labels_wait_for_a_valid_save ... ok
+test data::tests::menu_initialization_retries_late_parameters_language_and_vfs_without_save_queries ... ok
+test encounters::tests::load_missing_invalid_and_oversized_files_returns_an_error_without_default_mapping ... ok
+test ui::tests::cached_visual_state_never_authorizes_revival_without_a_fresh_matching_context ... ok
+test ui::tests::explicit_hide_precedes_a_busy_ui_and_reopening_unknown_does_not_restore_the_panel ... ok
+test ui::tests::preframe_failure_can_retry_but_a_built_frame_never_advances_twice ... ok
+test ui::tests::unknown_display_preserves_only_an_existing_panel_without_input_and_known_hides_clear_it ... ok
+test ui::tests::compact_revisions_defer_95_group_211_boss_list_until_full_render ... ok
+test ui::tests::snapshot_contention_keeps_the_published_panel_and_first_snapshot_remains_retryable ... ok
+
+test result: ok. 32 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running unittests src\lib.rs (target\debug\deps\EROverlay-4ea6c1641b7a8046.exe)
+
+running 23 tests
+test entry::tests::stopped_resident_is_terminal_without_claiming_unload ... ok
+test entry::tests::successful_external_stop_cancels_late_automatic_start ... ok
+test plugin::tests::busy_dispatch_does_not_consume_the_plugins_frame ... ok
+test plugin::tests::one_plugin_ui_frame_per_native_sequence_and_renderer_generation ... ok
+test staging::tests::copies_foreign_memory_and_rejects_invalid_indices ... ok
+test texture::tests::aggregate_reservation_refunds_only_after_last_owner ... ok
+test plugin::tests::copied_paint_is_committed_only_after_a_complete_successful_callback ... ok
+test logging::tests::diagnostic_probes_are_disabled_or_sampled_and_reports_are_rate_limited ... ok
+test config::tests::matches_sectioned_configuration_and_preserves_values ... ok
+test texture::tests::two_native_phases_share_one_pending_transfer_allowance ... ok
+test texture::tests::prepared_and_renderer_owned_bytes_stay_reserved_until_ready ... ok
+test texture::tests::retirement_and_reset_cannot_refund_or_resurrect_inflight_jobs ... ok
+test ui_input::tests::capture_requires_focus_visibility_lease_and_running_host ... ok
+test ui_input::tests::overflow_and_explicit_clear_reset_all_held_inputs ... ok
+test texture::tests::diagnostics_distinguish_preparation_failure_and_polling_without_new_uploads ... ok
+test texture::tests::failed_queue_submission_refunds_after_deferred_retirement ... ok
+test texture::tests::reset_retires_prepared_storage_before_refunding_its_lease ... ok
+test ui_input::tests::utf16_commits_unicode_without_control_or_orphan_surrogates ... ok
+test ui_input::tests::state_filter_keeps_controllers_and_separate_capture_masks ... ok
+test texture::tests::retired_ids_do_not_grow_the_pending_work_queue ... ok
+test texture::tests::dds_preparation_keeps_compressed_payload_and_mips ... ok
+test texture::tests::invalid_shapes_fail_and_budget_is_bounded ... ok
+test logging::tests::configured_log_appends_and_flushes_on_worker_shutdown ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_game-9491cacf2da7d0d4.exe)
+
+running 61 tests
+test boss_events::tests::archived_residual_template_has_only_local_actor_operations ... ignored, requires decompressed original EMEVDs in EROVERLAY_BOSS_EVENT_DIR
+test boss_params::tests::archived_param_assets_use_production_readers ... ignored, requires explicitly exported original PARAM assets in EROVERLAY_BOSS_PARAM_DIR
+test assets::tests::parsers_reject_truncated_offsets ... ok
+test assets::tests::bc1_transparency_and_bc2_bc3_opaque_interpolation ... ok
+test assets::tests::dds_bounds_and_color ... ok
+test boss_events::tests::binary_reader_rejects_short_tables_and_parameter_overruns ... ok
+test boss_events::tests::multi_bars_and_phases_keep_shared_guard_and_variant ... ok
+test files::tests::queued_named_parts_share_one_native_read ... ok
+test boss_runtime::tests::absent_graveyard_flag_does_not_hide_ordinary_boss_state ... ok
+test boss_params::tests::explicit_area_fields_and_type_version_bounds ... ok
+test boss_events::tests::linked_priority_and_parameter_instances_preserve_native_root_and_ordinal_order ... ok
+test boss_events::tests::ambiguity_and_missing_definition_are_explicit ... ok
+test boss_scene::tests::optional_soulsformats_membership_differential ... ok
+test boss_scene::tests::actors_groups_dummy_and_regions_remain_distinct ... ok
+test boss_scene::tests::native_area_bitset_limits_uncertain_dlc_aliases ... ok
+test boss_events::tests::scene_locality_rejects_proxy_summon_copy_and_unknown_target_operations ... ok
+test flags::tests::batch_nodes_reduce_os_reads_without_retaining_tree_or_values_across_batches ... ok
+test files::tests::aggregate_file_copy_budget_is_bounded ... ok
+test boss_events::tests::parameterized_common_bars_join_exact_defeat_evidence ... ok
+test boss_runtime::tests::production_state_reads_deaths_igt_and_fresh_save_identity ... ok
+test boss_runtime::tests::revival_resolves_all_targets_before_writing_and_preserves_neighbors ... ok
+test files::tests::boss_native_requests_cover_busy_missing_large_and_late_retirement ... ok
+test files::tests::request_validation_and_unavailable_shutdown ... ok
+test boss_events::tests::scene_locality_is_variant_scoped_and_missing_data_stays_unknown ... ok
+test boss_scene::tests::validated_dlc_layout_and_unknown_layout_failures ... ok
+test boss_runtime::tests::batch_flags_distinguish_missing_and_copy_shared_bytes_once ... ok
+test boss_events::tests::instantiated_call_targets_are_resolved_after_parameter_substitution ... ok
+test boss_scene::tests::rejects_bad_versions_tables_counts_and_overlapping_offsets ... ok
+test flags::tests::direct_storage_big_endian_bit_order_and_cycle_guard ... ok
+test files::tests::full_native_capacity_still_allows_parts_to_share_a_queued_archive ... ok
+test files::tests::asynchronous_native_completion_cannot_retire_until_callback_return_generation ... ok
+test memory::tests::copies_and_rejects_null ... ok
+test language::tests::copies_terminated_foreign_language_and_rejects_bad_ranges ... ok
+test map::tests::visibility_only_loading_logo_and_full_map_hide ... ok
+test map::tests::world_map_ignores_underground_padding_and_rejects_nan ... ok
+test map::tests::live_map_recheck_detects_location_and_owner_changes_without_update ... ok
+test flags::tests::cross_page_batch_snapshots_fall_back_only_to_required_readable_fields ... ok
+test files::tests::released_requests_keep_native_capacity_until_pump_retires_them ... ok
+test runtime_perf::runtime_production_read_profile ... ignored, controlled same-fixture revision comparison; not game frame timings
+test params::tests::row_boundaries_use_next_name_not_readable_page ... ok
+test params::tests::native_format_variants_snapshot_selected_fields_without_more_os_reads ... ok
+test params::tests::unavailable_size_preserves_live_field_reads_and_nameless_bounds ... ok
+test memory::tests::os_copy_rejects_protection_changes_guard_and_decommitted_ranges ... ok
+test scan::tests::bounded_sections_overlapping_patterns_and_rip_calls ... ok
+test tests::bindings_layout_and_truncated_pe_fail_closed ... ok
+test tests::offline_is_hidden_and_does_not_expose_game_calls ... ok
+test scan::tests::rtti_requires_unique_descriptor_and_primary_locator_with_aslr ... ok
+test text::tests::archived_text_binders_use_production_parser ... ignored, requires decompressed game item/menu BND paths in EROVERLAY_BOSS_TEXT_BINDERS, separated by semicolons
+test tests::production_active_masks_accept_cpp_readable_small_stride_and_recover_from_zero_stride ... ok
+test tests::production_snapshot_uses_native_repository_param_and_flag_layouts ... ok
+test text::tests::base_fallback_merges_only_the_missing_namespace ... ok
+test tests::production_new_context_invalidates_masks_and_missing_flag_manager_cannot_publish_old_masks ... ok
+test text::tests::binder_layers_preserve_null_fallback_and_do_not_depend_on_member_order ... ok
+test text::tests::fmg_sparse_null_utf16_and_corrupt_ranges ... ok
+test text::tests::language_paths_use_native_directories_without_unknown_language_guessing ... ok
+test scan::tests::all_generated_rules_have_valid_two_anchor_and_body_patterns ... ok
+test text::tests::namespace_presence_does_not_depend_on_text_count_or_another_namespace ... ok
+test files::tests::released_queued_parts_stay_bounded_and_preserve_active_token_indices_and_limits ... ok
+test tests::production_invalid_flag_divisor_waits_and_recovers_at_retry_without_bypassing_gate ... ok
+test tests::production_missing_param_backs_off_and_pointer_publication_recovers_immediately ... ok
+test tests::production_long_wait_retries_remain_invalid_then_regular_cache_is_reused ... ok
+
+test result: ok. 57 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src\bin\game_probe.rs (target\debug\deps\game_probe-89ec1a89117c83a6.exe)
+
+running 1 test
+test tests::rejects_truncated_pe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\boss_probe.rs (target\debug\deps\boss_probe-ad108fd338c9f6b1.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (target\debug\deps\eroverlay_harness-052d968898c4497a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\layer_order_probe.rs (target\debug\deps\layer_order_probe-3c40f236cf71a3b4.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\Minimap-249cdbae85b634e6.exe)
+
+running 51 tests
+test data::tests::param_field_readers_enforce_bounds ... ok
+test probe::archived_egui_cpu_probe ... ignored, requires archived EROVERLAY_GFX/EROVERLAY_LAYOUTS/EROVERLAY_TPF; reports CPU, no GPU
+test resources::tests::archived_game_gfx_and_atlas_layouts ... ignored, requires EROVERLAY_GFX and EROVERLAY_LAYOUTS archived game assets
+test geometry::tests::concave_fill_and_reversed_winding ... ok
+test gfx::tests::malformed_gfx_rejected ... ok
+test resources::tests::rgba_dds_matches_decoder ... ok
+test goblins::tests::runtime_uploads_follow_visible_demand_and_retire_idle_pending_work ... ok
+test goblins::tests::rejected_runtime_uploads_back_off_and_pending_tokens_are_polled_once ... ok
+test host::tests::key_chords_preserve_modifiers ... ok
+test lifecycle_tests::hidden_and_loading_controls_preserve_existing_behavior ... ok
+test resources::tests::normal_initial_and_metadata_loading_is_silent ... ok
+test resources::tests::first_metadata_waits_for_live_map_and_reads_late_mounted_override ... ok
+test goblins::tests::runtime_icon_bounds_and_premultiplication ... ok
+test resources::tests::busy_file_poll_keeps_token_until_success_without_error_or_reread ... ok
+test lifecycle_tests::host_configuration_preserves_empty_order_and_mixed_case_pixel_units ... ok
+test resources::tests::offscreen_admission_sources_release_tile_job_capacity ... ok
+test resources::tests::first_read_gate_preserves_cleanup_and_published_definitions_on_reset ... ok
+test goblins::tests::official_abi_sizes ... ok
+test lifecycle_tests::export_version_and_null_arguments_fail_safely ... ok
+test resources::tests::strict_tile_names ... ok
+test lifecycle_tests::render_rejects_short_frame_header_at_an_inaccessible_page_boundary ... ok
+test resources::tests::file_and_metadata_failures_log_only_failed_attempts_and_keep_ui_status ... ok
+test resources::tests::atlas_errors_are_visible_and_tile_errors_only_log_with_retry_limits ... ok
+test resources::tests::file_admission_pressure_is_silent_and_retries_without_a_failed_token ... ok
+test resources::tests::texture_admission_and_pending_uploads_stay_silent_and_reuse_source ... ok
+test resources::tests::first_metadata_starts_at_zero_opacity_without_a_marker_snapshot ... ok
+test gfx::tests::matrix_order_and_color_clamping ... ok
+test resources::tests::renderer_reset_rebuilds_textures_without_reloading_validated_metadata ... ok
+test resources::tests::tile_retry_reuses_validated_member_without_reparsing_or_copying_archive ... ok
+test resources::tests::xml_dtd_rejected ... ok
+test lifecycle_tests::init_rejects_a_host_without_required_texture_polling ... ok
+test settings::tests::synonymous_shortcuts_append_hidden_preset ... ok
+test ui::tests::installed_language_fonts_cover_status_and_produce_text_meshes ... ignored, reads installed Windows language fonts and checks real cmap/egui glyphs
+test settings::tests::shipped_configuration_preserves_units_and_hidden_step ... ok
+test settings::tests::malformed_numbers_and_duplicate_names_are_safe ... ok
+test ui::tests::anchored_circle_and_percent_reference ... ok
+test ui::tests::mesh_budget_accepts_exact_limits_and_latches_overflow ... ok
+test ui::tests::custom_fonts_try_existing_extensionless_paths_and_charset_prefixes ... ok
+test data::tests::first_metadata_uses_independent_live_map_after_marker_context_changes ... ok
+test ui::tests::pooled_direct_meshes_match_generic_egui_triangles ... ok
+test ui::tests::font_definitions_use_complete_custom_font_without_redundant_system_reads ... ok
+test resources::tests::native_and_provider_preparation_share_one_count_and_byte_budget ... ok
+test ui::tests::font_definitions_keep_readable_embedded_fallback_when_all_reads_fail ... ok
+test ui::tests::duplicate_native_frames_advance_context_once_and_reset_allows_same_sequence ... ok
+test ui::tests::resource_status_survives_valid_data_and_preserves_hiding_opacity_and_border ... ok
+test ui::tests::font_definitions_keep_language_primary_and_add_chinese_status_fallback ... ok
+test data::tests::native_wait_to_thousand_markers_batches_reads_and_failed_first_build_backs_off ... ok
+test ui::tests::waiting_frames_back_off_rejected_font_uploads_and_stop_polling_ready_fonts ... ok
+test data::tests::large_unsized_param_rows_use_bounded_bulk_reads_in_directory_order ... ok
+test resources::tests::sprite_region_decode_is_bounded_and_preserves_non_aligned_pixels ... ok
+test resources::tests::oversized_atlas_and_tile_are_errors_instead_of_permanent_admission_waits ... ok
+
+test result: ok. 48 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_renderer-60eee52a54bdbda0.exe)
+
+running 17 tests
+test scene_scan::tests::archived_contract_rejects_mutations_and_survives_relocation ... ignored, set EROVERLAY_SCENE_EXE to a supported archived EXE; reads data only
+test tests::native_frame_layout ... ok
+test scene_scan::tests::internal_bridge_layout_and_truncated_images_fail_closed ... ok
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=60144
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+test gpu::tests::warp_retained_surfaces_retire_after_both_copy_and_replay_fences ... ok
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+test gpu::tests::warp_padded_uploads_obey_aggregate_committed_staging_budget ... ok
+test gpu::tests::warp_real_rgb10a2_above_ui_and_busy_slots ... ok
+test gpu::tests::texture_queue_budget_and_retirement_are_bounded ... ok
+test gpu::tests::warp_real_pixels_group_opacity_circle_and_native_transmittance ... ok
+test gpu::tests::warp_lower_cannot_take_upper_layers_last_free_slot ... ok
+test gpu::tests::warp_uploads_share_sequence_and_inflight_image_budgets ... ok
+test gpu::tests::warp_unpublished_copy_cannot_change_or_resurrect_retained_image ... ok
+test gpu::tests::warp_oversized_upload_requires_idle_and_remains_alone ... ok
+test gpu::tests::warp_compressed_mips_memory_and_straight_alpha ... ok
+test gpu::tests::warp_retained_rechecks_hide_and_close_before_execute ... ok
+test gpu::tests::warp_retained_image_survives_missing_atlas_and_sixteen_busy_presentations ... ok
+test gpu::tests::warp_retained_copy_reuses_two_immutable_allocations ... ok
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=47576
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=47576
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=45264
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=45264
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=17896
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 1: callback after native batch flush; layer=above-ui thread=17896
+[EROverlay] UI_SCENE frame rejected: game target/queue validation failed
+[EROverlay] UI_SCENE queue 1: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE stopped: queues=1 callbacks=1
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE stopped accepting callbacks; hook removal deferred (4/0), native bridge retained
+[EROverlay] UI_SCENE stopped: queues=0 callbacks=0
+[EROverlay] UI_SCENE queue 1: enqueue before sort/consume; thread=40788
+[EROverlay] UI_SCENE queue 1: below-ui before native UI composition; priority=00FFFFFF
+[EROverlay] UI_SCENE queue 1: consumed 2 callback(s) (below-ui=1 above-ui=1), returning to game
+[EROverlay] UI_SCENE queue 2: enqueue before sort/consume; thread=40788
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE queue 2: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+[EROverlay] UI_SCENE queue 3: enqueue before sort/consume; thread=40788
+[EROverlay] UI_SCENE queue 3: consumed 1 callback(s) (below-ui=0 above-ui=1), returning to game
+test tests::native_hook_teardown_and_exact_layer_boundary ... ok
+
+test result: ok. 16 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 3.38s
+
+PASS: two real MinHook detours drain lock-protected callbacks; restored local entries and fixture reinstall work without unmapping the module.
+CONFIRMED: 12 real-detour pre-acquire/post-release pauses outlive stop(); a drained bridge does not prove its module can be unmapped.
+PASS: three real MinHook disable-error branches retain an inert bridge/trampoline, skip user callbacks, and permit later successful cleanup.
+PASS: exact native UI command boundary survives later native work; stale/missing boundaries suppress only the lower stage.
+     Running unittests src\lib.rs (target\debug\deps\eroverlay_ui-d91f428808cc4209.exe)
+
+running 4 tests
+test input::tests::reset_releases_keys_buttons_and_does_not_type_control_characters ... ok
+test meshes::tests::first_refused_or_missing_managed_texture_is_busy_instead_of_empty_success ... ok
+test meshes::tests::unused_dirty_atlas_does_not_block_and_free_handles_still_retire_after_submission ... ok
+test meshes::tests::refused_atlas_update_never_pairs_new_uvs_with_old_handle_and_retries_without_a_delta ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests eroverlay_abi
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests Boss
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests EROverlay
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests eroverlay_game
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests Minimap
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests eroverlay_renderer
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests eroverlay_ui
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+exit_code=0

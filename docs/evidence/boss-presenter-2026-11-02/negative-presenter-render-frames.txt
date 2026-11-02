@@ -1,0 +1,1 @@
+sequence=269 case=presenter-other-cpu-render-lock-fallback expected=Boss bad_pixels=26940/26940 opaque_bad=26940 mean_red=255.000

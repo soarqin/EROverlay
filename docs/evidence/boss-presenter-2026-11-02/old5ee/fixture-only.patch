@@ -1,0 +1,135 @@
+--- 5ee822c78921cd29e7c7252ed3810e563663bd54/crates/core/src/layer_fixture.rs
++++ fixture/crates/core/src/layer_fixture.rs
+@@ -236,9 +236,60 @@
+ struct DriveContext {
+     runtime: Arc<Runtime>,
+     mode: u32,
++    failed: AtomicBool,
++}
++
++fn render_while_publisher_busy(context: &DriveContext, frame: &NativeFrame) {
++    // The acknowledged second thread owns the real maintenance lock for the
++    // entire affected callback; it never submits GPU work or changes paint.
++    let handle = context
++        .runtime
++        .presentation
++        .lock()
++        .unwrap_or_else(|e| e.into_inner())
++        .clone();
++    let Some(handle) = handle else {
++        context.failed.store(true, Ordering::Release);
++        return;
++    };
++    let held = AtomicBool::new(false);
++    thread::scope(|scope| {
++        let (ack_tx, ack_rx) = std::sync::mpsc::sync_channel(1);
++        let (release_tx, release_rx) = std::sync::mpsc::sync_channel(1);
++        let held = &held;
++        let worker = scope.spawn(move || {
++            let _busy = handle.lock().unwrap_or_else(|e| e.into_inner());
++            held.store(true, Ordering::Release);
++            let _ = ack_tx.send(thread::current().id());
++            let _ = release_rx.recv_timeout(Duration::from_secs(2));
++            held.store(false, Ordering::Release);
++        });
++        let other_cpu = ack_rx.recv_timeout(Duration::from_secs(2));
++        if other_cpu.is_ok_and(|id| id != thread::current().id()) && held.load(Ordering::Acquire) {
++            if context.mode == 8 {
++                let _busy = context
++                    .runtime
++                    .render
++                    .lock()
++                    .unwrap_or_else(|e| e.into_inner());
++                context.runtime.render(frame);
++            } else {
++                context.runtime.render(frame);
++            }
++            if !held.load(Ordering::Acquire) {
++                context.failed.store(true, Ordering::Release);
++            }
++        } else {
++            context.failed.store(true, Ordering::Release);
++        }
++        let _ = release_tx.send(());
++        if worker.join().is_err() {
++            context.failed.store(true, Ordering::Release);
++        }
++    });
+ }
+ unsafe extern "C" fn busy_frame(user: *mut c_void, frame: *const NativeFrame) {
+-    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+         let context = unsafe { &*user.cast::<DriveContext>() };
+         let Some(frame) = (unsafe { frame.as_ref() }) else {
+             return;
+@@ -249,17 +300,21 @@
+             LAYER_BELOW_UI
+         };
+         if frame.layer == target_layer && context.mode != 0 {
+-            if context.mode == 6 {
++            if context.mode >= 7 {
++                render_while_publisher_busy(context, frame);
++            } else if context.mode == 6 {
+                 let handle = context
+                     .runtime
+                     .presentation
+                     .lock()
+                     .unwrap_or_else(|e| e.into_inner())
+                     .clone();
+-                let _busy = handle
+-                    .as_ref()
+-                    .map(|p| p.lock().unwrap_or_else(|e| e.into_inner()));
+-                context.runtime.render(frame);
++                if let Some(handle) = handle {
++                    let _busy = handle.lock().unwrap_or_else(|e| e.into_inner());
++                    context.runtime.render(frame);
++                } else {
++                    context.failed.store(true, Ordering::Release);
++                }
+             } else if context.mode == 5 {
+                 let _busy = context
+                     .runtime
+@@ -286,6 +341,11 @@
+             context.runtime.render(frame);
+         }
+     }));
++    if result.is_err() {
++        unsafe { &*user.cast::<DriveContext>() }
++            .failed
++            .store(true, Ordering::Release);
++    }
+     STAGING.with(|s| s.set(std::ptr::null_mut()));
+ }
+ 
+@@ -311,7 +371,7 @@
+         ) else {
+             return ERR_INVALID;
+         };
+-        if mode > 6 {
++        if mode > 8 {
+             return ERR_INVALID;
+         }
+         let Some(runtime) = RUNTIME
+@@ -322,7 +382,11 @@
+         else {
+             return ERR_UNAVAILABLE;
+         };
+-        let mut context = DriveContext { runtime, mode };
++        let mut context = DriveContext {
++            runtime,
++            mode,
++            failed: AtomicBool::new(false),
++        };
+         if unsafe {
+             eroverlay_renderer::drive_scene_fixture(
+                 busy_frame,
+@@ -335,7 +399,8 @@
+                 native_user,
+                 scenario,
+             )
+-        } {
++        } && !context.failed.load(Ordering::Acquire)
++        {
+             OK
+         } else {
+             ERR_UNAVAILABLE

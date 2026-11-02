@@ -1,0 +1,287 @@
+{
+  "builds": [
+    {
+      "mode": "old5ee",
+      "exe": "<worktree>\\target\\boss-presenter-review\\copy-old5ee.exe",
+      "sha256": "c4b9bf0a99e5a854faeef3428f1f51619f734ef28a2c7b89ce3105958cc2813a",
+      "source_sha256": "15987d4548296b998548f511ab4fde5fcd76bb3ef59e21e1c59421315b406fb5",
+      "command": [
+        "rustc",
+        "<worktree>\\target\\boss-presentation-final\\copy_perf.rs",
+        "--edition",
+        "2024",
+        "-O",
+        "-C",
+        "lto=thin",
+        "-C",
+        "codegen-units=1",
+        "-L",
+        "dependency=<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps",
+        "--extern",
+        "eroverlay_renderer=<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\liberoverlay_renderer-ce34b7f1371f87e3.rlib",
+        "--extern",
+        "eroverlay_abi=<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\liberoverlay_abi-3264003a8444baa8.rlib",
+        "--extern",
+        "windows=<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\libwindows-d4b42be31e20d645.rlib",
+        "--extern",
+        "egui=<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\libegui-004dc3fc2fac9c67.rlib",
+        "-o",
+        "<worktree>\\target\\boss-presenter-review\\copy-old5ee.exe"
+      ],
+      "libraries": {
+        "eroverlay_renderer": {
+          "path": "<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\liberoverlay_renderer-ce34b7f1371f87e3.rlib",
+          "sha256": "daf3fb40133af090224652d53597fc3b90c292e7d2afd97b5599d67df32a4b21"
+        },
+        "eroverlay_abi": {
+          "path": "<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\liberoverlay_abi-3264003a8444baa8.rlib",
+          "sha256": "140003110297eb76983ca4262c615b4ea677a3e47a30d4b9e3adba3a1ce343fc"
+        },
+        "windows": {
+          "path": "<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\libwindows-d4b42be31e20d645.rlib",
+          "sha256": "2b871253ec793bc311353c97faf48d68a87855c6429f25aeb0b9c46fa384728c"
+        },
+        "egui": {
+          "path": "<worktree>\\target\\boss-continuity-clean-source\\target\\release\\deps\\libegui-004dc3fc2fac9c67.rlib",
+          "sha256": "abf4dab637e149591d066859a753e0a2883c1e53e6c6e7683bd6dedca161623f"
+        }
+      }
+    },
+    {
+      "mode": "new",
+      "exe": "<worktree>\\target\\boss-presenter-review\\copy-new.exe",
+      "sha256": "dbaef85298b5744f305579c1ddc9061cbcad7896591f324b9e794e34eea2e5ba",
+      "source_sha256": "15987d4548296b998548f511ab4fde5fcd76bb3ef59e21e1c59421315b406fb5",
+      "command": [
+        "rustc",
+        "<worktree>\\target\\boss-presentation-final\\copy_perf.rs",
+        "--edition",
+        "2024",
+        "-O",
+        "-C",
+        "lto=thin",
+        "-C",
+        "codegen-units=1",
+        "-L",
+        "dependency=<worktree>\\target\\release\\deps",
+        "--extern",
+        "eroverlay_renderer=<worktree>\\target\\release\\liberoverlay_renderer.rlib",
+        "--extern",
+        "eroverlay_abi=<worktree>\\target\\release\\deps\\liberoverlay_abi-514a2ba51904d201.rlib",
+        "--extern",
+        "windows=<worktree>\\target\\release\\deps\\libwindows-3d1b0003f960d925.rlib",
+        "--extern",
+        "egui=<worktree>\\target\\release\\deps\\libegui-3b48c54b6c87a53a.rlib",
+        "-o",
+        "<worktree>\\target\\boss-presenter-review\\copy-new.exe"
+      ],
+      "libraries": {
+        "eroverlay_renderer": {
+          "path": "<worktree>\\target\\release\\liberoverlay_renderer.rlib",
+          "sha256": "d4f3ac972db14bad3f8e83295b6e2b78e92ca1c9053ebbb9adab1981fdfe7d63"
+        },
+        "eroverlay_abi": {
+          "path": "<worktree>\\target\\release\\deps\\liberoverlay_abi-514a2ba51904d201.rlib",
+          "sha256": "4bfc78c1abf600d7378557fed29decabb28f68fbd72c63d9819041fc0699505b"
+        },
+        "windows": {
+          "path": "<worktree>\\target\\release\\deps\\libwindows-3d1b0003f960d925.rlib",
+          "sha256": "9de0814c818e0b40479dd69b10eea0daa983a6b95e6e0e53c8b7be35d17b71fe"
+        },
+        "egui": {
+          "path": "<worktree>\\target\\release\\deps\\libegui-3b48c54b6c87a53a.rlib",
+          "sha256": "6c70327fa5199e03dae84659070d7d54f14cb09d6278d09916bfae3d8f0b0a43"
+        }
+      }
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "mode": "old5ee",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-old5ee.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-old5ee-1.jsonl",
+      "sha256": "eede866c1e43d73a63e4427ade94e2bec619553b75b012594fce096ada0fb095",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 25.6,
+        "cpu_p95_us": 63.7,
+        "cpu_p99_us": 75.9,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 35.84,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.032918,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 44957696,
+        "dropped": 0
+      }
+    },
+    {
+      "round": 1,
+      "mode": "new",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-new.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-new-1.jsonl",
+      "sha256": "11a404ac38620f32e46dd6f7fbeb7822a48a8df962b34aa9bd2e55f4b19ff422",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 24.6,
+        "cpu_p95_us": 51.1,
+        "cpu_p99_us": 66.0,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 35.84,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.030703,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 53346304,
+        "dropped": 0
+      }
+    },
+    {
+      "round": 2,
+      "mode": "new",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-new.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-new-2.jsonl",
+      "sha256": "cad22e6f23a4a134c61ed3f3316523556e94f8a68940d9193e1a79c7b3d24198",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 23.9,
+        "cpu_p95_us": 51.7,
+        "cpu_p99_us": 66.2,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 34.816,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.030445,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 53346304,
+        "dropped": 0
+      }
+    },
+    {
+      "round": 2,
+      "mode": "old5ee",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-old5ee.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-old5ee-2.jsonl",
+      "sha256": "35af874c2de1b2133d02889125b4ccea18f7ee3c799d062d60ab38c03d16ed34",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 23.0,
+        "cpu_p95_us": 53.9,
+        "cpu_p99_us": 65.8,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 34.816,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.03004,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 44957696,
+        "dropped": 0
+      }
+    },
+    {
+      "round": 3,
+      "mode": "old5ee",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-old5ee.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-old5ee-3.jsonl",
+      "sha256": "1f08a1cae977e155638fbab38280346947e73fb7a612652a4a2e1ba7a5327598",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 23.1,
+        "cpu_p95_us": 48.2,
+        "cpu_p99_us": 63.3,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 34.816,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.029924,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 44957696,
+        "dropped": 0
+      }
+    },
+    {
+      "round": 3,
+      "mode": "new",
+      "command": [
+        "<worktree>\\target\\boss-presenter-review\\copy-new.exe",
+        "--samples",
+        "300",
+        "--hdr",
+        "--retain"
+      ],
+      "log": "copy-new-3.jsonl",
+      "sha256": "0b112389b44ec1a6446ae8b0a6c58193f22630f146a8d4f527605364411f5115",
+      "result": {
+        "kind": "scenario",
+        "scenario": "stable_64_quads",
+        "cpu_p50_us": 23.8,
+        "cpu_p95_us": 51.3,
+        "cpu_p99_us": 65.6,
+        "gpu_p50_us": 34.816,
+        "gpu_p95_us": 35.84,
+        "gpu_p99_us": 35.84,
+        "gpu_samples": 300,
+        "rust_allocations": 0,
+        "rust_allocated_bytes": 0,
+        "draw_calls_per_frame": 2.0,
+        "sampled_wall_seconds": 0.030482,
+        "upload_bytes_total": 0,
+        "committed_resource_bytes_peak": 53346304,
+        "dropped": 0
+      }
+    }
+  ],
+  "limits": "Same Release source and renderer-only scene; 1080p,64 quads,300 samples,three alternating rounds on actual selected GPU. Explicit queue drain outside CPU timing. Includes normal-image copy and cache bookkeeping, not game/UI/dispatcher, presenter lock contention or startup. Old renderer source is independently verified clean 0819f40, byte-identical to 5ee822c renderer."
+}

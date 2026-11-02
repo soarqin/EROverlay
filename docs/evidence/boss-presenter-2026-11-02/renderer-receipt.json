@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "created_utc": "2026-11-02T15:25:27.865459+00:00",
+  "head": "9d623d0f4cc9063524b2538938f7505afdd1569f",
+  "branch": "cindy/gentle-darwin",
+  "working_tree_clean": true,
+  "scope": "Renderer implementation checks and three newly added WARP regressions; no game assets, live hook, injection, or FPS validation.",
+  "prior_agent_checks": [
+    {
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "eroverlay-renderer",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "standalone_log": null,
+      "evidence": "Previously executed functions.exec transcript; not rerun."
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "eroverlay-renderer",
+        "--locked",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "passed": 16,
+      "failed": 0,
+      "ignored": 1,
+      "standalone_log": null,
+      "evidence": "Previously executed functions.exec transcript; output not saved to disk. The frozen final sources also passed the parent workspace test log referenced below."
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "eroverlay-renderer",
+        "--all-targets",
+        "--features",
+        "native-scene-fixture",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "standalone_log": null,
+      "evidence": "Previously executed functions.exec transcript after final renderer changes; not rerun."
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "eroverlay-renderer",
+        "--locked",
+        "gpu::tests::warp_retained",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "standalone_log": null,
+      "evidence": "Previously executed final pressure/reuse/hide/retirement regression transcript; not rerun as a group."
+    }
+  ],
+  "parent_frozen_workspace_checks": {
+    "receipt": "target/boss-presenter-review/checks.json",
+    "test_log": "target/boss-presenter-review/test.log",
+    "clippy_log": "target/boss-presenter-review/clippy.log",
+    "release_log": "target/boss-presenter-review/release.log",
+    "test_totals": {
+      "passed": 186,
+      "failed": 0,
+      "ignored": 11
+    },
+    "renderer_in_test_log": {
+      "passed": 16,
+      "failed": 0,
+      "ignored": 1
+    },
+    "not_rerun_by_this_receipt": true
+  },
+  "new_regression_stdout_capture": [
+    {
+      "name": "immutable-reuse",
+      "test": "gpu::tests::warp_retained_copy_reuses_two_immutable_allocations",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "eroverlay-renderer",
+        "--locked",
+        "gpu::tests::warp_retained_copy_reuses_two_immutable_allocations",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "log": "target/boss-presenter-review/renderer-immutable-reuse.log",
+      "exit_code": 0,
+      "seconds": 0.301,
+      "result": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "stdout": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running unittests src\\lib.rs (target\\debug\\deps\\eroverlay_renderer-58cc532a923a61ba.exe)\n\nrunning 1 test\ntest gpu::tests::warp_retained_copy_reuses_two_immutable_allocations ... D3D12 debug layer enabled for WARP pixel/lifecycle checks\nWARP immutable retained: 32 updates, 2 resource/Arc allocations, 131072 resource bytes, hide frees both\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.08s\n\n"
+    },
+    {
+      "name": "hide-close-before-submit",
+      "test": "gpu::tests::warp_retained_rechecks_hide_and_close_before_execute",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "eroverlay-renderer",
+        "--locked",
+        "gpu::tests::warp_retained_rechecks_hide_and_close_before_execute",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "log": "target/boss-presenter-review/renderer-hide-close-before-submit.log",
+      "exit_code": 0,
+      "seconds": 0.252,
+      "result": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "stdout": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running unittests src\\lib.rs (target\\debug\\deps\\eroverlay_renderer-58cc532a923a61ba.exe)\n\nrunning 1 test\ntest gpu::tests::warp_retained_rechecks_hide_and_close_before_execute ... D3D12 debug layer enabled for WARP pixel/lifecycle checks\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.07s\n\n"
+    },
+    {
+      "name": "unpublished-copy",
+      "test": "gpu::tests::warp_unpublished_copy_cannot_change_or_resurrect_retained_image",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "eroverlay-renderer",
+        "--locked",
+        "gpu::tests::warp_unpublished_copy_cannot_change_or_resurrect_retained_image",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "log": "target/boss-presenter-review/renderer-unpublished-copy.log",
+      "exit_code": 0,
+      "seconds": 0.232,
+      "result": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "stdout": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s\n     Running unittests src\\lib.rs (target\\debug\\deps\\eroverlay_renderer-58cc532a923a61ba.exe)\n\nrunning 1 test\ntest gpu::tests::warp_unpublished_copy_cannot_change_or_resurrect_retained_image ... D3D12 debug layer enabled for WARP pixel/lifecycle checks\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.05s\n\n"
+    }
+  ],
+  "source_sha256": {
+    "Cargo.lock": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b",
+    "crates/renderer/Cargo.toml": "85900acfb893c50a5ca16ca265dcce6893c2a5353f5fcd27fbe136eebc5c4f11",
+    "crates/renderer/src/lib.rs": "b6ad6d853bf28718d2039a50e3711437f855f15d2839339c27679ebd9ca73216",
+    "crates/renderer/src/gpu.rs": "ae490ccca7a15711ab8ea8c5dcb3fcbd1e662f393a2037d88acb940c92cd0eaf",
+    "crates/renderer/src/gpu/presentation.rs": "bfc51834b31c8f295e683ceb454d213a26a83f55442429fea23c15b3f47f7dfd"
+  },
+  "matches_parent_frozen_source": {
+    "Cargo.lock": true,
+    "crates/renderer/Cargo.toml": true,
+    "crates/renderer/src/gpu.rs": true,
+    "crates/renderer/src/gpu/presentation.rs": true
+  },
+  "artifacts": [
+    {
+      "path": "target/release/EROverlay.dll",
+      "bytes": 761856,
+      "sha256": "a576c8e81f36660c9d143862be831ce32b12ede39ccae4244a128cbb9caaa7f4"
+    },
+    {
+      "path": "target/release/EROverlay.dll.lib",
+      "bytes": 2530,
+      "sha256": "dec6b309d03a5e990fe21ed8fbc3e044028cd55025400fd7f154e1967763dbd3"
+    },
+    {
+      "path": "target/release/libEROverlay.rlib",
+      "bytes": 3865162,
+      "sha256": "e7a711d9220be67c714ea2799e1892dfab5eade8ec4a0c95d63fe534cdafd18e"
+    },
+    {
+      "path": "target/release/liberoverlay_renderer.rlib",
+      "bytes": 3645856,
+      "sha256": "bcbafb225543a909ae84a32badccb7ad1bddd68f5e84c063725f6d983711bfea"
+    },
+    {
+      "path": "target/release/Boss.dll",
+      "bytes": 2692608,
+      "sha256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+    },
+    {
+      "path": "target/release/Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+    }
+  ],
+  "regression_contracts": {
+    "immutable-reuse": "32 updates create exactly two Surface resource/Arc allocations; 131072 resource bytes for this 64x64 fixture; hide frees both. 64 groups with current+idle at 128 SRVs admit a changed size by evicting only eligible idle images.",
+    "hide-close-before-submit": "Another CPU invalidates/closes after command recording/Close but before Execute. Final epoch/accepting check cancels replay; current cleared target stays red; wait_idle(0) cannot claim idle while recording lease is held. A cancelled slot is reusable.",
+    "unpublished-copy": "A completed but unpublished blue copy cannot modify concurrently replayed green retained pixels. Confirm publishes blue; invalidating while publication is held prevents confirm from resurrecting the image.",
+    "maintenance-contention": "The existing retained-image WARP test now holds the real maintenance/publication mutex on another CPU while the current callback replays green into a red-cleared target. Frozen parent test.log records this test passing.",
+    "sixteen-slots-and-retirement": "Existing sixteen-slot GPU-pressure and copy-plus-replay retirement tests pass in parent test.log; no render-side wait-event creation is allowed."
+  },
+  "limits": [
+    "WARP controlled-pixel and lifecycle fixtures are not live-game visual or FPS acceptance.",
+    "Image resource accounting excludes driver fence, command allocator/list, and descriptor heap allocation sizes.",
+    "Normal immutable retention uses two surfaces per active group rather than the previous single surface; the existing 128 MiB/128 descriptor/64 group limits remain."
+  ]
+}

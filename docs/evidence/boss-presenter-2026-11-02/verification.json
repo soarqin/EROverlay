@@ -1,0 +1,69 @@
+{
+  "code_commit": "9d623d0f4cc9063524b2538938f7505afdd1569f",
+  "baseline": "5ee822c78921cd29e7c7252ed3810e563663bd54",
+  "normal_tests": {
+    "passed": 186,
+    "failed": 0,
+    "ignored": 11
+  },
+  "production_dlls": [
+    {
+      "Path": "EROverlay.dll",
+      "Bytes": 761856,
+      "SHA256": "a576c8e81f36660c9d143862be831ce32b12ede39ccae4244a128cbb9caaa7f4"
+    },
+    {
+      "Path": "Boss.dll",
+      "Bytes": 2692608,
+      "SHA256": "b31ca8fdfde4da5197dd174e5649e07f326d8c829f55f0d2ebc1a9c5da1f339a"
+    },
+    {
+      "Path": "Minimap.dll",
+      "Bytes": 1766400,
+      "SHA256": "c73defe5cdc439e0d9a443d0ed793feee3d6af259fe3d7c4186144eedf149a7d"
+    }
+  ],
+  "normal_core_cycles": 3,
+  "normal_core_plus_upper_fixture_cycles": 3,
+  "matrices": [
+    {
+      "run": "final-production-03",
+      "steady_frames": 120,
+      "matrix_frames": 362,
+      "classification": {
+        "Boss": 283,
+        "Hidden": 44,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "deliberate_gpu_overload_misses": 6
+    },
+    {
+      "run": "final-fixture-04",
+      "steady_frames": 120,
+      "matrix_frames": 376,
+      "classification": {
+        "Boss": 297,
+        "Hidden": 44,
+        "Lower": 5,
+        "Closing": 6,
+        "Overload": 24
+      },
+      "deliberate_gpu_overload_misses": 6
+    }
+  ],
+  "source_checks": "Every tested source byte hash in checks.json and final layer receipt matches the code commit working files.",
+  "input_and_catalogue_scope": "Boss/Minimap bytes match 5ee822c exactly; game data, UI, 207 scope, recipes and native input hooks unchanged. Previous explicit asset/input evidence retained; no new live-game or VFS claim.",
+  "setup_incidents": [
+    "Initial extra-upper harness invocation supplied the wrong positional argument, so the fixture was correctly rejected as a null API. Corrected invocation with the explicit fixture DLL path passed three cycles. Normal multidll.txt preserves the initial successful tool stdout.",
+    "First standalone perf compilation selected an incompatible cached windows feature variant. Final compilation selected the exact cargo compiler-artifact dependency outputs; only the successful aligned builds produced performance samples."
+  ],
+  "limits": [
+    "Controlled display/save/resources with empty catalog; real two-plugin UI, core ownership, native queue driver and WARP readbacks. No injected game or live FPS validation.",
+    "Distinct acknowledged CPU thread/context; no physical-core affinity claimed. The scoped thread is joined before each fixture call returns.",
+    "Explicit reopen first reaches stable opaque ROI at frame 5 within fixed 11 presentations; strict coverage applies thereafter.",
+    "Artificial GPU-held 24-frame overload exceeds bounded pools: 6 frames lose opaque coverage, excluded from ordinary continuity. Next frame recovers after drain.",
+    "Initial baseline probe executables were not retained separately; exact pinned old core/source/fixture patch and actual plugins are preserved. Final probe identities apply to the two final positive runs."
+  ]
+}

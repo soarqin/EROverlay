@@ -1,0 +1,11 @@
+{
+  "actual_source_bytes_match_preexisting_receipt": true,
+  "normalized_change_is_only_busy_fixture_control_region": true,
+  "unchanged_region": "Everything before DriveContext and after drive_busy",
+  "original_bytes_sha256": "88f2eb1b41b2882eee72e483b501060dfb7327fdbbcf0bab8af25d4fc45d942b",
+  "fixture_bytes_sha256": "76ba4acf2cf66ac7ac5e05063429eda2b230ccd112643df4f1cb7b2f7f68b563",
+  "normalized_original_sha256": "7a7c1ee6dd558b741188c92e659635a073b1cf4db0e133ace5cf2cf2319a65cf",
+  "normalized_fixture_sha256": "76ba4acf2cf66ac7ac5e05063429eda2b230ccd112643df4f1cb7b2f7f68b563",
+  "normalized_patch_sha256": "108355f9f983b54e0752f68b9256cb548a371dfc087da33d29117e1ee1c5161a",
+  "source_or_dll_rewritten": false
+}

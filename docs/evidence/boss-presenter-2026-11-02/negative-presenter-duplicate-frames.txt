@@ -1,0 +1,1 @@
+sequence=268 case=presenter-other-cpu-cleared-duplicate expected=Boss bad_pixels=26460/26940 opaque_bad=26460 mean_red=6.000

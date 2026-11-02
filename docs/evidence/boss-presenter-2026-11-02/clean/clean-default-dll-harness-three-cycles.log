@@ -1,0 +1,6 @@
+$ <worktree>\target\boss-presenter-clean-source\target\release\eroverlay-harness.exe <worktree>\target\boss-presenter-clean-source\package 3
+cycle 1: real core and 2 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=35, committed=1114112; Boss=true, upper_fixture=false, GPU-retained shutdown=false; offline game overlays hidden)
+cycle 2: real core and 2 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=35, committed=1114112; Boss=true, upper_fixture=false, GPU-retained shutdown=false; offline game overlays hidden)
+cycle 3: real core and 2 plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders=35, committed=1114112; Boss=true, upper_fixture=false, GPU-retained shutdown=false; offline game overlays hidden)
+
+exit_code=0
