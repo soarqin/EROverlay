@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "date": "2026-11-03",
+  "service": "read_boss_region(user, context:u64, out:*mutu32)->i32",
+  "abi": {
+    "capability": 256,
+    "boss_state_bytes": 32,
+    "old_boss_host_bytes": 224,
+    "region_host_bytes": 232,
+    "bindings_layout_changed": false
+  },
+  "sources": [
+    {
+      "path": "crates/abi/src/lib.rs",
+      "sha256": "874cd983d106616d36998cbadbb6ab82bd88e37653d09bb926bd96fee8b946d5",
+      "bytes": 15312
+    },
+    {
+      "path": "crates/core/src/lib.rs",
+      "sha256": "261dc89b3ad566340e5d92f171886ee496d16e6e3e06fbc67229c85fe0dbb7fe",
+      "bytes": 43856
+    },
+    {
+      "path": "crates/core/src/layer_fixture.rs",
+      "sha256": "6905e95c9abc57faa698f062d78357c7aa40f0fb995ee9ab3ac837762244e776",
+      "bytes": 15695
+    },
+    {
+      "path": "crates/game/src/boss_params.rs",
+      "sha256": "cb518f0acc45c806612d3de52cf43f599a9245e6d63b7db149fc2bce6263b0d3",
+      "bytes": 13421
+    },
+    {
+      "path": "crates/game/src/boss_runtime.rs",
+      "sha256": "793e2fe632cec032b905ce252705162791b02ce7955f798484794aa62ecf37b2",
+      "bytes": 8961
+    },
+    {
+      "path": "crates/game/src/lib.rs",
+      "sha256": "fb6705ef65303600ae4f5bee7ef7cafc257e5f2ac52bb03f32817e86ee80426e",
+      "bytes": 32464
+    },
+    {
+      "path": "crates/game/src/boss_region.rs",
+      "sha256": "8f0f2f2a90114167f3504c0d4b9a242d860f702f0e568ca0d9e3c084332af975",
+      "bytes": 10706
+    }
+  ],
+  "commands": [
+    "cargo check -p eroverlay-abi -p eroverlay-game -p eroverlay-core --locked",
+    "cargo test -p eroverlay-abi -p eroverlay-game -p eroverlay-core --locked",
+    "cargo clippy -p eroverlay-abi -p eroverlay-game -p eroverlay-core --all-targets --locked -- -D warnings",
+    "cargo clippy -p eroverlay-core --features layer-order-fixture --all-targets --locked -- -D warnings",
+    "EROVERLAY_BOSS_PARAM_DIR=target/research cargo test -p eroverlay-game --locked archived_param_assets_use_production_readers -- --ignored --nocapture",
+    "EROVERLAY_GAME_ARCHIVES=D:/Games/EldenRingExe cargo test -p eroverlay-game --locked archived_cpp_region_layouts_reuse_dynamic_field_scanning -- --ignored --nocapture"
+  ],
+  "regular_tests": {
+    "failed": 0,
+    "passed": 91,
+    "ignored": 5
+  },
+  "archive_param": {
+    "play_regions": 593,
+    "passed": 1,
+    "boss_ids_count": 16,
+    "version": 9,
+    "boss_ids_offset": 172,
+    "boss_area_offset": 20,
+    "min_row_bytes": 272
+  },
+  "archives": [
+    {
+      "field_rva": "0x3cdffc0",
+      "game_version": "1.10.1",
+      "file_version": "2.0.1.0",
+      "region_offset": "0xe4",
+      "primary_vtable_rva": "0x2a27e30"
+    },
+    {
+      "field_rva": "0x3d691d8",
+      "game_version": "1.12",
+      "file_version": "2.2.0.0",
+      "region_offset": "0xe8",
+      "primary_vtable_rva": "0x2a78d78"
+    },
+    {
+      "field_rva": "0x3d6d248",
+      "game_version": "1.17.1",
+      "file_version": "2.7.1.0",
+      "region_offset": "0xe8",
+      "primary_vtable_rva": "0x2a7be08"
+    }
+  ],
+  "archive_checks": {
+    "unknown_exe_hash": "accepted",
+    "passed": 1,
+    "aslr_delta_bytes": 8589934592,
+    "elapsed_seconds": 32.61
+  },
+  "logs": [
+    "target/boss-layout-review/region-check.log",
+    "target/boss-layout-review/region-tests.log",
+    "target/boss-layout-review/region-clippy.log",
+    "target/boss-layout-review/region-layer-fixture-clippy.log",
+    "target/boss-layout-review/region-param-assets.log",
+    "target/boss-layout-review/region-archive-scan.log"
+  ],
+  "limits": [
+    "Archived EXEs are mapped as data only; no live game read or visual acceptance.",
+    "The optional service is unavailable if version resource, primary FieldArea RTTI, object type or context cannot be verified.",
+    "EXE hash does not authorize or reject discovery; version selects only the original E4/E8 field layout.",
+    "No game archive assets or executables are copied into this evidence."
+  ]
+}

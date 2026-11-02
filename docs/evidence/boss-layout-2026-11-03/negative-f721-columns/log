@@ -1,0 +1,30 @@
+PASS: controlled revival host rejects false/unknown primary, unknown targets, stale context, invalid IDs/values and conflicts before any write; this fixture is not the native game writer.
+minimap-font C:\WINDOWS\Fonts\msyh.ttc
+Minimap Rust/egui initialized; native UI_SCENE below game UI
+PASS: actual new Minimap DLL init/destroy with only 176 host bytes readable; next page PAGE_NOACCESS, no appended capabilities.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=2506ms updates=148 requests=1658 peak active tokens=16 pending polls=1068 busy polls=64 max single update=5833us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+PASS: menu catalogue Ready with save always unavailable, late PARAM/VFS, zero flag reads/writes; OK/valid=0 also rejected. First valid save update=25us, extra file requests=0, extra PARAM pointer queries=6; this is a controlled startup, not a live-game completion-time claim.
+Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue=207 rows, unique completion flags=208, file requests=1658, real scenes={"m31_00_00_00.msb", "m60_38_54_00.msb", "m61_49_44_00.msb"}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.
+compact: render CPU median=21us p95=31us; mean vertices=244 meshes=1; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+PASS: real DLL compact geometry: Lansseax early kill OR late
+PASS: real DLL compact geometry: Lansseax retreat is not a kill
+PASS: real DLL compact geometry: Adula early is not late completion
+PASS: real DLL compact geometry: Patches late is not initial completion
+PASS: real DLL compact geometry: Hinterland first remains independent
+PASS: real DLL compact geometry: Hinterland second remains independent
+PASS: real DLL compact geometry: Hinterland both unfinished
+Production DLL has no layout observation export; exact widget/fold metadata is checked separately with the feature DLL.
+Normal-DLL glyph observation: state=1, first Boss name glyph x=877, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\negative-f721-columns\boss-normal-status-1.bmp: 1280x900, nonblack RGB pixels=389962
+Normal-DLL glyph observation: state=0, first Boss name glyph x=868, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\negative-f721-columns\boss-normal-status-0.bmp: 1280x900, nonblack RGB pixels=389962
+Normal-DLL glyph observation: state=2, first Boss name glyph x=872, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\negative-f721-columns\boss-normal-status-2.bmp: 1280x900, nonblack RGB pixels=389962
+Boss 离线验证失败：actual normal-DLL [+]/[ ]/[?] shifts Boss name x: [877.0, 868.0, 872.0]

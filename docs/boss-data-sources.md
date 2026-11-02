@@ -9,8 +9,8 @@
 | `boss` | EMEVD 生命条指令的名称 ID → 当前语言 `NpcName*.fmg` | 不能把 `GameAreaParam.foundBossTextId` 当作 NPC 名称；多条生命条和阶段需要保留事件关系 |
 | `flag_id` | 生命条与胜利事件中的条件读取、置真写入及实体关系 | `GameAreaParam.defeatBossFlagId` 仅按精确值匹配以补充地图／位置；Param 中有无对应行不决定是否收录 |
 | `place` | 优先使用与完成旗标精确关联的 `WorldMapPointParam` 地点文本，否则使用同地图近邻赐福的地点文本；只取 `textType=0` 的 `PlaceName` | 地图标记或赐福名称不等于旧版作者填写的方位描述；没有可用地点文本时显示地图标识 |
-| `region_name` | 赐福子类别／标签的 `textId` → `GR_MenuText*.fmg` | 这是游戏传送菜单的分组，与旧版手工划分的地区不保证一致 |
-| `regions` | Param 的地图、位置及赐福子类别关系 | 相同地图中的最近赐福属于位置归类，不能把结果描述成 Boss 自带的地区外键 |
+| `region_name` | 32 个大区的稳定文本 ID → 当前语言 `PlaceName*.fmg` | 地区级关系不含 Boss 名单；未知区域才退到赐福菜单子类或地图标识 |
+| `regions` | 地图级关系、PlayRegionParam、三个局部地点关系及有界赐福／位置兜底；当前玩家地区读取 FieldArea | 目录近邻归属仍可能跨地理边界；不能把 packed 地图块 ID 或最近 Boss 当作玩家地区 |
 | `dlc` | 实际加载的 Param 行、事件文件和 DLC FMG 成员 | 不再用每种语言各自复制的名单表示 DLC |
 | `revive_flags` | 外部复活配置 | Param 没有表达完整的竞技场／阶段复位操作；不能由击败旗标推测额外写入 |
 | 跨场计数关系 | `configs/boss-encounters.json` 的三组主场／成员关系 | 只表达用户批准的计数边界，不保存全名单、名称、地区或位置，不推测复活写入 |
@@ -24,6 +24,7 @@
 | 表 | 运行时组号 | 数据版本 | 使用的字段及行内偏移 |
 |---|---:|---:|---|
 | `GAME_AREA_PARAM_ST` | 29 | 3 | `foundBossTextId` `0x38`；`defeatBossFlagId` `0x44`；`bossPosX/Y/Z` `0x48/0x4c/0x50`；`bossMapAreaNo/BlockNo/MapNo` `0x54/0x55/0x56` |
+| `PLAY_REGION_PARAM_ST` | 38 | 9 | `bossAreaId` `0x14`；16 个 `bossId` 从 `0xac` 起，步长 4；行至少 272 字节，仅用于已发现战斗的地区关系 |
 | `BONFIRE_WARP_PARAM_ST` | 43 | 6 | `eventflagId` `0x04`；`bonfireSubCategoryId` `0x14`；`clearedEventFlagId` `0x18`；地图 `0x20`；位置 `0x24`；文本槽 `0x30` 起 |
 | `BONFIRE_WARP_TAB_PARAM_ST` | 44 | 2 | `textId` `0x04`；`sortId` `0x08` |
 | `BONFIRE_WARP_SUB_CATEGORY_PARAM_ST` | 45 | 1 | `textId` `0x04`；`tabId` `0x08`；`sortId` `0x0a` |
@@ -52,6 +53,7 @@
 | `BonfireWarpSubCategoryParam` | 55 | 55 个标题 ID 均在 `GR_MenuText` 解析成功 |
 | `BonfireWarpTabParam` | 19 | 19 个标题 ID 均在 `GR_MenuText` 解析成功 |
 | `MapDefaultInfoParam` | 875 | 去掉 ID 为 0 的默认行后，提供 874 个资源地图 |
+| `PlayRegionParam`（2026-11-03 补充核对） | 593 | 全部通过生产解析器；不能独立覆盖所有 Boss 地区 |
 
 例如，`GameAreaParam` 行 `10000850` 给出完成旗标 `10000850`、地图 `[10,0,0]` 和局部位置约 `[-16.94,-2.75,-17.60]`。其 `foundBossTextId=1000101` 是另一套用途的文本 ID，不能替代生命条事件给出的 Margit 名称 ID。
 
@@ -63,7 +65,9 @@ Param 与事件的完成旗标也不保证完全一致。例如这份归档的 F
 
 `GameAreaParam` 的位置和地图可以缩小事件文件范围，并辅助归类。洞窟内部地图与入口赐福在大地图上的位置可能不同，不能直接比较两套局部坐标。没有经过转换验证的跨地图位置不用于推定归属；事件缺失或归类不确定必须保留其限制。
 
-同地图最近赐福只提供近邻参考，也不是官方的 Boss 地区关系。有匹配的 GameArea 行时，使用其 Boss 位置选择赐福；没有匹配行时，使用地图局部原点选择，近邻可靠性更低。高台、地下空间及同一 tile 内的多套地理区域可能使近邻落在另一地区。例如 Forlorn Hound 的近邻标签可能为 `Bridge of Sacrifice`，Omenkiller 的近邻也可能落在 `Moonlight Altar` 所属分组。这类结果不能称为原版准确地点，界面将地点标为「参考地点」；没有可用近邻时显示地图编号。位置归类不影响生命条事件给出的 Boss 名称和完成条件。
+同地图最近赐福只提供近邻参考，也不是官方的 Boss 地区关系。有匹配的 GameArea 行时，使用其 Boss 位置选择赐福；没有匹配行时，使用地图局部原点选择，近邻可靠性更低。高台、地下空间及同一 tile 内的多套地理区域可能使近邻落在另一地区。早期 Forlorn Hound 的近邻标签为 `Bridge of Sacrifice`，本轮用当前 WorldMapPoint 的封印监牢地点及局部关系修正；其他无法精确对应的地点仍标为「参考地点」。没有可用近邻时显示地图编号。位置归类不影响生命条事件给出的 Boss 名称和完成条件。
+
+2026-11-03 的地区修复将 95 个细分组归并为旧 C++ 的 32 个大区，并使用 PlayRegionParam 建立一次性关联索引。跨场代表位置按主完成成员确定性选择，避免异步资源顺序改变地图；相同地图族中的合法相邻 tile Param 位置继续保留。Golden Hippopotamus 和 Messmer 的 Param 复制了地图族 15，而实际生命条成员仅在地图族 21，故两者改用事件地图。完整 207 项地区对照、三个局部地点关系、11 项近邻兜底及 Marigga 的一项归属差异见 [地区修复记录](boss-layout-regions-2026-11-03.md)。
 
 资源地图不能只取 Boss 位置所在的 tile。例如完成旗标 `2048380850` 的战斗脚本位于 `m61_48_38_00`，但其 `GameAreaParam` 位置归属 `[61,48,39]`。`MapDefaultInfoParam` 明确列出行 `61483800`，因此可以通过游戏提供的资源目录补全，毋须为这个 Boss 写例外名单。874 个地图 ID 与本机 544 份已解码地图 EMEVD 对比，仅有 `m60_45_36_10`、`m60_45_52_10`、`m61_44_45_10`、`m61_54_39_00`、`m61_55_39_00` 不在这张表中；目录仍需与其他 Param 的地图及已验证的地图层级／仪式资源关系合并。`MapDefaultInfoParam` 表示资源地图，不能当作 Boss 名单，也不保证每一行都有 EMEVD 文件。
 

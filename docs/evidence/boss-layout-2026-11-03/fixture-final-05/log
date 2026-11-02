@@ -1,0 +1,107 @@
+PASS: controlled revival host rejects false/unknown primary, unknown targets, stale context, invalid IDs/values and conflicts before any write; this fixture is not the native game writer.
+minimap-font C:\WINDOWS\Fonts\msyh.ttc
+Minimap Rust/egui initialized; native UI_SCENE below game UI
+PASS: actual new Minimap DLL init/destroy with only 176 host bytes readable; next page PAGE_NOACCESS, no appended capabilities.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+PASS: actual Boss init/update/destroy accepts only 224 readable bytes before PAGE_NOACCESS, optional region cap=false, forbidden tail callback was never called.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+PASS: actual Boss init/update/destroy accepts only 228 readable bytes before PAGE_NOACCESS, optional region cap=false, forbidden tail callback was never called.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+PASS: actual Boss init/update/destroy accepts only 228 readable bytes before PAGE_NOACCESS, optional region cap=true, forbidden tail callback was never called.
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=2493ms updates=147 requests=1658 peak active tokens=16 pending polls=1079 busy polls=64 max single update=7484us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+PASS: menu catalogue Ready with save always unavailable, late PARAM/VFS, zero flag reads/writes; OK/valid=0 also rejected. First valid save update=53us, extra file requests=0, extra PARAM pointer queries=7; this is a controlled startup, not a live-game completion-time claim.
+Full232-byte host optional context-checked region callback calls=1
+Production Boss.dll loaded; old short table/capability rejected. Real resource catalogue=207 rows, unique completion flags=208, file requests=1658, real scenes={"m31_00_00_00.msb", "m60_38_54_00.msb", "m61_49_44_00.msb"}; save/flags/input/writes are controlled fixtures. Base-only scenes reject DLC2 and no invalid alias was requested; area 61 may serve both aliases from archived bytes. The live switch/mount priority is not simulated.
+compact: render CPU median=21us p95=29us; mean vertices=244 meshes=1; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+PASS: real DLL compact geometry: Lansseax early kill OR late
+PASS: real DLL compact geometry: Lansseax retreat is not a kill
+PASS: real DLL compact geometry: Adula early is not late completion
+PASS: real DLL compact geometry: Patches late is not initial completion
+PASS: real DLL compact geometry: Hinterland first remains independent
+PASS: real DLL compact geometry: Hinterland second remains independent
+PASS: real DLL compact geometry: Hinterland both unfinished
+PASS: initial native Stormveil region: current=10000, open={10000}, logical rows=34
+PASS: all207 actual-DLL primary/map/completion/group sets match the selected archive audit; old-scope member semantics require its separate production member audit.
+PASS: manual second group survives same-region snapshot: current=10000, open={10000, 61000}, logical rows=53
+PASS: repeated same-region update preserves manual expansion: current=10000, open={10000, 61000}, logical rows=53
+PASS: unknown native region preserves last valid fold state: current=10000, open={10000, 61000}, logical rows=53
+PASS: unmapped native region preserves last valid fold state: current=10000, open={10000, 61000}, logical rows=53
+PASS: valid region transition folds all other groups: current=62000, open={62000}, logical rows=57
+PASS: search defers region-driven collapse: current=61000, open={62000, 63000}, logical rows=2
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-layout-status-1.bmp: 1280x900, nonblack RGB pixels=389962
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-layout-status-0.bmp: 1280x900, nonblack RGB pixels=389962
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-layout-status-2.bmp: 1280x900, nonblack RGB pixels=389962
+PASS: real egui status/name Response rectangles keep name x fixed for done/remaining/unknown: [(833.0, 868.6875, 876.6875), (833.0, 868.6875, 876.6875), (833.0, 868.6875, 876.6875)]
+PASS: clearing search applies latest pending region once: current=61000, open={61000}, logical rows=51
+PASS: remaining filter defers region collapse: current=10000, open={61000}, logical rows=0
+PASS: clearing remaining filter applies pending region: current=10000, open={10000}, logical rows=34
+PASS: explicit region filter defers automatic collapse: current=62000, open={10000, 61000}, logical rows=20
+PASS: All regions selection applies latest pending region: current=62000, open={62000}, logical rows=57
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=1751ms updates=103 requests=1082 peak active tokens=16 pending polls=1076 busy polls=63 max single update=4240us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+PASS: real reload reaches Ready without a save and initializes every group closed: current=4294967295, open={}, logical rows=32
+PASS: initial and asynchronous reload produce identical207 primary/map/completion/group records.
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-layout-reloaded.bmp: 1280x900, nonblack RGB pixels=389962
+PASS: first valid save after reload opens only its current region: current=10000, open={10000}, logical rows=34
+Normal-DLL glyph observation: state=1, first Boss name glyph x=877, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-normal-status-1.bmp: 1280x900, nonblack RGB pixels=389962
+Normal-DLL glyph observation: state=0, first Boss name glyph x=877, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-normal-status-0.bmp: 1280x900, nonblack RGB pixels=389962
+Normal-DLL glyph observation: state=2, first Boss name glyph x=877, glyph count=21
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-normal-status-2.bmp: 1280x900, nonblack RGB pixels=389962
+PASS: uninstrumented real-DLL name glyph UV sequence stays identical and first glyph x is fixed for all three status states.
+full real catalogue: render CPU median=116us p95=144us; mean vertices=2984 meshes=8; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+Full 500ms update with controlled batch flag reader: median=51us max=82us, ids=208, file requests=0
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-full.bmp: 1280x900, nonblack RGB pixels=389962
+Search input verified at (1000,255): all=2988 vertices, no-match=1268; real pointer press/release, Ctrl+A, Backspace and Unicode text events.
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-search.bmp: 1280x900, nonblack RGB pixels=389962
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-settings.bmp: 1280x900, nonblack RGB pixels=389962
+Settings pointer interaction persisted configs/boss-ui.json on update, outside render.
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-revival-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-revival-reopened.bmp: 1280x900, nonblack RGB pixels=480832
+PASS: Cancel preserved flags; actual Lansseax search + early-only completion allowed one explicit update-side revival with a true early witness and the exact original five cleared targets: primary=1037510800, auxiliary writes=4
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-revived.bmp: 1280x900, nonblack RGB pixels=390065
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=1748ms updates=103 requests=1082 peak active tokens=16 pending polls=1079 busy polls=63 max single update=4263us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+Canonical search real glyph expansion: no-match=1268, initially matched=1356, expanded=1524
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-unknown-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+boss-revival: context or flags unavailable; no revival performed
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-unknown-rejected.bmp: 1280x900, nonblack RGB pixels=390065
+PASS: actual DLL confirmation rejected unknown completion flags without controlled writes
+boss-font C:\WINDOWS\Fonts\msyh.ttc
+Boss Rust/egui initialized; native UI_SCENE above game UI
+boss-loading: Discovering named Boss health bars
+boss-loading: Checking Boss scene entities
+boss-loading: Discovering named Boss health bars
+boss-loading: Ready; some game resources are unavailable
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=1750ms updates=103 requests=1082 peak active tokens=16 pending polls=1072 busy polls=63 max single update=4092us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+Canonical search real glyph expansion: no-match=1268, initially matched=1356, expanded=1524
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-context-confirm.bmp: 1280x900, nonblack RGB pixels=480832
+boss-revival: context or flags unavailable; no revival performed
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-context-rejected.bmp: 1280x900, nonblack RGB pixels=390065
+PASS: actual DLL confirmation rejected changed save context without controlled writes
+Wheel delivered through production input adapter; capture=3
+hidden loading: render CPU median=0us p95=0us; mean vertices=0 meshes=0; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples
+WARP readback \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05\boss-hidden.bmp: 1280x900, nonblack RGB pixels=0
+PASS: actual Boss DLL + real archived PARAM/EMEVD/FMG/MSB parsers + WARP pixels/mesh/font rendering; 207 rows/208 unique completion flags, OR/count boundaries, strict controlled revival, search/settings persistence/cancel/explicit early-witness confirmation/unknown/context rejection/wheel/full-map/loading/hide/reset/repeated-sequence contracts. Save/flags/writes are controlled fixtures; no live game/FPS or mount-priority claim. Scratch \\?\E:\Projects\EROverlay\.cindy-worktrees\gentle-darwin\target\boss-layout-review\fixture-final-05

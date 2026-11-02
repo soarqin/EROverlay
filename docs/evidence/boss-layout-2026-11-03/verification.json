@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "code_commit": "6a19db4d86163ae2bd81c71197f55c64a1340bdc",
+  "baseline": "f7210103f7002bf149f1d0c165ec0b126fa9ae04",
+  "normal_tests": {
+    "passed": 204,
+    "failed": 0,
+    "ignored": 12
+  },
+  "production_dlls": [
+    {
+      "name": "EROverlay.dll",
+      "bytes": 765952,
+      "sha256": "e4c3995a4f6f347a5c8ccf219e32853a45eb1f1f4d478646c9feda2ada33dfdb"
+    },
+    {
+      "name": "Boss.dll",
+      "bytes": 2746880,
+      "sha256": "8c752cbdd8515022e7b127826cb8ca86cf0310905de4b2cb790121a795eb5009"
+    },
+    {
+      "name": "Minimap.dll",
+      "bytes": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    }
+  ],
+  "new_dependencies": [],
+  "configs_changed": false,
+  "ui_observations": {
+    "old_f721_name_glyph_x": [
+      877,
+      868,
+      872
+    ],
+    "normal_name_glyph_x": [
+      877,
+      877,
+      877
+    ],
+    "name_glyphs": 21,
+    "fixture_name_response_x": 876.6875,
+    "groups": 32,
+    "encounters": 207
+  },
+  "native_region": {
+    "old_boss_state_bytes": 32,
+    "old_host_bytes": 224,
+    "new_host_bytes": 232,
+    "physical_guard_pages_tested": [
+      176,
+      224,
+      228
+    ]
+  },
+  "normal_multi_dll": {
+    "capture": "Recorded from exec_command output; no game process was used.",
+    "command": "./target/release/eroverlay-harness.exe ./package 3",
+    "exit_code": 0,
+    "cycles": 3,
+    "renders_per_cycle": 35,
+    "committed_bytes_per_cycle": 1114112,
+    "boss_loaded": true,
+    "scope": "Actual normal core and two plugin DLLs; RGB10A2 WARP resize, alternating layers and stop. Offline game overlays hidden."
+  },
+  "real_visible_two_plugin": {
+    "capture": "Recorded from exec_command output and three independent WARP BMP files.",
+    "command": "./target/release/layer_order_probe.exe ./target/boss-layout-core-fixture/release/EROverlay.dll ./package ./target/boss-layout-review/real-two-plugin-basic basic",
+    "exit_code": 0,
+    "normal_plugin_dlls": true,
+    "fixture_core": {
+      "path": "target/boss-layout-core-fixture/release/EROverlay.dll",
+      "bytes": 835584,
+      "sha256": "ec11c23bc5cc3ddf016c07e784633d4aa07fa6603a15dd16ceabfa6692828526"
+    },
+    "probe": {
+      "path": "target/release/layer_order_probe.exe",
+      "bytes": 332800,
+      "sha256": "4420839aaecfc23d3ca314f34144fb31cfb86ae5f0482b287d8728c3cdd8355d"
+    },
+    "stable_sequential_double_layer_frames": 120,
+    "opaque_overlap_pixels": 26940,
+    "nonempty_meshes": 1190,
+    "drops_total": 8,
+    "drops_normal_baseline": 1,
+    "gpu_retained_busy_stop": true,
+    "drained_stop_ok": true,
+    "scope": "Actual shared renderer and plugins; controlled native boundary, game/save/resource data. Deliberate busy scenarios include skip/recovery, so this basic run is not a renewed flicker acceptance."
+  },
+  "fixture_minimap": "fixture-final-05 uses the prior f721 Minimap for the 176-byte compatibility guard. normal-final-06 and the shared-renderer test use the new packaged Minimap.",
+  "limits": [
+    "No live game was launched, injected or changed; no in-game visual, input or FPS acceptance is claimed.",
+    "Prior flicker and menu-preload acceptance remain pending user confirmation.",
+    "Demi-Human Queen Marigga follows current PlayRegionParam Cerulean Coast rather than the old manual Charo group.",
+    "Eleven archived assignments use bounded neighbourhood evidence; it is not an exact geographic boundary.",
+    "Archive input lacks required common_macro; the real resource warning remains visible.",
+    "Save, flags, revival writes, late VFS/PARAM and region transitions in Boss probes are controlled; the normal core is checked separately."
+  ]
+}

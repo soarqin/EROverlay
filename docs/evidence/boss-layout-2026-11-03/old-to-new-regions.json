@@ -1,0 +1,2280 @@
+[
+  {
+    "flag": 18000800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m18_00_00_00",
+    "name": "Ulcerated Tree Spirit",
+    "completion_flags": [
+      18000800
+    ]
+  },
+  {
+    "flag": 18000850,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m18_00_00_00",
+    "name": "Soldier of Godrick",
+    "completion_flags": [
+      18000850
+    ]
+  },
+  {
+    "flag": 30020800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m30_02_00_00",
+    "name": "Erdtree Burial Watchdog",
+    "completion_flags": [
+      30020800
+    ]
+  },
+  {
+    "flag": 30040800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m30_04_00_00",
+    "name": "Grave Warden Duelist",
+    "completion_flags": [
+      30040800
+    ]
+  },
+  {
+    "flag": 30110800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m30_11_00_00",
+    "name": "Black Knife Assassin",
+    "completion_flags": [
+      30110800
+    ]
+  },
+  {
+    "flag": 31000800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m31_00_00_00",
+    "name": "Patches",
+    "completion_flags": [
+      31000800
+    ]
+  },
+  {
+    "flag": 31030800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m31_03_00_00",
+    "name": "Beastman of Farum Azula",
+    "completion_flags": [
+      31030800
+    ]
+  },
+  {
+    "flag": 31150800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m31_15_00_00",
+    "name": "Demi-Human Chief",
+    "completion_flags": [
+      31150800
+    ]
+  },
+  {
+    "flag": 31170800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m31_17_00_00",
+    "name": "Guardian Golem",
+    "completion_flags": [
+      31170800
+    ]
+  },
+  {
+    "flag": 32010800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m32_01_00_00",
+    "name": "Stonedigger Troll",
+    "completion_flags": [
+      32010800
+    ]
+  },
+  {
+    "flag": 1042360800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_42_36_00",
+    "name": "Tree Sentinel",
+    "completion_flags": [
+      1042360800
+    ]
+  },
+  {
+    "flag": 1042370800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_42_37_00",
+    "name": "Crucible Knight",
+    "completion_flags": [
+      1042370800
+    ]
+  },
+  {
+    "flag": 1042380800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_42_38_00",
+    "name": "Deathbird",
+    "completion_flags": [
+      1042380800
+    ]
+  },
+  {
+    "flag": 1042380850,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_42_38_00",
+    "name": "Bell Bearing Hunter",
+    "completion_flags": [
+      1042380850
+    ]
+  },
+  {
+    "flag": 1043360800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_43_36_00",
+    "name": "Flying Dragon Agheel",
+    "completion_flags": [
+      1043360800
+    ]
+  },
+  {
+    "flag": 1043370800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_43_37_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1043370800
+    ]
+  },
+  {
+    "flag": 1044350800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_44_34_00",
+    "name": "Bloodhound Knight Darriwil",
+    "completion_flags": [
+      1044350800
+    ]
+  },
+  {
+    "flag": 1044360800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_44_36_00",
+    "name": "Mad Pumpkin Head",
+    "completion_flags": [
+      1044360800
+    ]
+  },
+  {
+    "flag": 1045390800,
+    "old_region": "Limgrave",
+    "new_region": "Limgrave",
+    "group_id": 61000,
+    "map": "m60_45_39_00",
+    "name": "Tibia Mariner",
+    "completion_flags": [
+      1045390800
+    ]
+  },
+  {
+    "flag": 30000800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m30_00_00_00",
+    "name": "Cemetery Shade",
+    "completion_flags": [
+      30000800
+    ]
+  },
+  {
+    "flag": 30010800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m30_01_00_00",
+    "name": "Erdtree Burial Watchdog",
+    "completion_flags": [
+      30010800
+    ]
+  },
+  {
+    "flag": 31010800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m31_01_00_00",
+    "name": "Runebear",
+    "completion_flags": [
+      31010800
+    ]
+  },
+  {
+    "flag": 31020800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m31_02_00_00",
+    "name": "Miranda Blossom",
+    "completion_flags": [
+      31020800
+    ]
+  },
+  {
+    "flag": 32000800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m32_00_00_00",
+    "name": "Scaly Misbegotten",
+    "completion_flags": [
+      32000800
+    ]
+  },
+  {
+    "flag": 1042330800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m60_42_33_00",
+    "name": "Ancient Hero of Zamor",
+    "completion_flags": [
+      1042330800
+    ]
+  },
+  {
+    "flag": 1043300800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m60_43_30_00",
+    "name": "Leonine Misbegotten",
+    "completion_flags": [
+      1043300800
+    ]
+  },
+  {
+    "flag": 1043330800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m60_43_33_00",
+    "name": "Erdtree Avatar",
+    "completion_flags": [
+      1043330800
+    ]
+  },
+  {
+    "flag": 1044320800,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m60_44_32_00",
+    "name": "Deathbird",
+    "completion_flags": [
+      1044320800
+    ]
+  },
+  {
+    "flag": 1044320850,
+    "old_region": "Weeping Peninsula",
+    "new_region": "Weeping Peninsula",
+    "group_id": 61002,
+    "map": "m60_44_32_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1044320850
+    ]
+  },
+  {
+    "flag": 10000800,
+    "old_region": "Stormveil Castle",
+    "new_region": "Stormveil Castle",
+    "group_id": 10000,
+    "map": "m10_00_00_00",
+    "name": "Godrick the Grafted",
+    "completion_flags": [
+      10000800
+    ]
+  },
+  {
+    "flag": 10000850,
+    "old_region": "Stormveil Castle",
+    "new_region": "Stormveil Castle",
+    "group_id": 10000,
+    "map": "m10_00_00_00",
+    "name": "Margit, the Fell Omen",
+    "completion_flags": [
+      10000850
+    ]
+  },
+  {
+    "flag": 10010800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m10_01_00_00",
+    "name": "Grafted Scion",
+    "completion_flags": [
+      10010800
+    ]
+  },
+  {
+    "flag": 30030800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m30_03_00_00",
+    "name": "Spiritcaller Snail",
+    "completion_flags": [
+      30030800
+    ]
+  },
+  {
+    "flag": 30050800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m30_05_00_00",
+    "name": "Cemetery Shade",
+    "completion_flags": [
+      30050800
+    ]
+  },
+  {
+    "flag": 30050850,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m30_05_00_00",
+    "name": "Black Knife Assassin",
+    "completion_flags": [
+      30050850
+    ]
+  },
+  {
+    "flag": 30060800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m30_06_00_00",
+    "name": "Erdtree Burial Watchdog",
+    "completion_flags": [
+      30060800
+    ]
+  },
+  {
+    "flag": 31040800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m31_04_00_00",
+    "name": "Cleanrot Knight",
+    "completion_flags": [
+      31040800
+    ]
+  },
+  {
+    "flag": 31050800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m31_05_00_00",
+    "name": "Bloodhound Knight",
+    "completion_flags": [
+      31050800
+    ]
+  },
+  {
+    "flag": 31060800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m31_06_00_00",
+    "name": "Crystalian (Staff) / Crystalian (Spear)",
+    "completion_flags": [
+      31060800
+    ]
+  },
+  {
+    "flag": 32020800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m32_02_00_00",
+    "name": "Crystalian",
+    "completion_flags": [
+      32020800
+    ]
+  },
+  {
+    "flag": 39200800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m39_20_00_00",
+    "name": "Magma Wyrm Makar",
+    "completion_flags": [
+      39200800
+    ]
+  },
+  {
+    "flag": 1033430800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_33_43_00",
+    "name": "Erdtree Avatar",
+    "completion_flags": [
+      1033430800
+    ]
+  },
+  {
+    "flag": 1033450800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_33_45_00",
+    "name": "Bols, Carian Knight",
+    "completion_flags": [
+      1033450800
+    ]
+  },
+  {
+    "flag": 1034450800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_34_45_00",
+    "name": "Glintstone Dragon Smarag",
+    "completion_flags": [
+      1034450800
+    ]
+  },
+  {
+    "flag": 1034480800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_34_48_00",
+    "name": "Royal Revenant",
+    "completion_flags": [
+      1034480800
+    ]
+  },
+  {
+    "flag": 1035420800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_35_42_00",
+    "name": "Omenkiller",
+    "completion_flags": [
+      1035420800
+    ]
+  },
+  {
+    "flag": 1035500800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_35_50_00",
+    "name": "Royal Knight Loretta",
+    "completion_flags": [
+      1035500800
+    ]
+  },
+  {
+    "flag": 1036450800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_36_45_00",
+    "name": "Death Rite Bird",
+    "completion_flags": [
+      1036450800
+    ]
+  },
+  {
+    "flag": 1036480800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_36_48_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1036480800
+    ]
+  },
+  {
+    "flag": 1036500800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_36_50_00",
+    "name": "Onyx Lord",
+    "completion_flags": [
+      1036500800
+    ]
+  },
+  {
+    "flag": 1037420800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_37_42_00",
+    "name": "Deathbird",
+    "completion_flags": [
+      1037420800
+    ]
+  },
+  {
+    "flag": 1037460800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_37_46_00",
+    "name": "Bell Bearing Hunter",
+    "completion_flags": [
+      1037460800
+    ]
+  },
+  {
+    "flag": 1038410800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_38_41_00",
+    "name": "Adan, Thief of Fire",
+    "completion_flags": [
+      1038410800
+    ]
+  },
+  {
+    "flag": 1038480800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_38_48_00",
+    "name": "Erdtree Avatar",
+    "completion_flags": [
+      1038480800
+    ]
+  },
+  {
+    "flag": 1039430800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_39_43_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1039430800
+    ]
+  },
+  {
+    "flag": 1039440800,
+    "old_region": "Liurnia of the Lakes",
+    "new_region": "Liurnia of the Lakes",
+    "group_id": 62000,
+    "map": "m60_39_44_00",
+    "name": "Tibia Mariner",
+    "completion_flags": [
+      1039440800
+    ]
+  },
+  {
+    "flag": 1033420800,
+    "old_region": "Moonlight Altar",
+    "new_region": "Moonlight Altar",
+    "group_id": 62002,
+    "map": "m60_33_42_00",
+    "name": "Alecto, Black Knife Ringleader",
+    "completion_flags": [
+      1033420800
+    ]
+  },
+  {
+    "flag": 1034420800,
+    "old_region": "Moonlight Altar",
+    "new_region": "Moonlight Altar",
+    "group_id": 62002,
+    "map": "m60_34_42_00",
+    "name": "Glintstone Dragon Adula",
+    "completion_flags": [
+      1034420800
+    ]
+  },
+  {
+    "flag": 14000800,
+    "old_region": "Academy of Raya Lucaria",
+    "new_region": "Academy of Raya Lucaria",
+    "group_id": 14000,
+    "map": "m14_00_00_00",
+    "name": "Rennala, Queen of the Full Moon",
+    "completion_flags": [
+      14000800
+    ]
+  },
+  {
+    "flag": 14000850,
+    "old_region": "Academy of Raya Lucaria",
+    "new_region": "Academy of Raya Lucaria",
+    "group_id": 14000,
+    "map": "m14_00_00_00",
+    "name": "Red Wolf of Radagon",
+    "completion_flags": [
+      14000850
+    ]
+  },
+  {
+    "flag": 30140800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m30_14_00_00",
+    "name": "Erdtree Burial Watchdog (Sword) / Erdtree Burial Watchdog (Scepter)",
+    "completion_flags": [
+      30140800
+    ]
+  },
+  {
+    "flag": 30150800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m30_15_00_00",
+    "name": "Cemetery Shade",
+    "completion_flags": [
+      30150800
+    ]
+  },
+  {
+    "flag": 31110800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m31_11_00_00",
+    "name": "Putrid Crystalian (Spear) / Putrid Crystalian (Ringblade) / Putrid Crystalian (Staff)",
+    "completion_flags": [
+      31110800
+    ]
+  },
+  {
+    "flag": 31210800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m31_21_00_00",
+    "name": "Frenzied Duelist",
+    "completion_flags": [
+      31210800
+    ]
+  },
+  {
+    "flag": 32070800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m32_07_00_00",
+    "name": "Magma Wyrm",
+    "completion_flags": [
+      32070800
+    ]
+  },
+  {
+    "flag": 32080800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m32_08_00_00",
+    "name": "Fallingstar Beast",
+    "completion_flags": [
+      32080800
+    ]
+  },
+  {
+    "flag": 1047400800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_47_40_00",
+    "name": "Putrid Avatar",
+    "completion_flags": [
+      1047400800
+    ]
+  },
+  {
+    "flag": 1048370800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_48_37_00",
+    "name": "Decaying Ekzykes",
+    "completion_flags": [
+      1048370800
+    ]
+  },
+  {
+    "flag": 1048400800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_48_40_00",
+    "name": "Mad Pumpkin Head (Flail) / Mad Pumpkin Head (Hammer)",
+    "completion_flags": [
+      1048400800
+    ]
+  },
+  {
+    "flag": 1049370800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_49_37_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1049370800
+    ]
+  },
+  {
+    "flag": 1049370850,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_49_37_00",
+    "name": "Death Rite Bird",
+    "completion_flags": [
+      1049370850
+    ]
+  },
+  {
+    "flag": 1049380800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_49_38_00",
+    "name": "Commander O'Neil",
+    "completion_flags": [
+      1049380800
+    ]
+  },
+  {
+    "flag": 1049390800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_49_39_00",
+    "name": "Nox Monk / Nox Swordstress",
+    "completion_flags": [
+      1049390800
+    ]
+  },
+  {
+    "flag": 1051360800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_51_36_00",
+    "name": "Misbegotten Warrior / Crucible Knight",
+    "completion_flags": [
+      1051360800
+    ]
+  },
+  {
+    "flag": 1252380800,
+    "old_region": "Caelid",
+    "new_region": "Caelid",
+    "group_id": 64000,
+    "map": "m60_52_38_00",
+    "name": "Starscourge Radahn",
+    "completion_flags": [
+      1252380800
+    ]
+  },
+  {
+    "flag": 30160800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m30_16_00_00",
+    "name": "Putrid Tree Spirit",
+    "completion_flags": [
+      30160800
+    ]
+  },
+  {
+    "flag": 31100800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m31_10_00_00",
+    "name": "Beastman of Farum Azula (Cleaver) / Beastman of Farum Azula (Throwing Knife)",
+    "completion_flags": [
+      31100800
+    ]
+  },
+  {
+    "flag": 31200800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m31_20_00_00",
+    "name": "Cleanrot Knight (Spear) / Cleanrot Knight (Sickle)",
+    "completion_flags": [
+      31200800
+    ]
+  },
+  {
+    "flag": 34130800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m34_13_00_00",
+    "name": "Godskin Apostle",
+    "completion_flags": [
+      34130800
+    ]
+  },
+  {
+    "flag": 1048410800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_48_41_00",
+    "name": "Bell Bearing Hunter",
+    "completion_flags": [
+      1048410800
+    ]
+  },
+  {
+    "flag": 1049390850,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_49_39_00",
+    "name": "Battlemage Hugues",
+    "completion_flags": [
+      1049390850
+    ]
+  },
+  {
+    "flag": 1051400800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_51_40_00",
+    "name": "Putrid Avatar",
+    "completion_flags": [
+      1051400800
+    ]
+  },
+  {
+    "flag": 1051430800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_51_43_00",
+    "name": "Black Blade Kindred",
+    "completion_flags": [
+      1051430800
+    ]
+  },
+  {
+    "flag": 1052410800,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_52_41_00",
+    "name": "Flying Dragon Greyll",
+    "completion_flags": [
+      1052410800
+    ]
+  },
+  {
+    "flag": 1052410850,
+    "old_region": "Greyoll's Dragonbarrow",
+    "new_region": "Greyoll's Dragonbarrow",
+    "group_id": 64001,
+    "map": "m60_52_41_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1052410850
+    ]
+  },
+  {
+    "flag": 30070800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m30_07_00_00",
+    "name": "Erdtree Burial Watchdog",
+    "completion_flags": [
+      30070800
+    ]
+  },
+  {
+    "flag": 30080800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m30_08_00_00",
+    "name": "Ancient Hero of Zamor",
+    "completion_flags": [
+      30080800
+    ]
+  },
+  {
+    "flag": 30120800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m30_12_00_00",
+    "name": "Misbegotten Warrior / Perfumer Tricia",
+    "completion_flags": [
+      30120800
+    ]
+  },
+  {
+    "flag": 31180800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m31_18_00_00",
+    "name": "Miranda the Blighted Bloom / Omenkiller",
+    "completion_flags": [
+      31180800
+    ]
+  },
+  {
+    "flag": 31190800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m31_19_00_00",
+    "name": "Black Knife Assassin",
+    "completion_flags": [
+      31190800
+    ]
+  },
+  {
+    "flag": 31190850,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m31_19_00_00",
+    "name": "Necromancer Garris",
+    "completion_flags": [
+      31190850
+    ]
+  },
+  {
+    "flag": 32040800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m32_04_00_00",
+    "name": "Stonedigger Troll",
+    "completion_flags": [
+      32040800
+    ]
+  },
+  {
+    "flag": 32050800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m32_05_00_00",
+    "name": "Crystalian (Ringblade) / Crystalian (Spear)",
+    "completion_flags": [
+      32050800
+    ]
+  },
+  {
+    "flag": 1038510800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_38_51_00",
+    "name": "Demi-Human Queen Gilika",
+    "completion_flags": [
+      1038510800
+    ]
+  },
+  {
+    "flag": 1038520800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_38_52_00",
+    "name": "Tibia Mariner",
+    "completion_flags": [
+      1038520800
+    ]
+  },
+  {
+    "flag": 1039500800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_39_50_00",
+    "name": "Godefroy the Grafted",
+    "completion_flags": [
+      1039500800
+    ]
+  },
+  {
+    "flag": 1039510800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_39_51_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1039510800
+    ]
+  },
+  {
+    "flag": 1039540800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_39_54_00",
+    "name": "Elemer of the Briar",
+    "completion_flags": [
+      1039540800
+    ]
+  },
+  {
+    "flag": 1040520800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_40_52_00",
+    "name": "Black Knife Assassin",
+    "completion_flags": [
+      1040520800
+    ]
+  },
+  {
+    "flag": 1040530800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_40_53_00",
+    "name": "Sanguine Noble",
+    "completion_flags": [
+      1040530800
+    ]
+  },
+  {
+    "flag": 1041500800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_41_50_00",
+    "name": "Fallingstar Beast",
+    "completion_flags": [
+      1041500800
+    ]
+  },
+  {
+    "flag": 1041510800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_41_51_00",
+    "name": "Tree Sentinel",
+    "completion_flags": [
+      1041510800
+    ]
+  },
+  {
+    "flag": 1041520800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_41_52_00",
+    "name": "Ancient Dragon Lansseax",
+    "completion_flags": [
+      1041520800,
+      1037510800
+    ]
+  },
+  {
+    "flag": 1041530800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_41_53_00",
+    "name": "Wormface",
+    "completion_flags": [
+      1041530800
+    ]
+  },
+  {
+    "flag": 1042550800,
+    "old_region": "Altus Plateau",
+    "new_region": "Altus Plateau",
+    "group_id": 63000,
+    "map": "m60_42_55_00",
+    "name": "Godskin Apostle",
+    "completion_flags": [
+      1042550800
+    ]
+  },
+  {
+    "flag": 30100800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m30_10_00_00",
+    "name": "Crucible Knight Ordovis / Crucible Knight",
+    "completion_flags": [
+      30100800
+    ]
+  },
+  {
+    "flag": 30130800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m30_13_00_00",
+    "name": "Grave Warden Duelist",
+    "completion_flags": [
+      30130800
+    ]
+  },
+  {
+    "flag": 34120800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m34_12_00_00",
+    "name": "Onyx Lord",
+    "completion_flags": [
+      34120800
+    ]
+  },
+  {
+    "flag": 1043530800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m60_43_53_00",
+    "name": "Bell Bearing Hunter",
+    "completion_flags": [
+      1043530800
+    ]
+  },
+  {
+    "flag": 1044530800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m60_44_53_00",
+    "name": "Deathbird",
+    "completion_flags": [
+      1044530800
+    ]
+  },
+  {
+    "flag": 1045520800,
+    "old_region": "Capital Outskirts",
+    "new_region": "Capital Outskirts",
+    "group_id": 63002,
+    "map": "m60_45_52_00",
+    "name": "Draconic Tree Sentinel",
+    "completion_flags": [
+      1045520800
+    ]
+  },
+  {
+    "flag": 30090800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m30_09_00_00",
+    "name": "Red Wolf of the Champion",
+    "completion_flags": [
+      30090800
+    ]
+  },
+  {
+    "flag": 31070800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m31_07_00_00",
+    "name": "Kindred of Rot",
+    "completion_flags": [
+      31070800
+    ]
+  },
+  {
+    "flag": 31090800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m31_09_00_00",
+    "name": "Demi-Human Queen Margot",
+    "completion_flags": [
+      31090800
+    ]
+  },
+  {
+    "flag": 1035530800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m60_35_53_00",
+    "name": "Magma Wyrm",
+    "completion_flags": [
+      1035530800
+    ]
+  },
+  {
+    "flag": 1036540800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m60_36_54_00",
+    "name": "Full-Grown Fallingstar Beast",
+    "completion_flags": [
+      1036540800
+    ]
+  },
+  {
+    "flag": 1037530800,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m60_37_53_00",
+    "name": "Demi-Human Queen Maggie",
+    "completion_flags": [
+      1037530800
+    ]
+  },
+  {
+    "flag": 1037540810,
+    "old_region": "Mt. Gelmir",
+    "new_region": "Mt. Gelmir",
+    "group_id": 63001,
+    "map": "m60_37_54_00",
+    "name": "Ulcerated Tree Spirit",
+    "completion_flags": [
+      1037540810
+    ]
+  },
+  {
+    "flag": 16000800,
+    "old_region": "Volcano Manor",
+    "new_region": "Volcano Manor",
+    "group_id": 16000,
+    "map": "m16_00_00_00",
+    "name": "God-Devouring Serpent / Rykard, Lord of Blasphemy",
+    "completion_flags": [
+      16000800
+    ]
+  },
+  {
+    "flag": 16000850,
+    "old_region": "Volcano Manor",
+    "new_region": "Volcano Manor",
+    "group_id": 16000,
+    "map": "m16_00_00_00",
+    "name": "Godskin Noble",
+    "completion_flags": [
+      16000850
+    ]
+  },
+  {
+    "flag": 16000860,
+    "old_region": "Volcano Manor",
+    "new_region": "Volcano Manor",
+    "group_id": 16000,
+    "map": "m16_00_00_00",
+    "name": "Abductor Virgin (Swinging Sickle) / Abductor Virgin (Wheel)",
+    "completion_flags": [
+      16000860
+    ]
+  },
+  {
+    "flag": 11000800,
+    "old_region": "Leyndell, Royal Capital",
+    "new_region": "Leyndell, Royal Capital",
+    "group_id": 11000,
+    "map": "m11_00_00_00",
+    "name": "Morgott, the Omen King",
+    "completion_flags": [
+      11000800
+    ]
+  },
+  {
+    "flag": 11000850,
+    "old_region": "Leyndell, Royal Capital",
+    "new_region": "Leyndell, Royal Capital",
+    "group_id": 11000,
+    "map": "m11_00_00_00",
+    "name": "Godfrey, First Elden Lord",
+    "completion_flags": [
+      11000850
+    ]
+  },
+  {
+    "flag": 34140850,
+    "old_region": "Leyndell, Royal Capital",
+    "new_region": "Leyndell, Royal Capital",
+    "group_id": 11000,
+    "map": "m34_14_00_00",
+    "name": "Fell Twin",
+    "completion_flags": [
+      34140850
+    ]
+  },
+  {
+    "flag": 35000800,
+    "old_region": "Leyndell, Royal Capital",
+    "new_region": "Leyndell, Royal Capital",
+    "group_id": 11000,
+    "map": "m35_00_00_00",
+    "name": "Mohg, the Omen",
+    "completion_flags": [
+      35000800
+    ]
+  },
+  {
+    "flag": 35000850,
+    "old_region": "Leyndell, Royal Capital",
+    "new_region": "Leyndell, Royal Capital",
+    "group_id": 11000,
+    "map": "m35_00_00_00",
+    "name": "Esgar, Priest of Blood",
+    "completion_flags": [
+      35000850
+    ]
+  },
+  {
+    "flag": 1048510800,
+    "old_region": "Forbidden Lands",
+    "new_region": "Forbidden Lands",
+    "group_id": 63003,
+    "map": "m60_48_51_00",
+    "name": "Night's Cavalry",
+    "completion_flags": [
+      1048510800
+    ]
+  },
+  {
+    "flag": 1049520800,
+    "old_region": "Forbidden Lands",
+    "new_region": "Forbidden Lands",
+    "group_id": 63003,
+    "map": "m60_49_52_00",
+    "name": "Black Blade Kindred",
+    "completion_flags": [
+      1049520800
+    ]
+  },
+  {
+    "flag": 30170800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m30_17_00_00",
+    "name": "Ancient Hero of Zamor",
+    "completion_flags": [
+      30170800
+    ]
+  },
+  {
+    "flag": 30180800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m30_18_00_00",
+    "name": "Ulcerated Tree Spirit",
+    "completion_flags": [
+      30180800
+    ]
+  },
+  {
+    "flag": 31220800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m31_22_00_00",
+    "name": "Godskin Apostle / Godskin Noble / Spiritcaller Snail",
+    "completion_flags": [
+      31220800
+    ]
+  },
+  {
+    "flag": 1050570800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_50_57_00",
+    "name": "Death Rite Bird",
+    "completion_flags": [
+      1050570800
+    ]
+  },
+  {
+    "flag": 1051570800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_51_57_00",
+    "name": "Commander Niall",
+    "completion_flags": [
+      1051570800
+    ]
+  },
+  {
+    "flag": 1052560800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_52_56_00",
+    "name": "Erdtree Avatar",
+    "completion_flags": [
+      1052560800
+    ]
+  },
+  {
+    "flag": 1053560800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_53_56_00",
+    "name": "Roundtable Knight Vyke",
+    "completion_flags": [
+      1053560800
+    ]
+  },
+  {
+    "flag": 1252520800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_52_52_00",
+    "name": "Fire Giant",
+    "completion_flags": [
+      1252520800
+    ]
+  },
+  {
+    "flag": 1254560800,
+    "old_region": "Mountaintops of the Giants",
+    "new_region": "Mountaintops of the Giants",
+    "group_id": 65000,
+    "map": "m60_54_56_00",
+    "name": "Borealis the Freezing Fog",
+    "completion_flags": [
+      1254560800
+    ]
+  },
+  {
+    "flag": 13000800,
+    "old_region": "Crumbling Farum Azula",
+    "new_region": "Crumbling Farum Azula",
+    "group_id": 13000,
+    "map": "m13_00_00_00",
+    "name": "Beast Clergyman / Maliketh, the Black Blade",
+    "completion_flags": [
+      13000800
+    ]
+  },
+  {
+    "flag": 13000830,
+    "old_region": "Crumbling Farum Azula",
+    "new_region": "Crumbling Farum Azula",
+    "group_id": 13000,
+    "map": "m13_00_00_00",
+    "name": "Dragonlord Placidusax",
+    "completion_flags": [
+      13000830
+    ]
+  },
+  {
+    "flag": 13000850,
+    "old_region": "Crumbling Farum Azula",
+    "new_region": "Crumbling Farum Azula",
+    "group_id": 13000,
+    "map": "m13_00_00_00",
+    "name": "Godskin Duo",
+    "completion_flags": [
+      13000850
+    ]
+  },
+  {
+    "flag": 30190800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m30_19_00_00",
+    "name": "Putrid Grave Warden Duelist",
+    "completion_flags": [
+      30190800
+    ]
+  },
+  {
+    "flag": 30200800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m30_20_00_00",
+    "name": "Stray Mimic Tear",
+    "completion_flags": [
+      30200800
+    ]
+  },
+  {
+    "flag": 31120800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m31_12_00_00",
+    "name": "Misbegotten Crusader",
+    "completion_flags": [
+      31120800
+    ]
+  },
+  {
+    "flag": 32110800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m32_11_00_00",
+    "name": "Astel, Stars of Darkness",
+    "completion_flags": [
+      32110800
+    ]
+  },
+  {
+    "flag": 1048570800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m60_48_57_00",
+    "name": "Death Rite Bird",
+    "completion_flags": [
+      1048570800
+    ]
+  },
+  {
+    "flag": 1050560800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m60_50_56_00",
+    "name": "Great Wyrm Theodorix",
+    "completion_flags": [
+      1050560800
+    ]
+  },
+  {
+    "flag": 1050570850,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m60_50_57_00",
+    "name": "Putrid Avatar",
+    "completion_flags": [
+      1050570850
+    ]
+  },
+  {
+    "flag": 1248550800,
+    "old_region": "Consecrated Snowfield",
+    "new_region": "Consecrated Snowfield",
+    "group_id": 65002,
+    "map": "m60_48_55_00",
+    "name": "Night's Cavalry (Glaive) / Night's Cavalry (Flail)",
+    "completion_flags": [
+      1248550800
+    ]
+  },
+  {
+    "flag": 15000800,
+    "old_region": "Miquella's Haligtree",
+    "new_region": "Miquella's Haligtree",
+    "group_id": 15001,
+    "map": "m15_00_00_00",
+    "name": "Malenia, Blade of Miquella / Malenia, Goddess of Rot",
+    "completion_flags": [
+      15000800
+    ]
+  },
+  {
+    "flag": 15000850,
+    "old_region": "Miquella's Haligtree",
+    "new_region": "Miquella's Haligtree",
+    "group_id": 15001,
+    "map": "m15_00_00_00",
+    "name": "Loretta, Knight of the Haligtree",
+    "completion_flags": [
+      15000850
+    ]
+  },
+  {
+    "flag": 12020800,
+    "old_region": "Siofra River",
+    "new_region": "Siofra River",
+    "group_id": 12070,
+    "map": "m12_02_00_00",
+    "name": "Valiant Gargoyle / Valiant Gargoyle (Twinblade)",
+    "completion_flags": [
+      12020800
+    ]
+  },
+  {
+    "flag": 12020830,
+    "old_region": "Siofra River",
+    "new_region": "Siofra River",
+    "group_id": 12070,
+    "map": "m12_02_00_00",
+    "name": "Dragonkin Soldier",
+    "completion_flags": [
+      12020830
+    ]
+  },
+  {
+    "flag": 12020850,
+    "old_region": "Siofra River",
+    "new_region": "Siofra River",
+    "group_id": 12070,
+    "map": "m12_02_00_00",
+    "name": "Mimic Tear",
+    "completion_flags": [
+      12020850
+    ]
+  },
+  {
+    "flag": 12080800,
+    "old_region": "Siofra River",
+    "new_region": "Siofra River",
+    "group_id": 12070,
+    "map": "m12_08_00_00",
+    "name": "Ancestor Spirit",
+    "completion_flags": [
+      12080800
+    ]
+  },
+  {
+    "flag": 12090800,
+    "old_region": "Siofra River",
+    "new_region": "Siofra River",
+    "group_id": 12070,
+    "map": "m12_09_00_00",
+    "name": "Regal Ancestor Spirit",
+    "completion_flags": [
+      12090800
+    ]
+  },
+  {
+    "flag": 12050800,
+    "old_region": "Mohgwyn Dynasty Mausoleum",
+    "new_region": "Mohgwyn Dynasty Mausoleum",
+    "group_id": 6664500,
+    "map": "m12_05_00_00",
+    "name": "Mohg, Lord of Blood",
+    "completion_flags": [
+      12050800
+    ]
+  },
+  {
+    "flag": 12010800,
+    "old_region": "Ainsel River",
+    "new_region": "Ainsel River",
+    "group_id": 12012,
+    "map": "m12_01_00_00",
+    "name": "Dragonkin Soldier of Nokstella",
+    "completion_flags": [
+      12010800
+    ]
+  },
+  {
+    "flag": 12010850,
+    "old_region": "Ainsel River",
+    "new_region": "Ainsel River",
+    "group_id": 12012,
+    "map": "m12_01_00_00",
+    "name": "Dragonkin Soldier",
+    "completion_flags": [
+      12010850
+    ]
+  },
+  {
+    "flag": 12040800,
+    "old_region": "Ainsel River",
+    "new_region": "Ainsel River",
+    "group_id": 12012,
+    "map": "m12_04_00_00",
+    "name": "Astel, Naturalborn of the Void",
+    "completion_flags": [
+      12040800
+    ]
+  },
+  {
+    "flag": 12030390,
+    "old_region": "Deeproot Depths",
+    "new_region": "Deeproot Depths",
+    "group_id": 12030,
+    "map": "m12_03_00_00",
+    "name": "Crucible Knight Siluria",
+    "completion_flags": [
+      12030390
+    ]
+  },
+  {
+    "flag": 12030800,
+    "old_region": "Deeproot Depths",
+    "new_region": "Deeproot Depths",
+    "group_id": 12030,
+    "map": "m12_03_00_00",
+    "name": "Fia's Champion / Sorcerer Rogier / Lionel the Lionhearted",
+    "completion_flags": [
+      12030800
+    ]
+  },
+  {
+    "flag": 12030850,
+    "old_region": "Deeproot Depths",
+    "new_region": "Deeproot Depths",
+    "group_id": 12030,
+    "map": "m12_03_00_00",
+    "name": "Lichdragon Fortissax",
+    "completion_flags": [
+      12030850
+    ]
+  },
+  {
+    "flag": 11050800,
+    "old_region": "Leyndell, Ashen Capital",
+    "new_region": "Leyndell, Ashen Capital",
+    "group_id": 11050,
+    "map": "m11_05_00_00",
+    "name": "Godfrey, First Elden Lord / Hoarah Loux, Warrior",
+    "completion_flags": [
+      11050800
+    ]
+  },
+  {
+    "flag": 11050850,
+    "old_region": "Leyndell, Ashen Capital",
+    "new_region": "Leyndell, Ashen Capital",
+    "group_id": 11050,
+    "map": "m11_05_00_00",
+    "name": "Sir Gideon Ofnir, the All-Knowing",
+    "completion_flags": [
+      11050850
+    ]
+  },
+  {
+    "flag": 19000800,
+    "old_region": "Leyndell, Ashen Capital",
+    "new_region": "Leyndell, Ashen Capital",
+    "group_id": 11050,
+    "map": "m19_00_00_00",
+    "name": "Radagon of the Golden Order / Elden Beast",
+    "completion_flags": [
+      19000800
+    ]
+  },
+  {
+    "flag": 20000800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m20_00_00_00",
+    "name": "Divine Beast Dancing Lion",
+    "completion_flags": [
+      20000800
+    ]
+  },
+  {
+    "flag": 41000800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m41_00_00_00",
+    "name": "Demi-Human Swordmaster Onze",
+    "completion_flags": [
+      41000800
+    ]
+  },
+  {
+    "flag": 41020800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m41_02_00_00",
+    "name": "Lamenter",
+    "completion_flags": [
+      41020800
+    ]
+  },
+  {
+    "flag": 43000800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m43_00_00_00",
+    "name": "Chief Bloodfiend",
+    "completion_flags": [
+      43000800
+    ]
+  },
+  {
+    "flag": 2045440800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m61_45_44_00",
+    "name": "Ghostflame Dragon",
+    "completion_flags": [
+      2045440800
+    ]
+  },
+  {
+    "flag": 2046410800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m61_46_41_00",
+    "name": "Knight of the Solitary Gaol",
+    "completion_flags": [
+      2046410800
+    ]
+  },
+  {
+    "flag": 2048440800,
+    "old_region": "Gravesite Plain",
+    "new_region": "Gravesite Plain",
+    "group_id": 68000,
+    "map": "m61_48_44_00",
+    "name": "Rellana, Twin Moon Knight",
+    "completion_flags": [
+      2048440800
+    ]
+  },
+  {
+    "flag": 21000850,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m21_00_00_00",
+    "name": "Golden Hippopotamus",
+    "completion_flags": [
+      21000850
+    ]
+  },
+  {
+    "flag": 21010800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m21_01_00_00",
+    "name": "Messmer the Impaler / Base Serpent Messmer",
+    "completion_flags": [
+      21010800
+    ]
+  },
+  {
+    "flag": 25000800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m25_00_00_00",
+    "name": "Metyr, Mother of Fingers",
+    "completion_flags": [
+      25000800
+    ]
+  },
+  {
+    "flag": 40000800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m40_00_00_00",
+    "name": "Death Knight",
+    "completion_flags": [
+      40000800
+    ]
+  },
+  {
+    "flag": 40010800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m40_01_00_00",
+    "name": "Death Knight",
+    "completion_flags": [
+      40010800
+    ]
+  },
+  {
+    "flag": 41010800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m41_01_00_00",
+    "name": "Curseblade Labirith",
+    "completion_flags": [
+      41010800
+    ]
+  },
+  {
+    "flag": 2044470800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_44_47_00",
+    "name": "Rugalea the Great Red Bear",
+    "completion_flags": [
+      2044470800
+    ]
+  },
+  {
+    "flag": 2046450800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_46_45_00",
+    "name": "Red Bear",
+    "completion_flags": [
+      2046450800
+    ]
+  },
+  {
+    "flag": 2047450800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_47_44_00",
+    "name": "Black Knight Garrew",
+    "completion_flags": [
+      2047450800
+    ]
+  },
+  {
+    "flag": 2049430800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_49_43_00",
+    "name": "Ghostflame Dragon",
+    "completion_flags": [
+      2049430800
+    ]
+  },
+  {
+    "flag": 2049430850,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_49_43_00",
+    "name": "Black Knight Edredd",
+    "completion_flags": [
+      2049430850
+    ]
+  },
+  {
+    "flag": 2049440800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_49_44_00",
+    "name": "Dryleaf Dane",
+    "completion_flags": [
+      2049440800
+    ]
+  },
+  {
+    "flag": 2049450800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_49_45_00",
+    "name": "Ralva the Great Red Bear",
+    "completion_flags": [
+      2049450800
+    ]
+  },
+  {
+    "flag": 2051440800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_51_44_00",
+    "name": "Rakshasa",
+    "completion_flags": [
+      2051440800
+    ]
+  },
+  {
+    "flag": 2051450800,
+    "old_region": "Scadu Altus",
+    "new_region": "Scadu Altus",
+    "group_id": 69000,
+    "map": "m61_51_45_00",
+    "name": "Count Ymir, Mother of Fingers",
+    "completion_flags": [
+      2051450800
+    ]
+  },
+  {
+    "flag": 2044450800,
+    "old_region": "Ancient Ruins of Rauh",
+    "new_region": "Ancient Ruins of Rauh",
+    "group_id": 69400,
+    "map": "m61_44_45_00",
+    "name": "Romina, Saint of the Bud",
+    "completion_flags": [
+      2044450800
+    ]
+  },
+  {
+    "flag": 2046460800,
+    "old_region": "Ancient Ruins of Rauh",
+    "new_region": "Ancient Ruins of Rauh",
+    "group_id": 69400,
+    "map": "m61_46_46_00",
+    "name": "Divine Beast Dancing Lion",
+    "completion_flags": [
+      2046460800
+    ]
+  },
+  {
+    "flag": 22000800,
+    "old_region": "Cerulean Coast",
+    "new_region": "Cerulean Coast",
+    "group_id": 68300,
+    "map": "m22_00_00_00",
+    "name": "Putrescent Knight",
+    "completion_flags": [
+      22000800
+    ]
+  },
+  {
+    "flag": 2046380800,
+    "old_region": "Cerulean Coast",
+    "new_region": "Cerulean Coast",
+    "group_id": 68300,
+    "map": "m61_46_38_00",
+    "name": "Dancer of Ranah",
+    "completion_flags": [
+      2046380800
+    ]
+  },
+  {
+    "flag": 2046400800,
+    "old_region": "Charo's Hidden Grave",
+    "new_region": "Cerulean Coast",
+    "group_id": 68300,
+    "map": "m61_46_40_00",
+    "name": "Demi-Human Queen Marigga",
+    "completion_flags": [
+      2046400800
+    ]
+  },
+  {
+    "flag": 2048380850,
+    "old_region": "Cerulean Coast",
+    "new_region": "Cerulean Coast",
+    "group_id": 68300,
+    "map": "m61_48_39_00",
+    "name": "Ghostflame Dragon",
+    "completion_flags": [
+      2048380850
+    ]
+  },
+  {
+    "flag": 2047390800,
+    "old_region": "Charo's Hidden Grave",
+    "new_region": "Charo's Hidden Grave",
+    "group_id": 68400,
+    "map": "m61_47_39_00",
+    "name": "Death Rite Bird",
+    "completion_flags": [
+      2047390800
+    ]
+  },
+  {
+    "flag": 43010800,
+    "old_region": "Jagged Peak",
+    "new_region": "Jagged Peak",
+    "group_id": 68500,
+    "map": "m43_01_00_00",
+    "name": "Ancient Dragon-Man",
+    "completion_flags": [
+      43010800
+    ]
+  },
+  {
+    "flag": 2049410800,
+    "old_region": "Jagged Peak",
+    "new_region": "Jagged Peak",
+    "group_id": 68500,
+    "map": "m61_49_41_00",
+    "name": "Jagged Peak Drake",
+    "completion_flags": [
+      2049410800
+    ]
+  },
+  {
+    "flag": 2052400800,
+    "old_region": "Jagged Peak",
+    "new_region": "Jagged Peak",
+    "group_id": 68500,
+    "map": "m61_52_40_00",
+    "name": "Jagged Peak Drake",
+    "completion_flags": [
+      2052400800
+    ]
+  },
+  {
+    "flag": 2054390800,
+    "old_region": "Jagged Peak",
+    "new_region": "Jagged Peak",
+    "group_id": 68500,
+    "map": "m61_54_39_00",
+    "name": "Bayle the Dread",
+    "completion_flags": [
+      2054390800
+    ]
+  },
+  {
+    "flag": 2054390850,
+    "old_region": "Jagged Peak",
+    "new_region": "Jagged Peak",
+    "group_id": 68500,
+    "map": "m61_54_39_00",
+    "name": "Ancient Dragon Senessax",
+    "completion_flags": [
+      2054390850
+    ]
+  },
+  {
+    "flag": 2049480800,
+    "old_region": "Scaduview",
+    "new_region": "Scaduview",
+    "group_id": 69200,
+    "map": "m61_49_48_00",
+    "name": "Commander Gaius",
+    "completion_flags": [
+      2049480800
+    ]
+  },
+  {
+    "flag": 2050470800,
+    "old_region": "Scaduview",
+    "new_region": "Scaduview",
+    "group_id": 69200,
+    "map": "m61_50_47_00",
+    "name": "Tree Sentinel",
+    "completion_flags": [
+      2050470800
+    ]
+  },
+  {
+    "flag": 2050480800,
+    "old_region": "Scaduview",
+    "new_region": "Scaduview",
+    "group_id": 69200,
+    "map": "m61_50_48_00",
+    "name": "Scadutree Avatar",
+    "completion_flags": [
+      2050480800
+    ]
+  },
+  {
+    "flag": 2050480860,
+    "old_region": "Scaduview",
+    "new_region": "Scaduview",
+    "group_id": 69200,
+    "map": "m61_50_48_00",
+    "name": "Tree Sentinel",
+    "completion_flags": [
+      2050480860
+    ]
+  },
+  {
+    "flag": 2052480800,
+    "old_region": "Scaduview",
+    "new_region": "Scaduview",
+    "group_id": 69200,
+    "map": "m61_52_48_00",
+    "name": "Fallingstar Beast",
+    "completion_flags": [
+      2052480800
+    ]
+  },
+  {
+    "flag": 28000800,
+    "old_region": "Abyssal Woods",
+    "new_region": "Abyssal Woods",
+    "group_id": 68600,
+    "map": "m28_00_00_00",
+    "name": "Midra, Lord of Frenzied Flame",
+    "completion_flags": [
+      28000800
+    ]
+  },
+  {
+    "flag": 2052430800,
+    "old_region": "Abyssal Woods",
+    "new_region": "Abyssal Woods",
+    "group_id": 68600,
+    "map": "m61_52_43_00",
+    "name": "Jori, Elder Inquisitor",
+    "completion_flags": [
+      2052430800
+    ]
+  },
+  {
+    "flag": 20010800,
+    "old_region": "Enir-Ilim",
+    "new_region": "Enir-Ilim",
+    "group_id": 20010,
+    "map": "m20_01_00_00",
+    "name": "Promised Consort Radahn / Radahn, Consort of Miquella",
+    "completion_flags": [
+      20010800
+    ]
+  }
+]

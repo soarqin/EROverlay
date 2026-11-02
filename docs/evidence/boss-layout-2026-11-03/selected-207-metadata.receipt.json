@@ -1,0 +1,32 @@
+{
+  "scope": "207 old primary/completion identities retained; full named event members verified by selected audit, not inferred from flag matching",
+  "baseline": "target\\boss-layout-review\\selected-207-metadata.tsv",
+  "map_representation_changes": [
+    {
+      "flag": 21000850,
+      "old": "m15_00_00_00",
+      "new": "m21_00_00_00",
+      "name": "Golden Hippopotamus"
+    },
+    {
+      "flag": 21010800,
+      "old": "m15_00_00_00",
+      "new": "m21_01_00_00",
+      "name": "Messmer the Impaler / Base Serpent Messmer"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "target\\boss-207-delivery-audit\\audit.json",
+      "sha256": "a4da0d9231cbd28764aa762149e2d418cb3442e5f65240faa84e793c3068e19b"
+    },
+    {
+      "path": "target\\boss-layout-review\\final-region-audit\\audit.json",
+      "sha256": "df18b42a9c81368e8d50fc41e74b623da478bcd5b221383cfa59d9388fc8cd25"
+    },
+    {
+      "path": "target\\boss-layout-review\\selected-207-metadata.tsv",
+      "sha256": "1788b48e0c4523743476375b10cf33c4c7564e8cccba1899fe5fbd933f0702c0"
+    }
+  ]
+}

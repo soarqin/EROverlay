@@ -1,0 +1,162 @@
+[
+  {
+    "id": 61000,
+    "name": "Limgrave",
+    "count": 19
+  },
+  {
+    "id": 61002,
+    "name": "Weeping Peninsula",
+    "count": 10
+  },
+  {
+    "id": 10000,
+    "name": "Stormveil Castle",
+    "count": 2
+  },
+  {
+    "id": 62000,
+    "name": "Liurnia of the Lakes",
+    "count": 25
+  },
+  {
+    "id": 62002,
+    "name": "Moonlight Altar",
+    "count": 2
+  },
+  {
+    "id": 14000,
+    "name": "Academy of Raya Lucaria",
+    "count": 2
+  },
+  {
+    "id": 64000,
+    "name": "Caelid",
+    "count": 15
+  },
+  {
+    "id": 64001,
+    "name": "Greyoll's Dragonbarrow",
+    "count": 10
+  },
+  {
+    "id": 63000,
+    "name": "Altus Plateau",
+    "count": 20
+  },
+  {
+    "id": 63002,
+    "name": "Capital Outskirts",
+    "count": 6
+  },
+  {
+    "id": 63001,
+    "name": "Mt. Gelmir",
+    "count": 7
+  },
+  {
+    "id": 16000,
+    "name": "Volcano Manor",
+    "count": 3
+  },
+  {
+    "id": 11000,
+    "name": "Leyndell, Royal Capital",
+    "count": 5
+  },
+  {
+    "id": 63003,
+    "name": "Forbidden Lands",
+    "count": 2
+  },
+  {
+    "id": 65000,
+    "name": "Mountaintops of the Giants",
+    "count": 9
+  },
+  {
+    "id": 13000,
+    "name": "Crumbling Farum Azula",
+    "count": 3
+  },
+  {
+    "id": 65002,
+    "name": "Consecrated Snowfield",
+    "count": 8
+  },
+  {
+    "id": 15001,
+    "name": "Miquella's Haligtree",
+    "count": 2
+  },
+  {
+    "id": 12070,
+    "name": "Siofra River",
+    "count": 5
+  },
+  {
+    "id": 6664500,
+    "name": "Mohgwyn Dynasty Mausoleum",
+    "count": 1
+  },
+  {
+    "id": 12012,
+    "name": "Ainsel River",
+    "count": 3
+  },
+  {
+    "id": 12030,
+    "name": "Deeproot Depths",
+    "count": 3
+  },
+  {
+    "id": 11050,
+    "name": "Leyndell, Ashen Capital",
+    "count": 3
+  },
+  {
+    "id": 68000,
+    "name": "Gravesite Plain",
+    "count": 7
+  },
+  {
+    "id": 69000,
+    "name": "Scadu Altus",
+    "count": 15
+  },
+  {
+    "id": 69400,
+    "name": "Ancient Ruins of Rauh",
+    "count": 2
+  },
+  {
+    "id": 68300,
+    "name": "Cerulean Coast",
+    "count": 4
+  },
+  {
+    "id": 68400,
+    "name": "Charo's Hidden Grave",
+    "count": 1
+  },
+  {
+    "id": 68500,
+    "name": "Jagged Peak",
+    "count": 5
+  },
+  {
+    "id": 69200,
+    "name": "Scaduview",
+    "count": 5
+  },
+  {
+    "id": 68600,
+    "name": "Abyssal Woods",
+    "count": 2
+  },
+  {
+    "id": 20010,
+    "name": "Enir-Ilim",
+    "count": 1
+  }
+]

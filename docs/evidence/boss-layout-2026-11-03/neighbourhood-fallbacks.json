@@ -1,0 +1,288 @@
+[
+  {
+    "flag": 1043360800,
+    "name": "Flying Dragon Agheel",
+    "map": "m60_43_36_00",
+    "group_id": 61000,
+    "group": "Limgrave",
+    "has_exact_param_position": true,
+    "origin": [
+      -95.5,
+      64.95999908447266,
+      80.2300033569336
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 320100,
+    "anchor_map": [
+      60,
+      43,
+      37
+    ],
+    "anchor_position": [
+      -121.69999694824219,
+      66.61000061035156,
+      -34.93000030517578
+    ],
+    "distance": 143.2657213487593
+  },
+  {
+    "flag": 1045390800,
+    "name": "Tibia Mariner",
+    "map": "m60_45_39_00",
+    "group_id": 61000,
+    "group": "Limgrave",
+    "has_exact_param_position": true,
+    "origin": [
+      -35.04999923706055,
+      92.2300033569336,
+      1.2899999618530273
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 61443900,
+    "anchor_map": [
+      60,
+      44,
+      39
+    ],
+    "anchor_position": [
+      122.75,
+      101.37999725341797,
+      -40.09000015258789
+    ],
+    "distance": 106.95450877648001
+  },
+  {
+    "flag": 1044320800,
+    "name": "Deathbird",
+    "map": "m60_44_32_00",
+    "group_id": 61002,
+    "group": "Weeping Peninsula",
+    "has_exact_param_position": true,
+    "origin": [
+      -103.37999725341797,
+      41.20000076293945,
+      7.570000171661377
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 61443300,
+    "anchor_map": [
+      60,
+      44,
+      33
+    ],
+    "anchor_position": [
+      81.25,
+      43.310001373291016,
+      -94.80000305175781
+    ],
+    "distance": 240.19755181505295
+  },
+  {
+    "flag": 1044320850,
+    "name": "Night's Cavalry",
+    "map": "m60_44_32_00",
+    "group_id": 61002,
+    "group": "Weeping Peninsula",
+    "has_exact_param_position": true,
+    "origin": [
+      36.61000061035156,
+      42.81999969482422,
+      102.44999694824219
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 61443300,
+    "anchor_map": [
+      60,
+      44,
+      33
+    ],
+    "anchor_position": [
+      81.25,
+      43.310001373291016,
+      -94.80000305175781
+    ],
+    "distance": 73.78707303554405
+  },
+  {
+    "flag": 1033450800,
+    "name": "Bols, Carian Knight",
+    "map": "m60_33_45_00",
+    "group_id": 62000,
+    "group": "Liurnia of the Lakes",
+    "has_exact_param_position": true,
+    "origin": [
+      -52.29999923706055,
+      245.0500030517578,
+      -29.600000381469727
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 62334400,
+    "anchor_map": [
+      60,
+      33,
+      44
+    ],
+    "anchor_position": [
+      17.43000030517578,
+      256.9100036621094,
+      20.049999237060547
+    ],
+    "distance": 218.13586387403234
+  },
+  {
+    "flag": 1039430800,
+    "name": "Night's Cavalry",
+    "map": "m60_39_43_00",
+    "group_id": 62000,
+    "group": "Liurnia of the Lakes",
+    "has_exact_param_position": true,
+    "origin": [
+      -125.30000305175781,
+      253.11000061035156,
+      -8.130000114440918
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 62384300,
+    "anchor_map": [
+      60,
+      38,
+      43
+    ],
+    "anchor_position": [
+      51.599998474121094,
+      257.7900085449219,
+      27.799999237060547
+    ],
+    "distance": 87.00389121339629
+  },
+  {
+    "flag": 1039500800,
+    "name": "Godefroy the Grafted",
+    "map": "m60_39_50_00",
+    "group_id": 63000,
+    "group": "Altus Plateau",
+    "has_exact_param_position": true,
+    "origin": [
+      -45.619998931884766,
+      709.6500244140625,
+      -86.06999969482422
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 63385002,
+    "anchor_map": [
+      60,
+      38,
+      50
+    ],
+    "anchor_position": [
+      55.7599983215332,
+      764.4000244140625,
+      82.93000030517578
+    ],
+    "distance": 235.51201190035516
+  },
+  {
+    "flag": 1044530800,
+    "name": "Deathbird",
+    "map": "m60_44_53_00",
+    "group_id": 63002,
+    "group": "Capital Outskirts",
+    "has_exact_param_position": true,
+    "origin": [
+      -23.579999923706055,
+      1025.93994140625,
+      75.98999786376953
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 63435300,
+    "anchor_map": [
+      60,
+      43,
+      53
+    ],
+    "anchor_position": [
+      -3.1500000953674316,
+      992.97998046875,
+      10.569999694824219
+    ],
+    "distance": 246.6968993852636
+  },
+  {
+    "flag": 1048510800,
+    "name": "Night's Cavalry",
+    "map": "m60_48_51_00",
+    "group_id": 63003,
+    "group": "Forbidden Lands",
+    "has_exact_param_position": true,
+    "origin": [
+      -93.19999694824219,
+      971.47998046875,
+      47.68000030517578
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 65475100,
+    "anchor_map": [
+      60,
+      47,
+      51
+    ],
+    "anchor_position": [
+      -4.639999866485596,
+      999.1900024414062,
+      -24.15999984741211
+    ],
+    "distance": 184.29591834034275
+  },
+  {
+    "flag": 1248550800,
+    "name": "Night's Cavalry (Glaive) / Night's Cavalry (Flail)",
+    "map": "m60_48_55_00",
+    "group_id": 65002,
+    "group": "Consecrated Snowfield",
+    "has_exact_param_position": true,
+    "origin": [
+      108.16999816894531,
+      1281.5699462890625,
+      -33.08000183105469
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 65495500,
+    "anchor_map": [
+      60,
+      49,
+      55
+    ],
+    "anchor_position": [
+      -104.47000122070312,
+      1266.9100341796875,
+      105.83000183105469
+    ],
+    "distance": 146.25659572611255
+  },
+  {
+    "flag": 2046410800,
+    "name": "Knight of the Solitary Gaol",
+    "map": "m61_46_41_00",
+    "group_id": 68000,
+    "group": "Gravesite Plain",
+    "has_exact_param_position": true,
+    "origin": [
+      -177.91000366210938,
+      317.6600036621094,
+      54.75
+    ],
+    "anchor_table": "BonfireWarpParam",
+    "anchor_row": 61454100,
+    "anchor_map": [
+      61,
+      45,
+      41
+    ],
+    "anchor_position": [
+      -8.010000228881836,
+      393.135009765625,
+      55.90999984741211
+    ],
+    "distance": 114.50341285206282
+  }
+]

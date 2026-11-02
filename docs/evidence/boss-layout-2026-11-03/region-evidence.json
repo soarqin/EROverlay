@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "code_baseline": "f7210103f7002bf149f1d0c165ec0b126fa9ae04",
+  "summary": {
+    "catalogue_rows": 207,
+    "extra_battles": [],
+    "inventory_raw_bar_members": 349,
+    "inventory_scripts": 588,
+    "known_cross_map_count": 11,
+    "known_cross_map_or_variant_battles": [
+      "R106",
+      "R133",
+      "R149",
+      "R150",
+      "R151",
+      "R152",
+      "R180",
+      "R181",
+      "R182",
+      "R186",
+      "R187"
+    ],
+    "known_cross_variant_count": 0,
+    "many_old_to_one_battle": [],
+    "missing_old": [],
+    "multi_member_battles": [
+      "R004",
+      "R006",
+      "R009",
+      "R010",
+      "R011",
+      "R013",
+      "R014",
+      "R020",
+      "R023",
+      "R025",
+      "R027",
+      "R029",
+      "R032",
+      "R034",
+      "R036",
+      "R039",
+      "R051",
+      "R053",
+      "R055",
+      "R062",
+      "R068",
+      "R069",
+      "R071",
+      "R072",
+      "R074",
+      "R076",
+      "R079",
+      "R081",
+      "R086",
+      "R092",
+      "R104",
+      "R106",
+      "R107",
+      "R109",
+      "R111",
+      "R112",
+      "R113",
+      "R115",
+      "R116",
+      "R117",
+      "R118",
+      "R119",
+      "R121",
+      "R123",
+      "R124",
+      "R125",
+      "R127",
+      "R129",
+      "R131",
+      "R132",
+      "R133",
+      "R134",
+      "R136",
+      "R138",
+      "R139",
+      "R140",
+      "R142",
+      "R143",
+      "R144",
+      "R145",
+      "R146",
+      "R147",
+      "R149",
+      "R150",
+      "R151",
+      "R152",
+      "R153",
+      "R154",
+      "R155",
+      "R156",
+      "R157",
+      "R158",
+      "R159",
+      "R160",
+      "R161",
+      "R162",
+      "R164",
+      "R165",
+      "R166",
+      "R167",
+      "R168",
+      "R169",
+      "R170",
+      "R172",
+      "R173",
+      "R174",
+      "R176",
+      "R179",
+      "R180",
+      "R181",
+      "R182",
+      "R184",
+      "R186",
+      "R187",
+      "R188",
+      "R189",
+      "R190",
+      "R192",
+      "R193",
+      "R194",
+      "R196",
+      "R198",
+      "R199",
+      "R200",
+      "R202",
+      "R205",
+      "R207"
+    ],
+    "name_review_rows": 31,
+    "old_multi_label_records": 27,
+    "old_one_to_one": 207,
+    "old_records": 207,
+    "old_records_with_complete_named_members": 207,
+    "old_records_with_missing_raw_displays": 0,
+    "one_old_to_many_battles": [],
+    "raw_bar_members": 345,
+    "requested_paths": 1081,
+    "rust_battles": 207,
+    "scene_excluded_bar_members": 2,
+    "scene_inputs": 3,
+    "scene_untrusted_maps": 0,
+    "scripts": 555,
+    "static_raw_bar_members": 347,
+    "structurally_disconnected_battles": [
+      "R020",
+      "R023",
+      "R027",
+      "R032",
+      "R034",
+      "R036",
+      "R062",
+      "R081",
+      "R106",
+      "R133",
+      "R149",
+      "R150",
+      "R151",
+      "R152",
+      "R180",
+      "R181",
+      "R182",
+      "R186",
+      "R187",
+      "R199"
+    ],
+    "unknown_battles": 0,
+    "unresolved_event_calls": 9
+  },
+  "group_count": 32,
+  "region_agreement": 206,
+  "region_differences": [
+    {
+      "flag": 2046400800,
+      "old_region": "Charo's Hidden Grave",
+      "new_region": "Cerulean Coast",
+      "group_id": 68300,
+      "map": "m61_46_40_00",
+      "name": "Demi-Human Queen Marigga",
+      "completion_flags": [
+        2046400800
+      ]
+    }
+  ],
+  "coordinate_contract": "Minimap convert: local x/z plus m60/m61 block coordinates *256; never mix world IDs or underground",
+  "neighbourhood_limits": {
+    "world_areas": [
+      60,
+      61
+    ],
+    "max_tile_delta_each_axis": 2,
+    "max_game_distance": 512,
+    "use_altitude_only_if_param_location_matches_event_map": true,
+    "unknown_fallback": "numeric map group; no player-region inference"
+  },
+  "marker_overrides": [
+    {
+      "place_id": 6100900,
+      "group_id": 61000,
+      "world_map_point_row": 61443500,
+      "map": [
+        60,
+        44,
+        35
+      ],
+      "max_distance": 64
+    },
+    {
+      "place_id": 6210900,
+      "group_id": 62002,
+      "world_map_point_row": 62334200,
+      "map": [
+        60,
+        33,
+        42
+      ],
+      "max_distance": 64
+    },
+    {
+      "place_id": 6410900,
+      "group_id": 64001,
+      "world_map_point_row": 64493900,
+      "map": [
+        60,
+        49,
+        39
+      ],
+      "max_distance": 64
+    }
+  ],
+  "marker_limits": {
+    "max_game_distance_3d": 64,
+    "max_overworld_tile_delta_each_axis": 1,
+    "world_areas": [
+      60,
+      61
+    ],
+    "non_overworld": "exact same map only",
+    "for_nonfinite_or_unavailable_position": "no marker override"
+  },
+  "marigga": {
+    "game_area_row": 2046400800,
+    "map": [
+      61,
+      46,
+      40
+    ],
+    "pos": [
+      -71.77999877929688,
+      2.25,
+      -12.529999732971191
+    ],
+    "play_region_rows": [
+      6830000,
+      6830001
+    ],
+    "boss_id_field": 2046400800,
+    "old_place": "",
+    "new_group_id": 68300
+  },
+  "neighbourhood_fallback_count": 11,
+  "neighbourhood_anchor_count": 293,
+  "inputs": [
+    {
+      "name": "data.rs",
+      "bytes": 116580,
+      "sha256": "193588a7a1f6b865312f0d866681dd5ca3a44c4359c392a2ebd894f410732d7d"
+    },
+    {
+      "name": "regions.rs",
+      "bytes": 5143,
+      "sha256": "136f3a82717c4c96ad15ea5f7881ad01f597868b6f5ff574c1a2479d6a200d13"
+    },
+    {
+      "name": "data_audit.rs",
+      "bytes": 58064,
+      "sha256": "25fcac175fd2e48698a87d9b4a63ac1e60e79c466dfc50fc1c0469a7fe21b9da"
+    },
+    {
+      "name": "PlayRegionParam.param",
+      "bytes": 175617,
+      "sha256": "ca4ea063660d87ee3e93d3135c55157b2a9b359bd25f0a3670cd545075fe8d46"
+    }
+  ],
+  "audit": "final-region-audit/audit.json",
+  "map_location_policy": "Exact completion-flag GameArea location is retained if its map area belongs to at least one instantiated member. Prefer exact representative map first. Actual entity-to-GameArea row/flag links are a secondary lookup. Zero completion flags do not match zero placeholders.",
+  "representative_policy": "Prefer original completion flag equal to canonical group flag, then lexicographic (map_id,runtime_variant,entity_id,name_id); independent of VFS completion order."
+}

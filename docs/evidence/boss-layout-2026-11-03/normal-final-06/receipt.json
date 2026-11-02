@@ -1,0 +1,260 @@
+{
+  "result": "PASS",
+  "exit_code": 0,
+  "observation_feature": false,
+  "command": "target\\boss-layout-check\\release\\boss_probe.exe target/release/Boss.dll target/research E:/Projects/EROverlay/build/ida/boss/events target\\boss-layout-review\\normal-final-06 target/boss-contract/scene-fixtures",
+  "environment": {},
+  "inputs": [
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\controlled-inputs\\Boss.dll",
+      "size": 2746880,
+      "sha256": "8c752cbdd8515022e7b127826cb8ca86cf0310905de4b2cb790121a795eb5009"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\controlled-inputs\\Minimap.dll",
+      "size": 1766400,
+      "sha256": "3e7d69f38f59b42ab00bb41b24e9b331b4aa049f34a97ad09742bd5358ed55cb"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\controlled-inputs\\boss_probe.exe",
+      "size": 627200,
+      "sha256": "5da3e37da620d6e91b5d9b1f2c4c1f4387d4ea81a9b9d1f8ba2d56273758d9ed"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "Cargo.lock",
+      "size": 14972,
+      "sha256": "a6a04b65fb27c9efcca327e8732a64ad8fc2623e06b7b27dd48aa13981ed968b"
+    },
+    {
+      "path": "crates\\harness\\src\\bin\\boss_probe.rs",
+      "size": 83498,
+      "sha256": "5cb5f87ebb4383b67aad3481eb3d6050f385b49461332c603fd428a0951d65f6"
+    },
+    {
+      "path": "crates\\harness\\src\\gpu.rs",
+      "size": 12092,
+      "sha256": "2e6730c2124ac0fd16899585e793e3c05448b7c7bf21d230cb3a68ac10782460"
+    },
+    {
+      "path": "crates\\abi\\src\\lib.rs",
+      "size": 15312,
+      "sha256": "874cd983d106616d36998cbadbb6ab82bd88e37653d09bb926bd96fee8b946d5"
+    },
+    {
+      "path": "crates\\boss\\src\\challenge.rs",
+      "size": 4488,
+      "sha256": "5248dcb6ae2839ec5337faf505bf3ed7eaa358f83fe298b63c7b6dc8b5180474"
+    },
+    {
+      "path": "crates\\boss\\src\\data.rs",
+      "size": 116580,
+      "sha256": "193588a7a1f6b865312f0d866681dd5ca3a44c4359c392a2ebd894f410732d7d"
+    },
+    {
+      "path": "crates\\boss\\src\\data_audit.rs",
+      "size": 58064,
+      "sha256": "25fcac175fd2e48698a87d9b4a63ac1e60e79c466dfc50fc1c0469a7fe21b9da"
+    },
+    {
+      "path": "crates\\boss\\src\\encounters.rs",
+      "size": 10876,
+      "sha256": "f21851122cba19cb364136ce71e17aa19807780caf882953d026ffd429a4f152"
+    },
+    {
+      "path": "crates\\boss\\src\\host.rs",
+      "size": 6840,
+      "sha256": "e53bb3ec171717277bac6d2ca2418d4ec0ebe2b615b12a2212836618fdc83eec"
+    },
+    {
+      "path": "crates\\boss\\src\\lib.rs",
+      "size": 20434,
+      "sha256": "fd71515aa7b2cfe765bc933e892d8698ff4115d8d89ee808633cf8731d67930e"
+    },
+    {
+      "path": "crates\\boss\\src\\probe.rs",
+      "size": 7637,
+      "sha256": "8cf3d7f6860f17cfb041ddb39be9d48cff3dddffaae561ac5acdfe58a478fcee"
+    },
+    {
+      "path": "crates\\boss\\src\\regions.rs",
+      "size": 5143,
+      "sha256": "136f3a82717c4c96ad15ea5f7881ad01f597868b6f5ff574c1a2479d6a200d13"
+    },
+    {
+      "path": "crates\\boss\\src\\revival.rs",
+      "size": 8358,
+      "sha256": "bc88dc42d64867714ad27df3aaeb130c69345474eafc177d766c5789fd56580e"
+    },
+    {
+      "path": "crates\\boss\\src\\settings.rs",
+      "size": 5004,
+      "sha256": "7c9f6b2bfb5c4f423e724865eaf55d79c4d592b3ae5a0c742dfcea60f1dfe68e"
+    },
+    {
+      "path": "crates\\boss\\src\\ui.rs",
+      "size": 58818,
+      "sha256": "a456f0850b28f3ad97a12a9b2478e63cb936fcfbf1bb14bce3b438ad9c631209"
+    },
+    {
+      "path": "crates\\game\\src\\boss_events.rs",
+      "size": 39821,
+      "sha256": "c19969d0622541c600cea0b65d54f3c00a099611732c57bae8288eaf5ae29f90"
+    },
+    {
+      "path": "crates\\game\\src\\boss_params.rs",
+      "size": 13421,
+      "sha256": "cb518f0acc45c806612d3de52cf43f599a9245e6d63b7db149fc2bce6263b0d3"
+    },
+    {
+      "path": "crates\\game\\src\\boss_scene.rs",
+      "size": 18992,
+      "sha256": "d5612f59e5c77a3b350fbf54a6678a1e4ae8d0d6d9e0bd861335883fee0cc373"
+    },
+    {
+      "path": "crates\\game\\src\\text.rs",
+      "size": 17074,
+      "sha256": "ab8054e7f17978ed31d2add7ed3661563358bf0a1d4f4ec821f011306c60fef2"
+    },
+    {
+      "path": "crates\\game\\src\\params.rs",
+      "size": 8071,
+      "sha256": "761b6fb5f48f62309764a144c5ddc888e54305f5428830732a3f35c7ee793322"
+    },
+    {
+      "path": "crates\\game\\src\\memory.rs",
+      "size": 10570,
+      "sha256": "6f448b83c033156a5c3f4f69ed3e7e77fe577e42aaffa28f41757814e955aea6"
+    },
+    {
+      "path": "crates\\renderer\\src\\gpu.rs",
+      "size": 131305,
+      "sha256": "ae490ccca7a15711ab8ea8c5dcb3fcbd1e662f393a2037d88acb940c92cd0eaf"
+    },
+    {
+      "path": "crates\\renderer\\src\\lib.rs",
+      "size": 5238,
+      "sha256": "b6ad6d853bf28718d2039a50e3711437f855f15d2839339c27679ebd9ca73216"
+    },
+    {
+      "path": "crates\\renderer\\src\\scene_scan.rs",
+      "size": 17658,
+      "sha256": "fde4e7afaac47aa785d9603dbf95e44f850308f436ae964919a8d45ea339f185"
+    }
+  ],
+  "archive_audit": [
+    {
+      "path": "target\\boss-layout-review\\final-region-audit\\audit.json",
+      "size": 872762,
+      "sha256": "df18b42a9c81368e8d50fc41e74b623da478bcd5b221383cfa59d9388fc8cd25"
+    },
+    {
+      "path": "target\\boss-layout-review\\final-region-audit\\inputs.json",
+      "size": 111630,
+      "sha256": "2300b7d54168ded7901890709c2bf2384b5a2bd824722019585a837fdfa281d6"
+    }
+  ],
+  "baseline_generation": {
+    "path": "target\\boss-layout-review\\selected-207-metadata.receipt.json",
+    "size": 1090,
+    "sha256": "63796658c780bbdd71bf18128b5e767e429ae43549285f68e6c0923a476e9aa0"
+  },
+  "load_observations": [
+    "Catalogue initialization at 60Hz: elapsed=2562ms updates=151 requests=1658 peak active tokens=16 pending polls=1077 busy polls=64 max single update=6087us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1700ms updates=100 requests=1082 peak active tokens=16 pending polls=1079 busy polls=63 max single update=6595us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update",
+    "Catalogue initialization at 60Hz: elapsed=1804ms updates=106 requests=1082 peak active tokens=16 pending polls=1073 busy polls=63 max single update=5558us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update"
+  ],
+  "cpu_observations": [
+    "compact: render CPU median=20us p95=27us; mean vertices=244 meshes=1; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples",
+    "full real catalogue: render CPU median=104us p95=130us; mean vertices=2984 meshes=8; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples",
+    "Full 500ms update with controlled batch flag reader: median=31us max=57us, ids=208, file requests=0",
+    "hidden loading: render CPU median=0us p95=0us; mean vertices=0 meshes=0; atlas replacements=0 file requests=0; WARP submits/drain excluded from CPU samples"
+  ],
+  "glyph_observations": [
+    "Normal-DLL glyph observation: state=1, first Boss name glyph x=877, glyph count=21",
+    "Normal-DLL glyph observation: state=0, first Boss name glyph x=877, glyph count=21",
+    "Normal-DLL glyph observation: state=2, first Boss name glyph x=877, glyph count=21"
+  ],
+  "screenshots": [
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-context-confirm.bmp",
+      "size": 3456054,
+      "sha256": "4db56514679df28711756b4ca1401ee6aac0cf90844a892383b3e036272e0d34"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-context-rejected.bmp",
+      "size": 3456054,
+      "sha256": "e75cbd3b34bf4e65794c180a59bcc1ede29e198db9c92b04546f91107880652c"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-full.bmp",
+      "size": 3456054,
+      "sha256": "2cbe2651a8c87c2491351eb014a02304116ea546435f47044c6bacaa51bf96c6"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-hidden.bmp",
+      "size": 3456054,
+      "sha256": "a5b7222e900c7fb10ada52c51b634569b11d43f4b9d71825a2d4d834576c6964"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-normal-status-0.bmp",
+      "size": 3456054,
+      "sha256": "dfbe6a101008569918eabd0ece1a5a9d2a7f144a7bb4ba55bb5dc335a7aeba6b"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-normal-status-1.bmp",
+      "size": 3456054,
+      "sha256": "0e65adcbeff117f2bb9ca0539bb71cbd21a32a721ca8ef71e657693b22199ce6"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-normal-status-2.bmp",
+      "size": 3456054,
+      "sha256": "2936125ab92bc01a65a4cb8d318dc34bb1b4b52abe6e2c96f2f49f594861d80f"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-revival-confirm.bmp",
+      "size": 3456054,
+      "sha256": "4db56514679df28711756b4ca1401ee6aac0cf90844a892383b3e036272e0d34"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-revival-reopened.bmp",
+      "size": 3456054,
+      "sha256": "4db56514679df28711756b4ca1401ee6aac0cf90844a892383b3e036272e0d34"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-revived.bmp",
+      "size": 3456054,
+      "sha256": "33adda80123a52b2ef8bdd58d7560cb4456c279ebb7fc2c81829d0989d73d787"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-search.bmp",
+      "size": 3456054,
+      "sha256": "3b7c6da947af1f638f2a4068dda52fb18311be105e2662fb33917e20c9b1c42f"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-settings.bmp",
+      "size": 3456054,
+      "sha256": "a3fafc730385ef4a2734ad3b4d5289f81dbdd7cd8e47d8d5ee8bd0f8a5a77164"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-unknown-confirm.bmp",
+      "size": 3456054,
+      "sha256": "4db56514679df28711756b4ca1401ee6aac0cf90844a892383b3e036272e0d34"
+    },
+    {
+      "path": "target\\boss-layout-review\\normal-final-06\\boss-unknown-rejected.bmp",
+      "size": 3456054,
+      "sha256": "53d5a5f1add7fdcddb9cac390c6acc34d23bd4ca85ed5b034d4a063d7cf1c816"
+    }
+  ],
+  "limits": [
+    "Direct Boss.dll entrypoints with controlled HostApi; EROverlay core is not loaded by this probe.",
+    "Minimap compatibility here is real DLL init/destroy against guarded176-byte prefix, not combined rendering.",
+    "Real archived seven PARAM tables / EMEVD / FMG / decompressed MSB; save, region, flags, input and writes are fixtures.",
+    "Fixture build adds only fault hook and read-only POD/UI recording; the normal DLL has no observation export.",
+    "WARP meshes, atlas uploads and1280x900 readback are real; no live game, FPS or mount-priority claim.",
+    "Initial load max update includes provider lazy MSB disk reads and parser work, not native game timing.",
+    "common_macro archive is absent: first_failure records it,9 unresolved calls remain explicit."
+  ]
+}

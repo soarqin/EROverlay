@@ -4,6 +4,8 @@
 
 Boss 从游戏 Param、具名大生命条事件和当前语言文本生成目录，保留地区进度、筛选、死亡数、游戏时间、挑战记录及可选复活。默认按 `=` 打开或关闭完整列表。额外复活旗标仍在外部配置，发行包不再包含旧多语言名单。操作与限制见 [Boss 说明](crates/boss/README.md)、[数据来源](docs/boss-data-sources.md) 和 [事件证据](docs/boss-events.md)。
 
+Boss 名称已按固定状态列对齐，地区恢复旧 C++ 的 32 个大区粒度；有效切区时只展开当前区，同区保留手动折叠。搜索和筛选期间延后自动折叠，清除后应用最新地区。207 场目录、地区差分与验证见 [列表布局和地区修复](docs/boss-layout-regions-2026-11-03.md)。
+
 核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；Boss 的首交结果见 [Boss 验证记录](docs/boss-validation.md)，后续修复见 [Boss 验收修复](docs/boss-review-2026-11-02.md)。按用户选择恢复旧 207 项范围后，真实归档生成 **207 条记录，与 C++ 207 项逐项一一对应**，DLC 后门双守卫仍各占一条。完整映射、三条外部关系与场景残留检查见 [207 项范围与验证](docs/boss-207-scope-2026-11-02.md)。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
 
 DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)：Minimap 移除未使用的等宽和 emoji 字库，保留比例字体后备、自定义字体及系统语言字体。
@@ -48,7 +50,7 @@ package/
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。从 `411bc63` 或更早 Rust Boss 包升级本轮连续显示修复，替换 `EROverlay.dll`、`overlays/Boss.dll` 和 `overlays/Minimap.dll`；两个插件都包含共享字体图集暂忙处理的修复。相对暂缓交付的 `5ee822c` 包，本轮仅核心 DLL 变化。从 Boss 移植前版本升级还需加入 `configs/boss-encounters.json`。首次安装 Boss 另需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。当前修复、故障当帧验证及现场边界见 [成图锁竞争记录](docs/boss-presenter-contention-fix-2026-11-02.md)。
+升级前须完全退出游戏。本轮列表布局和地区修复包更新 `EROverlay.dll`、`overlays/Boss.dll` 和 `overlays/Minimap.dll`；核心提供新的玩家地区读取，Boss 使用该信息切换折叠状态，Minimap 随共享 ABI 重新构建。从 Boss 移植前版本升级还需加入 `configs/boss-encounters.json`。首次安装 Boss 另需加入 `configs/boss.ini` 和 `configs/boss-revival.json`；已有 Rust Boss 配置不必覆盖，复活配方内容未变。保留现有配置、`configs/boss-ui.json` 和 `Challenge.txt`。旧 C++ Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。此前连续显示修复与现场边界见 [成图锁竞争记录](docs/boss-presenter-contention-fix-2026-11-02.md)，不代表闪烁或菜单预加载已经得到用户确认。
 
 ## 加载与退出
 
