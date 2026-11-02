@@ -1,0 +1,105 @@
+# Boss 目录、Param 和游戏文本
+
+本文记录 Boss 移植使用的数据来源、字段契约和离线验证范围。Boss 的判定条件是游戏在画面下方显示带名称的大生命条；击败旗标、血量、获得卢恩的方式和旧版名单都不能单独证明这一条件。事件生命条的识别和关联由 `crates/game/src/boss_events.rs` 负责，本文说明 Param 和文本如何提供补充数据。
+
+## 旧字段与运行时来源
+
+| 旧 Boss 数据字段 | 新来源 | 限制 |
+|---|---|---|
+| `boss` | EMEVD 生命条指令的名称 ID → 当前语言 `NpcName*.fmg` | 不能把 `GameAreaParam.foundBossTextId` 当作 NPC 名称；多条生命条和阶段需要保留事件关系 |
+| `flag_id` | 生命条与胜利事件中的条件读取、置真写入及实体关系 | `GameAreaParam.defeatBossFlagId` 仅按精确值匹配以补充地图／位置；Param 中有无对应行不决定是否收录 |
+| `place` | 优先使用与完成旗标精确关联的 `WorldMapPointParam` 地点文本，否则使用同地图近邻赐福的地点文本；只取 `textType=0` 的 `PlaceName` | 地图标记或赐福名称不等于旧版作者填写的方位描述；没有可用地点文本时显示地图标识 |
+| `region_name` | 赐福子类别／标签的 `textId` → `GR_MenuText*.fmg` | 这是游戏传送菜单的分组，与旧版手工划分的地区不保证一致 |
+| `regions` | Param 的地图、位置及赐福子类别关系 | 相同地图中的最近赐福属于位置归类，不能把结果描述成 Boss 自带的地区外键 |
+| `dlc` | 实际加载的 Param 行、事件文件和 DLC FMG 成员 | 不再用每种语言各自复制的名单表示 DLC |
+| `revive_flags` | 外部复活配置 | Param 没有表达完整的竞技场／阶段复位操作；不能由击败旗标推测额外写入 |
+
+自己的窗口、设置和错误文案与游戏 Boss／地区文本分开维护。发行包不携带旧版 14 种语言的 `bosses.json` 或游戏 FMG 文件。
+
+## Param 字段契约
+
+`crates/game/src/boss_params.rs` 在更新线程读取 Param。读取前检查表头中的实际 `ParamType` 和数据版本，再复用 `params::param_rows` 的有界整表快照。以下组号是 `SoloParamRepository` 的运行时组号，不是 PARAMDEF 文件的 `<Index>`；两者不同，例如 `GameAreaParam` 的编辑器索引为 197，运行时组号为 29。
+
+| 表 | 运行时组号 | 数据版本 | 使用的字段及行内偏移 |
+|---|---:|---:|---|
+| `GAME_AREA_PARAM_ST` | 29 | 3 | `foundBossTextId` `0x38`；`defeatBossFlagId` `0x44`；`bossPosX/Y/Z` `0x48/0x4c/0x50`；`bossMapAreaNo/BlockNo/MapNo` `0x54/0x55/0x56` |
+| `BONFIRE_WARP_PARAM_ST` | 43 | 6 | `eventflagId` `0x04`；`bonfireSubCategoryId` `0x14`；`clearedEventFlagId` `0x18`；地图 `0x20`；位置 `0x24`；文本槽 `0x30` 起 |
+| `BONFIRE_WARP_TAB_PARAM_ST` | 44 | 2 | `textId` `0x04`；`sortId` `0x08` |
+| `BONFIRE_WARP_SUB_CATEGORY_PARAM_ST` | 45 | 1 | `textId` `0x04`；`tabId` `0x08`；`sortId` `0x0a` |
+| `WORLD_MAP_POINT_PARAM_ST` | 87 | 6 | `iconId` `0x0c`；`clearedEventFlagId` `0x14`；地图 `0x20`；位置 `0x24`；文本槽 `0x30` 起 |
+| `MAP_DEFAULT_INFO_PARAM_ST` | 133 | 6 | 行 ID 按十进制编码 `AA*1000000 + BB*10000 + CC*100 + DD`，对应资源地图 `mAA_BB_CC_DD` |
+
+两个地图表都保留 8 个文本槽。第 `i` 个槽的 `textId`、显示旗标、隐藏旗标分别位于 `0x30 + 12*i`、`0x34 + 12*i`、`0x38 + 12*i`，类型位于 `0x90 + i`。实际资产核对表明，类型 0 使用 `PlaceName`，类型 1 使用 `NpcName`；两种命名空间存在相同数字 ID，不能混查。生产目录的地点标签仅接受类型 0，并按准备目录时的显示／隐藏旗标选择文本，不把 NPC 名称作为地点名称。
+
+字段布局与本机可用的 Elden Ring PARAMDEF XML、既有 Minimap 的相同前缀及实际 Param 行尺寸交叉核对。行不足、类型／数据版本不符、无效地图字节和非有限位置均返回失败，不猜测新的布局。新增字段或数据版本需要补充真实布局证据。
+
+`NpcParam.nameId` 确实存在，`isSoulGetByBoss` 也确实存在，但后者描述卢恩结算，未表达「显示具名大生命条」。同一角色类型的普通敌人和 Boss 实例不能由这些字段独立区分。当前目录不把 `NpcParam` 当作 Boss 的判定入口。
+
+## 真实 Param 核对
+
+2026-11-02 使用本机归档 `D:/Games/fog/eldendata/Vanilla/regulation.bin`，仅将解密、解压后的选定 Param 导出到忽略目录 `target/research/`。原文件 SHA-256 为 `7b6d07c357b639c902d48403ffe3612db35e0cf8d6fcc82d3fb24ea6eb6cf30a`，内部 BND 版本字符串为 `11611000`。正常构建、测试和安装包不依赖这些文件，也不包含解密脚本或游戏数据。
+
+生产读取器得到：
+
+| 表 | 行数 | 核对结果 |
+|---|---:|---|
+| `GameAreaParam` | 216 | 212 行具有非零击败旗标，合并为 207 个唯一旗标；4 行无击败旗标 |
+| `BonfireWarpParam` | 422 | 全部通过生产解析器 |
+| `WorldMapPointParam` | 472 | 全部通过生产解析器 |
+| `BonfireWarpSubCategoryParam` | 55 | 55 个标题 ID 均在 `GR_MenuText` 解析成功 |
+| `BonfireWarpTabParam` | 19 | 19 个标题 ID 均在 `GR_MenuText` 解析成功 |
+| `MapDefaultInfoParam` | 875 | 去掉 ID 为 0 的默认行后，提供 874 个资源地图 |
+
+例如，`GameAreaParam` 行 `10000850` 给出完成旗标 `10000850`、地图 `[10,0,0]` 和局部位置约 `[-16.94,-2.75,-17.60]`。其 `foundBossTextId=1000101` 是另一套用途的文本 ID，不能替代生命条事件给出的 Margit 名称 ID。
+
+这份原版数据中，207 个击败旗标与 `WorldMapPointParam.clearedEventFlagId` 的交集为 0，与全部文本隐藏旗标的交集仅为 1；与赐福的解锁、完成、文本显示／隐藏旗标交集均为 0。因此，不能依靠「击败旗标必然对应某个地图标记或赐福」重建目录。其他 Mod 中存在的对应关系不能推广到原版。
+
+Param 与事件的完成旗标也不保证完全一致。例如这份归档的 Fire Giant 位置行写有 `1052520800`，实际胜利事件关联的完成旗标为 `1252520800`。生产目录保留事件得出的后者，不按数值相似度改写；没有精确 Param 旗标匹配时使用事件地图，地点／分组只作近邻参考。
+
+完整生产管线的另一项组合回归以这 6 张真实 Param、实际归档事件和当前语言 FMG 共同生成目录：1075 个请求路径中读取到 555 份事件脚本，得到 211 个具名战斗，完成条件和名称均解析成功。这是这组资产的覆盖结果，不把 207 个 Param 旗标或 211 个战斗写成运行时默认名单。事件实例、双 Boss、多阶段及旧版名单的具体差异见 [事件与战斗契约](boss-events.md)。
+
+`GameAreaParam` 的位置和地图可以缩小事件文件范围，并辅助归类。洞窟内部地图与入口赐福在大地图上的位置可能不同，不能直接比较两套局部坐标。没有经过转换验证的跨地图位置不用于推定归属；事件缺失或归类不确定必须保留其限制。
+
+同地图最近赐福只提供近邻参考，也不是官方的 Boss 地区关系。有匹配的 GameArea 行时，使用其 Boss 位置选择赐福；没有匹配行时，使用地图局部原点选择，近邻可靠性更低。高台、地下空间及同一 tile 内的多套地理区域可能使近邻落在另一地区。例如 Forlorn Hound 的近邻标签可能为 `Bridge of Sacrifice`，Omenkiller 的近邻也可能落在 `Moonlight Altar` 所属分组。这类结果不能称为原版准确地点，界面将地点标为「参考地点」；没有可用近邻时显示地图编号。位置归类不影响生命条事件给出的 Boss 名称和完成条件。
+
+资源地图不能只取 Boss 位置所在的 tile。例如完成旗标 `2048380850` 的战斗脚本位于 `m61_48_38_00`，但其 `GameAreaParam` 位置归属 `[61,48,39]`。`MapDefaultInfoParam` 明确列出行 `61483800`，因此可以通过游戏提供的资源目录补全，毋须为这个 Boss 写例外名单。874 个地图 ID 与本机 544 份已解码地图 EMEVD 对比，仅有 `m60_45_36_10`、`m60_45_52_10`、`m61_44_45_10`、`m61_54_39_00`、`m61_55_39_00` 不在这张表中；目录仍需与其他 Param 的地图及已验证的地图层级／仪式资源关系合并。`MapDefaultInfoParam` 表示资源地图，不能当作 Boss 名单，也不保证每一行都有 EMEVD 文件。
+
+## 当前语言与 Mod 文本
+
+`text::language_directory` 将 Steam 的语言名或已有区域代码转换为原生目录，例如 `schinese → zhoCN`、`english → engUS`。未知语言返回不可用，由调用者保留数字标识或明确提示，不静默加载一套离线英文名单。
+
+归档 1.17.2 EXE 中的 UTF-16 字符串直接给出以下原生请求路径：
+
+```text
+msg:/%s/item_dlc02.msgbnd
+msg:/%s/menu_dlc02.msgbnd
+```
+
+分别位于该归档 EXE 的文件偏移 `45999440` 和 `45999496`。这些是 VFS 挂载路径，不是磁盘上的 `msg/<语言>/*.msgbnd.dcx` 路径。原生文件服务负责找到 Mod 覆盖及 DCX 解压，Rust 解析解压后的 BND4。DLC02 binder 不可用时，调用者可请求对应的 `item.msgbnd` 或 `menu.msgbnd`。
+
+真实 `item_dlc02` binder 同时包含 `NpcName.fmg`、`NpcName_dlc01.fmg`、`NpcName_dlc02.fmg`，以及三层 `PlaceName`。`menu_dlc02` 同样包含三层 `GR_MenuText`。`TextCatalog` 按 FMG 成员层级覆盖，DLC02 高于 DLC01，高于 base；空指针条目保留较低层文本，空字符串仍是有效覆盖。合并不依赖 binder 的成员顺序，解析失败时不留下半套覆盖结果。
+
+2026-11-02 另用本机 `D:/Games/EROrigin/mod_/msg/engus/{item_dlc02,menu_dlc02}.msgbnd.dcx` 验证生产 FMG/BND 读取器。这是包含 Mod 附加文本的资产，不将其数量称为原版文本总数。两个 binder 分别含 78、50 个成员，成功读取 3996、1515 次有效文本覆盖。例如：
+
+| 命名空间与 ID | 实际文本 |
+|---|---|
+| `NpcName:904750000` | `Godrick the Grafted` |
+| `NpcName:905210000` | `Divine Beast Dancing Lion` |
+| `PlaceName:10000` | `Stormveil Castle` |
+| 子类别 `6800 → GR_MenuText:241353` | `Gravesite Plain` |
+| 标签 `6800 → GR_MenuText:241417` | `Gravesite Plain` |
+
+这份 Mod 的 `PlaceName` 还含有冲突的重复 ID `9205486`。读取器将冲突 ID 标记为无明确文本，其他条目仍可用；不会任取一个冲突名称，也不会使整份 Boss 目录失效。FMG 的尺寸、组索引、偏移、UTF-16 和总文本预算均有界检查。
+
+## 可选验证与证据边界
+
+常规测试包含 Param 表型／版本／行边界检查、FMG 空条目和 UTF-16、损坏偏移拒绝、三层文本覆盖、失败合并回滚，以及生产存档读取／批量旗标／复活前置条件测试。外部资产检查需显式提供自行导出的数据：
+
+```powershell
+$env:EROVERLAY_BOSS_PARAM_DIR='E:/path/to/exported-params'
+cargo test -p eroverlay-game --locked archived_param_assets_use_production_readers -- --ignored --nocapture
+$env:EROVERLAY_BOSS_TEXT_BINDERS='E:/path/item_dlc02.bnd;E:/path/menu_dlc02.bnd'
+cargo test -p eroverlay-game --locked archived_text_binders_use_production_parser -- --ignored --nocapture
+```
+
+第一个目录应含上述 6 张同名 `.param` 文件。第二项接收已解压 BND，不会启动游戏或调用原生 VFS。这些检查证明给定归档的解析、ID 和字段契约，不证明游戏内文本加载时机、所有 Mod、游戏画面或完整帧性能已经通过验收。

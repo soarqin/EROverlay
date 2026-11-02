@@ -1,6 +1,9 @@
 //! Update-thread game services. Rendering consumes copied POD snapshots only.
 #![deny(unsafe_op_in_unsafe_fn)]
 pub mod assets;
+pub mod boss_events;
+pub mod boss_params;
+pub mod boss_runtime;
 mod files;
 mod flags;
 mod language;
@@ -8,6 +11,7 @@ mod map;
 pub mod memory;
 pub mod params;
 pub mod scan;
+pub mod text;
 pub use eroverlay_abi::{DisplayState, GameLayout, MapState};
 pub use files::{FileDiagnostics, FilePoll};
 use flags::EventFlagCache;
@@ -240,7 +244,9 @@ impl GameServices {
         let Some(b) = self.bindings else {
             return 0;
         };
-        if ![43, 87, 88, 141].contains(&group) || group >= b.layout.repository_groups {
+        if ![29, 43, 44, 45, 87, 88, 133, 141].contains(&group)
+            || group >= b.layout.repository_groups
+        {
             return 0;
         }
         let repository = pointer(self.base + b.repository as usize);

@@ -139,10 +139,20 @@ unsafe extern "C" fn init(host: *const abi::HostApi, out: *mut *mut c_void) -> i
         let magic = unsafe { std::ptr::addr_of!((*host).magic).read_unaligned() };
         let size = unsafe { std::ptr::addr_of!((*host).size).read_unaligned() };
         let version = unsafe { std::ptr::addr_of!((*host).version).read_unaligned() };
-        if !abi::valid_header(magic, size, version, size_of::<abi::HostApi>()) {
+        if !abi::valid_header(magic, size, version, abi::HOST_V1_BASE_SIZE) {
             return abi::ERR_ABI;
         }
-        let host = Host(unsafe { host.read_unaligned() });
+        // SAFETY: all fields have valid zero representations. Minimap only
+        // consumes the original V1 prefix, including on an older short host.
+        let mut owned: abi::HostApi = unsafe { std::mem::zeroed() };
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                host.cast::<u8>(),
+                (&mut owned as *mut abi::HostApi).cast::<u8>(),
+                abi::HOST_V1_BASE_SIZE,
+            )
+        };
+        let host = Host(owned);
         let required =
             abi::CAP_GAME | abi::CAP_FILES | abi::CAP_TEXTURES | abi::CAP_MESH | abi::CAP_INPUT;
         if host.0.capabilities & required != required

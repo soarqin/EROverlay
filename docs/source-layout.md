@@ -4,9 +4,9 @@
 
 | 位置 | 用途 |
 |---|---|
-| `Cargo.toml`、`Cargo.lock`、`crates/` | 核心、Minimap、游戏服务、DX12 后端、稳定 ABI 和离线宿主 |
+| `Cargo.toml`、`Cargo.lock`、`crates/` | 核心、Minimap、Boss、静态 UI 工具、游戏服务、DX12 后端、稳定 ABI 和离线宿主 |
 | `build.ps1` | Release 构建和独立安装包生成 |
-| `configs/`、`configs_CN/` | common/input/style/minimap 默认配置及中文注释模板；程序只自动读取 `configs/` |
+| `configs/`、`configs_CN/` | common/input/style/minimap/boss 默认配置及中文注释模板；Boss 额外复活配方独立为 JSON，程序只自动读取 `configs/` |
 | `third_party/minhook/` | 原生 hook 所需的 MinHook C 源码和许可证 |
 | `tools/` | 显式导出历史对照、绘制及读取性能比较 |
 | `docs/`、各 crate 的 Markdown | 设计、功能、验收边界和历史证据 |
@@ -14,7 +14,7 @@
 
 PE、签名、RTTI、unwind 和调用关系扫描由 Rust 实现。正常安装构建保留的原生代码只有 `crates/renderer/native/` 的游戏 UI_SCENE hook 桥及 MinHook，不链接旧 C++ 核心或扫描器。`crates/game/native/read_checks.cpp` 仅由显式选择的 `runtime-read-fixture` 测试功能编译，用于和导出的 C++ reader 对照，不进入普通安装构建。
 
-配置缺失时程序使用内置默认值；发行包保留四份模板以维持既有默认预设和操作习惯。`configs_CN/` 不会自动覆盖配置，需要复制所选文件到 `configs/`。游戏素材通过原生 VFS 读取，不签入或打包；`data/` 仅可用于用户自备字体，不需要保留旧 Boss/Achievements 数据。
+配置缺失时程序使用内置默认值；发行包保留五份 INI 模板和必要的外部复活配方。`configs_CN/` 不会自动覆盖配置，需要复制所选文件到 `configs/`。游戏素材通过原生 VFS 读取，不签入或打包；`data/` 仅可用于用户自备字体，不需要保留旧 Boss/Achievements 数据。
 
 [MapForGoblins 官方 C ABI 头文件](api/mfg_map_api.h) 作为接口参考保留，来源为 [官方 SDK 的固定提交](https://github.com/VirusAlex/ERR-MapForGoblins-DLL/blob/7506219bd4923662fdc7fdb3c6753495f6abc29e/sdk/mfg_map_api.h)。Rust 使用自己的 `repr(C)` 声明，不通过 C 头文件生成或编译该接口；头文件保留 MIT 许可。
 

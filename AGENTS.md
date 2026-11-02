@@ -2,13 +2,13 @@
 
 ## Scope and layout
 
-This branch contains the Rust/egui core and Minimap only. `Cargo.toml` and
+This branch contains the Rust/egui core, Minimap and Boss. `Cargo.toml` and
 `Cargo.lock` live at the repository root. `crates/` contains the stable C ABI,
-core, game services, Minimap, renderer, harness and ABI fixtures. `configs/` and
+core, game services, Minimap, Boss, static UI helpers, renderer, harness and ABI fixtures. `configs/` and
 `configs_CN/` contain the supported INI templates. `docs/` records design,
 parity and validation. See `README.md` and `docs/source-layout.md` for commands.
 
-The C++ application, ImGui, Boss, Achievements, injector, CMake project and old
+The C++ application, ImGui, old Boss data, Achievements, injector, CMake project and old
 release scripts belong to the separate C++ history; do not copy them back here.
 Pure PE/signature/RTTI scanning is Rust. The native renderer bridge and vendored
 MinHook are the minimal platform-specific exception. Optional differential tests
@@ -39,7 +39,7 @@ performance equivalence. Report those evidence limits accurately.
 
 ## Runtime contracts
 
-- Preserve `EROverlay.dll` + `overlays/Minimap.dll`, egui and native UI_SCENE only.
+- Preserve `EROverlay.dll` + `overlays/Minimap.dll` + `overlays/Boss.dll`, egui and native UI_SCENE only.
   Do not add DXGI/Present hooks or an independent window/event loop.
 - Build UI/input only once per game queue. Minimap is below native UI; lower
   alpha stores scene transmittance, with RGB10A2 target and RGBA8 offscreen.
@@ -56,6 +56,11 @@ performance equivalence. Report those evidence limits accurately.
 - Keep normal loading and individual tile errors silent on screen. Report real
   metadata/atlas failures, and log update-side failures only on attempts or state
   changes. Do not format/log repeatedly in the render path.
+- Boss discovery requires enabled named health-bar event evidence. PARAM supplies
+  facts, never a heuristic Boss label. Keep auxiliary revival recipes external;
+  never bundle the old multilingual catalogue. Parse/scan on update, render snapshots.
+- UI input capture is leased only by a visible interactive panel. Release on
+  closing, focus loss, loading/full map and stop; retain input detour code with PIN.
 - Compare performance with C++ under the same workload. Absolute milliseconds
   are observations, not a fixed acceptance threshold. Preserve useful tests and
   distinguish inherited bottlenecks from new regressions.

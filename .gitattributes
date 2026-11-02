@@ -1,0 +1,2 @@
+# Keep the reproducible revival export byte-identical on Windows checkouts.
+configs/boss-revival.json text eol=lf

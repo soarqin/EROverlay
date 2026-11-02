@@ -4,6 +4,7 @@ mod logging;
 mod plugin;
 mod staging;
 mod texture;
+mod ui_input;
 
 use eroverlay_abi::*;
 use eroverlay_game::GameServices;
@@ -53,6 +54,7 @@ struct Runtime {
     callbacks: RwLock<()>,
     render: Mutex<RenderState>,
     bridge: Mutex<Option<NativeBridge>>,
+    native_input: Mutex<Option<ui_input::NativeInput>>,
     worker: Mutex<Option<JoinHandle<()>>>,
     updates: AtomicU64,
     renders: AtomicU64,
@@ -202,6 +204,113 @@ unsafe extern "C" fn event_flag(user: *mut c_void, id: u32) -> u32 {
     unsafe { host(user) }
         .and_then(|h| h.game.try_lock().ok())
         .is_some_and(|mut g| g.event_flag(id)) as u32
+}
+unsafe extern "C" fn boss_state(user: *mut c_void, out: *mut BossState) -> i32 {
+    guarded(|| {
+        let Some(h) = (unsafe { host(user) }) else {
+            return ERR_INVALID;
+        };
+        if out.is_null() || !(out as usize).is_multiple_of(align_of::<BossState>()) {
+            return ERR_INVALID;
+        }
+        // Read only the fixed size word before accepting the whole POD buffer.
+        if (unsafe { out.cast::<u32>().read() } as usize) < size_of::<BossState>() {
+            return ERR_ABI;
+        }
+        unsafe {
+            *out = BossState {
+                size: size_of::<BossState>() as u32,
+                ..BossState::default()
+            }
+        };
+        let Ok(mut game) = h.game.try_lock() else {
+            return ERR_BUSY;
+        };
+        let Some(state) = game.boss_state() else {
+            return ERR_UNAVAILABLE;
+        };
+        unsafe { *out = state };
+        OK
+    })
+}
+unsafe extern "C" fn event_flags(
+    user: *mut c_void,
+    ids: *const u32,
+    out: *mut u8,
+    len: usize,
+) -> i32 {
+    guarded(|| {
+        let Some(h) = (unsafe { host(user) }) else {
+            return ERR_INVALID;
+        };
+        if len > 4096
+            || (len != 0
+                && (ids.is_null()
+                    || out.is_null()
+                    || !(ids as usize).is_multiple_of(align_of::<u32>())))
+        {
+            return ERR_INVALID;
+        }
+        if len == 0 {
+            return OK;
+        }
+        // SAFETY: ABI caller supplies disjoint readable IDs and writable bytes.
+        let (ids, out) = unsafe {
+            (
+                std::slice::from_raw_parts(ids, len),
+                std::slice::from_raw_parts_mut(out, len),
+            )
+        };
+        out.fill(2);
+        let Ok(mut game) = h.game.try_lock() else {
+            return ERR_BUSY;
+        };
+        if game.boss_flags(ids, out) {
+            OK
+        } else {
+            ERR_UNAVAILABLE
+        }
+    })
+}
+unsafe extern "C" fn revive_boss(
+    user: *mut c_void,
+    context: u64,
+    primary: u32,
+    writes: *const FlagWrite,
+    len: usize,
+) -> i32 {
+    guarded(|| {
+        let Some(h) = (unsafe { host(user) }) else {
+            return ERR_INVALID;
+        };
+        if len > 2048
+            || primary == 0
+            || primary == u32::MAX
+            || (len != 0
+                && (writes.is_null() || !(writes as usize).is_multiple_of(align_of::<FlagWrite>())))
+        {
+            return ERR_INVALID;
+        }
+        let writes = if len == 0 {
+            &[]
+        } else {
+            // SAFETY: ABI caller supplies len readable FlagWrite entries.
+            unsafe { std::slice::from_raw_parts(writes, len) }
+        };
+        if writes.iter().any(|write| {
+            write.id == 0 || write.id == u32::MAX || write.id == primary || write.value > 1
+        }) {
+            return ERR_INVALID;
+        }
+        let Ok(mut game) = h.game.try_lock() else {
+            return ERR_BUSY;
+        };
+        if game.revive_boss(context, primary, writes) {
+            OK
+        } else {
+            ERR_UNAVAILABLE
+        }
+    })
 }
 unsafe extern "C" fn param_table(user: *mut c_void, id: u32) -> usize {
     unsafe { host(user) }
@@ -357,7 +466,9 @@ impl Runtime {
                 | CAP_TEXTURES
                 | CAP_MESH
                 | CAP_INPUT
-                | CAP_CONCURRENT,
+                | CAP_CONCURRENT
+                | CAP_UI_INPUT
+                | CAP_BOSS_STATE,
             user: (&mut *host as *mut Host).cast(),
             log: log_enabled.then_some(log),
             config_get: Some(config_get),
@@ -377,6 +488,12 @@ impl Runtime {
             submit_mesh: Some(submit_mesh),
             texture_create_rgba: Some(texture_rgba),
             set_render_options: Some(render_options),
+            ui_input_poll: Some(ui_input::poll),
+            ui_input_clear: Some(ui_input::clear),
+            ui_input_capture: Some(ui_input::capture),
+            read_boss_state: Some(boss_state),
+            read_event_flags: Some(event_flags),
+            revive_boss: Some(revive_boss),
         });
         let mut plugins = Vec::new();
         let mut rejected = 0;
@@ -416,6 +533,7 @@ impl Runtime {
                 generation: 0,
             }),
             bridge: Mutex::new(None),
+            native_input: Mutex::new(None),
             worker: Mutex::new(None),
             updates: AtomicU64::new(0),
             renders: AtomicU64::new(0),
@@ -435,6 +553,12 @@ impl Runtime {
                 ERR_UNAVAILABLE
             })?;
             *runtime.bridge.lock().unwrap_or_else(|e| e.into_inner()) = Some(bridge);
+            if runtime.plugins.iter().any(plugin::Plugin::needs_ui_input) {
+                *runtime
+                    .native_input
+                    .lock()
+                    .unwrap_or_else(|e| e.into_inner()) = Some(ui_input::NativeInput::start());
+            }
         }
         let weak = Arc::downgrade(&runtime);
         let worker = thread::Builder::new()
@@ -471,6 +595,12 @@ impl Runtime {
         };
         if !self.accepting.load(Ordering::Acquire) {
             return;
+        }
+        if let Ok(mut input) = self.native_input.try_lock()
+            && let Some(input) = input.as_mut()
+        {
+            let display = self.host.display.read();
+            input.update(display.valid != 0 && display.loading_or_logo == 0);
         }
         if let Ok(mut input) = self.host.input.lock() {
             input.epoch = input.epoch.wrapping_add(1);
@@ -675,6 +805,14 @@ impl Runtime {
     }
     fn stop(&self) -> i32 {
         self.accepting.store(false, Ordering::Release);
+        if let Some(mut input) = self
+            .native_input
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take()
+        {
+            input.stop();
+        }
         if let Some(mut bridge) = self.bridge.lock().unwrap_or_else(|e| e.into_inner()).take() {
             bridge.stop();
             if NativeBridge::requires_module_retention() {
@@ -831,6 +969,23 @@ pub extern "C" fn eroverlay_test_native_lifecycle() -> i32 {
     }
     guarded(|| {
         if unsafe { er_rust_scene_lifecycle_check() } {
+            OK
+        } else {
+            ERR_UNAVAILABLE
+        }
+    })
+}
+/// Hidden Win32 message and real device-hook fixture; not shipped or injected.
+#[cfg(feature = "native-lifecycle-fixture")]
+#[unsafe(no_mangle)]
+pub extern "C" fn eroverlay_test_ui_input() -> i32 {
+    guarded(|| {
+        // The native fixture pins this DLL and initializes the shared MinHook
+        // before any process-lifetime input detour becomes reachable.
+        if eroverlay_test_native_lifecycle() != OK {
+            return ERR_UNAVAILABLE;
+        }
+        if ui_input::fixture() {
             OK
         } else {
             ERR_UNAVAILABLE

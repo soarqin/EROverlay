@@ -110,6 +110,14 @@ fn readable(info: &MemoryBasicInformation) -> bool {
         && info.protect & 0x100 == 0
         && info.protect & (2 | 4 | 8 | 0x20 | 0x40 | 0x80) != 0
 }
+/// Used only by an explicit flag mutation after every target has been resolved.
+pub(crate) fn writable_byte(address: usize) -> bool {
+    query(address).is_some_and(|info| {
+        info.state == 0x1000
+            && info.protect & 0x100 == 0
+            && info.protect & (4 | 8 | 0x40 | 0x80) != 0
+    })
+}
 pub fn read_memory(address: usize, output: &mut [u8]) -> bool {
     if output.is_empty() {
         return true;

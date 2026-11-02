@@ -99,6 +99,9 @@ impl Plugin {
     pub fn layer(&self) -> u32 {
         self.api.layer
     }
+    pub fn needs_ui_input(&self) -> bool {
+        self.api.required_capabilities & CAP_UI_INPUT != 0
+    }
     pub fn update(&self) -> i32 {
         let _guard = (self.api.capabilities & CAP_CONCURRENT == 0)
             .then(|| self.gate.lock().unwrap_or_else(|e| e.into_inner()));

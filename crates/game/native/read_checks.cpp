@@ -3,10 +3,83 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <cstdint>
+#include <memory>
 #include "util/mapstate.hpp"
 #include "util/gameflags.hpp"
 #include "util/paramreader.hpp"
 #include "util/gamescan.hpp"
+#include "util/eventflag.hpp"
+#include "boss/data.hpp"
+
+// The opt-in Boss profile compiles the unmodified historical BossDataSet. These
+// callbacks reproduce api.cpp's direct resolver, not the safer Minimap reader.
+// Only one Boss fixture may exist at a time; no production host uses this API.
+EROverlayAPI *api = nullptr;
+static uintptr_t bossFixtureBase = 0;
+static std::wstring bossFixtureDirectory;
+static EROverlayAPI bossFixtureApi{};
+struct CppBossFixture {
+    er::bosses::BossDataSet data;
+    er::bosses::RenderState state;
+};
+extern "C" void *er_cpp_boss_fixture(uintptr_t base, const wchar_t *directory) noexcept {
+    if (!base || !directory) return nullptr;
+    try {
+        bossFixtureBase = base;
+        bossFixtureDirectory = directory;
+        bossFixtureApi = {};
+        bossFixtureApi.getGameVersion = [] { return uint64_t{0x0002000200000000ULL}; };
+        bossFixtureApi.getModulePath = [] { return bossFixtureDirectory.c_str(); };
+        bossFixtureApi.screenState = [] { return static_cast<int>(*reinterpret_cast<uint16_t *>(bossFixtureBase + 0x1718)); };
+        bossFixtureApi.getGameLanguage = [] { return L"engUS"; };
+        bossFixtureApi.configGetString = [](const char *, const wchar_t *fallback) { return fallback; };
+        bossFixtureApi.configEnabled = [](const char *) { return false; };
+        bossFixtureApi.configGetVirtualKey = [](const char *, int fallback) { return fallback; };
+        bossFixtureApi.getGameAddresses = [] {
+            return GameAddresses{bossFixtureBase + 0x20, bossFixtureBase + 0x28,
+                                 bossFixtureBase + 0x30, bossFixtureBase + 0x48, bossFixtureBase};
+        };
+        bossFixtureApi.resolveFlagAddress = [](uint32_t id, uint8_t *bits) {
+            const auto manager = *reinterpret_cast<uintptr_t *>(bossFixtureBase + 0x30);
+            return er::util::resolveEventFlag(manager, id, bits);
+        };
+        api = &bossFixtureApi;
+        auto fixture = std::make_unique<CppBossFixture>();
+        fixture->data.load(true);
+        fixture->data.initMemoryAddresses();
+        return fixture.release();
+    } catch (...) { return nullptr; }
+}
+extern "C" void er_cpp_drop_boss_fixture(void *fixture) noexcept {
+    delete static_cast<CppBossFixture *>(fixture);
+}
+extern "C" size_t er_cpp_boss_ids_fixture(void *fixture, uint32_t *ids, size_t capacity) noexcept {
+    if (!fixture) return 0;
+    const auto &bosses = static_cast<CppBossFixture *>(fixture)->data.bosses();
+    if (ids && capacity >= bosses.size()) {
+        for (size_t i = 0; i < bosses.size(); ++i) ids[i] = bosses[i].flagId;
+    }
+    return bosses.size();
+}
+extern "C" void er_cpp_update_boss_fixture(void *fixture) noexcept {
+    // Fixture construction validated the owning pointer. Historical update is
+    // invoked unchanged; no timing instrumentation is injected into its loop.
+    static_cast<CppBossFixture *>(fixture)->data.update();
+}
+extern "C" bool er_cpp_boss_snapshot_fixture(void *fixture, uint8_t *dead, size_t length,
+                                            int32_t *metadata) noexcept {
+    if (!fixture || !dead || !metadata) return false;
+    try {
+        auto &f = *static_cast<CppBossFixture *>(fixture);
+        if (f.data.total() != static_cast<int>(length)) return false;
+        f.data.fillRenderState(f.state);
+        std::copy(f.state.dead.begin(), f.state.dead.end(), dead);
+        metadata[0] = f.state.count;
+        metadata[1] = f.state.deaths;
+        metadata[2] = f.state.inGameTime;
+        return true;
+    } catch (...) { return false; }
+}
 
 // Optional test oracle only; production discovery executes the Rust scanner.
 extern "C" bool er_cpp_scan_fixture(const uint8_t *image, size_t length, uintptr_t base,

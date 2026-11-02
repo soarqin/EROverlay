@@ -25,7 +25,11 @@ fn reference_fixture() {
         "src/util/peimage.hpp",
         "src/util/signature.hpp",
         "src/util/memory.hpp",
+        "src/util/eventflag.hpp",
         "src/util/minimap_scan_rules.inc",
+        "src/boss/data.cpp",
+        "src/boss/data.hpp",
+        "deps/nlohmann_json/include/nlohmann/json.hpp",
         "deps/pattern16/Pattern16.h",
     ];
     for relative in required {
@@ -43,8 +47,10 @@ fn reference_fixture() {
         .file("native/read_checks.cpp")
         .file(root.join("src/util/mapstate.cpp"))
         .file(root.join("src/util/gameflags.cpp"))
+        .file(root.join("src/boss/data.cpp"))
         .include(root.join("src"))
         .include(root.join("deps/pattern16"))
+        .include(root.join("deps/nlohmann_json/include"))
         .flag("/std:c++latest")
         .flag("/utf-8")
         .flag("/EHsc")

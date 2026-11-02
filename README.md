@@ -1,8 +1,10 @@
 # EROverlay Rust + egui
 
-本仓库是 EROverlay 核心基础库和 Minimap 的独立 Rust 改写。Cargo workspace 位于仓库根目录。原 C++ 工程仅在独立 C++ 分支中保留，用于可选的行为和性能对照，不参与本分支的构建。Rust 版采用 `EROverlay.dll` 和 `overlays/Minimap.dll` 两个动态库，不加载旧 ImGui 插件。本期不移植 Boss、Achievements。
+本仓库是 EROverlay 核心基础库、Minimap 和 Boss 的 Rust/egui 改写。Cargo workspace 位于仓库根目录。原 C++ 工程仅在独立 C++ 分支中保留，用于可选的行为和性能对照，不参与本分支的构建。安装包含 `EROverlay.dll`、`overlays/Minimap.dll` 和 `overlays/Boss.dll`，不加载旧 ImGui 插件；Achievements 尚未移植。
 
-实现和验证状态以 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md) 为准。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
+Boss 从游戏 Param、具名大生命条事件和当前语言文本生成目录，保留地区进度、筛选、死亡数、游戏时间、挑战记录及可选复活。默认按 `=` 打开或关闭完整列表。额外复活旗标仍在外部配置，发行包不再包含旧多语言名单。操作与限制见 [Boss 说明](crates/boss/README.md)、[数据来源](docs/boss-data-sources.md) 和 [事件证据](docs/boss-events.md)。
+
+核心与 Minimap 的实现和历史验证见 [功能对照](docs/parity.md) 和 [验证记录](docs/validation.md)；本次 Boss 的结果见 [Boss 验证记录](docs/boss-validation.md)。离线检查不能证明游戏内画面、运行开销或卸载已经通过验收。
 
 DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)：Minimap 移除未使用的等宽和 emoji 字库，保留比例字体后备、自定义字体及系统语言字体。
 
@@ -24,10 +26,13 @@ DLL 体积调查与字体收敛见 [二进制尺寸分析](docs/binary-size.md)�
 package/
   EROverlay.dll
   overlays/Minimap.dll
+  overlays/Boss.dll
   configs/common.ini
   configs/input.ini
   configs/style.ini
   configs/minimap.ini
+  configs/boss.ini
+  configs/boss-revival.json
   README.md
   LICENSE
   THIRD_PARTY.md
@@ -35,12 +40,12 @@ package/
   manifest.json
   source.json
   docs/                 # 功能、设计、验证与性能记录
-  crates/               # Minimap 和后端说明
+  crates/               # Minimap、Boss、公共 UI 和后端说明
 ```
 
 脚本不会复制文件到游戏目录，不会启动或注入游戏。源码结构和本次根目录构建验证见 [源码结构](docs/source-layout.md)。
 
-升级前须完全退出游戏。从 `bc96b83` 基线升级只需替换 `overlays/Minimap.dll`；从此前 `c519cdb`、`86cd403` 等旧包升级，必须同时替换 `EROverlay.dll` 和 `overlays/Minimap.dll`。保留现有 `configs/`，包括 `[diagnostics]` 中的 `log_file` 设置，不要用包内默认配置覆盖。
+升级前须完全退出游戏。本次 Boss 包需要同时更新 `EROverlay.dll`、`overlays/Minimap.dll` 并新增 `overlays/Boss.dll`、`configs/boss.ini` 和 `configs/boss-revival.json`。保留其他现有配置，包括日志设置。旧 Boss 的 `data_file`、`panel_pos` 和语言 JSON 不再使用；不要以旧 Boss INI 覆盖本包模板。新界面设置保存到 `configs/boss-ui.json`，挑战记录继续保存在 `Challenge.txt`。
 
 ## 加载与退出
 
@@ -83,7 +88,7 @@ cargo build --workspace --release --locked
 ./target/release/eroverlay-harness.exe ./package 10
 ```
 
-`eroverlay-harness` 实际加载核心和 Minimap DLL，检查初始化、重复启动拒绝、未知版本、空指针、update、RGB10A2 WARP 渲染、交替层尺寸、分辨率变化和重复装卸载。可选的合法上层测试插件提交真实纹理和三角形，检查尺寸变化不重建 renderer，GPU 在途时停止等待退休；命令见 [审查记录](docs/review-2026-11-02.md)。无游戏状态时 Minimap 保持隐藏，其可见绘制另由归档素材探针和 renderer 像素回读验证。这些检查不启动游戏。
+`eroverlay-harness` 实际加载包内核心、Minimap 和 Boss DLL，检查初始化、重复启动拒绝、未知版本、空指针、update、RGB10A2 WARP 渲染、交替层尺寸、分辨率变化和重复装卸载。可选的合法上层测试插件提交真实纹理和三角形，检查尺寸变化不重建 renderer，GPU 在途时停止等待退休；命令见 [审查记录](docs/review-2026-11-02.md)。无游戏状态时两个实际插件保持隐藏；Boss 的可见绘制和交互另由 [归档数据 DLL 探针](docs/boss-validation.md) 验证。这些检查不启动游戏。
 
 可选 C++ 差分测试先使用 `tools/export_cpp_reference.py --repository <C++仓库路径>` 导出明确提交，再设置 `EROVERLAY_CPP_REFERENCE` 并启用 `runtime-read-fixture`；普通构建和测试不需要 C++ 分支。独立 clone 不含旧提交时须显式指定含该提交的 C++ 仓库，不会自动获取旧历史。具体命令见 [源码结构](docs/source-layout.md)。
 

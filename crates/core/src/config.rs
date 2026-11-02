@@ -14,7 +14,7 @@ impl Config {
         if let Ok(text) = fs::read_to_string(directory.join("EROverlay.ini")) {
             result.parse("", &text);
         }
-        for name in ["common", "input", "style", "minimap"] {
+        for name in ["common", "input", "style", "minimap", "boss"] {
             let path = directory.join("configs").join(format!("{name}.ini"));
             if let Ok(text) = fs::read_to_string(path) {
                 result.parse(name, &text);

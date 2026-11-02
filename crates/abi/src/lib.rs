@@ -13,6 +13,20 @@ pub const CAP_TEXTURES: u64 = 4;
 pub const CAP_MESH: u64 = 8;
 pub const CAP_INPUT: u64 = 16;
 pub const CAP_CONCURRENT: u64 = 32;
+pub const CAP_UI_INPUT: u64 = 64;
+pub const CAP_BOSS_STATE: u64 = 128;
+pub const UI_CAPTURE_MOUSE: u32 = 1;
+pub const UI_CAPTURE_KEYBOARD: u32 = 2;
+pub const UI_INPUT_POINTER: u32 = 1;
+pub const UI_INPUT_BUTTON: u32 = 2;
+pub const UI_INPUT_WHEEL: u32 = 3;
+pub const UI_INPUT_KEY: u32 = 4;
+pub const UI_INPUT_TEXT: u32 = 5;
+pub const UI_INPUT_FOCUS: u32 = 6;
+pub const UI_INPUT_RESET: u32 = 7;
+pub const UI_INPUT_DOWN: u32 = 1;
+pub const UI_INPUT_REPEAT: u32 = 2;
+pub const MAX_UI_INPUT_EVENTS: usize = 256;
 pub const LAYER_ABOVE_UI: u32 = 0;
 pub const LAYER_BELOW_UI: u32 = 1;
 pub const OK: i32 = 0;
@@ -179,6 +193,42 @@ pub struct FrameInfo {
     pub delta_seconds: f32,
 }
 
+/// One physical-pixel Win32 input event. `code` is a virtual key, Unicode
+/// scalar, mouse button (0=left, 1=right, 2=middle, 3/4=extra), or focus 0/1.
+/// `flags` combines UI_INPUT_DOWN/REPEAT and MOD_*; wheel x/y are line deltas.
+/// RESET releases every held key/button, including after queue overflow.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct UiInput {
+    pub size: u32,
+    pub kind: u32,
+    pub code: u32,
+    pub flags: u32,
+    pub x: f32,
+    pub y: f32,
+    pub value: f32,
+    pub reserved: u32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct BossState {
+    pub size: u32,
+    pub valid: u32,
+    pub context: u64,
+    pub raw_map_id: u32,
+    pub deaths: u32,
+    pub in_game_time_ms: u32,
+    pub graveyard_reached: u32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct FlagWrite {
+    pub id: u32,
+    pub value: u32,
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct RenderOptions {
@@ -242,7 +292,31 @@ pub struct HostApi {
     /// queue operations; GPU upload is scheduled after plugin callbacks return.
     pub texture_create_rgba: Option<unsafe extern "C" fn(*mut c_void, u32, u32, ByteSlice) -> u64>,
     pub set_render_options: Option<unsafe extern "C" fn(*mut c_void, *const RenderOptions) -> i32>,
+    /// Single-consumer, nonblocking event drain, available on update/render.
+    /// Caller provides capacity <= MAX_UI_INPUT_EVENTS; count is always written.
+    pub ui_input_poll:
+        Option<unsafe extern "C" fn(*mut c_void, *mut UiInput, usize, *mut usize) -> i32>,
+    /// Discards pending events and schedules RESET. Does not enable capture.
+    pub ui_input_clear: Option<unsafe extern "C" fn(*mut c_void) -> i32>,
+    /// Mask is UI_CAPTURE_*. Renew only while an interactive UI is visible.
+    /// Zero releases immediately. Native capture expires after 750 ms without
+    /// renewal, on focus loss, hidden loading/logo screens, or core stop.
+    pub ui_input_capture: Option<unsafe extern "C" fn(*mut c_void, u32) -> i32>,
+    pub read_boss_state: Option<unsafe extern "C" fn(*mut c_void, *mut BossState) -> i32>,
+    /// Update-only. Up to 4096 flags; bytes are 0=false, 1=true, 2=unavailable.
+    pub read_event_flags:
+        Option<unsafe extern "C" fn(*mut c_void, *const u32, *mut u8, usize) -> i32>,
+    /// Update-only. Validates the current context and all writes before changing
+    /// flags. The primary defeat flag must currently be set.
+    pub revive_boss:
+        Option<unsafe extern "C" fn(*mut c_void, u64, u32, *const FlagWrite, usize) -> i32>,
 }
+
+/// V1's original prefix remains accepted independently of optional appendices.
+pub const HOST_V1_BASE_SIZE: usize = core::mem::offset_of!(HostApi, ui_input_poll);
+pub const UI_INPUT_HOST_SIZE: usize = core::mem::offset_of!(HostApi, ui_input_capture)
+    + core::mem::size_of::<Option<unsafe extern "C" fn(*mut c_void, u32) -> i32>>();
+pub const BOSS_STATE_HOST_SIZE: usize = core::mem::size_of::<HostApi>();
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -310,6 +384,24 @@ mod tests {
         assert_eq!(offset_of!(HostApi, magic), 0);
         assert_eq!(offset_of!(HostApi, size), 8);
         assert_eq!(offset_of!(PluginApi, version), 12);
+        assert_eq!(size_of::<UiInput>(), 32);
+        assert_eq!(size_of::<BossState>(), 32);
+        assert_eq!(HOST_V1_BASE_SIZE, 176);
+        assert_eq!(UI_INPUT_HOST_SIZE, 200);
+        assert_eq!(BOSS_STATE_HOST_SIZE, 224);
+        assert_eq!(offset_of!(HostApi, set_render_options), 168);
+        assert!(!valid_header(
+            ABI_MAGIC,
+            HOST_V1_BASE_SIZE as u32,
+            1,
+            UI_INPUT_HOST_SIZE
+        ));
+        assert!(valid_header(
+            ABI_MAGIC,
+            BOSS_STATE_HOST_SIZE as u32,
+            1,
+            HOST_V1_BASE_SIZE
+        ));
         assert!(!valid_header(ABI_MAGIC, 16, 2, size_of::<PluginApi>()));
         assert!(!valid_header(ABI_MAGIC, 16, 1, size_of::<PluginApi>()));
         assert!(valid_header(

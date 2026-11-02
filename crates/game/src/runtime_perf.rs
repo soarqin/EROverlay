@@ -186,3 +186,6 @@ fn runtime_production_read_profile() {
 
 #[cfg(feature = "runtime-read-fixture")]
 include!("runtime_cpp_perf.rs");
+
+#[cfg(feature = "runtime-read-fixture")]
+include!("runtime_boss_perf.rs");

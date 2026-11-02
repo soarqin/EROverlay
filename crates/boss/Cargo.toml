@@ -1,0 +1,20 @@
+[package]
+name = "eroverlay-boss"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "Boss"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+eroverlay-abi.workspace = true
+eroverlay-game.workspace = true
+eroverlay-ui = { path = "../ui" }
+egui.workspace = true
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[lints]
+workspace = true

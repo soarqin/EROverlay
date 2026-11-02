@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/abi", "crates/abi-fixture", "crates/core", "crates/game", "crates/minimap", "crates/renderer", "crates/harness"]
+members = ["crates/abi", "crates/abi-fixture", "crates/core", "crates/game", "crates/minimap", "crates/boss", "crates/ui", "crates/renderer", "crates/harness"]
 resolver = "2"
 
 [workspace.package]

@@ -25,9 +25,11 @@ def child(core: Path) -> None:
     stop = library.eroverlay_stop
     stop.restype = ctypes.c_int
     assert stop() == 0, "offline mode unexpectedly retained code before hooks"
-    check = library.eroverlay_test_native_lifecycle
+    # This entry runs the same local lifecycle checks first, then the hidden
+    # HWND/DirectInput input fixture. Neither entry exists in a shipped DLL.
+    check = library.eroverlay_test_ui_input
     check.restype = ctypes.c_int
-    assert check() == 0, "controlled native detour checks failed"
+    assert check() == 0, "controlled native lifecycle/input checks failed"
     assert stop() == 1, "native stop must report STOPPED_RESIDENT"
     assert stop() == 1, "repeated stop lost resident state"
     class StartOptions(ctypes.Structure):
@@ -50,7 +52,7 @@ def child(core: Path) -> None:
     assert kernel.GetModuleHandleW(str(core)) == handle, "pinned code was unmapped"
     # Resolve again through the resident module rather than using a dead object.
     assert stop() == 1, "resident stop export no longer callable"
-    print("PASS: actual DLL local detours, resident stop=1, caller FreeLibrary leaves code mapped")
+    print("PASS: actual DLL local detours and hidden-window input, resident stop=1, caller FreeLibrary leaves code mapped")
 
 
 def main() -> None:

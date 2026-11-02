@@ -13,9 +13,11 @@ try {
     New-Item -ItemType Directory -Path $overlayRoot, $configRoot -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $rustRoot 'target/release/EROverlay.dll') -Destination $packageRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'target/release/Minimap.dll') -Destination $overlayRoot
-    foreach ($name in @('common', 'input', 'style', 'minimap')) {
+    Copy-Item -LiteralPath (Join-Path $rustRoot 'target/release/Boss.dll') -Destination $overlayRoot
+    foreach ($name in @('common', 'input', 'style', 'minimap', 'boss')) {
         Copy-Item -LiteralPath (Join-Path $rustRoot "configs/$name.ini") -Destination $configRoot
     }
+    Copy-Item -LiteralPath (Join-Path $rustRoot 'configs/boss-revival.json') -Destination $configRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'README.md') -Destination $packageRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'LICENSE') -Destination $packageRoot
     Copy-Item -LiteralPath (Join-Path $rustRoot 'THIRD_PARTY.md') -Destination $packageRoot
@@ -25,7 +27,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $rustRoot 'third_party/minhook/LICENSE.txt') -Destination $minhookNotices
     Copy-Item -LiteralPath (Join-Path $rustRoot 'third_party/font-licenses') -Destination $noticeRoot -Recurse -Force
     Copy-Item -LiteralPath (Join-Path $rustRoot 'docs') -Destination $packageRoot -Recurse -Force
-    foreach ($module in @('minimap', 'renderer', 'game')) {
+    foreach ($module in @('minimap', 'boss', 'renderer', 'game', 'ui')) {
         $moduleDocs = Join-Path $packageRoot "crates/$module"
         New-Item -ItemType Directory -Path $moduleDocs -Force | Out-Null
         Get-ChildItem -LiteralPath (Join-Path $rustRoot "crates/$module") -Filter '*.md' -File |

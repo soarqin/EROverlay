@@ -157,10 +157,64 @@ impl EventFlagCache {
         self.diagnostic
     }
     fn read_inner(&mut self, manager: usize, id: u32) -> Result<bool, FlagReason> {
-        use FlagReason::*;
         if id == 0 {
             return Ok(false);
         }
+        let (address, mask) = self.address_inner(manager, id)?;
+        if address == 0 {
+            return Ok(false);
+        }
+        let Some(bits) = read::<u8>(address) else {
+            self.storage.remove(&(id / self.divisor));
+            return Err(FlagReason::MemoryRead);
+        };
+        Ok(bits & mask != 0)
+    }
+
+    /// Unknown/unallocated flags remain distinct from a cleared flag. Bytes
+    /// shared by multiple flags are copied once for this snapshot.
+    pub fn read_many(&mut self, manager: usize, ids: &[u32], out: &mut [u8]) {
+        let mut bytes = HashMap::<usize, Option<u8>>::with_capacity(ids.len());
+        for (&id, value) in ids.iter().zip(out) {
+            *value = match self.address_inner(manager, id) {
+                Ok((address, mask)) if address != 0 && id != 0 && id != u32::MAX => {
+                    match *bytes.entry(address).or_insert_with(|| read::<u8>(address)) {
+                        Some(byte) => u8::from(byte & mask != 0),
+                        None => 2,
+                    }
+                }
+                _ => 2,
+            };
+        }
+    }
+
+    /// Freshly resolve every target before any mutation; a missing category
+    /// aborts the whole request. Arena flags precede the primary completion bit.
+    pub fn prepare_writes(
+        &mut self,
+        manager: usize,
+        ids: &[(u32, bool)],
+    ) -> Option<Vec<(usize, u8, bool)>> {
+        self.reset();
+        let mut writes = Vec::with_capacity(ids.len());
+        for &(id, value) in ids {
+            if id == 0 || id == u32::MAX {
+                return None;
+            }
+            let (address, mask) = self.address_inner(manager, id).ok()?;
+            if address == 0
+                || !crate::memory::writable_byte(address)
+                || read::<u8>(address).is_none()
+            {
+                return None;
+            }
+            writes.push((address, mask, value));
+        }
+        Some(writes)
+    }
+
+    fn address_inner(&mut self, manager: usize, id: u32) -> Result<(usize, u8), FlagReason> {
+        use FlagReason::*;
         let now = Instant::now();
         if manager != self.manager || self.expiry.is_none_or(|expiry| now >= expiry) {
             self.reset();
@@ -190,18 +244,15 @@ impl EventFlagCache {
             p
         };
         if storage == 0 {
-            return Ok(false);
+            return Ok((0, 0));
         }
         let remainder = id % self.divisor;
-        let Some(bits) = read::<u8>(
+        Ok((
             storage
                 .checked_add((remainder >> 3) as usize)
                 .ok_or(MemoryRead)?,
-        ) else {
-            self.storage.remove(&category);
-            return Err(MemoryRead);
-        };
-        Ok(bits & (1 << (7 - (remainder & 7))) != 0)
+            1 << (7 - (remainder & 7)),
+        ))
     }
 }
 #[cfg(test)]

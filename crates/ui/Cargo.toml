@@ -1,0 +1,14 @@
+[package]
+name = "eroverlay-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+eroverlay-abi.workspace = true
+egui.workspace = true
+epaint_default_fonts = "=0.33.3"
+ttf-parser = "=0.25.1"
+
+[lints]
+workspace = true

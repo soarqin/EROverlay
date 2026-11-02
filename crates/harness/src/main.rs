@@ -49,6 +49,18 @@ fn run() -> Result<(), String> {
             .min(30),
     );
     let fixture_path = std::env::args_os().nth(4).map(PathBuf::from);
+    let has_boss = directory.join("overlays/Boss.dll").is_file();
+    let upper_consumer = fixture_path.is_some() || has_boss;
+    let expected_plugins = std::fs::read_dir(directory.join("overlays"))
+        .map_err(|e| e.to_string())?
+        .filter_map(Result::ok)
+        .filter(|entry| {
+            entry
+                .path()
+                .extension()
+                .is_some_and(|v| v.eq_ignore_ascii_case("dll"))
+        })
+        .count() as u32;
     if fixture_path.is_some() {
         // Single-threaded controlled startup. The fixture must already reside
         // in the package's overlays directory so the real loader discovers it.
@@ -133,8 +145,14 @@ fn run() -> Result<(), String> {
                 size: size_of::<RuntimeStats>() as u32,
                 ..RuntimeStats::default()
             };
-            if stats(&mut out) != OK || out.plugins_loaded == 0 || out.updates == 0 {
-                return Err(format!("runtime did not update: {out:?}"));
+            if stats(&mut out) != OK
+                || out.plugins_loaded != expected_plugins
+                || out.plugins_rejected != 0
+                || out.updates == 0
+            {
+                return Err(format!(
+                    "runtime did not load all {expected_plugins} plugins and update: {out:?}"
+                ));
             }
             // Call the actual loaded core/Minimap pipeline with a borrowed WARP
             // RGB10A2 target. Offline Minimap remains correctly hidden without
@@ -176,8 +194,8 @@ fn run() -> Result<(), String> {
                     if render(&upper) != OK
                         || stats(&mut out) != OK
                         || out.last_error != OK
-                        || out.renders != before + u64::from(fixture.is_some())
-                        || (fixture.is_none() && out.gpu_committed_bytes != committed)
+                        || out.renders != before + u64::from(upper_consumer)
+                        || (!upper_consumer && out.gpu_committed_bytes != committed)
                     {
                         return Err(format!(
                             "above-UI layer changed core renderer state unexpectedly: before_renders={before}, before_bytes={committed}, after={out:?}"
@@ -334,7 +352,7 @@ fn run() -> Result<(), String> {
                 FreeLibrary(module).map_err(|e| e.to_string())?;
             }
             println!(
-                "cycle {}: real core/Minimap DLL load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders={render_count}, committed={committed}; upper_fixture={}, GPU-retained shutdown={}; offline Minimap hidden)",
+                "cycle {}: real core and {expected_plugins} plugin DLLs load/update, RGB10A2 WARP alternating-layer viewport/resize and unload passed (renders={render_count}, committed={committed}; Boss={has_boss}, upper_fixture={}, GPU-retained shutdown={}; offline game overlays hidden)",
                 cycle + 1,
                 fixture_path.is_some(),
                 fixture_path.is_some()
