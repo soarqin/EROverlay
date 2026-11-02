@@ -113,12 +113,14 @@ hidden output must contain zero nonblack RGB pixels. D3D12 validation errors
 fail the probe. Readback and GPU waits belong to this controlled host, never
 the production render callback.
 
-The probe checks a 211-entry archived catalogue, flags, short-host rejection,
+The original pre-scope probe checked a 211-entry static catalogue, flags, short-host rejection,
 full/compact switching, search geometry differences, settings persistence on
 update, Cancel preserving flags, exactly one explicitly confirmed revival
 request, wheel input, full-screen-map/loading/hide capture release, renderer
 reset and duplicate-sequence suppression. The test clicks the captured default
 English layout; coordinate assertions must change if that layout changes.
+The current [207-entry scope](boss-207-scope-2026-11-02.md) and
+[strict native-path/loading checks](boss-loading-fix-2026-11-02.md) have separate evidence.
 
 It also reports production DLL render CPU samples for compact/full/hidden and
 500 ms update samples. Samples exclude GPU submission/drain and readback; the

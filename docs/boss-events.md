@@ -69,21 +69,43 @@ Examples from the original resources:
 
 ## Runtime preparation
 
-The native executable uses `event:/%s.emevd`, `event:/common_func.emevd` and
-`event:/common.emevd`. These mounted VFS paths omit `.dcx`; native file services
-perform decompression. The plugin obtains its map-resource directory from
-`MapDefaultInfoParam` row IDs, supplemented by actual map fields in
+The native executable uses the logical names `event:/%s.emevd`,
+`event:/common_func.emevd` and `event:/common.emevd`. Its resource adapter appends
+`.dcx` before raw submission; the raw file service does not append it. Boss Host
+likewise appends `.dcx` once at the request boundary and sets `0x40` for native
+DCX decompression, including text and scene requests. Event parsing and linked
+resource matching retain the logical names. The plugin obtains its map-resource
+directory from `MapDefaultInfoParam` row IDs, supplemented by actual map fields in
 `GameAreaParam`, `BonfireWarpParam` and `WorldMapPointParam`. Field-area ceremony
 resources use the supported `00/10/20` versions. There is no hardcoded Boss-map
 or defeat-flag catalogue.
 
-Catalogue preparation runs on the overlay update thread. At most two native
-file jobs are pending. A rejected request backs off; an accepted failed request
-gets one delayed retry. At most one completed resource is parsed and one map
-is expanded per update. Limits are 4,096 distinct resource paths and 32 MiB of
-parsed EMEVD source, plus 32 MiB of accepted decompressed scene input. Ordinary absent optional map versions are not reported as
-on-screen errors. Invalid resource metadata and unavailable required links are
-tracked separately. Native file ownership still ends through `release_file`.
+Catalogue preparation runs on the overlay update thread. Boss holds at most
+four active file tokens. File processing and map expansion share a 2 ms soft
+CPU budget per update, with at most 32 submissions, 32 completions or expiries,
+and 32 map expansions. The budget cannot interrupt an individual parse or Host
+call. Each active token is polled at most once per update; pending and
+`ERR_BUSY` retain it. A rejected request backs off 250 ms.
+
+Ordinary absent optional maps are not retried or reported as on-screen errors.
+Required transport failures get at most one delayed retry; obtained invalid
+bytes are not reread. A later explicit link can promote an optional miss to a
+bounded required task without repeatedly reopening a final required failure.
+Each job has a 10-second elapsed-time deadline from its first request attempt,
+including rejected, pending and busy requests; retries do not reset it. Each
+generation has a 60-second resource-wait deadline, after which remaining jobs
+expire in bounded batches without new reads or text fallbacks. Cleanup,
+discovery and catalogue preparation may require further updates, so this is
+not a hard initialization or game-frame time limit. Failure remains visible
+and game-data reload permits recovery; a failed empty catalogue is not Ready.
+
+Limits remain 4,096 distinct resource paths and 32 MiB of accepted EMEVD source,
+plus 32 MiB of accepted decompressed scene input. Invalid resource metadata and
+unavailable required links are tracked separately. Obsolete and expired tokens
+are released through `release_file`; outstanding native callbacks still await
+safe generation retirement, so four active tokens do not bound all retained
+native callback contexts. Contract evidence and the actual DLL checks are in
+the [initial-loading fix](boss-loading-fix-2026-11-02.md).
 
 The finished catalogue is immutable. Opening the full-screen map, changing
 player/save context or temporarily unavailable game pointers does not restart
