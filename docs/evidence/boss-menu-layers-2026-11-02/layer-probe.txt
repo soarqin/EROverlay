@@ -1,0 +1,20 @@
+plugin: boss-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Boss Rust/egui initialized; native UI_SCENE above game UI
+plugin: minimap-font C:\WINDOWS\Fonts\msyh.ttc
+plugin: Minimap Rust/egui initialized; native UI_SCENE below game UI
+plugin: minimap-data phase=ready
+plugin: minimap-wait phase=gfx-file
+plugin: minimap-data phase=ready
+real DLL overlap established: 26940 interior red-border pixels hidden by Boss; capture=3
+120 sequential actual double-layer frames: overlap readback stable; max test step including GPU drain=4.548ms
+three busy slots + native dual-layer frame: Boss remains above overlap; drops +1
+8 asynchronous queued frames: released gate and recovered full overlap
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+[EROverlay] UI_SCENE below-ui skipped: no validated native UI composition boundary
+native driver scenarios 0–4: stale/missing/duplicate composite boundaries preserve the upper stage
+duplicate sequence emits no new meshes; same-device viewport resizes recover overlap
+core render try_lock and callback-gate contention skip and recover
+GPU-busy stop returned ERR_BUSY after 5.008s with 14614528 bytes retained
+PASS: actual core + Boss.dll + Minimap.dll; plugins=2, nonempty meshes=1190, drops=14 (normal baseline 0); RGB10A2/RGBA8 same-queue composite/readback; validation clean; drained stop OK
+Evidence limits: controlled game/save/resource inputs; real plugin UI, core ownership, native queue adapter and WARP pixels. This does not measure live-game FPS or prove injected-game visuals.

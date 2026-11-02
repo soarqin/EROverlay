@@ -1,0 +1,10 @@
+    Checking eroverlay-abi v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\abi)
+   Compiling eroverlay-game v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\game)
+   Compiling eroverlay-renderer v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\renderer)
+    Checking eroverlay-ui v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\ui)
+    Checking eroverlay-abi-fixture v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\abi-fixture)
+    Checking eroverlay-boss v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\boss)
+    Checking eroverlay-minimap v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\minimap)
+    Checking eroverlay-core v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\core)
+    Checking eroverlay-harness v0.1.0 (<worktree>\target\boss-menu-layer-clean\crates\harness)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.35s

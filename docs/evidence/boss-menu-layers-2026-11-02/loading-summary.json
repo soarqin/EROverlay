@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "baseline_commit": "09cd6e999de43e61c9851737d87ba84fac58d457",
+  "measurement": "Production Loading with real archived inputs and controlled next-poll async completion at virtual 60Hz; no live VFS, game FPS or disk IO timing claim. Initial parse/plan is timed separately. Final profile excludes diagnostic printing from update timing; baseline included final diagnostic printing.",
+  "baseline": [
+    {
+      "round": 0,
+      "tokens": 4,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 357,
+      "virtual_ms": 5950,
+      "init_us": 801,
+      "filter_us": 454,
+      "catalog_us": 732,
+      "flag_calls": 1,
+      "peak_tokens": 4
+    },
+    {
+      "round": 0,
+      "update_cpu_us": 39391,
+      "p50_us": 12,
+      "p95_us": 538,
+      "p99_us": 2193,
+      "max_us": 2301
+    },
+    {
+      "round": 1,
+      "tokens": 4,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 356,
+      "virtual_ms": 5933,
+      "init_us": 712,
+      "filter_us": 436,
+      "catalog_us": 658,
+      "flag_calls": 1,
+      "peak_tokens": 4
+    },
+    {
+      "round": 1,
+      "update_cpu_us": 39570,
+      "p50_us": 12,
+      "p95_us": 508,
+      "p99_us": 2241,
+      "max_us": 3087
+    },
+    {
+      "round": 2,
+      "tokens": 4,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 357,
+      "virtual_ms": 5950,
+      "init_us": 778,
+      "filter_us": 450,
+      "catalog_us": 813,
+      "flag_calls": 1,
+      "peak_tokens": 4
+    },
+    {
+      "round": 2,
+      "update_cpu_us": 41976,
+      "p50_us": 14,
+      "p95_us": 575,
+      "p99_us": 2268,
+      "max_us": 2701
+    }
+  ],
+  "sixteen_tokens_before_dependency_priority": [
+    {
+      "round": 0,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 154,
+      "virtual_ms": 2566,
+      "init_us": 770,
+      "filter_us": 472,
+      "catalog_us": 525,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 0,
+      "update_cpu_us": 38308,
+      "p50_us": 46,
+      "p95_us": 2012,
+      "p99_us": 2252,
+      "max_us": 3141
+    },
+    {
+      "round": 1,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 154,
+      "virtual_ms": 2566,
+      "init_us": 820,
+      "filter_us": 414,
+      "catalog_us": 472,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 1,
+      "update_cpu_us": 37409,
+      "p50_us": 44,
+      "p95_us": 2021,
+      "p99_us": 3045,
+      "max_us": 3094
+    },
+    {
+      "round": 2,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 154,
+      "virtual_ms": 2566,
+      "init_us": 706,
+      "filter_us": 427,
+      "catalog_us": 471,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 2,
+      "update_cpu_us": 36853,
+      "p50_us": 42,
+      "p95_us": 1994,
+      "p99_us": 2977,
+      "max_us": 3083
+    }
+  ],
+  "final": [
+    {
+      "round": 0,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 94,
+      "virtual_ms": 1566,
+      "init_us": 851,
+      "filter_us": 440,
+      "catalog_us": 513,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 0,
+      "update_cpu_us": 38995,
+      "p50_us": 101,
+      "p95_us": 2090,
+      "p99_us": 2412,
+      "max_us": 2412
+    },
+    {
+      "round": 1,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 93,
+      "virtual_ms": 1550,
+      "init_us": 740,
+      "filter_us": 480,
+      "catalog_us": 480,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 1,
+      "update_cpu_us": 38269,
+      "p50_us": 99,
+      "p95_us": 2108,
+      "p99_us": 2448,
+      "max_us": 2448
+    },
+    {
+      "round": 2,
+      "tokens": 16,
+      "rows": 207,
+      "scripts": 555,
+      "requests": 1082,
+      "ticks": 93,
+      "virtual_ms": 1550,
+      "init_us": 702,
+      "filter_us": 424,
+      "catalog_us": 475,
+      "flag_calls": 0,
+      "peak_tokens": 16
+    },
+    {
+      "round": 2,
+      "update_cpu_us": 36951,
+      "p50_us": 99,
+      "p95_us": 2073,
+      "p99_us": 2276,
+      "max_us": 2276
+    }
+  ],
+  "limits": {
+    "boss_pending_tokens": 16,
+    "shared_native_pool": 128,
+    "soft_update_budget_ms": 2,
+    "max_submissions_per_update": 32,
+    "max_completions_per_update": 32,
+    "job_timeout_seconds": 10,
+    "loading_timeout_seconds": 60,
+    "required_transport_retries": 1,
+    "optional_transport_retries": 0
+  },
+  "real_menu_contract": {
+    "unavailable_save": {
+      "rows": 207,
+      "ticks": 93,
+      "requests": 1082,
+      "save_state_queries": 0,
+      "flag_queries": 0,
+      "enter_save_resource_rescans": 0
+    },
+    "valid_zero_save": {
+      "rows": 207,
+      "ticks": 93,
+      "requests": 1082,
+      "save_state_queries": 0,
+      "flag_queries": 0,
+      "enter_save_resource_rescans": 0
+    }
+  },
+  "labels": {
+    "vanilla_conditional_selected_rows": 0,
+    "vanilla_conditional_flag_ids": 0,
+    "menu_labels_changed": 0,
+    "vanilla_enter_save_label_queries": 0,
+    "mod_condition_unknown_false_true_regression": "passed"
+  },
+  "checks": {
+    "boss_unit_passed": 27,
+    "boss_unit_failed": 0,
+    "boss_unit_ignored": 3,
+    "boss_strict_all_target_clippy": "passed",
+    "real_profile_ignored_test": "passed",
+    "selected_audit_ignored_test": "passed"
+  },
+  "logs": [
+    "target/boss-menu-profile-before.log",
+    "target/boss-menu-profile-final.log",
+    "target/boss-menu-profile-priority.log",
+    "target/boss-menu-unit-tests.log",
+    "target/boss-menu-clippy.log",
+    "target/boss-menu-audit.log"
+  ],
+  "profile_source_hashes": [
+    {
+      "path": "crates\\boss\\src\\data.rs",
+      "sha256": "a3840b837a24770bf4919740323c235f51f72a6eee557ae1192d08eb2ce2fe07"
+    },
+    {
+      "path": "crates\\boss\\src\\lib.rs",
+      "sha256": "4540a8db337d329ecd853f6cdc6563bda50148e12d413961f96e04aa474d46e5"
+    },
+    {
+      "path": "crates\\game\\src\\boss_events.rs",
+      "sha256": "c19969d0622541c600cea0b65d54f3c00a099611732c57bae8288eaf5ae29f90"
+    }
+  ],
+  "current_source_hashes_after_test_only_extension": [
+    {
+      "path": "crates/boss/src/data.rs",
+      "sha256": "0b6eaa143aca8511d4a0f0fa45fab269240b332f575228a8515ba4a8d904af48"
+    },
+    {
+      "path": "crates/boss/src/lib.rs",
+      "sha256": "4540a8db337d329ecd853f6cdc6563bda50148e12d413961f96e04aa474d46e5"
+    },
+    {
+      "path": "crates/game/src/boss_events.rs",
+      "sha256": "c19969d0622541c600cea0b65d54f3c00a099611732c57bae8288eaf5ae29f90"
+    }
+  ],
+  "source_note": "data.rs gained test-only parameter relocation/temporary zero/explicit same-address reload/new-language regressions after component profiling; production logic did not change. The extended test passed. Original profile source hashes are retained separately.",
+  "audit_comparison": {
+    "previous": "target/boss-207-delivery-audit",
+    "current": "target/boss-menu-audit",
+    "sections_equal": {
+      "catalogue": true,
+      "old_to_rust": true,
+      "summary": true,
+      "scene_evidence": true,
+      "relationship_configuration": true
+    },
+    "csv_identical": true,
+    "csv_sha256": "30095b135ac115bfe29d174d607017144a8dac9e5bf614f9daa5cb920ece296a"
+  }
+}

@@ -1,0 +1,11 @@
+cargo build -p eroverlay-core --release --features layer-order-fixture --locked --target-dir target/layer-fixture
+./target/input-agent/release/layer_order_probe.exe ./target/layer-fixture/release/EROverlay.dll ./package ./target/boss-menu-layer-final/layer-probe-release-final
+./target/input-agent/release/layer_order_probe.exe ./target/layer-fixture/release/EROverlay.dll ./target/boss-menu-layer-final/old-minimap-input-release-final ./target/boss-menu-layer-final/layer-probe-old-minimap-release-final
+
+These are the executed commands. The probe requires a fresh output directory when reproduced.
+old-minimap-input-release-final is an independent controlled input directory: current package/configs, current package/overlays/Boss.dll, and target/boss-preload-review/Minimap.dll copied verbatim (SHA256 231C5596CB36CDDAA923DE687158527CB691B60B424F1F3BC066D948E1DECAB8). It is not a release package.
+The fixture core is a separately built DLL with layer-order-fixture. It forwards controlled game/save/input callbacks and exports host/drive/busy solely for the offline test. DLL loading, core texture/mesh ownership, Runtime::render, renderer slot reservation, GPU drawing and retirement use the same production source. The normal package core has none of the three fixture exports.
+Game resource input in this layer probe is deliberately unavailable; Boss shows its real waiting panel and Minimap draws its real border. No live-game catalog, native game UI contents, injected-game visuals or FPS claims are made. U is a controlled same-queue real GPU compositor.
+Final production Boss SHA256: 3322DEFC3F2BA1E9BEBF415FF2A263AB4062FB23119CCE59075C191256C859DD.
+Both final runs passed: 26940 overlap pixels, 120 sequential frames, three occupied slots force one lower drop while Boss stays visible, eight async frames recover, scenarios 0-4 verify both upper pixels and lower boundary exclusion, duplicate sequence has no additional meshes, viewport resizes and render/gate lock contention recover. GPU-busy stop returned ERR_BUSY after 5.008s retaining 14614528B, then drained stop OK. D3D12 debug layer and InfoQueue were required and reported no errors. Total 1190 meshes, 14 controlled drops, normal baseline zero.
+The 4.548ms and 4.493ms maxima include test-host GPU drain and are not gameplay or render-callback CPU performance measurements.

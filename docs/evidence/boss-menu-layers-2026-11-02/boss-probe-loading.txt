@@ -1,0 +1,10 @@
+Source: target/boss-menu-layer-final/boss-probe-final.log
+Scope: Actual Boss.dll with archived PARAM/EMEVD/FMG/MSB and controlled Host/save/flags; not live native VFS or game FPS. Loading/menu excerpts only; no DLL hash/commit claim.
+
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=2670ms updates=157 requests=1658 peak active tokens=16 pending polls=1066 busy polls=64 max single update=4553us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+PASS: menu catalogue Ready with save always unavailable, late PARAM/VFS, zero flag reads/writes; OK/valid=0 also rejected. First valid save update=63us, extra file requests=0, extra PARAM pointer queries=6; this is a controlled startup, not a live-game completion-time claim.
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=2058ms updates=120 requests=1082 peak active tokens=16 pending polls=1046 busy polls=63 max single update=25092us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update
+boss-catalog: 207 encounters, 0 unknown, 555 scripts, 1 unavailable game resources, 519 absent optional resources, 9 unresolved event calls, 2 absent scene bars excluded, 0 request timeouts, first_failure=Some("event:/common_macro.emevd: resource unavailable or invalid")
+Catalogue initialization at 60Hz: elapsed=1893ms updates=111 requests=1082 peak active tokens=16 pending polls=1044 busy polls=63 max single update=17580us; physical .dcx names verified, provider returns native-decompressed archive bytes no earlier than the next update

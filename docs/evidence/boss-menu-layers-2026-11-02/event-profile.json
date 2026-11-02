@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "measurement": "Production event parser/discover functions; actual 555 preloaded scripts, no native IO, DCX, GPU or game/FPS claim. Input IO and Discovery formatting excluded from component samples.",
+  "source_tool": "tools/boss_load_profile.rs",
+  "before": [
+    {
+      "round": 0,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 6210,
+      "discovery_us": 25952,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    },
+    {
+      "round": 1,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 5752,
+      "discovery_us": 26354,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    },
+    {
+      "round": 2,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 6081,
+      "discovery_us": 26778,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    }
+  ],
+  "after": [
+    {
+      "round": 0,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 6180,
+      "discovery_us": 23072,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    },
+    {
+      "round": 1,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 5675,
+      "discovery_us": 22692,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    },
+    {
+      "round": 2,
+      "scripts": 555,
+      "maps": 552,
+      "parse_us": 5890,
+      "discovery_us": 22702,
+      "instances": 16213,
+      "displays": 347,
+      "defeats": 464,
+      "missing": 9
+    }
+  ],
+  "discovery_snapshots": [
+    {
+      "path": "target/boss-events-profile/final-before/round-0.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    },
+    {
+      "path": "target/boss-events-profile/final-before/round-1.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    },
+    {
+      "path": "target/boss-events-profile/final-before/round-2.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    },
+    {
+      "path": "target/boss-events-profile/final-after/round-0.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    },
+    {
+      "path": "target/boss-events-profile/final-after/round-1.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    },
+    {
+      "path": "target/boss-events-profile/final-after/round-2.txt",
+      "bytes": 286369,
+      "sha256": "1f962ec433121fed4dc1bd4c78de2c47003910dd87157882852b0a30531c411f"
+    }
+  ],
+  "all_full_discovery_snapshots_identical": true
+}

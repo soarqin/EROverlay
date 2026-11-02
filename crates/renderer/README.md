@@ -38,6 +38,10 @@ fall back into an entry that might still be patched.
   vertex/index buffers. Each starts with 8,192 vertices and 16,384 indices and
   grows by doubling only after its own fence completes; stable frames reuse it.
   A busy fence slot is skipped, never waited on by `render`.
+  Below-UI groups also leave one slot per loaded Above-UI group free, capped at
+  three of the four slots. This restores the C++ upper-stage reservation: a
+  lower group cannot consume the upper stage's last available slot. More upper
+  groups remain best effort; the cap prevents permanent lower-stage starvation.
 - Each slot has a reusable RGBA8 offscreen target sized to the group's clipped
   region. It is resized only after that slot completes. The shader handles group
   opacity, circular/rounded clipping and an independently opaque inside border.
@@ -87,6 +91,13 @@ resource bytes, including vertex/index buffers, in-flight uploads, offscreen
 targets and retired textures. They are not DXGI process residency/VRAM samples.
 
 ## Verification and measurement
+
+The [menu/layer fix](../../docs/boss-menu-layer-fix-2026-11-02.md) records the
+three-busy-slot old/new RGB10A2 regression and real core/Boss/Minimap overlap
+readbacks. `native-scene-fixture` and core's `layer-order-fixture` are explicit
+offline features; their controlled native-queue driver is absent from the
+installation core's exports. They preserve the production render, texture,
+mesh, callback and fence paths while controlling game inputs.
 
 From the repository root:
 

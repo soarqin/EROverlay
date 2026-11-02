@@ -80,8 +80,15 @@ directory from `MapDefaultInfoParam` row IDs, supplemented by actual map fields 
 resources use the supported `00/10/20` versions. There is no hardcoded Boss-map
 or defeat-flag catalogue.
 
-Catalogue preparation runs on the overlay update thread. Boss holds at most
-four active file tokens. File processing and map expansion share a 2 ms soft
+Catalogue preparation starts on the overlay update thread as soon as all six
+PARAM pointers and the current language are available, including in the menu.
+It does not query save state or flags. Missing PARAM/language readiness is
+checked at 500 ms intervals; VFS admission retains its bounded retry/deadline
+contract. Save callbacks returning unavailable or `OK` with `valid=0` cannot
+enable progress-flag reads, revival or challenge-result saves.
+
+Boss holds at most 16 active file tokens within the shared 128-request native
+pool. File processing and map expansion share a 2 ms soft
 CPU budget per update, with at most 32 submissions, 32 completions or expiries,
 and 32 map expansions. The budget cannot interrupt an individual parse or Host
 call. Each active token is polled at most once per update; pending and
@@ -91,6 +98,11 @@ Ordinary absent optional maps are not retried or reported as on-screen errors.
 Required transport failures get at most one delayed retry; obtained invalid
 bytes are not reread. A later explicit link can promote an optional miss to a
 bounded required task without repeatedly reopening a final required failure.
+New required dependencies are placed ahead of broad map probes so that their
+unchanged retry delay can overlap other reads. An already queued optional job
+is promoted in place; retries still respect their backoff. Missing linked
+libraries retain required-resource errors, including the archived missing
+`common_macro.emevd`; the nine unresolved calls are not silently discarded.
 Each job has a 10-second elapsed-time deadline from its first request attempt,
 including rejected, pending and busy requests; retries do not reset it. Each
 generation has a 60-second resource-wait deadline, after which remaining jobs
@@ -103,15 +115,26 @@ Limits remain 4,096 distinct resource paths and 32 MiB of accepted EMEVD source,
 plus 32 MiB of accepted decompressed scene input. Invalid resource metadata and
 unavailable required links are tracked separately. Obsolete and expired tokens
 are released through `release_file`; outstanding native callbacks still await
-safe generation retirement, so four active tokens do not bound all retained
-native callback contexts. Contract evidence and the actual DLL checks are in
-the [initial-loading fix](boss-loading-fix-2026-11-02.md).
+safe generation retirement, so 16 active tokens do not bound all retained
+native callback contexts. The earlier four-token measurements and DLL receipts
+remain historical evidence in the [initial-loading fix](boss-loading-fix-2026-11-02.md).
+Current scheduling, menu contracts and distinct component/DLL timing scopes
+are recorded in the [menu and layer fix](boss-menu-layer-fix-2026-11-02.md).
 
-The finished catalogue is immutable. Opening the full-screen map, changing
+Published catalogue snapshots are immutable. Opening the full-screen map, changing
 player/save context or temporarily unavailable game pointers does not restart
 catalogue IO. A complete nonzero PARAM-pointer change or the settings action to
 reload game data starts a fresh catalogue and releases obsolete pending jobs.
 Rendering only reads the published catalogue and completion-state snapshot.
+
+Conditional place labels retain their candidate text and enable/disable flags
+in a separate cached label plan (`data.rs::Labels`). Menu preparation selects
+only unconditional candidates or a map label. A valid save permits a deduplicated
+condition-flag read; known true/false conditions can publish a changed place/search
+snapshot without rereading PARAM, EMEVD, FMG or scene data. Unknown conditions
+do not qualify as false. The current 207-row archive requires zero such flags
+and changes no menu labels. Full discovery still publishes only after its bounded
+preparation completes; entering a save does not launch a second discovery pass.
 
 Known progress entries merge by their proved completion flag and the configured
 cross-location relationships, preserving multiple phase names without counting

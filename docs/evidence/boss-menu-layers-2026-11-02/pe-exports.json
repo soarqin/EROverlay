@@ -1,0 +1,19 @@
+{
+  "package/EROverlay.dll": [
+    "DllMain",
+    "eroverlay_render",
+    "eroverlay_start",
+    "eroverlay_stats",
+    "eroverlay_stop"
+  ],
+  "target/layer-fixture/release/EROverlay.dll": [
+    "DllMain",
+    "eroverlay_render",
+    "eroverlay_start",
+    "eroverlay_stats",
+    "eroverlay_stop",
+    "eroverlay_test_layer_busy",
+    "eroverlay_test_layer_drive",
+    "eroverlay_test_layer_host"
+  ]
+}

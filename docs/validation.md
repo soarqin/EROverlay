@@ -2,7 +2,17 @@
 
 记录日期：2026-11-01；资源预算复查与复测：2026-11-02。迁移前注册工作树：`E:\Projects\EROverlay\.cindy-worktrees\steady-jepsen`，分支为 `cindy/steady-jepsen`，当时使用 `rust/` 和 `rust/package/` 布局。下列旧 commit 编号、工具输出和测量值保留为历史证据。
 
-当前 `rust-rewrite` 分支的 workspace、`build.ps1` 和 `package/` 均位于仓库根目录，不再保留旧 C++ 工程。C++ 行为起点是独立 `master` 基线的 `afab7e1`；显式导出及新旧扫描证据的区分见 [源码布局](source-layout.md)。安装包的 `source.json` 记录打包时的 commit 和是否有未提交修改，`manifest.json` 记录文件 SHA-256。
+当前 Rust workspace、`build.ps1` 和 `package/` 均位于仓库根目录，不再保留旧 C++ 工程。C++ 行为起点是独立 `master` 基线的 `afab7e1`；显式导出及新旧扫描证据的区分见 [源码布局](source-layout.md)。安装包的 `source.json` 记录打包时的 commit 和是否有未提交修改，`manifest.json` 记录文件 SHA-256。
+
+## Boss 菜单预加载与层级修复（2026-11-02）
+
+当前 Boss 目录在六张 Param 表地址及语言就绪后即可在菜单准备，不等待有效存档。存档状态不可用或 `valid=0` 时不批读进度旗标、不复活、不保存挑战结果。条件地名独立缓存，进入有效存档后只更新进度和必要的标签快照；临时无效状态不触发目录重扫，真正的非零 Param 地址换代或显式重读仍取消旧任务并重新准备。
+
+Boss 活动文件 token 上限为 16，核心共享请求池仍为 128。文件处理和地图展开共享约 2 ms 软预算及各 32 项批次上限；新发现的必需依赖先尝试，使保留的一次重试与其他读取重叠。10 秒任务期限、60 秒资源等待期限、原生 generation 退休和缺失证据保守处理保持不变。
+
+纯生产 Loading 的真实归档、虚拟 60 Hz 调度从 356–357 次更新降至 93–94 次；折合约 5.94 秒降至 1.55–1.57 秒。真实 Boss DLL 的受控 60 Hz 最终探针中，两次无额外门槛初始化为 2.058／1.893 秒；故意延迟 Param／VFS 的启动为 2.670 秒。首个有效存档更新观测为 63 µs，新增文件请求为 0，仅有 6 次 Param 指针查询。DLL 探针的单次更新最坏为 25.092 ms，包含受控 Host 的同步 OS 读取和系统调度；不能用纯 Loading 样本的 2.448 ms 最坏值代替。这些数字不证明原生游戏 VFS、进档完成时间或 FPS。
+
+Boss 常规检查为 27 通过、0 失败、3 项显式归档检查默认忽略；Boss all-targets Clippy `-D warnings` 通过。显式归档 profile 和 selected audit 另行通过，207 项逐项映射、完整成员、场景及关系证据与先前相同，CSV 字节未变。当前契约、组件测量、真实 DLL 回执及复现命令见 [菜单预加载与层级修复](boss-menu-layer-fix-2026-11-02.md)。本页其余通过次数、旧包和早期 Core／Minimap 范围说明保留为各阶段历史记录；上一轮 4 token 的 Boss 回执见 [首次读取修复](boss-loading-fix-2026-11-02.md)，不作为当前参数。
 
 ## 根目录迁移后的验证
 

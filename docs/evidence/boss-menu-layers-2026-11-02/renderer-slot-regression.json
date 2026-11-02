@@ -1,0 +1,79 @@
+{
+  "issue": "Lower stage can consume the last free shared GPU submission slot and suppress the upper stage",
+  "reference_commit": "afab7e14db2b62ae0bede980d5d0c96634321350",
+  "reference_file": "src/d3drenderer.cpp",
+  "reference_lines": [
+    377,
+    379
+  ],
+  "reference_guard": "layer == RenderLayer::BelowUI && allocatorFences_[(bufferIndex + 1) % frameCount_] > completed",
+  "rust_fix": "Keep the four-slot pool. Core supplies loaded AboveUI group count; reserve clamps at three so idle lower work cannot permanently starve. BelowUI submits only when free slots exceed the reserve. More upper groups remain best effort. No GPU wait. The reserve is capped at three slots to prevent permanent lower-stage starvation with four or more loaded upper groups.",
+  "reproduction": {
+    "backend": "D3D12 WARP with debug layer",
+    "format": "RGB10A2",
+    "inflight_slots_before_lower": 3,
+    "old": {
+      "lower_dropped": false,
+      "upper_dropped": true,
+      "overlap_rgb10": [
+        1023,
+        0,
+        0
+      ]
+    },
+    "new": {
+      "lower_dropped": true,
+      "upper_dropped": false,
+      "overlap_rgb10": [
+        0,
+        1023,
+        0
+      ]
+    }
+  },
+  "tests": [
+    "cargo test -p eroverlay-renderer --features native-scene-fixture --locked -- --nocapture",
+    "12 passed; 0 failed; 1 archived-EXE test ignored",
+    "cargo check -p eroverlay-core --features layer-order-fixture --locked: passed",
+    "renderer feature all-target clippy: passed"
+  ],
+  "limits": [
+    "Controlled WARP reproduction establishes a concrete C++ parity regression; it does not prove that every observed live frame had this cause.",
+    "Native boundary cache and priority strategy match the pinned C++ reference. No confirmed native command inversion was found.",
+    "Missing/replaced/no-current boundary suppresses BelowUI; fixture does not claim perfect recognition of identical stale memory reuse.",
+    "Both layers may still be skipped when no slots are free; the policy remains nonblocking."
+  ],
+  "native_fixture": {
+    "feature": "eroverlay-renderer/native-scene-fixture",
+    "driver": "drive_scene_fixture",
+    "normal_order": [
+      "BelowUI",
+      "native UI",
+      "AboveUI"
+    ],
+    "two_composites_order": [
+      "native UI",
+      "BelowUI",
+      "native UI",
+      "AboveUI"
+    ],
+    "missing_or_replaced_order": [
+      "native UI",
+      "AboveUI"
+    ],
+    "production_exports_added": 0
+  },
+  "excess_upper_regression": {
+    "requested_reserve": "usize::MAX",
+    "initial_free_slots": 4,
+    "lower_dropped": false,
+    "draw_calls": 1,
+    "edge_rgb10": [
+      1023,
+      1023,
+      1023
+    ],
+    "validation": "Actual border render and RGB10A2 readback; no min-only assertion"
+  },
+  "additional_warp_regression": "usize::MAX upper groups, all four slots initially free: lower border submits one draw and white RGB10 pixels are read back."
+}
